@@ -4,12 +4,9 @@
 import { projectId, publicAnonKey } from '@/utils/supabase/info';
 import { getSupabase } from '@/utils/supabase/client';
 import { getProfileBypass, getSquadsBypass, getSessionsBypass, updateProfileBypass } from '@/utils/api-bypass';
+import { USE_BYPASS_MODE } from '@/utils/api-config';
 
 const API_BASE = `https://${projectId}.supabase.co/functions/v1/make-server-e884809f`;
-
-// 🚨 BYPASS MODE: Set to true to use direct KV access instead of Edge Functions
-// This is a temporary workaround for the "Invalid JWT" error
-const USE_BYPASS_MODE = true;
 
 // ============================================================
 // SESSION REFRESH SINGLETON
@@ -95,149 +92,58 @@ async function getAuthToken(): Promise<string | null> {
     const now = Date.now();
     const timeUntilExpiry = expiresAt - now;
     
-    console.log('Session check:', {
+    console.log('Session expiry check:', {
       expiresAt: new Date(expiresAt).toISOString(),
       now: new Date(now).toISOString(),
-      timeUntilExpiry: Math.round(timeUntilExpiry / 1000) + ' seconds',
+      timeUntilExpiry: `${Math.floor(timeUntilExpiry / 1000)}s`,
       isExpired: timeUntilExpiry <= 0
     });
     
-    // If session is already expired, we must refresh it
-    if (timeUntilExpiry <= 0) {
-      console.log('❌ Session has expired, attempting refresh...');
-      const token = await refreshSessionOnce();
+    // If expired or expiring soon (within 5 minutes), refresh
+    if (timeUntilExpiry <= 5 * 60 * 1000) {
+      console.log('⚠️ Session expired or expiring soon, refreshing...');
+      const newToken = await refreshSessionOnce();
       
-      if (!token) {
-        console.error('❌ Session expired and refresh failed - user must re-authenticate');
-        console.log('🔑 === GET AUTH TOKEN END (REFRESH FAILED) ===');
-        return null;
-      }
-      
-      session = { ...session, access_token: token };
-      console.log('✅ Expired session refreshed successfully');
-    } 
-    // If session expires soon (< 5 min), try to refresh but continue with current token if refresh fails
-    else if (timeUntilExpiry < 5 * 60 * 1000) {
-      console.log('⚠️ Session expiring soon, attempting proactive refresh...');
-      const token = await refreshSessionOnce();
-      
-      if (token) {
-        session = { ...session, access_token: token };
-        console.log('✅ Session refreshed proactively');
+      if (newToken) {
+        console.log('✅ Using refreshed token');
+        console.log('🔑 === GET AUTH TOKEN END (REFRESHED) ===');
+        return newToken;
       } else {
-        console.log('⚠️ Proactive refresh failed, but current token still valid - continuing with current token');
-        // Continue with current token since it's still valid
+        console.log('❌ Failed to refresh, using existing token anyway');
+        console.log('🔑 === GET AUTH TOKEN END (REFRESH FAILED) ===');
+        return session.access_token;
       }
     }
   }
   
-  if (session?.access_token) {
-    console.log('✅ Auth token retrieved:', {
-      hasToken: true,
-      tokenLength: session.access_token.length,
-      tokenPreview: session.access_token.substring(0, 20) + '...',
-      expiresAt: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : 'unknown',
-      user: session.user?.email
-    });
-    console.log('🔑 === GET AUTH TOKEN END (SUCCESS) ===');
-    return session.access_token;
-  } else {
-    console.log('❌ No valid auth token available in session');
-    console.log('🔑 === GET AUTH TOKEN END (NO TOKEN) ===');
-    return null;
-  }
+  console.log('✅ Using existing valid token');
+  console.log('🔑 === GET AUTH TOKEN END (VALID) ===');
+  return session.access_token;
 }
 
 // Helper to make authenticated API calls
-async function authenticatedFetch(path: string, options: RequestInit = {}, isRetry: boolean = false): Promise<any> {
-  console.log(`📡 === API CALL START: ${path} ===`);
-  console.log(`📡 Is retry: ${isRetry}`);
-  
+async function apiCall(endpoint: string, options: RequestInit = {}) {
   const token = await getAuthToken();
   
-  console.log(`📡 Token retrieved:`, {
-    hasToken: !!token,
-    tokenLength: token?.length,
-    tokenPreview: token ? token.substring(0, 30) + '...' : 'null'
-  });
-  
   if (!token) {
-    console.error('❌ No token available for authenticated request');
-    throw new Error('Vous devez être connecté pour effectuer cette action');
+    throw new Error('Not authenticated');
   }
 
-  const headers = {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`,
-    ...options.headers,
-  };
-
-  console.log(`📡 Making request to: ${API_BASE}${path}`);
-  
-  const response = await fetch(`${API_BASE}${path}`, {
+  const response = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
-    headers,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      ...options.headers,
+    },
   });
-
-  console.log(`📡 Response received:`, {
-    status: response.status,
-    statusText: response.statusText,
-    ok: response.ok
-  });
-
-  let data;
-  try {
-    data = await response.json();
-    console.log(`📡 Response data:`, data);
-  } catch (e) {
-    console.log('📡 No JSON in response');
-    data = null;
-  }
 
   if (!response.ok) {
-    // Handle 401 Unauthorized errors with automatic token refresh
-    if (response.status === 401 && !isRetry) {
-      console.log(`🔄 401 Unauthorized for [${path}] - Token may be expired, attempting refresh...`);
-      
-      // Use the singleton refresh to avoid rate limiting
-      const newToken = await refreshSessionOnce();
-      
-      if (!newToken) {
-        console.error('❌ Session refresh failed after 401 - User must re-authenticate');
-        console.log('Server response:', data);
-        // Clear local storage and redirect to login will be handled by AuthContext
-        throw new Error('Session expirée. Veuillez vous reconnecter.');
-      }
-      
-      console.log('✅ Session refreshed after 401, retrying request...');
-      
-      // Retry the request with the new token (pass isRetry=true to prevent infinite loop)
-      return authenticatedFetch(path, options, true);
-    }
-    
-    // Use different log levels based on status
-    if (response.status === 401) {
-      // 401 after retry is a real auth issue
-      console.error(`❌ Authentication failed even after refresh [${path}]:`, {
-        status: response.status,
-        serverResponse: data,
-        message: data?.message || data?.error || 'Unauthorized'
-      });
-      // This means the token is truly invalid (not just expired) or server can't verify it
-      throw new Error('Session invalide. Veuillez vous reconnecter.');
-    } else {
-      // Other errors are actual errors
-      console.error(`API Error [${path}]:`, {
-        status: response.status,
-        statusText: response.statusText,
-        data,
-      });
-    }
-    
-    throw new Error(data?.message || data?.error || `Erreur ${response.status}`);
+    const errorData = await response.json().catch(() => ({ message: 'Request failed' }));
+    throw new Error(errorData.message || `API Error: ${response.status}`);
   }
 
-  return data;
+  return response.json();
 }
 
 // ============================================================
@@ -245,97 +151,43 @@ async function authenticatedFetch(path: string, options: RequestInit = {}, isRet
 // ============================================================
 
 export const authAPI = {
-  async signUp(email: string, password: string, name: string, avatar?: string) {
-    // Sign up doesn't need user authentication, but still needs the public anon key
-    const response = await fetch(`${API_BASE}/auth/signup`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${publicAnonKey}`, // Supabase requires anon key for all requests
-      },
-      body: JSON.stringify({ email, password, name, avatar }),
-    });
-
-    let data;
-    try {
-      data = await response.json();
-    } catch (e) {
-      data = null;
-    }
-
-    if (!response.ok) {
-      console.error('Sign up error:', data);
-      throw new Error(data?.message || data?.error || `Erreur ${response.status}`);
-    }
-
-    return data;
-  },
-
-  async checkUser(email: string) {
-    const response = await fetch(`${API_BASE}/auth/check-user`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${publicAnonKey}`,
-      },
-      body: JSON.stringify({ email }),
-    });
-
-    let data;
-    try {
-      data = await response.json();
-    } catch (e) {
-      data = null;
-    }
-
-    if (!response.ok) {
-      console.error('Check user error:', data);
-      throw new Error(data?.message || data?.error || `Erreur ${response.status}`);
-    }
-
-    return data;
-  },
-
-  async resetPassword(email: string, newPassword: string) {
-    const response = await fetch(`${API_BASE}/auth/reset-password-admin`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${publicAnonKey}`,
-      },
-      body: JSON.stringify({ email, newPassword }),
-    });
-
-    let data;
-    try {
-      data = await response.json();
-    } catch (e) {
-      data = null;
-    }
-
-    if (!response.ok) {
-      console.error('Reset password error:', data);
-      throw new Error(data?.message || data?.error || `Erreur ${response.status}`);
-    }
-
-    return data;
-  },
-
+  /**
+   * Get current user profile
+   */
   async getProfile() {
     if (USE_BYPASS_MODE) {
+      console.log('🚨 Using BYPASS mode for getProfile');
       return getProfileBypass();
     }
-    return authenticatedFetch('/auth/profile');
+    
+    return apiCall('/auth/profile');
   },
 
-  async updateProfile(updates: any) {
+  /**
+   * Update user profile
+   */
+  async updateProfile(profileData: any) {
     if (USE_BYPASS_MODE) {
-      return updateProfileBypass(updates);
+      console.log('🚨 Using BYPASS mode for updateProfile');
+      return updateProfileBypass(profileData);
     }
-    return authenticatedFetch('/auth/profile', {
+    
+    return apiCall('/auth/profile', {
       method: 'PUT',
-      body: JSON.stringify(updates),
+      body: JSON.stringify(profileData),
     });
+  },
+
+  /**
+   * Check auth status
+   */
+  async checkAuth() {
+    const supabase = getSupabase();
+    const { data: { session } } = await supabase.auth.getSession();
+    return {
+      isAuthenticated: !!session,
+      user: session?.user || null,
+    };
   },
 };
 
@@ -344,52 +196,70 @@ export const authAPI = {
 // ============================================================
 
 export const squadsAPI = {
-  async getAll() {
+  /**
+   * Get all squads for current user
+   */
+  async getSquads() {
     if (USE_BYPASS_MODE) {
+      console.log('🚨 Using BYPASS mode for getSquads');
       return getSquadsBypass();
     }
-    return authenticatedFetch('/squads');
+    
+    return apiCall('/squads');
   },
 
-  async getById(id: string) {
-    return authenticatedFetch(`/squads/${id}`);
+  /**
+   * Get a specific squad
+   */
+  async getSquad(squadId: string) {
+    return apiCall(`/squads/${squadId}`);
   },
 
-  async create(squad: any) {
-    return authenticatedFetch('/squads', {
+  /**
+   * Create a new squad
+   */
+  async createSquad(squadData: any) {
+    return apiCall('/squads', {
       method: 'POST',
-      body: JSON.stringify(squad),
+      body: JSON.stringify(squadData),
     });
   },
 
-  async join(inviteCode: string) {
-    return authenticatedFetch('/squads/join', {
-      method: 'POST',
-      body: JSON.stringify({ inviteCode }),
-    });
-  },
-
-  async update(id: string, updates: any) {
-    return authenticatedFetch(`/squads/${id}`, {
+  /**
+   * Update a squad
+   */
+  async updateSquad(squadId: string, squadData: any) {
+    return apiCall(`/squads/${squadId}`, {
       method: 'PUT',
-      body: JSON.stringify(updates),
+      body: JSON.stringify(squadData),
     });
   },
 
-  async delete(id: string) {
-    return authenticatedFetch(`/squads/${id}`, {
+  /**
+   * Delete a squad
+   */
+  async deleteSquad(squadId: string) {
+    return apiCall(`/squads/${squadId}`, {
       method: 'DELETE',
     });
   },
 
-  async getMessages(squadId: string, limit = 50) {
-    return authenticatedFetch(`/squads/${squadId}/messages?limit=${limit}`);
+  /**
+   * Add member to squad
+   */
+  async addMember(squadId: string, email: string) {
+    return apiCall(`/squads/${squadId}/members`, {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
   },
 
-  async sendMessage(squadId: string, content: string, type = 'text') {
-    return authenticatedFetch(`/squads/${squadId}/messages`, {
-      method: 'POST',
-      body: JSON.stringify({ content, type }),
+  /**
+   * Remove member from squad
+   */
+  async removeMember(squadId: string, userId: string) {
+    return apiCall(`/squads/${squadId}/members/${userId}`, {
+      method: 'DELETE',
     });
   },
 };
@@ -399,142 +269,99 @@ export const squadsAPI = {
 // ============================================================
 
 export const sessionsAPI = {
-  async getAll() {
-    if (USE_BYPASS_MODE) {
-      return getSessionsBypass();
+  /**
+   * Get all sessions for a squad
+   */
+  async getSessions(squadId?: string) {
+    if (USE_BYPASS_MODE && squadId) {
+      console.log('🚨 Using BYPASS mode for getSessions');
+      return getSessionsBypass(squadId);
     }
-    return authenticatedFetch('/sessions');
+    
+    const endpoint = squadId ? `/sessions?squadId=${squadId}` : '/sessions';
+    return apiCall(endpoint);
   },
 
-  async getBySquad(squadId: string) {
-    return authenticatedFetch(`/squads/${squadId}/sessions`);
+  /**
+   * Get a specific session
+   */
+  async getSession(sessionId: string) {
+    return apiCall(`/sessions/${sessionId}`);
   },
 
-  async create(squadId: string, session: any) {
-    return authenticatedFetch(`/squads/${squadId}/sessions`, {
+  /**
+   * Create a new session
+   */
+  async createSession(sessionData: any) {
+    return apiCall('/sessions', {
       method: 'POST',
-      body: JSON.stringify(session),
+      body: JSON.stringify(sessionData),
     });
   },
 
-  async rsvp(sessionId: string, slotId: string, response: 'yes' | 'no' | 'maybe') {
-    return authenticatedFetch(`/sessions/${sessionId}/rsvp`, {
-      method: 'POST',
-      body: JSON.stringify({ slotId, response }),
-    });
-  },
-
-  async updateStatus(sessionId: string, status: string) {
-    return authenticatedFetch(`/sessions/${sessionId}/status`, {
+  /**
+   * Update a session
+   */
+  async updateSession(sessionId: string, sessionData: any) {
+    return apiCall(`/sessions/${sessionId}`, {
       method: 'PUT',
+      body: JSON.stringify(sessionData),
+    });
+  },
+
+  /**
+   * Delete a session
+   */
+  async deleteSession(sessionId: string) {
+    return apiCall(`/sessions/${sessionId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  /**
+   * RSVP to a session
+   */
+  async rsvp(sessionId: string, status: 'yes' | 'no' | 'maybe') {
+    return apiCall(`/sessions/${sessionId}/rsvp`, {
+      method: 'POST',
       body: JSON.stringify({ status }),
     });
   },
 
-  // ROADMAP #2: Check-in functionality
-  async checkIn(sessionId: string, status: 'present' | 'late' | 'absent', note?: string) {
-    return authenticatedFetch(`/sessions/${sessionId}/check-in`, {
+  /**
+   * Check in to a session
+   */
+  async checkIn(sessionId: string) {
+    return apiCall(`/sessions/${sessionId}/checkin`, {
       method: 'POST',
-      body: JSON.stringify({ status, note }),
-    });
-  },
-
-  async getCheckIns(sessionId: string) {
-    return authenticatedFetch(`/sessions/${sessionId}/check-ins`);
-  },
-};
-
-// ============================================================
-// WEBHOOKS API
-// ============================================================
-
-export const webhooksAPI = {
-  async getAll() {
-    return authenticatedFetch('/webhooks');
-  },
-
-  async create(webhook: any) {
-    return authenticatedFetch('/webhooks', {
-      method: 'POST',
-      body: JSON.stringify(webhook),
-    });
-  },
-
-  async update(id: string, updates: any) {
-    return authenticatedFetch(`/webhooks/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(updates),
-    });
-  },
-
-  async delete(id: string) {
-    return authenticatedFetch(`/webhooks/${id}`, {
-      method: 'DELETE',
     });
   },
 };
 
 // ============================================================
-// STATS & BADGES API
+// STATS API
 // ============================================================
 
 export const statsAPI = {
+  /**
+   * Get user statistics
+   */
   async getUserStats(userId: string) {
-    return authenticatedFetch(`/users/${userId}/stats`);
+    return apiCall(`/stats/user/${userId}`);
   },
 
-  async getLeaderboard() {
-    return authenticatedFetch('/leaderboard');
-  },
-};
-
-// ============================================================
-// ROADMAP #3: AUTOMATISATION & INTELLIGENCE API
-// ============================================================
-
-export const intelligenceAPI = {
-  // Get smart time slot suggestions based on historical data
-  async getSmartSuggestions(squadId: string) {
-    return authenticatedFetch(`/squads/${squadId}/smart-suggestions`);
+  /**
+   * Get squad statistics
+   */
+  async getSquadStats(squadId: string) {
+    return apiCall(`/stats/squad/${squadId}`);
   },
 
-  // Create recurring session
-  async createRecurringSession(squadId: string, config: {
-    dayOfWeek: number;
-    time: string;
-    duration?: number;
-    game?: string;
-    title?: string;
-  }) {
-    return authenticatedFetch(`/squads/${squadId}/recurring-session`, {
-      method: 'POST',
-      body: JSON.stringify(config),
-    });
-  },
-
-  // Get availability heatmap
-  async getAvailabilityHeatmap(squadId: string) {
-    return authenticatedFetch(`/squads/${squadId}/availability-heatmap`);
-  },
-
-  // Get members stats in batch
-  async getMembersStats(squadId: string) {
-    return authenticatedFetch(`/squads/${squadId}/members-stats`);
-  },
-};
-
-export const notificationsAPI = {
-  // Get user notifications
-  async getUserNotifications(userId: string) {
-    return authenticatedFetch(`/users/${userId}/notifications`);
-  },
-
-  // Mark notification as read
-  async markAsRead(notificationId: string) {
-    return authenticatedFetch('/notifications/mark-read', {
-      method: 'POST',
-      body: JSON.stringify({ notificationId }),
-    });
+  /**
+   * Get reliability score
+   */
+  async getReliabilityScore(userId: string) {
+    return apiCall(`/stats/reliability/${userId}`);
   },
 };
 
@@ -543,29 +370,183 @@ export const notificationsAPI = {
 // ============================================================
 
 export const analyticsAPI = {
-  async getHeatmap() {
-    return authenticatedFetch('/analytics/heatmap');
+  /**
+   * Track event
+   */
+  async trackEvent(eventName: string, eventData?: any) {
+    return apiCall('/analytics/track', {
+      method: 'POST',
+      body: JSON.stringify({ event: eventName, data: eventData }),
+    });
   },
 
-  async getSuggestions() {
-    return authenticatedFetch('/analytics/suggestions');
-  },
-
-  async getSquadCohesion(squadId: string) {
-    return authenticatedFetch(`/squads/${squadId}/cohesion`);
-  },
-
-  async getWeeklyRecap() {
-    return authenticatedFetch('/analytics/weekly-recap');
+  /**
+   * Get analytics dashboard data
+   */
+  async getDashboard() {
+    return apiCall('/analytics/dashboard');
   },
 };
 
 // ============================================================
-// HEALTH CHECK
+// NOTIFICATIONS API  
 // ============================================================
 
-export const healthAPI = {
-  async check() {
-    return authenticatedFetch('/health');
+export const notificationsAPI = {
+  /**
+   * Get user notifications
+   */
+  async getNotifications() {
+    return apiCall('/notifications');
   },
+
+  /**
+   * Mark notification as read
+   */
+  async markAsRead(notificationId: string) {
+    return apiCall(`/notifications/${notificationId}/read`, {
+      method: 'PUT',
+    });
+  },
+
+  /**
+   * Delete notification
+   */
+  async deleteNotification(notificationId: string) {
+    return apiCall(`/notifications/${notificationId}`, {
+      method: 'DELETE',
+    });
+  },
+};
+
+// ============================================================
+// INVITES API
+// ============================================================
+
+export const invitesAPI = {
+  /**
+   * Create squad invite
+   */
+  async createInvite(squadId: string, options?: any) {
+    return apiCall('/invites', {
+      method: 'POST',
+      body: JSON.stringify({ squadId, ...options }),
+    });
+  },
+
+  /**
+   * Get invite by code
+   */
+  async getInvite(inviteCode: string) {
+    return apiCall(`/invites/${inviteCode}`);
+  },
+
+  /**
+   * Accept invite
+   */
+  async acceptInvite(inviteCode: string) {
+    return apiCall(`/invites/${inviteCode}/accept`, {
+      method: 'POST',
+    });
+  },
+
+  /**
+   * Revoke invite
+   */
+  async revokeInvite(inviteCode: string) {
+    return apiCall(`/invites/${inviteCode}`, {
+      method: 'DELETE',
+    });
+  },
+};
+
+// ============================================================
+// WEBHOOKS API
+// ============================================================
+
+export const webhooksAPI = {
+  /**
+   * Get user webhooks
+   */
+  async getWebhooks() {
+    return apiCall('/webhooks');
+  },
+
+  /**
+   * Create webhook
+   */
+  async createWebhook(webhookData: any) {
+    return apiCall('/webhooks', {
+      method: 'POST',
+      body: JSON.stringify(webhookData),
+    });
+  },
+
+  /**
+   * Delete webhook
+   */
+  async deleteWebhook(webhookId: string) {
+    return apiCall(`/webhooks/${webhookId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  /**
+   * Test webhook
+   */
+  async testWebhook(webhookId: string) {
+    return apiCall(`/webhooks/${webhookId}/test`, {
+      method: 'POST',
+    });
+  },
+};
+
+// ============================================================
+// INTELLIGENCE API (IA Features - ROADMAP #1)
+// ============================================================
+
+export const intelligenceAPI = {
+  /**
+   * Get smart suggestions for squad scheduling
+   */
+  async getSmartSuggestions(squadId: string) {
+    return apiCall(`/intelligence/suggestions/${squadId}`);
+  },
+
+  /**
+   * Get availability heatmap for squad
+   */
+  async getAvailabilityHeatmap(squadId: string) {
+    return apiCall(`/intelligence/heatmap/${squadId}`);
+  },
+
+  /**
+   * Get members stats for squad
+   */
+  async getMembersStats(squadId: string) {
+    return apiCall(`/intelligence/members-stats/${squadId}`);
+  },
+
+  /**
+   * Get AI-powered scheduling recommendations
+   */
+  async getSchedulingRecommendations(squadId: string, options?: any) {
+    return apiCall(`/intelligence/recommendations/${squadId}`, {
+      method: 'POST',
+      body: JSON.stringify(options || {}),
+    });
+  },
+};
+
+// Export all APIs
+export default {
+  auth: authAPI,
+  squads: squadsAPI,
+  sessions: sessionsAPI,
+  stats: statsAPI,
+  analytics: analyticsAPI,
+  notifications: notificationsAPI,
+  invites: invitesAPI,
+  webhooks: webhooksAPI,
+  intelligence: intelligenceAPI,
 };
