@@ -1,0 +1,86 @@
+# Supabase Configuration for Squad Planner
+# Documentation: https://supabase.com/docs/guides/cli/config
+
+[project]
+name = "squad-planner"
+
+# Supabase Studio configuration
+[studio]
+enabled = true
+port = 54323
+api_url = "http://localhost"
+
+# API configuration
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+# Database configuration
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+# Schema management
+[db.pooler]
+enabled = false
+port = 54329
+pool_mode = "transaction"
+default_pool_size = 20
+max_client_conn = 100
+
+# Authentication configuration
+[auth]
+enabled = true
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:3000"]
+jwt_expiry = 3600
+enable_signup = true
+enable_anonymous_sign_ins = false
+
+# Email provider (configure in production)
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = false  # Disabled for dev (auto-confirm)
+
+# OAuth providers (optional - configure in production)
+# [auth.external.google]
+# enabled = true
+# client_id = "your-google-client-id"
+# secret = "your-google-client-secret"
+
+# [auth.external.github]
+# enabled = true
+# client_id = "your-github-client-id"
+# secret = "your-github-client-secret"
+
+# Storage configuration
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+buckets = []
+
+# Edge Functions configuration
+[functions]
+enabled = true
+
+# Edge Function: server
+[[functions.server]]
+verify_jwt = false
+
+# Realtime configuration
+[realtime]
+enabled = true
+ip_version = "IPv4"
+
+# Analytics (disabled for local dev)
+[analytics]
+enabled = false
+
+# Experimental features
+[experimental]
+enabled = false

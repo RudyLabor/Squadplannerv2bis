@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "Squad Planner",
+    "slug": "squad-planner",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#F5F3F0"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.squadplanner.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#F5F3F0"
+      },
+      "package": "com.squadplanner.app"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [],
+    "scheme": "squadplanner",
+    "extra": {
+      "EXPO_PUBLIC_SUPABASE_URL": "https://cwtoprbowdqcemdjrtir.supabase.co",
+      "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3dG9wcmJvd2RxY2VtZGpydGlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyMTQyNjMsImV4cCI6MjA4NDc5MDI2M30.FUpLncLIZc7l4hukBu5oOzj0tHl2IiwIIJ2Ghml8-6k"
+    }
+  }
+}

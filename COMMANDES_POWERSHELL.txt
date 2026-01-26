@@ -1,0 +1,83 @@
+════════════════════════════════════════════════════════════════════
+    🎮 SQUAD PLANNER - COMMANDES POWERSHELL À COPIER-COLLER 🎮
+════════════════════════════════════════════════════════════════════
+
+⚠️  RAPPEL : Ceci N'AFFECTE PAS votre application Figma Make !
+    La version web dans /src/ reste 100% intacte.
+
+────────────────────────────────────────────────────────────────────
+📋 ÉTAPE 1 : COPIER-COLLER DANS POWERSHELL
+────────────────────────────────────────────────────────────────────
+
+cd expo-app
+
+
+────────────────────────────────────────────────────────────────────
+📋 ÉTAPE 2 : INSTALLER LES DÉPENDANCES (PREMIÈRE FOIS UNIQUEMENT)
+────────────────────────────────────────────────────────────────────
+
+npm install
+
+
+────────────────────────────────────────────────────────────────────
+📋 ÉTAPE 3 : LANCER EXPO
+────────────────────────────────────────────────────────────────────
+
+npx expo start --clear
+
+
+────────────────────────────────────────────────────────────────────
+✅ C'EST TOUT ! EXPO SE LANCE MAINTENANT
+────────────────────────────────────────────────────────────────────
+
+Vous devriez voir un QR code dans PowerShell.
+
+────────────────────────────────────────────────────────────────────
+📱 TESTER SUR TÉLÉPHONE
+────────────────────────────────────────────────────────────────────
+
+1. Installez "Expo Go" sur votre téléphone :
+   
+   Android : https://play.google.com/store/apps/details?id=host.exp.exponent
+   iOS : https://apps.apple.com/app/expo-go/id982107779
+
+2. Ouvrez Expo Go et scannez le QR code
+
+3. Squad Planner se lance automatiquement ! 🎉
+
+
+────────────────────────────────────────────────────────────────────
+🌐 OU TESTER DANS LE NAVIGATEUR
+────────────────────────────────────────────────────────────────────
+
+Une fois Expo lancé, appuyez sur "w" dans PowerShell.
+
+
+────────────────────────────────────────────────────────────────────
+🛑 ARRÊTER EXPO
+────────────────────────────────────────────────────────────────────
+
+Ctrl + C
+
+
+────────────────────────────────────────────────────────────────────
+🔄 RELANCER EXPO (les fois suivantes)
+────────────────────────────────────────────────────────────────────
+
+cd expo-app
+npx expo start
+
+
+────────────────────────────────────────────────────────────────────
+🧹 EN CAS DE PROBLÈME : NETTOYER TOUT ET RÉINSTALLER
+────────────────────────────────────────────────────────────────────
+
+cd expo-app
+rm -r -Force node_modules
+npm install
+npx expo start --clear
+
+
+════════════════════════════════════════════════════════════════════
+    🚀 PROFITEZ DE SQUAD PLANNER EN MOBILE ! 🚀
+════════════════════════════════════════════════════════════════════
