@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Squad Planner - Setup Instructions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            color: #333;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+        
+        h2 {
+            font-size: 1.8em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #764ba2;
+        }
+        
+        .step {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .step h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        code {
+            background: #2d3748;
+            color: #63b3ed;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .sql-box {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            position: relative;
+        }
+        
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        
+        .copy-btn:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+        }
+        
+        .success {
+            background: #48bb78;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .warning {
+            background: #ed8936;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .link-btn {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            text-decoration: none;
+            margin: 10px 10px 10px 0;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .link-btn:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+        }
+        
+        .emoji {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1><span class="emoji">🚀</span>Squad Planner Setup</h1>
+            <p style="font-size: 1.2em; color: #666; margin-bottom: 30px;">
+                Suis ces 3 étapes pour créer la table dans Supabase
+            </p>
+            
+            <div class="step">
+                <h3><span class="emoji">1️⃣</span>Ouvre le Dashboard Supabase</h3>
+                <p>Clique sur ce lien pour ouvrir ton projet :</p>
+                <a href="https://supabase.com/dashboard/project/cwtoprbowdqcemdjrtir" target="_blank" class="link-btn">
+                    Ouvrir Supabase Dashboard
+                </a>
+            </div>
+            
+            <div class="step">
+                <h3><span class="emoji">2️⃣</span>Va dans SQL Editor</h3>
+                <p>Dans le menu de gauche, clique sur <strong>"SQL Editor"</strong></p>
+            </div>
+            
+            <div class="step">
+                <h3><span class="emoji">3️⃣</span>Copie et exécute ce SQL</h3>
+                <p>Clique sur le bouton pour copier, puis colle dans l'éditeur SQL et clique sur <strong>RUN</strong></p>
+                
+                <div class="sql-box" id="sqlCode">-- Créer la table kv_store_e884809f
+CREATE TABLE IF NOT EXISTS public.kv_store_e884809f (
+  key TEXT PRIMARY KEY,
+  value JSONB NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Créer les index
+CREATE INDEX IF NOT EXISTS idx_kv_key_prefix 
+  ON public.kv_store_e884809f (key text_pattern_ops);
+
+CREATE INDEX IF NOT EXISTS idx_kv_updated_at 
+  ON public.kv_store_e884809f (updated_at DESC);
+
+-- Activer Row Level Security
+ALTER TABLE public.kv_store_e884809f ENABLE ROW LEVEL SECURITY;
+
+-- Supprimer les anciennes policies
+DROP POLICY IF EXISTS "Service role full access" ON public.kv_store_e884809f;
+DROP POLICY IF EXISTS "Anon users have access" ON public.kv_store_e884809f;
+
+-- Créer les policies
+CREATE POLICY "Service role full access" 
+  ON public.kv_store_e884809f 
+  FOR ALL TO service_role 
+  USING (true) WITH CHECK (true);
+
+CREATE POLICY "Anon users have access" 
+  ON public.kv_store_e884809f 
+  FOR ALL TO anon 
+  USING (true) WITH CHECK (true);
+
+-- Message de succès
+SELECT '✅ Table créée avec succès !' as status;</div>
+                
+                <button class="copy-btn" onclick="copySQL()">
+                    📋 Copier le SQL
+                </button>
+                <span id="copyStatus" style="margin-left: 15px; color: #48bb78;"></span>
+            </div>
+            
+            <div class="success">
+                <strong>✅ Succès attendu :</strong><br>
+                Après avoir cliqué sur RUN, tu devrais voir :<br>
+                <code style="background: #2d3748; padding: 5px 10px; display: inline-block; margin-top: 5px;">✅ Table créée avec succès !</code>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2><span class="emoji">🎯</span>Après avoir créé la table</h2>
+            
+            <div class="step">
+                <h3><span class="emoji">4️⃣</span>Teste en Preview</h3>
+                <p>Retourne dans Figma Make et clique sur le bouton <strong>▶️ Preview</strong></p>
+                <p>L'erreur devrait disparaître !</p>
+            </div>
+            
+            <div class="step">
+                <h3><span class="emoji">5️⃣</span>Publie ton app</h3>
+                <p>Clique sur <strong>"Publish"</strong> dans Figma Make</p>
+                <p>Tu recevras une URL que tu pourras ouvrir sur ton téléphone 📱</p>
+            </div>
+            
+            <div class="success">
+                <strong>🎮 Compte de test :</strong><br>
+                Email : <code>rudylabor@hotmail.fr</code><br>
+                Password : <code>password123</code>
+            </div>
+        </div>
+        
+        <div class="card" style="background: rgba(237, 137, 54, 0.1); border: 2px solid #ed8936;">
+            <h2 style="color: #ed8936;"><span class="emoji">❓</span>Besoin d'aide ?</h2>
+            <p style="color: #333;">Si tu rencontres un problème, donne-moi :</p>
+            <ul style="margin-left: 20px; margin-top: 10px; color: #333;">
+                <li>Le message d'erreur exact</li>
+                <li>Une capture d'écran après avoir exécuté le SQL</li>
+                <li>Ce que tu vois dans le Table Editor</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        function copySQL() {
+            const sqlCode = document.getElementById('sqlCode').textContent;
+            navigator.clipboard.writeText(sqlCode).then(() => {
+                const status = document.getElementById('copyStatus');
+                status.textContent = '✅ Copié !';
+                setTimeout(() => {
+                    status.textContent = '';
+                }, 3000);
+            });
+        }
+    </script>
+</body>
+</html>

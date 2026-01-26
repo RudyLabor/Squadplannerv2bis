@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Squad Planner - Création Automatique</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            color: #333;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-align: center;
+        }
+        
+        .big-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 25px 50px;
+            border-radius: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin: 20px 0;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .big-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+        }
+        
+        .big-button:active {
+            transform: scale(0.98);
+        }
+        
+        .step {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 5px solid #667eea;
+        }
+        
+        .step h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        
+        .status {
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: bold;
+            display: none;
+            font-size: 18px;
+        }
+        
+        .status.success {
+            background: #48bb78;
+            color: white;
+            display: block;
+        }
+        
+        .status.error {
+            background: #f56565;
+            color: white;
+            display: block;
+        }
+        
+        .status.loading {
+            background: #ed8936;
+            color: white;
+            display: block;
+        }
+        
+        .code-box {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .warning-box {
+            background: #fff5e6;
+            border: 2px solid #ed8936;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .warning-box h3 {
+            color: #ed8936;
+            margin-bottom: 10px;
+        }
+        
+        .emoji {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+        
+        .link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1><span class="emoji">🚀</span>Création Automatique de la Table</h1>
+            
+            <div class="warning-box">
+                <h3><span class="emoji">⚠️</span>Important</h3>
+                <p style="color: #333; line-height: 1.6;">
+                    Je ne peux pas accéder directement à ton compte Supabase pour créer la table.<br><br>
+                    <strong>Mais j'ai 2 solutions ultra-simples pour toi :</strong>
+                </p>
+            </div>
+            
+            <div class="step">
+                <h3><span class="emoji">1️⃣</span>Solution Automatique (1 clic)</h3>
+                <p style="margin-bottom: 15px;">
+                    Clique sur ce bouton, il va copier le SQL automatiquement :
+                </p>
+                <button class="big-button" onclick="copyAndOpen()">
+                    📋 COPIER LE SQL + OUVRIR SUPABASE
+                </button>
+                <div id="statusAuto" class="status"></div>
+                <p style="margin-top: 15px; color: #666; font-size: 14px;">
+                    ✅ Le SQL sera copié dans ton presse-papier<br>
+                    ✅ Supabase s'ouvrira automatiquement<br>
+                    ✅ Tu n'auras qu'à coller (Ctrl+V) et cliquer sur RUN
+                </p>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0; color: #999; font-size: 18px;">
+                OU
+            </div>
+            
+            <div class="step">
+                <h3><span class="emoji">2️⃣</span>Solution Manuelle (copier/coller)</h3>
+                <p style="margin-bottom: 15px;">
+                    Copie le SQL ci-dessous et colle-le dans Supabase SQL Editor :
+                </p>
+                
+                <div class="code-box" id="sqlCode">CREATE TABLE IF NOT EXISTS public.kv_store_e884809f (
+  key TEXT PRIMARY KEY,
+  value JSONB NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_kv_key_prefix ON public.kv_store_e884809f (key text_pattern_ops);
+CREATE INDEX IF NOT EXISTS idx_kv_updated_at ON public.kv_store_e884809f (updated_at DESC);
+
+ALTER TABLE public.kv_store_e884809f ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Service role full access" ON public.kv_store_e884809f;
+DROP POLICY IF EXISTS "Anon users have access" ON public.kv_store_e884809f;
+
+CREATE POLICY "Service role full access" ON public.kv_store_e884809f
+  FOR ALL TO service_role USING (true) WITH CHECK (true);
+
+CREATE POLICY "Anon users have access" ON public.kv_store_e884809f
+  FOR ALL TO anon USING (true) WITH CHECK (true);
+
+SELECT '✅ Table créée avec succès !' as status;</div>
+                
+                <button class="big-button" onclick="copyManual()">
+                    📋 COPIER CE SQL
+                </button>
+                <div id="statusManual" class="status"></div>
+                
+                <div style="margin-top: 20px;">
+                    <a href="https://supabase.com/dashboard/project/cwtoprbowdqcemdjrtir/sql/new" 
+                       target="_blank" 
+                       class="big-button" 
+                       style="display: inline-block; text-decoration: none; text-align: center;">
+                        🔗 OUVRIR SUPABASE SQL EDITOR
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 style="color: #667eea; margin-bottom: 20px;">
+                <span class="emoji">📋</span>Étapes Détaillées
+            </h2>
+            
+            <div class="step">
+                <h3>Étape 1</h3>
+                <p>Clique sur le bouton "COPIER LE SQL" ci-dessus</p>
+            </div>
+            
+            <div class="step">
+                <h3>Étape 2</h3>
+                <p>Va sur <a href="https://supabase.com/dashboard/project/cwtoprbowdqcemdjrtir/sql/new" target="_blank" class="link">Supabase SQL Editor</a></p>
+            </div>
+            
+            <div class="step">
+                <h3>Étape 3</h3>
+                <p>Colle le SQL (Ctrl+V ou Cmd+V)</p>
+            </div>
+            
+            <div class="step">
+                <h3>Étape 4</h3>
+                <p>Clique sur le bouton <strong>"RUN"</strong> en haut à droite</p>
+            </div>
+            
+            <div class="step">
+                <h3>Étape 5</h3>
+                <p>Tu devrais voir : <code style="background: #2d3748; color: #48bb78; padding: 5px 10px; border-radius: 5px;">✅ Table créée avec succès !</code></p>
+            </div>
+        </div>
+        
+        <div class="card" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: white;">
+            <h2 style="color: white; margin-bottom: 20px;">
+                <span class="emoji">✅</span>Après avoir créé la table
+            </h2>
+            <ol style="font-size: 18px; line-height: 2;">
+                <li>Retourne dans Figma Make</li>
+                <li>Clique sur Preview (▶️)</li>
+                <li>Connecte-toi avec :<br>
+                    <code style="background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 5px; display: inline-block; margin-top: 5px;">rudylabor@hotmail.fr</code><br>
+                    <code style="background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 5px; display: inline-block; margin-top: 5px;">password123</code>
+                </li>
+                <li>Clique sur "Publish"</li>
+                <li>Teste sur ton téléphone ! 🎮📱</li>
+            </ol>
+        </div>
+    </div>
+    
+    <script>
+        const sqlCode = `CREATE TABLE IF NOT EXISTS public.kv_store_e884809f (
+  key TEXT PRIMARY KEY,
+  value JSONB NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_kv_key_prefix ON public.kv_store_e884809f (key text_pattern_ops);
+CREATE INDEX IF NOT EXISTS idx_kv_updated_at ON public.kv_store_e884809f (updated_at DESC);
+
+ALTER TABLE public.kv_store_e884809f ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Service role full access" ON public.kv_store_e884809f;
+DROP POLICY IF EXISTS "Anon users have access" ON public.kv_store_e884809f;
+
+CREATE POLICY "Service role full access" ON public.kv_store_e884809f
+  FOR ALL TO service_role USING (true) WITH CHECK (true);
+
+CREATE POLICY "Anon users have access" ON public.kv_store_e884809f
+  FOR ALL TO anon USING (true) WITH CHECK (true);
+
+SELECT '✅ Table créée avec succès !' as status;`;
+
+        function copyAndOpen() {
+            const status = document.getElementById('statusAuto');
+            
+            navigator.clipboard.writeText(sqlCode).then(() => {
+                status.className = 'status success';
+                status.innerHTML = '✅ SQL copié ! Ouverture de Supabase dans 2 secondes...<br>Colle le SQL avec Ctrl+V (ou Cmd+V sur Mac) et clique sur RUN';
+                
+                setTimeout(() => {
+                    window.open('https://supabase.com/dashboard/project/cwtoprbowdqcemdjrtir/sql/new', '_blank');
+                }, 2000);
+                
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 10000);
+            }).catch(err => {
+                status.className = 'status error';
+                status.innerHTML = '❌ Erreur de copie. Utilise la méthode manuelle ci-dessous.';
+            });
+        }
+        
+        function copyManual() {
+            const status = document.getElementById('statusManual');
+            
+            navigator.clipboard.writeText(sqlCode).then(() => {
+                status.className = 'status success';
+                status.innerHTML = '✅ SQL copié dans le presse-papier !<br>Maintenant, clique sur "OUVRIR SUPABASE SQL EDITOR" ci-dessous, colle (Ctrl+V) et clique sur RUN';
+                
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 8000);
+            }).catch(err => {
+                status.className = 'status error';
+                status.innerHTML = '❌ Erreur de copie. Sélectionne manuellement le texte ci-dessus et copie-le (Ctrl+C).';
+            });
+        }
+    </script>
+</body>
+</html>
