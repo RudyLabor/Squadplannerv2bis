@@ -2,8 +2,8 @@ import React, { useState, useRef, Suspense } from 'react';
 import { motion } from 'motion/react';
 import { Download, ChevronLeft, ChevronRight, Grid3x3, X } from 'lucide-react';
 import * as domtoimage from 'dom-to-image-more';
-import { Button } from '@/app/components/ui/Button';
-import { Card } from '@/app/components/ui/Card';
+import { Button } from '@/app/components/ui/button';
+import { Card } from '@/app/components/ui/card';
 import { SplashScreen } from '@/app/components/SplashScreen';
 import { ScreenWrapper } from '@/app/components/ScreenWrapper';
 
@@ -266,8 +266,8 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
   ];
 
   // Flatten all screens for navigation
-  const allScreens = screensByCategory.flatMap(category => category.screens);
-  const currentScreen = allScreens[currentIndex];
+  const allScreens: any[] = screensByCategory.flatMap(category => (category as any).screens);
+  const currentScreen = allScreens[currentIndex] as any;
 
   const handleDownload = async () => {
     if (!screenRef.current) return;

@@ -62,7 +62,7 @@ export function useWebPush(accessToken: string | null) {
       // Subscribe to push
       const pushSubscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicKey),
+        applicationServerKey: urlBase64ToUint8Array(publicKey) as BufferSource,
       });
 
       // Save subscription to server

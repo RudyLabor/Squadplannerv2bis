@@ -231,7 +231,7 @@ export async function batchRequests<T extends readonly unknown[]>(
     }
   }
 
-  return Promise.all(results) as Promise<T>;
+  return Promise.all(results) as unknown as Promise<T>;
 }
 
 /**

@@ -1,7 +1,7 @@
 import { Calendar, Check, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Button } from '@/app/components/ui/Button';
+import { Button } from '@/app/components/ui/button';
 import { useGoogleCalendar } from '@/app/hooks/useGoogleCalendar';
 import { useUser } from '@/app/contexts/UserContext';
 
@@ -25,7 +25,7 @@ export function GoogleCalendarSyncButton({
   onError,
   className = '',
 }: GoogleCalendarSyncButtonProps) {
-  const { user } = useUser();
+  const { userProfile: user } = useUser();
   const { syncSessionToCalendar, isSyncing } = useGoogleCalendar();
   const [isSynced, setIsSynced] = useState(false);
 

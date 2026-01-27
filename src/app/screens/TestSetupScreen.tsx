@@ -1,6 +1,6 @@
 import { ArrowLeft, Beaker, CheckCircle2, Loader2, Users, Trophy, Calendar, Sparkles } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from '@/app/components/ui/Button';
+import { Button } from '@/app/components/ui/button';
 import { projectId, publicAnonKey } from '@/utils/supabase/info';
 
 interface TestSetupScreenProps {

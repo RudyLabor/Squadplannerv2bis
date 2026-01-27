@@ -64,38 +64,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, name: string, avatar?: string) => {
     try {
-      // Use backend signup endpoint to create user
-      const { authAPI } = await import('@/utils/api');
-      const response = await authAPI.signUp(email, password, name, avatar);
+      console.log('📝 Creating new user with Supabase Auth...');
       
-      console.log('✅ User created successfully:', response);
-      
-      // Wait for Supabase to fully sync the new user (2 seconds should be enough)
-      console.log('⏳ Waiting for Supabase to sync...');
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Now sign in with those credentials - retry up to 5 times with longer delays
-      let lastError;
-      for (let i = 0; i < 5; i++) {
-        try {
-          console.log(`🔑 Attempting sign in (attempt ${i + 1}/5)...`);
-          await signIn(email, password);
-          console.log('✅ Sign in successful!');
-          return; // Success!
-        } catch (error) {
-          lastError = error;
-          console.log(`❌ Sign in attempt ${i + 1} failed:`, error);
-          if (i < 4) {
-            // Wait progressively longer before retry
-            const delay = (i + 1) * 1000; // 1s, 2s, 3s, 4s
-            console.log(`⏳ Waiting ${delay}ms before retry...`);
-            await new Promise(resolve => setTimeout(resolve, delay));
+      // Use Supabase Auth directly for signup
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name: name,
+            avatar: avatar || '🎮',
+            display_name: name,
           }
         }
+      });
+      
+      if (error) {
+        console.error('❌ Supabase signUp error:', error);
+        throw error;
       }
       
-      // If all retries failed, throw the last error
-      throw lastError;
+      if (!data.user) {
+        throw new Error('Aucun utilisateur créé');
+      }
+      
+      console.log('✅ User created successfully:', data.user.id);
+      
+      // If email confirmation is disabled, user is automatically logged in
+      if (data.session) {
+        console.log('✅ User automatically logged in');
+        setUser(data.user);
+        return;
+      }
+      
+      // If email confirmation is required, try to sign in
+      console.log('⏳ Waiting for Supabase to sync...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Now sign in with those credentials
+      console.log('🔑 Attempting sign in after signup...');
+      await signIn(email, password);
+      console.log('✅ Sign in successful!');
     } catch (error: any) {
       console.error('Sign up error:', error);
       throw new Error(error.message || 'Erreur lors de la création du compte');

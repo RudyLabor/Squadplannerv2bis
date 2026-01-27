@@ -14,7 +14,7 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, signUp } = useAuth();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -92,12 +92,10 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
       console.log('🔄 Trying to create demo account...');
       
       try {
-        const { authAPI } = await import('@/utils/api');
         console.log('📝 Creating new demo user...');
-        await authAPI.signUp(demoEmail, demoPassword, 'Demo User', '🎮');
+        await signUp(demoEmail, demoPassword, 'Demo User', '🎮');
         
-        console.log('✅ Demo user created, now signing in...');
-        await signIn(demoEmail, demoPassword);
+        console.log('✅ Demo user created and signed in!');
         onLogin?.(demoEmail, true);
         showToast?.('Compte démo créé et connecté ! 🚀', 'success');
         onNavigate?.('home');
@@ -117,8 +115,7 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
           
           try {
             console.log('📝 Creating unique demo user:', uniqueDemoEmail);
-            await authAPI.signUp(uniqueDemoEmail, uniqueDemoPassword, 'Demo User', '🎮');
-            await signIn(uniqueDemoEmail, uniqueDemoPassword);
+            await signUp(uniqueDemoEmail, uniqueDemoPassword, 'Demo User', '🎮');
             onLogin?.(uniqueDemoEmail, true);
             showToast?.('Session démo créée ! 🚀', 'success');
             onNavigate?.('home');

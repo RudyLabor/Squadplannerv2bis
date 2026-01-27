@@ -32,8 +32,8 @@ import {
   X,
   Camera
 } from 'lucide-react';
-import { Card } from '@/app/components/ui/Card';
-import { Button } from '@/app/components/ui/Button';
+import { Card } from '@/app/components/ui/card';
+import { Button } from '@/app/components/ui/button';
 import { SplashScreen } from '@/app/components/SplashScreen';
 import { ScreenWrapper } from '@/app/components/ScreenWrapper';
 
@@ -447,7 +447,7 @@ export default function DesignDocScreen({ onNavigate, showToast }: DesignDocScre
               className="mt-8"
             >
               <button
-                onClick={() => onNavigate('screenshot-gallery')}
+                onClick={() => onNavigate?.('screenshot-gallery')}
                 className="inline-flex items-center gap-3 bg-white text-[#F59E0B] px-8 py-4 rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200"
               >
                 <Camera className="w-6 h-6" />

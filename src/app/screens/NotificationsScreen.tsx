@@ -26,21 +26,21 @@ interface Notification {
 }
 
 export function NotificationsScreen({ onNavigate, showToast }: NotificationsScreenProps) {
-  const { user } = useUser();
+  const { userProfile } = useUser();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     loadNotifications();
-  }, [user?.id]);
+  }, [userProfile?.id]);
 
   const loadNotifications = async () => {
-    if (!user?.id) return;
+    if (!userProfile?.id) return;
 
     setLoading(true);
     try {
-      const response = await notificationsAPI.getUserNotifications(user.id);
+      const response = await notificationsAPI.getUserNotifications();
       setNotifications(response.notifications || []);
       setUnreadCount(response.unreadCount || 0);
     } catch (error: any) {

@@ -8,7 +8,9 @@ interface CelebrationProps {
   subtitle?: string;
   variant?: 'success' | 'achievement' | 'milestone';
   onComplete?: () => void;
+  onEnd?: () => void; // Alias for compatibility
   duration?: number;
+  className?: string;
 }
 
 export function Celebration({
@@ -16,8 +18,12 @@ export function Celebration({
   subtitle,
   variant = 'success',
   onComplete,
-  duration = 2000
+  onEnd,
+  duration = 2000,
+  className = ""
 }: CelebrationProps) {
+  
+  const handleComplete = onComplete || onEnd;
   
   useEffect(() => {
     // Confetti animation based on variant
@@ -76,15 +82,15 @@ export function Celebration({
     fireConfetti();
 
     // Auto-complete after duration
-    if (onComplete) {
-      const timer = setTimeout(onComplete, duration);
+    if (handleComplete) {
+      const timer = setTimeout(handleComplete, duration);
       return () => clearTimeout(timer);
     }
-  }, [variant, onComplete, duration]);
+  }, [variant, handleComplete, duration]);
 
   return (
     <motion.div
-      className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      className={`fixed inset-0 z-[var(--z-modal)] flex items-center justify-center bg-black/50 backdrop-blur-sm ${className}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}

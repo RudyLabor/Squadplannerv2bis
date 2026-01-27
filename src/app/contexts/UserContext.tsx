@@ -250,6 +250,7 @@ export function useUser() {
           },
           integrations: {
             discord: { connected: false },
+            google: { connected: false },
           },
         },
         updateUserProfile: () => {},

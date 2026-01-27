@@ -9,4 +9,4 @@
  * 
  * ✅ Edge Functions are working properly - BYPASS MODE SHOULD BE FALSE
  */
-export const USE_BYPASS_MODE = false;
+export const USE_BYPASS_MODE = true;

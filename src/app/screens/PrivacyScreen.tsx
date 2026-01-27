@@ -1,7 +1,7 @@
 import { ArrowLeft, Eye, EyeOff, Shield, Users, Lock, Globe } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useState } from 'react';
-import { Button } from '@/app/components/ui/Button';
+import { Button } from '@/app/components/ui/button';
 
 interface PrivacyScreenProps {
   onNavigate: (screen: string) => void;

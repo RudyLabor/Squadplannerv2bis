@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Webhook, Plus, Trash2, Edit2, Check, X, Copy, ExternalLink, Zap, Activity } from 'lucide-react';
-import { Card } from './ui/Card';
-import { Button } from './ui/Button';
-import { Badge } from './ui/Badge';
+import { Card } from './ui/card';
+import { Button } from './ui/button';
+import { Badge } from './ui/badge';
 import { EMOJIS } from '@/constants/emojis';
 
 export interface WebhookConfig {

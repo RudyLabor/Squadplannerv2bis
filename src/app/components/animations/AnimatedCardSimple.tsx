@@ -1,13 +1,14 @@
 import { motion, MotionProps } from 'motion/react';
 import { ReactNode } from 'react';
-import { fadeInUp, scrollRevealViewport, gpuAcceleration } from '@/app/utils/animations';
+import { fadeInUp, gpuAcceleration } from '@/app/utils/animations';
 
-interface AnimatedCardSimpleProps extends Omit<MotionProps, 'children'> {
+interface AnimatedCardSimpleProps {
   children: ReactNode;
   className?: string;
   delay?: number;
   direction?: 'up' | 'left' | 'right';
   threshold?: number;
+  onClick?: () => void;
 }
 
 /**
@@ -19,11 +20,13 @@ export function AnimatedCardSimple({
   delay = 0,
   direction = 'up',
   threshold = 0.3,
+  onClick,
   ...props 
 }: AnimatedCardSimpleProps) {
   return (
     <motion.div
       className={className}
+      onClick={onClick}
       variants={fadeInUp}
       initial="hidden"
       whileInView="visible"

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { mockSquads, mockSessions, mockPlayers, mockAchievements, mockBadges, mockFriends, mockChallenges, mockActivities, mockUser } from '@/data/mockData';
+import { mockSquads, mockSessions, mockPlayers, mockUser } from '@/data/mockData';
 
 /**
  * Wrapper component that provides mock data and default props to screens

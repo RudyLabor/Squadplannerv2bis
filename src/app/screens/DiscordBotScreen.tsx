@@ -1,8 +1,8 @@
 import { ArrowLeft, Bot, Zap, Check, Copy, Terminal, MessageSquare, Users, Calendar } from 'lucide-react';
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Button } from '@/app/components/ui/Button';
-import { Input } from '@/app/components/ui/Input';
+import { Button } from '@/app/components/ui/button';
+import { Input } from '@/app/components/ui/input';
 
 interface DiscordBotScreenProps {
   onNavigate: (screen: string) => void;

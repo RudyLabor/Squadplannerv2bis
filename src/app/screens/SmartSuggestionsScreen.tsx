@@ -1,7 +1,7 @@
 import { ArrowLeft, Sparkles, Calendar, Clock, TrendingUp, CheckCircle2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Button } from '@/app/components/ui/Button';
+import { Button } from '@/app/components/ui/button';
 
 
 interface SmartSuggestionsScreenProps {

@@ -1,277 +1,276 @@
-import { ArrowLeft, Crown, Check, Sparkles, TrendingUp, Calendar, Download, Zap, Shield, Users } from 'lucide-react';
-import { useState } from 'react';
-import { motion } from 'motion/react';
-import { Button } from '@/app/components/ui/Button';
+/**
+ * 👑 PREMIUM SCREEN - Aligné sur maquette Figma
+ * Design System v2 - Mobile-first
+ */
+
+import { useState } from "react";
+import {
+  ArrowLeft,
+  Crown,
+  Brain,
+  BarChart3,
+  Clock,
+  Calendar,
+  Bot,
+  Users,
+  Check,
+  ChevronRight,
+  Star,
+} from "lucide-react";
+import { ActionButton, Badge } from "@/app/components/ui/DesignSystem";
 
 interface PremiumScreenProps {
-  onNavigate: (screen: string) => void;
-  showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
+  onNavigate: (screen: string, data?: any) => void;
+  showToast: (message: string, type?: "success" | "error" | "info") => void;
 }
 
 export function PremiumScreen({ onNavigate, showToast }: PremiumScreenProps) {
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly');
-  const [isPremium, setIsPremium] = useState(false);
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
+
+  const price = billingCycle === "yearly" ? "2,99" : "4,99";
+  const yearlyPrice = "35,88";
+  const originalYearlyPrice = "59,88";
+  const discount = "-40%";
 
   const features = [
     {
-      icon: Sparkles,
-      title: 'Suggestions IA',
-      desc: 'Créneaux optimaux basés sur votre historique',
-      free: false,
+      icon: Brain,
+      title: "Suggestions IA",
+      description: "Créneaux optimaux basés sur votre historique",
+      isPro: true,
     },
     {
-      icon: TrendingUp,
-      title: 'Stats avancées',
-      desc: 'Analyse détaillée de vos performances',
-      free: false,
+      icon: BarChart3,
+      title: "Stats avancées",
+      description: "Analyse détaillée de vos performances",
+      isPro: true,
+    },
+    {
+      icon: Clock,
+      title: "Historique illimité",
+      description: "Accès à toutes vos sessions passées",
+      isPro: true,
     },
     {
       icon: Calendar,
-      title: 'Historique illimité',
-      desc: 'Accès à toutes vos sessions passées',
-      free: false,
+      title: "Export calendrier",
+      description: "Sync Google, Apple, Outlook",
+      isPro: true,
     },
     {
-      icon: Download,
-      title: 'Export calendrier',
-      desc: 'Sync Google, Apple, Outlook',
-      free: false,
-    },
-    {
-      icon: Zap,
-      title: 'Bot Discord avancé',
-      desc: 'Automatisation complète Discord',
-      free: false,
-    },
-    {
-      icon: Shield,
-      title: 'Rôles personnalisés',
-      desc: 'Coach, Manager, Capitaine, etc.',
-      free: false,
+      icon: Bot,
+      title: "Bot Discord avancé",
+      description: "Automatisation complète Discord",
+      isPro: true,
     },
     {
       icon: Users,
-      title: 'Squads illimitées',
-      desc: 'Créez autant de squads que vous voulez',
-      free: true,
+      title: "Rôles personnalisés",
+      description: "Coach, Manager, Capitaine, etc.",
+      isPro: true,
+    },
+    {
+      icon: Crown,
+      title: "Squads illimitées",
+      description: "Créez autant de squads que vous voulez",
+      isPro: true,
     },
   ];
 
-  const handleUpgrade = () => {
-    showToast('🎉 Bienvenue dans Premium !', 'success');
-    setIsPremium(true);
-    setTimeout(() => {
-      onNavigate('profile');
-    }, 1500);
+  const testimonials = [
+    {
+      text: "Les suggestions IA sont incroyables. On a doublé notre fréquence de jeu !",
+      author: "RudyFramade",
+      squad: "FragGirls",
+    },
+    {
+      text: "Export calendrier = game changer. Plus aucune excuse de no-show.",
+      author: "KANA",
+      squad: "Apex Legends Squad",
+    },
+  ];
+
+  const handleSubscribe = () => {
+    showToast("Redirection vers le paiement...", "info");
+    // In real app, redirect to Stripe/payment
   };
 
   return (
-    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-b from-[var(--primary-50)] to-[var(--bg-base)]">
-      <div className="px-4 py-8 max-w-2xl mx-auto">
-        
+    <div className="min-h-screen pb-24">
+      <div className="px-4 py-6">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
+        <div className="flex items-center gap-3 mb-6">
           <button
-            onClick={() => onNavigate('profile')}
-            className="w-12 h-12 rounded-2xl bg-white border-[0.5px] border-[var(--border-medium)] flex items-center justify-center hover:border-[var(--border-strong)] shadow-sm transition-all"
+            onClick={() => onNavigate("profile")}
+            className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center"
           >
-            <ArrowLeft className="w-5 h-5 text-[var(--fg-primary)]" strokeWidth={2} />
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
-          <div className="flex-1">
-            <h1 className="text-2xl font-semibold text-[var(--fg-primary)] tracking-tight flex items-center gap-2">
-              <Crown className="w-6 h-6 text-[var(--primary-500)]" strokeWidth={2} />
+          <div className="flex items-center gap-2">
+            <Crown className="w-6 h-6 text-amber-500" />
+            <h1 className="text-lg font-semibold text-gray-900">
               Squad Planner Premium
             </h1>
-            <p className="text-sm text-[var(--fg-tertiary)] font-medium">
-              Débloquez tout le potentiel de votre squad
-            </p>
           </div>
         </div>
 
-        {/* Hero */}
-        <div className="bg-gradient-to-br from-[var(--primary-500)] to-[var(--secondary-500)] rounded-3xl p-8 mb-6 text-white shadow-xl">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center">
-              <Crown className="w-8 h-8" strokeWidth={2} />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold">Premium</h2>
-              <p className="text-sm opacity-90">Pour les squads sérieuses</p>
+        {/* Hero Card */}
+        <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 mb-6 border border-amber-100">
+          <p className="text-sm text-gray-500 text-center mb-4">
+            Débloquez tout le potentiel de votre squad
+          </p>
+
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+              <Crown className="w-7 h-7 text-white" />
             </div>
           </div>
-          <p className="text-base opacity-90 leading-relaxed">
+
+          <h2 className="text-xl font-bold text-gray-900 text-center mb-1">
+            Premium
+          </h2>
+          <p className="text-sm text-gray-500 text-center mb-4">
+            Pour les squads sérieuses
+          </p>
+
+          <p className="text-xs text-gray-500 text-center max-w-xs mx-auto">
             Intelligence artificielle, stats avancées, automatisation complète.
-            Tout ce dont vous avez besoin pour organiser vos sessions comme des pros.
+            Tout ce dont vous avez besoin pour organiser vos sessions comme des
+            pros.
           </p>
         </div>
 
-        {/* Pricing Toggle */}
-        <div className="bg-white rounded-2xl p-2 mb-6 border-[0.5px] border-[var(--border-medium)] shadow-sm flex gap-2">
+        {/* Billing Toggle */}
+        <div className="flex items-center justify-center gap-4 mb-6">
           <button
-            onClick={() => setSelectedPlan('monthly')}
-            className={`flex-1 h-12 rounded-xl font-semibold text-sm transition-all duration-200 ${
-              selectedPlan === 'monthly'
-                ? 'bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] text-white shadow-lg shadow-[var(--primary-500)]/20'
-                : 'text-[var(--fg-tertiary)]'
+            onClick={() => setBillingCycle("monthly")}
+            className={`text-sm font-medium transition-colors ${
+              billingCycle === "monthly" ? "text-gray-900" : "text-gray-400"
             }`}
           >
             Mensuel
           </button>
           <button
-            onClick={() => setSelectedPlan('yearly')}
-            className={`flex-1 h-12 rounded-xl font-semibold text-sm transition-all duration-200 relative ${
-              selectedPlan === 'yearly'
-                ? 'bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] text-white shadow-lg shadow-[var(--primary-500)]/20'
-                : 'text-[var(--fg-tertiary)]'
+            onClick={() => setBillingCycle("yearly")}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              billingCycle === "yearly"
+                ? "bg-amber-500 text-white"
+                : "bg-gray-100 text-gray-600"
             }`}
           >
             Annuel
-            <span className="absolute -top-2 -right-2 px-2 py-0.5 bg-[var(--success-500)] text-white text-xs rounded-full font-bold">
-              -40%
-            </span>
+            {billingCycle === "yearly" && (
+              <span className="ml-2 text-xs bg-white/20 px-1.5 py-0.5 rounded">
+                {discount}
+              </span>
+            )}
           </button>
         </div>
 
-        {/* Pricing */}
-        <div className="bg-white rounded-2xl p-6 mb-6 border-[0.5px] border-[var(--border-subtle)] shadow-md">
-          <div className="text-center mb-6">
-            <div className="flex items-end justify-center gap-2 mb-2">
-              <span className="text-5xl font-bold text-[var(--fg-primary)]">
-                {selectedPlan === 'monthly' ? '4,99' : '2,99'}
-              </span>
-              <span className="text-xl text-[var(--fg-tertiary)] font-semibold mb-2">
-                €/mois
-              </span>
-            </div>
-            {selectedPlan === 'yearly' && (
-              <p className="text-sm text-[var(--success-600)] font-semibold">
-                Soit 35,88 € / an (au lieu de 59,88 €)
-              </p>
-            )}
+        {/* Price */}
+        <div className="text-center mb-6">
+          <div className="flex items-baseline justify-center gap-1">
+            <span className="text-4xl font-bold text-gray-900">{price}</span>
+            <span className="text-lg text-gray-500">€/mois</span>
           </div>
-
-          <Button
-            variant="primary"
-            onClick={handleUpgrade}
-            className="w-full h-14 bg-gradient-to-r from-[var(--primary-500)] to-[var(--secondary-500)] hover:from-[var(--primary-600)] hover:to-[var(--secondary-600)] text-white rounded-2xl shadow-lg font-bold text-base"
-          >
-            <Crown className="w-6 h-6" strokeWidth={2} />
-            Passer Premium
-          </Button>
-
-          <p className="text-xs text-[var(--fg-tertiary)] text-center mt-3">
-            Annulation possible à tout moment • 7 jours d'essai gratuit
-          </p>
+          {billingCycle === "yearly" && (
+            <p className="text-sm text-gray-500 mt-1">
+              Soit {yearlyPrice} € / an{" "}
+              <span className="line-through">(au lieu de {originalYearlyPrice} €)</span>
+            </p>
+          )}
         </div>
 
+        {/* CTA Button */}
+        <ActionButton
+          variant="primary"
+          onClick={handleSubscribe}
+          className="w-full mb-2"
+        >
+          Passer Premium
+        </ActionButton>
+        <p className="text-xs text-gray-400 text-center mb-8">
+          Annulation possible à tout moment • 7 jours d'essai gratuit
+        </p>
+
         {/* Features */}
-        <div className="space-y-3 mb-6">
-          <h3 className="text-lg font-semibold text-[var(--fg-primary)] mb-4">
-            Tout ce qui est inclus
-          </h3>
+        <h3 className="text-base font-semibold text-gray-900 mb-4">
+          Tout ce qui est inclus
+        </h3>
+        <div className="space-y-3 mb-8">
           {features.map((feature, index) => (
-            <motion.div
+            <div
               key={index}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="bg-white rounded-xl p-4 border-[0.5px] border-[var(--border-subtle)] shadow-sm flex items-center gap-4"
+              className="flex items-center gap-3 bg-white rounded-xl p-3 border border-gray-100"
             >
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                feature.free
-                  ? 'bg-[var(--bg-subtle)]'
-                  : 'bg-gradient-to-br from-[var(--primary-100)] to-[var(--secondary-100)]'
-              }`}>
-                <feature.icon className={`w-6 h-6 ${
-                  feature.free ? 'text-[var(--fg-tertiary)]' : 'text-[var(--primary-500)]'
-                }`} strokeWidth={2} />
+              <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
+                <feature.icon className="w-5 h-5 text-gray-600" />
               </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="text-sm font-semibold text-[var(--fg-primary)]">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-gray-900 text-sm">
                     {feature.title}
-                  </h4>
-                  {!feature.free && (
-                    <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-[var(--primary-500)]/10 to-[var(--primary-600)]/10 border border-[var(--primary-500)]/20 text-xs font-bold text-[var(--primary-600)]">
-                      PRO
-                    </span>
-                  )}
+                  </span>
+                  {feature.isPro && <Badge variant="pro">PRO</Badge>}
                 </div>
-                <p className="text-xs text-[var(--fg-tertiary)]">
-                  {feature.desc}
+                <p className="text-xs text-gray-500 truncate">
+                  {feature.description}
                 </p>
               </div>
-              <Check className="w-5 h-5 text-[var(--success-500)]" strokeWidth={2.5} />
-            </motion.div>
+              <Check className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+            </div>
           ))}
         </div>
 
-        {/* Premium Tools Access */}
-        <div className="bg-gradient-to-br from-[var(--primary-50)] to-[var(--secondary-50)] rounded-2xl p-6 mb-6 border-[0.5px] border-[var(--primary-200)]">
-          <h3 className="text-base font-bold text-[var(--fg-primary)] mb-4">
-            Outils Premium
-          </h3>
-          <div className="space-y-3">
-            <Button
-              variant="ghost"
-              onClick={() => onNavigate('advanced-stats')}
-              className="w-full h-12 bg-white hover:bg-[var(--bg-muted)] border-[0.5px] border-[var(--border-medium)] rounded-xl font-semibold justify-start"
+        {/* Premium Tools */}
+        <h3 className="text-base font-semibold text-gray-900 mb-4">
+          Outils Premium
+        </h3>
+        <div className="space-y-2 mb-8">
+          {[
+            { label: "Stats Avancées", screen: "advanced-stats" },
+            { label: "Coaching Tools", screen: "coaching-tools" },
+            { label: "Export Calendrier", screen: "calendar-sync" },
+          ].map((tool, index) => (
+            <button
+              key={index}
+              onClick={() => onNavigate(tool.screen)}
+              className="w-full flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors"
             >
-              <TrendingUp className="w-5 h-5 text-[var(--primary-500)]" strokeWidth={2} />
-              Stats Avancées
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => onNavigate('coaching-tools')}
-              className="w-full h-12 bg-white hover:bg-[var(--bg-muted)] border-[0.5px] border-[var(--border-medium)] rounded-xl font-semibold justify-start"
-            >
-              <Crown className="w-5 h-5 text-[var(--warning-500)]" strokeWidth={2} />
-              Coaching Tools
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => onNavigate('calendar-sync')}
-              className="w-full h-12 bg-white hover:bg-[var(--bg-muted)] border-[0.5px] border-[var(--border-medium)] rounded-xl font-semibold justify-start"
-            >
-              <Calendar className="w-5 h-5 text-[var(--secondary-500)]" strokeWidth={2} />
-              Export Calendrier
-            </Button>
-          </div>
+              <span className="text-sm font-medium text-gray-900">
+                {tool.label}
+              </span>
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+            </button>
+          ))}
         </div>
 
         {/* Testimonials */}
-        <div className="bg-[var(--bg-subtle)] rounded-2xl p-5 border-[0.5px] border-[var(--border-medium)]">
-          <h3 className="text-sm font-semibold text-[var(--fg-primary)] mb-3 text-center">
-            Ce que disent nos utilisateurs Premium
-          </h3>
-          <div className="space-y-3">
-            <div className="bg-white rounded-xl p-4">
-              <p className="text-sm text-[var(--fg-secondary)] mb-2 italic">
-                "Les suggestions IA sont incroyables. On a doublé notre fréquence de jeu !"
+        <h3 className="text-base font-semibold text-gray-900 mb-4">
+          Ce que disent nos utilisateurs Premium
+        </h3>
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-4 space-y-4">
+          {testimonials.map((testimonial, index) => (
+            <div key={index} className="bg-white rounded-xl p-4">
+              <p className="text-sm text-gray-700 italic mb-2">
+                "{testimonial.text}"
               </p>
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-[var(--primary-500)]" />
-                <span className="text-xs font-semibold text-[var(--fg-tertiary)]">
-                  RudyFourcade • Fragsters
+                <div className="flex text-amber-400">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-3 h-3 fill-current" />
+                  ))}
+                </div>
+                <span className="text-xs text-gray-500">
+                  {testimonial.author} • {testimonial.squad}
                 </span>
               </div>
             </div>
-            <div className="bg-white rounded-xl p-4">
-              <p className="text-sm text-[var(--fg-secondary)] mb-2 italic">
-                "Export calendrier = game changer. Plus aucune excuse de no-show."
-              </p>
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-[var(--secondary-500)]" />
-                <span className="text-xs font-semibold text-[var(--fg-tertiary)]">
-                  KANA • Apex Legends Squad
-                </span>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
-
       </div>
     </div>
   );
 }
+
 export default PremiumScreen;

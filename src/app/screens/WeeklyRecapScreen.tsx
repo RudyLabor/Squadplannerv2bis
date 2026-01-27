@@ -1,6 +1,6 @@
 import { ArrowLeft, Calendar, TrendingUp, Trophy, Clock, Users, Zap, Award, Star, Target, Share2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { Button } from '@/app/components/ui/Button';
+import { Button } from '@/app/components/ui/button';
 import CountUp from 'react-countup';
 
 interface WeeklyRecapScreenProps {

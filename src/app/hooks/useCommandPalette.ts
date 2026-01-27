@@ -8,11 +8,8 @@ export function useCommandPalette() {
   const close = useCallback(() => setIsOpen(false), []);
   const toggle = useCallback(() => setIsOpen(prev => !prev), []);
 
-  // Cmd+K or Ctrl+K to open
-  useKeyboardShortcut(['Meta+k', 'Control+k'], (e) => {
-    e.preventDefault();
-    toggle();
-  });
+  // Cmd+K or Ctrl+K to open (meta covers both Mac Cmd and Windows/Linux Ctrl)
+  useKeyboardShortcut({ key: 'k', meta: true }, toggle);
 
   // Escape to close
   useEffect(() => {

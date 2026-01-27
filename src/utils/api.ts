@@ -262,6 +262,31 @@ export const squadsAPI = {
       method: 'DELETE',
     });
   },
+  /**
+   * Get messages for squad
+   */
+  async getMessages(squadId: string) {
+    return apiCall(`/squads/${squadId}/messages`);
+  },
+
+  /**
+   * Send message to squad
+   */
+  async sendMessage(squadId: string, messageData: any) {
+    return apiCall(`/squads/${squadId}/messages`, {
+      method: 'POST',
+      body: JSON.stringify(messageData),
+    });
+  },
+
+  /**
+   * Join a squad
+   */
+  async join(squadId: string) {
+    return apiCall(`/squads/${squadId}/join`, {
+      method: 'POST',
+    });
+  },
 };
 
 // ============================================================
@@ -405,6 +430,13 @@ export const notificationsAPI = {
    * Get user notifications
    */
   async getNotifications() {
+    return apiCall('/notifications');
+  },
+
+  /**
+   * Get user notifications (alias for getNotifications)
+   */
+  async getUserNotifications() {
     return apiCall('/notifications');
   },
 

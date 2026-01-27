@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Share2, Download, Link2, Check, Copy, MessageCircle } from 'lucide-react';
-import { generateICS, downloadICS, generateDiscordShareLink, copyToClipboard } from '@/utils/dateUtils';
+import { Share2, Download, Link2, Check, MessageCircle } from 'lucide-react';
+import { generateICS, downloadICS, copyToClipboard } from '@/utils/dateUtils';
 
 interface ShareSessionProps {
   session: {

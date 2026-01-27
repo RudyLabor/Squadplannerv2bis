@@ -1,8 +1,8 @@
 import { ArrowLeft, Send, Smile, Plus, Image as ImageIcon } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Button } from '@/app/components/ui/Button';
-import { Input } from '@/app/components/ui/Input';
+import { Button } from '@/app/components/ui/button';
+import { Input } from '@/app/components/ui/input';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 import { useHaptic } from '@/app/hooks/useHaptic';
 import { squadsAPI } from '@/utils/api';
@@ -303,10 +303,10 @@ export function SquadChatScreen({
                   </AnimatePresence>
 
                   {/* Reactions */}
-                  {message.reactions?.length > 0 && (
+                  {(message.reactions?.length ?? 0) > 0 && (
                     <div className="flex gap-1 flex-wrap">
                       {Object.entries(
-                        message.reactions.reduce((acc, r) => {
+                        (message.reactions || []).reduce((acc, r) => {
                           acc[r.emoji] = (acc[r.emoji] || 0) + 1;
                           return acc;
                         }, {} as Record<string, number>)
@@ -315,7 +315,7 @@ export function SquadChatScreen({
                           key={emoji}
                           onClick={() => handleReaction(message.id, emoji)}
                           className={`px-2 py-1 rounded-full text-xs flex items-center gap-1 transition-all ${
-                            message.reactions.some(r => r.userId === currentUserId && r.emoji === emoji)
+                            (message.reactions || []).some(r => r.userId === currentUserId && r.emoji === emoji)
                               ? 'bg-[var(--primary-100)] border-[0.5px] border-[var(--primary-500)]'
                               : 'bg-[var(--bg-muted)] border-[0.5px] border-transparent hover:border-[var(--border-medium)]'
                           }`}
@@ -353,8 +353,7 @@ export function SquadChatScreen({
                 }
               }}
               placeholder="Votre message..."
-              className="rounded-2xl resize-none"
-              rows={1}
+              className="rounded-2xl"
             />
           </div>
 

@@ -1,6 +1,6 @@
 import { ArrowLeft, Gamepad2, Globe, Shield, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from '@/app/components/ui/Button';
+import { Button } from '@/app/components/ui/button';
 import { useUser } from '@/app/contexts/UserContext';
 
 interface DiscordConnectScreenProps {

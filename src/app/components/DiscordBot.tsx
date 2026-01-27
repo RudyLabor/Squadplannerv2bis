@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { MessageCircle, Check, Copy, ExternalLink, Zap, Users, Bell, Calendar } from 'lucide-react';
-import { Card } from './ui/Card';
-import { Button } from './ui/Button';
-import { Badge } from './ui/Badge';
+import { Card } from './ui/card';
+import { Button } from './ui/button';
+import { Badge } from './ui/badge';
 import { EMOJIS } from '@/constants/emojis';
 
 interface DiscordBotProps {

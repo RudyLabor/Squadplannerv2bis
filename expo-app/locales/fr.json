@@ -1,0 +1,6 @@
+{
+  "CFBundleDisplayName": "Squad Planner",
+  "CFBundleName": "Squad Planner",
+  "NSCameraUsageDescription": "Squad Planner utilise la caméra pour personnaliser votre avatar.",
+  "NSPhotoLibraryUsageDescription": "Squad Planner accède à vos photos pour personnaliser votre avatar."
+}

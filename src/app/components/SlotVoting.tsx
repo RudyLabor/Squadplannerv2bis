@@ -1,9 +1,7 @@
 import { Check, X, HelpCircle, Calendar, Clock, Users } from 'lucide-react';
 import { motion } from 'motion/react';
-import { Badge } from '@/app/components/ui/Badge';
+import { Badge } from '@/app/components/ui/badge';
 import { AnimatedProgressBar } from '@/app/components/ui/AnimatedProgressBar';
-import { PulseBadge } from '@/app/components/ui/PulseBadge';
-import { AvatarStack } from '@/app/components/ui/AvatarStack';
 
 interface SlotVotingProps {
   slot: {

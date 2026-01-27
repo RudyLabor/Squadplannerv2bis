@@ -41,8 +41,6 @@ interface SquadCohesionProps {
 }
 
 export function SquadCohesion({ 
-  squadId, 
-  squadName, 
   members, 
   metrics,
   onActionClick 
@@ -148,11 +146,7 @@ export function SquadCohesion({
         </div>
 
         <div className="bg-white rounded-2xl p-4 border-[0.5px] border-[var(--border-subtle)] shadow-sm">
-          <TrendingUp className="w-5 h-5 text-[var(--secondary-500)] mb-2" strokeWidth={2} />
-          <div className="text-2xl font-bold text-[var(--fg-primary)] mb-1">
-            {metrics.avgReliability}%
-          </div>
-          <div className="text-xs text-[var(--fg-tertiary)} font-medium">
+          <div className="text-xs text-[var(--fg-tertiary)] font-medium">
             Fiabilité moyenne
           </div>
         </div>

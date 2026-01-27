@@ -5,7 +5,9 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
     "splash": {
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#F5F3F0"
     },
@@ -14,22 +16,45 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.squadplanner.app"
+      "bundleIdentifier": "com.squadplanner.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Squad Planner utilise la caméra pour personnaliser votre avatar.",
+        "NSPhotoLibraryUsageDescription": "Squad Planner accède à vos photos pour personnaliser votre avatar.",
+        "CFBundleAllowMixedLocalizations": true
+      }
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#F5F3F0"
       },
-      "package": "com.squadplanner.app"
+      "package": "com.squadplanner.app",
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "VIBRATE"
+      ]
     },
     "web": {
-      "bundler": "metro"
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
     },
-    "plugins": [],
+    "plugins": [
+      "expo-router"
+    ],
     "scheme": "squadplanner",
+    "owner": "squadplanner",
     "extra": {
+      "eas": {
+        "projectId": "squad-planner-app"
+      },
       "EXPO_PUBLIC_SUPABASE_URL": "https://cwtoprbowdqcemdjrtir.supabase.co",
       "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3dG9wcmJvd2RxY2VtZGpydGlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyMTQyNjMsImV4cCI6MjA4NDc5MDI2M30.FUpLncLIZc7l4hukBu5oOzj0tHl2IiwIIJ2Ghml8-6k"
+    },
+    "locales": {
+      "fr": "./locales/fr.json"
     }
   }
 }

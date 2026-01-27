@@ -1,7 +1,7 @@
 import { ArrowLeft, Clock, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Button } from '@/app/components/ui/Button';
+import { Button } from '@/app/components/ui/button';
 import { mockSessions } from '@/data/mockData';
 import { sessionsAPI } from '@/utils/api';
 import { useUser } from '@/app/contexts/UserContext';

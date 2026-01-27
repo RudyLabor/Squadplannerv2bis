@@ -1,7 +1,7 @@
 import { ArrowLeft, Calendar, Check, Download, ExternalLink, Crown } from 'lucide-react';
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Button } from '@/app/components/ui/Button';
+import { Button } from '@/app/components/ui/button';
 import { useUser } from '@/app/contexts/UserContext';
 
 interface CalendarSyncScreenProps {

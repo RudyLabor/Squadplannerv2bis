@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform, MotionValue } from 'motion/react';
+import { motion, useScroll, useTransform } from 'motion/react';
 import { ReactNode, useRef } from 'react';
 import { gpuAcceleration } from '@/app/utils/animations';
 

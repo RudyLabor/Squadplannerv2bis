@@ -1,6 +1,6 @@
 import { ArrowLeft, Mail, Smartphone, Save } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from '@/app/components/ui/Button';
+import { Button } from '@/app/components/ui/button';
 import { useUser } from '@/app/contexts/UserContext';
 
 interface NotificationSettingsScreenProps {

@@ -1,331 +1,280 @@
-import { Calendar, Plus, Users, Clock, CheckCircle, XCircle, AlertCircle, Filter, Zap, Check, X, Globe } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
-import { Button } from '@/app/components/ui/Button';
-import { EmptyState } from '@/app/components/ui/EmptyState';
-import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
-import { mockSessions } from '@/data/mockData';
-import { useTranslation } from '@/i18n/useTranslation';
-import { usePerformanceMonitor } from '@/app/hooks/usePerformanceMonitor';
-import { sessionsAPI } from '@/utils/api';
-import { useAuth } from '@/app/contexts/AuthContext';
+/**
+ * 📅 SESSIONS SCREEN - Aligné sur maquette Figma
+ * Design System v2 - Mobile-first
+ */
+
+import { useState, useEffect } from "react";
+import { Plus, Calendar, Clock, Users, Check, X } from "lucide-react";
+import { sessionsAPI } from "@/utils/api";
+import { useAuth } from "@/app/contexts/AuthContext";
+import { PageHeader, ActionButton, Badge } from "@/app/components/ui/DesignSystem";
 
 interface SessionsScreenProps {
   onNavigate: (screen: string, data?: any) => void;
-  showToast?: (message: string, type?: 'success' | 'error' | 'info') => void;
-  useMockData?: boolean;
+  showToast: (message: string, type?: "success" | "error" | "info") => void;
 }
 
-export function SessionsScreen({ onNavigate, showToast = () => {}, useMockData = false }: SessionsScreenProps) {
-  const { t } = useTranslation();
-  const [filter, setFilter] = useState<'all' | 'today' | 'upcoming'>('all');
+type FilterType = "all" | "today" | "upcoming";
+
+export function SessionsScreen({ onNavigate, showToast }: SessionsScreenProps) {
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [sessions, setSessions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [filter, setFilter] = useState<FilterType>("all");
 
-  // 🔍 Performance Monitoring
-  usePerformanceMonitor('SessionsScreen');
-
-  // Load sessions from backend or use mock data
   useEffect(() => {
-    if (useMockData) {
-      // Mode démo pour la galerie
-      setSessions(mockSessions);
-      setIsLoading(false);
-    } else {
+    if (!authLoading && isAuthenticated) {
       loadSessions();
+    } else if (!authLoading) {
+      setIsLoading(false);
     }
-  }, [useMockData]);
+  }, [authLoading, isAuthenticated]);
 
   const loadSessions = async () => {
     setIsLoading(true);
     try {
-      const { sessions: allSessions } = await sessionsAPI.getSessions();
-      
-      // Map backend data to UI format
-      const formattedSessions = allSessions.map((s: any) => {
-        // Use confirmed slot if available, otherwise first slot
-        // In a real multi-slot voting system, we'd need more complex logic here
-        const displaySlot = s.selectedSlotId 
-          ? s.slots?.find((slot: any) => slot.id === s.selectedSlotId) 
-          : s.slots?.[0];
-          
-        const dateStr = displaySlot?.date || '';
-        const isToday = new Date(dateStr).toDateString() === new Date().toDateString();
-        
-        // Calculate confirmed participants (yes responses)
-        const yesCount = displaySlot?.responses?.filter((r: any) => r.response === 'yes').length || 0;
-        
-        return {
-          ...s,
-          date: dateStr,
-          time: displaySlot?.time || '',
-          isToday,
-          readyCount: yesCount,
-          totalPlayers: s.playersNeeded,
-          selectedSlotId: displaySlot?.id,
-          relativeTime: dateStr && displaySlot?.time 
-            ? formatDistanceToNow(new Date(`${dateStr}T${displaySlot.time}:00`), { addSuffix: true, locale: fr })
-            : ''
-        };
-      });
-
-      setSessions(formattedSessions || []);
-    } catch (error: any) {
-      console.error('Load sessions error:', error);
-      // Keep empty array on error
-      if (error?.message?.includes('Session') || error?.message?.includes('reconnecter')) {
-        showToast(error.message, 'error');
-      }
+      const { sessions: userSessions } = await sessionsAPI.getSessions();
+      setSessions(userSessions || []);
+    } catch (error) {
+      console.error("Load sessions error:", error);
+      setSessions([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const filteredSessions = sessions.filter(session => {
-    if (filter === 'today') return session.isToday;
-    if (filter === 'upcoming') return !session.isToday;
-    return true;
-  });
-
-  const handleRSVP = async (sessionId: string, slotId: string, response: 'yes' | 'no') => {
-    // En mode démo, simuler la réponse sans appel API
-    if (useMockData) {
-      showToast(
-        response === 'yes' 
-          ? 'Participation confirmée !' 
-          : 'Participation refusée',
-        'success'
-      );
-      return;
-    }
-    
-    // Mode production: envoyer via API
+  const handleRSVP = async (sessionId: string, response: "yes" | "no") => {
     try {
-      await sessionsAPI.rsvp(sessionId, slotId, response);
-      showToast(
-        response === 'yes' 
-          ? 'Participation confirmée !' 
-          : 'Participation refusée',
-        'success'
-      );
-      // Reload sessions to get updated data
+      await sessionsAPI.rsvpSession(sessionId, response);
+      showToast(response === "yes" ? "Participation confirmée !" : "Absence notée", "success");
       loadSessions();
-    } catch (error: any) {
-      console.error('RSVP error:', error);
-      showToast(error?.message || 'Erreur lors de la réponse', 'error');
+    } catch (error) {
+      showToast("Erreur lors de la réponse", "error");
     }
   };
 
-  return (
-    <div className="min-h-screen pb-24 pt-safe">
-      <div className="px-4 py-8 max-w-2xl mx-auto">
-        
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-semibold text-[var(--fg-primary)] mb-2 tracking-tight">
-            {t('sessions.title')}
-          </h1>
-          <p className="text-base text-[var(--fg-tertiary)] font-medium">
-            {sessions.length} sessions à venir
-          </p>
-        </div>
+  // Filter sessions
+  const filteredSessions = sessions.filter((session) => {
+    const sessionDate = new Date(session.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
-        {/* Filters - Glass style premium */}
-        <div className="flex gap-2 mb-8">
-          {(['all', 'today', 'upcoming'] as const).map((filterOption) => (
+    switch (filter) {
+      case "today":
+        return sessionDate >= today && sessionDate < tomorrow;
+      case "upcoming":
+        return sessionDate >= today;
+      default:
+        return true;
+    }
+  });
+
+  // Group by time
+  const groupedSessions = filteredSessions.reduce((acc, session) => {
+    const hour = new Date(session.date).getHours();
+    const timeKey = `${hour}h`;
+    if (!acc[timeKey]) acc[timeKey] = [];
+    acc[timeKey].push(session);
+    return acc;
+  }, {} as Record<string, any[]>);
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-500">Chargement des sessions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen pb-24">
+      <div className="px-4 py-6">
+        {/* Header */}
+        <PageHeader
+          title="Mes sessions"
+          subtitle={`${sessions.length} sessions à venir`}
+        />
+
+        {/* Filter Tabs */}
+        <div className="flex gap-2 mb-6">
+          {[
+            { key: "all", label: "Toutes" },
+            { key: "today", label: "Aujourd'hui" },
+            { key: "upcoming", label: "À venir" },
+          ].map((tab) => (
             <button
-              key={filterOption}
-              onClick={() => setFilter(filterOption)}
-              className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
-                filter === filterOption
-                  ? 'bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] text-white shadow-lg shadow-[var(--primary-500)]/20'
-                  : 'bg-white/60 backdrop-blur-sm text-[var(--fg-secondary)] border-[0.5px] border-[var(--border-medium)] hover:bg-white hover:border-[var(--border-strong)] shadow-sm'
+              key={tab.key}
+              onClick={() => setFilter(tab.key as FilterType)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                filter === tab.key
+                  ? "bg-amber-500 text-white"
+                  : "bg-white text-gray-600 border border-gray-200"
               }`}
             >
-              {filterOption === 'all' && 'Toutes'}
-              {filterOption === 'today' && "Aujourd'hui"}
-              {filterOption === 'upcoming' && 'À venir'}
+              {tab.label}
             </button>
           ))}
         </div>
 
-        {/* Sessions Timeline */}
-        {isLoading ? (
-          <EmptyState
-            icon={Calendar}
-            title="Chargement..."
-            description="Récupération de vos sessions"
-          />
-        ) : filteredSessions.length === 0 ? (
-          <EmptyState
-            icon={Calendar}
-            title="Aucune session prévue"
-            description="Propose un créneau à ta squad"
-            actionLabel="Proposer une session"
-            onAction={() => onNavigate('propose-session')}
-          />
-        ) : (
-          <div className="space-y-6">
-            {filteredSessions.map((session, index) => (
-              <motion.div
-                key={session.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.08 }}
-                className="relative"
-              >
-                {/* Timeline connector */}
-                {index < filteredSessions.length - 1 && (
-                  <div className="absolute left-6 top-16 bottom-0 w-[2px] bg-gradient-to-b from-[var(--border-medium)] to-transparent" />
-                )}
-
-                {/* Session Card - Horizontal Timeline Layout */}
-                <div className="flex gap-4">
-                  {/* Time indicator */}
-                  <div className="flex-shrink-0 w-12 pt-1">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-sm ${
-                      session.isToday 
-                        ? 'bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] text-white shadow-lg shadow-[var(--primary-500)]/20' 
-                        : 'bg-white border-[1.5px] border-[var(--border-medium)] text-[var(--fg-tertiary)]'
-                    }`}>
-                      {session.time.split(':')[0]}h
-                    </div>
-                  </div>
-
-                  {/* Content card */}
-                  <motion.div
-                    className="flex-1 bg-white rounded-2xl border-[0.5px] border-[var(--border-subtle)] shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden"
-                    whileHover={{ y: -2 }}
-                  >
-                    <div className="p-5">
-                      {/* Header row */}
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="text-lg font-bold text-[var(--fg-primary)]">
-                              {session.title}
-                            </h3>
-                            {session.isToday && (
-                              <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-[var(--primary-500)]/10 to-[var(--primary-600)]/10 border border-[var(--primary-500)]/20 text-xs font-bold text-[var(--primary-600)] flex items-center gap-1">
-                                <Zap className="w-3 h-3" strokeWidth={2.5} />
-                                Bientôt
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-3 text-sm text-[var(--fg-tertiary)]">
-                            <span className="font-medium">{session.squad}</span>
-                            <span className="w-1 h-1 rounded-full bg-[var(--fg-tertiary)]/40" />
-                            <span>{session.game}</span>
-                          </div>
-                        </div>
-
-                        {/* Game badge */}
-                        <div className="w-10 h-10 rounded-xl overflow-hidden border border-[var(--border-subtle)] flex-shrink-0">
-                          <ImageWithFallback
-                            src={session.gameImage}
-                            alt={session.game}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Metadata row */}
-                      <div className="flex items-center gap-6 mb-4 text-sm">
-                        <div className="flex items-center gap-2 text-[var(--fg-secondary)]">
-                          <Calendar className="w-4 h-4 text-[var(--fg-tertiary)]" strokeWidth={1.5} />
-                          <span className="font-medium">{session.date}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-[var(--fg-secondary)]">
-                          <Clock className="w-4 h-4 text-[var(--fg-tertiary)]" strokeWidth={1.5} />
-                          <span className="font-medium">{session.time}</span>
-                          {session.relativeTime && (
-                            <span className="text-[var(--fg-tertiary)] ml-1 text-xs">
-                              ({session.relativeTime})
-                            </span>
-                          )}
-                          <span className="text-[var(--primary-500)] text-xs font-semibold bg-[var(--primary-50)] px-1.5 py-0.5 rounded ml-2">
-                            Paris
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Status bar */}
-                      <div className="pt-4 border-t border-[var(--border-subtle)] space-y-3">
-                        {/* Top row: Participants + Actions */}
-                        <div className="flex items-center justify-between">
-                          {/* Participants */}
-                          <div className="flex items-center gap-2">
-                            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--bg-base)] border border-[var(--border-subtle)]">
-                              <Users className="w-4 h-4 text-[var(--secondary-500)]" strokeWidth={2} />
-                              <span className={`text-sm font-bold ${
-                                session.readyCount === session.totalPlayers 
-                                  ? 'text-[var(--success-600)]' 
-                                  : 'text-[var(--fg-secondary)]'
-                              }`}>
-                                {session.readyCount || 0}/{session.totalPlayers || 0}
-                              </span>
-                            </div>
-                            {session.readyCount === session.totalPlayers && (
-                              <span className="text-xs font-semibold text-[var(--success-600)] flex items-center gap-1">
-                                <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
-                                Complet
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Actions */}
-                          {session.status === 'pending' && (
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => handleRSVP(session.id, session.selectedSlotId, 'yes')}
-                                className="px-4 py-2 rounded-xl bg-gradient-to-br from-[var(--success-50)] to-[var(--success-100)] border border-[var(--success-200)] text-[var(--success-700)] text-sm font-bold hover:from-[var(--success-500)] hover:to-[var(--success-600)] hover:text-white transition-all duration-200"
-                              >
-                                <Check className="w-4 h-4" strokeWidth={2.5} />
-                              </button>
-                              <button
-                                onClick={() => handleRSVP(session.id, session.selectedSlotId, 'no')}
-                                className="px-4 py-2 rounded-xl bg-gradient-to-br from-[var(--error-50)] to-[var(--error-100)] border border-[var(--error-200)] text-[var(--error-700)] text-sm font-bold hover:from-[var(--error-500)] hover:to-[var(--error-600)] hover:text-white transition-all duration-200"
-                              >
-                                <X className="w-4 h-4" strokeWidth={2.5} />
-                              </button>
-                            </div>
-                          )}
-                          {session.status === 'confirmed' && (
-                            <span className="px-3 py-1.5 rounded-full bg-gradient-to-r from-[var(--success-50)] to-[var(--success-100)] border border-[var(--success-200)] text-xs font-bold text-[var(--success-700)] flex items-center gap-1.5">
-                              <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
-                              Confirmé
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                </div>
-              </motion.div>
+        {/* Sessions List */}
+        {Object.keys(groupedSessions).length > 0 ? (
+          <div className="space-y-4">
+            {Object.entries(groupedSessions).map(([time, timeSessions]) => (
+              <div key={time}>
+                {(timeSessions as any[]).map((session) => (
+                  <SessionCard
+                    key={session.id}
+                    session={session}
+                    time={time}
+                    onRSVP={handleRSVP}
+                    onNavigate={onNavigate}
+                  />
+                ))}
+              </div>
             ))}
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl p-8 text-center border border-gray-100">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Calendar className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="font-semibold text-gray-900 mb-1">Aucune session</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              Proposez une session ou rejoignez une squad
+            </p>
           </div>
         )}
 
-        {/* Quick action */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="mt-8"
-        >
-          <Button
-            variant="default"
-            onClick={() => onNavigate('propose-session')}
-            className="w-full h-14 text-base font-bold bg-gradient-to-r from-[var(--primary-500)] to-[var(--primary-600)] hover:from-[var(--primary-600)] hover:to-[var(--primary-700)] text-white rounded-2xl shadow-lg shadow-[var(--primary-500)]/20 hover:shadow-xl hover:shadow-[var(--primary-500)]/30 transition-all duration-200"
+        {/* Fixed CTA Button */}
+        <div className="fixed bottom-24 left-4 right-4 max-w-md mx-auto">
+          <ActionButton
+            variant="primary"
+            icon={Plus}
+            onClick={() => onNavigate("propose-session")}
+            className="w-full shadow-lg"
           >
-            <Plus className="w-5 h-5 mr-2" strokeWidth={2} />
             Proposer une session
-          </Button>
-        </motion.div>
+          </ActionButton>
+        </div>
       </div>
     </div>
   );
 }
+
+// Session Card Component
+interface SessionCardProps {
+  session: any;
+  time: string;
+  onRSVP: (sessionId: string, response: "yes" | "no") => void;
+  onNavigate: (screen: string, data?: any) => void;
+}
+
+function SessionCard({ session, time, onRSVP, onNavigate }: SessionCardProps) {
+  const date = new Date(session.date);
+  const formattedDate = date.toLocaleDateString("fr-FR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const formattedTime = date.toLocaleTimeString("fr-FR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  const confirmed = session.confirmedCount || 0;
+  const total = session.totalSlots || 5;
+  const isComplete = confirmed >= total;
+  const userRSVP = session.userRSVP;
+
+  return (
+    <div className="flex gap-4 mb-6">
+      {/* Time indicator */}
+      <div className="w-12 text-sm text-gray-400 font-medium pt-1">{time}</div>
+
+      {/* Card */}
+      <div
+        className="flex-1 bg-white rounded-2xl p-4 border border-gray-100 cursor-pointer hover:shadow-md transition-shadow"
+        onClick={() => onNavigate("session-detail", { sessionId: session.id })}
+      >
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex-1">
+            <h3 className="font-semibold text-gray-900 mb-1">
+              {session.title || session.name || "Session"}
+            </h3>
+            <p className="text-sm text-gray-500">
+              {session.squadName} • {session.game}
+            </p>
+          </div>
+          <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0">
+            <img
+              src={session.gameImage || "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=100&h=100&fit=crop"}
+              alt={session.game}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </div>
+
+        {/* Date & Time */}
+        <div className="flex items-center gap-4 mb-3 text-sm text-gray-500">
+          <div className="flex items-center gap-1.5">
+            <Calendar className="w-4 h-4" />
+            {formattedDate}
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Clock className="w-4 h-4" />
+            {formattedTime}
+          </div>
+        </div>
+
+        {/* Status & Actions */}
+        <div className="flex items-center gap-2">
+          <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-sm ${
+            isComplete ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-600"
+          }`}>
+            <Users className="w-4 h-4" />
+            {confirmed}/{total}
+          </div>
+
+          {isComplete && (
+            <Badge variant="success">Complet</Badge>
+          )}
+
+          {userRSVP === "yes" && (
+            <Badge variant="success">Confirmé</Badge>
+          )}
+
+          {!userRSVP && !isComplete && (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRSVP(session.id, "yes");
+                }}
+                className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center hover:bg-emerald-200 transition-colors"
+              >
+                <Check className="w-4 h-4" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRSVP(session.id, "no");
+                }}
+                className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gray-200 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default SessionsScreen;

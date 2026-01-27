@@ -1,7 +1,7 @@
 import { ArrowLeft, CheckCircle, Trophy } from 'lucide-react';
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Button } from '@/app/components/ui/Button';
+import { Button } from '@/app/components/ui/button';
 import { SlotVoting } from '@/app/components/SlotVoting';
 import { AnimatedProgressBar } from '@/app/components/ui/AnimatedProgressBar';
 import { PulseBadge } from '@/app/components/ui/PulseBadge';
@@ -277,6 +277,7 @@ export function VoteSessionScreen({ onNavigate, showToast }: VoteSessionScreenPr
         {/* Celebration */}
         {showCelebration && (
           <Celebration
+            title="Session confirmée !"
             className="absolute top-0 left-0 right-0 bottom-0"
             onEnd={() => setShowCelebration(false)}
           />

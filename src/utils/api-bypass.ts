@@ -77,8 +77,8 @@ export async function getProfileBypass() {
       };
 
       // Store it
-      await supabase
-        .from(KV_TABLE)
+      await (supabase
+        .from(KV_TABLE) as any)
         .insert({
           key: `user:${userId}`,
           value: JSON.stringify(defaultProfile)

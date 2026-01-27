@@ -1,4 +1,3 @@
-import { motion } from 'motion/react';
 import { Bell, Search, Command } from 'lucide-react';
 import { LanguageSwitcher } from '@/app/components/LanguageSwitcher';
 

@@ -1,6 +1,6 @@
 import { ArrowLeft, CheckCircle2, XCircle, Loader2, PlayCircle, Beaker } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from '@/app/components/ui/Button';
+import { Button } from '@/app/components/ui/button';
 import { intelligenceAPI, notificationsAPI } from '@/utils/api';
 
 interface QATestsScreenProps {
@@ -109,8 +109,7 @@ export function QATestsScreen({ onNavigate, showToast }: QATestsScreenProps) {
     updateTest(2, { status: 'running' });
     const start3 = Date.now();
     try {
-      const userId = localStorage.getItem('userId') || 'test-user-id';
-      const result = await notificationsAPI.getUserNotifications(userId);
+      const result = await notificationsAPI.getUserNotifications();
       const duration = Date.now() - start3;
       
       if (result.notifications && Array.isArray(result.notifications)) {

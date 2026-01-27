@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { projectId } from '/utils/supabase/info';
+import { projectId } from '@/utils/supabase/info';
 import { useAuth } from '@/app/contexts/AuthContext';
 
 export function useGoogleCalendar() {

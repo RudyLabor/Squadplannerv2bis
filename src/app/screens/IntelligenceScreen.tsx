@@ -1,6 +1,6 @@
 import { ArrowLeft, Sparkles, Calendar, Clock, TrendingUp, Zap, Target, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { Button } from '@/app/components/ui/Button';
+import { Button } from '@/app/components/ui/button';
 import { HeatmapAvailability } from '@/app/components/HeatmapAvailability';
 
 interface IntelligenceScreenProps {
@@ -24,6 +24,7 @@ interface Suggestion {
   description: string;
   impact: string;
   priority: 'high' | 'medium' | 'low';
+  action?: string;
   data: any;
 }
 
@@ -73,6 +74,7 @@ export function IntelligenceScreen({ onNavigate, showToast }: IntelligenceScreen
       description: 'Mardi 21h donne 95% de présence pour votre squad',
       impact: '+15% participation',
       priority: 'high',
+      action: 'Planifier la session',
       data: {
         suggestedDay: 'Mardi',
         suggestedTime: '21:00',
@@ -86,6 +88,7 @@ export function IntelligenceScreen({ onNavigate, showToast }: IntelligenceScreen
       description: 'MaxGamer a 68% de probabilité d\'absence jeudi soir (historique)',
       impact: 'Alerte moyenne',
       priority: 'medium',
+      action: 'Envoyer un rappel',
       data: {
         player: 'MaxGamer',
         probability: 68,
@@ -99,6 +102,7 @@ export function IntelligenceScreen({ onNavigate, showToast }: IntelligenceScreen
       description: 'Automatisez une session tous les mercredis 20h',
       impact: '+25% régularité',
       priority: 'high',
+      action: 'Configurer la récurrence',
       data: {
         day: 'Mercredi',
         time: '20:00',
@@ -112,6 +116,7 @@ export function IntelligenceScreen({ onNavigate, showToast }: IntelligenceScreen
       description: 'SaraGames n\'a pas joué depuis 2 semaines',
       impact: 'Risque de départ',
       priority: 'medium',
+      action: 'Mentionner Sara',
       data: {
         member: 'SaraGames',
         lastSession: '14 jours'
@@ -124,6 +129,7 @@ export function IntelligenceScreen({ onNavigate, showToast }: IntelligenceScreen
       description: 'Samedi 19h fonctionne aussi pour 4/5 membres',
       impact: '+10% flexibilité',
       priority: 'low',
+      action: 'Proposer samedi',
       data: {
         suggestedDay: 'Samedi',
         suggestedTime: '19:00',

@@ -1,13 +1,13 @@
 import { ArrowLeft, Camera, Save, Mail, User, AtSign, MapPin, Calendar, Trophy, Clock, Trash2 } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { motion } from 'motion/react';
-import { Button } from '@/app/components/ui/Button';
-import { Input } from '@/app/components/ui/Input';
+import { Button } from '@/app/components/ui/button';
+import { Input } from '@/app/components/ui/input';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 import { useHaptic } from '@/app/hooks/useHaptic';
 import { useUser } from '@/app/contexts/UserContext';
 import { useAuth } from '@/app/contexts/AuthContext';
-import { projectId, publicAnonKey } from '/utils/supabase/info';
+import { projectId, publicAnonKey } from '@/utils/supabase/info';
 
 interface EditProfileScreenProps {
   onNavigate: (screen: string, data?: any) => void;

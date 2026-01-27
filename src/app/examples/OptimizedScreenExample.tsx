@@ -17,7 +17,7 @@ import { useOptimizedFetch, useBatchFetch, useOptimisticUpdate } from '@/app/hoo
 import { CacheTTL } from '@/app/utils/cache';
 import { MemoizedSquadCard } from '@/app/components/optimized/MemoizedSquadCard';
 import { VirtualizedGrid } from '@/app/components/optimized/VirtualizedList';
-import { Button } from '@/app/components/ui/Button';
+import { Button } from '@/app/components/ui/button';
 
 // Types
 interface Squad {

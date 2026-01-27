@@ -1,7 +1,7 @@
 import { ArrowLeft, Repeat, Calendar, Clock, Users, Bell, CheckCircle2, Settings, Trash2, Plus, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useState } from 'react';
-import { Button } from '@/app/components/ui/Button';
+import { Button } from '@/app/components/ui/button';
 
 interface RecurringSessionScreenProps {
   onNavigate: (screen: string, data?: any) => void;

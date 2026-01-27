@@ -1,4 +1,4 @@
-import { motion, useMotionValue, useSpring, useTransform } from 'motion/react';
+import { motion, useMotionValue, useSpring } from 'motion/react';
 import { useRef, useState, ReactNode } from 'react';
 
 interface MagneticButtonProps {

@@ -1,4 +1,4 @@
-import { memo, useEffect, useState, useCallback, useMemo } from 'react';
+import { memo, useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, Users, Calendar, Plus, Home, User } from 'lucide-react';
 
