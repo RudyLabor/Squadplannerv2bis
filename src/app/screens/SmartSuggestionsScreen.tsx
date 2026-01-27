@@ -2,15 +2,18 @@ import { ArrowLeft, Sparkles, Calendar, Clock, TrendingUp, CheckCircle2 } from '
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Button } from '@/app/components/ui/Button';
-import { intelligenceAPI } from '@/utils/api';
+
 
 interface SmartSuggestionsScreenProps {
   onNavigate: (screen: string, data?: any) => void;
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
+  useMockData?: boolean;
   data?: {
     squadId?: string;
   };
 }
+
+import { sessionsAPI } from '@/utils/api';
 
 interface Suggestion {
   id: string;
@@ -25,7 +28,7 @@ interface Suggestion {
   description: string;
 }
 
-export function SmartSuggestionsScreen({ onNavigate, showToast, data }: SmartSuggestionsScreenProps) {
+export function SmartSuggestionsScreen({ onNavigate, showToast, data, useMockData = false }: SmartSuggestionsScreenProps) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -34,15 +37,83 @@ export function SmartSuggestionsScreen({ onNavigate, showToast, data }: SmartSug
   }, [data?.squadId]);
 
   const loadSuggestions = async () => {
-    if (!data?.squadId) return;
+    if (!data?.squadId && !useMockData) return;
 
     setLoading(true);
     try {
-      const response = await intelligenceAPI.getSmartSuggestions(data.squadId);
-      setSuggestions(response.suggestions || []);
+      if (useMockData) {
+         // Keep mock data for demo mode if explicitly requested
+         // ... existing mock logic ...
+         await new Promise(resolve => setTimeout(resolve, 1000));
+         setSuggestions([
+          { id: '1', day: 2, dayName: 'Mardi', hour: 21, time: '21:00', score: 98, confidence: 95, sessionsCount: 12, title: 'Mardi Tryhard', description: 'Créneau historique le plus performant' },
+          { id: '2', day: 4, dayName: 'Jeudi', hour: 20, time: '20:00', score: 85, confidence: 82, sessionsCount: 8, title: 'Jeudi Soirée', description: 'Bon taux de réponse avant le week-end' },
+          { id: '3', day: 0, dayName: 'Dimanche', hour: 14, time: '14:00', score: 75, confidence: 70, sessionsCount: 5, title: 'Dimanche Après-midi', description: 'Idéal pour les sessions longues' }
+         ]);
+      } else {
+        // REAL LOGIC: Fetch all sessions and calculate stats
+        const { sessions } = await sessionsAPI.getSessions(data?.squadId);
+        
+        // 1. Group sessions by slot (Day + Hour)
+        const slotStats: Record<string, { count: number, confirmed: number, day: number, hour: number }> = {};
+        
+        sessions.forEach((session: any) => {
+           // Only consider past or confirmed sessions
+           if (session.status !== 'confirmed') return;
+           
+           // Find the confirmed slot
+           const confirmedSlot = session.slots.find((s: any) => s.id === session.selectedSlotId);
+           if (!confirmedSlot) return;
+           
+           const date = new Date(`${confirmedSlot.date}T${confirmedSlot.time}:00`);
+           const day = date.getDay(); // 0-6
+           const hour = date.getHours(); // 0-23
+           const key = `${day}-${hour}`;
+           
+           if (!slotStats[key]) {
+             slotStats[key] = { count: 0, confirmed: 0, day, hour };
+           }
+           
+           slotStats[key].count++;
+           // Count confirmed players (responses 'yes')
+           const yesCount = confirmedSlot.responses?.filter((r: any) => r.response === 'yes').length || 0;
+           // If participation > 50%, consider it a "good" session
+           if (yesCount >= (session.playersNeeded || 5) * 0.5) {
+             slotStats[key].confirmed++;
+           }
+        });
+
+        // 2. Score slots and sort
+        const calculatedSuggestions = Object.values(slotStats)
+          .map(stat => {
+            const score = (stat.confirmed / stat.count) * 100; // Success rate
+            const confidence = Math.min(stat.count * 10, 100); // More sessions = higher confidence
+            
+            // Format Day Name
+            const dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+            
+            return {
+              id: `${stat.day}-${stat.hour}`,
+              day: stat.day,
+              dayName: dayNames[stat.day],
+              hour: stat.hour,
+              time: `${String(stat.hour).padStart(2, '0')}:00`,
+              score,
+              confidence,
+              sessionsCount: stat.count,
+              title: `${dayNames[stat.day]} ${stat.hour}h`,
+              description: `${stat.confirmed} sessions réussies sur ${stat.count} essais`
+            };
+          })
+          .filter(s => s.sessionsCount >= 1) // Only keep slots with at least 1 session
+          .sort((a, b) => (b.score * b.confidence) - (a.score * a.confidence)) // Sort by weighted score
+          .slice(0, 3); // Top 3
+          
+        setSuggestions(calculatedSuggestions);
+      }
     } catch (error: any) {
       console.error('Load suggestions error:', error);
-      showToast(error.message || 'Erreur lors du chargement des suggestions', 'error');
+      showToast(error.message || 'Erreur d\'analyse', 'error');
     } finally {
       setLoading(false);
     }
@@ -168,7 +239,7 @@ export function SmartSuggestionsScreen({ onNavigate, showToast, data }: SmartSug
 
                   {/* CTA */}
                   <Button
-                    variant="primary"
+                    variant="default"
                     onClick={() => handleSelectSuggestion(suggestion)}
                     className="w-full h-11 text-sm font-semibold bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] hover:from-[var(--primary-600)] hover:to-[var(--primary-700)] text-white rounded-xl shadow-lg shadow-[var(--primary-500)]/20 transition-all duration-200"
                   >
@@ -184,3 +255,5 @@ export function SmartSuggestionsScreen({ onNavigate, showToast, data }: SmartSug
     </div>
   );
 }
+
+export default SmartSuggestionsScreen;

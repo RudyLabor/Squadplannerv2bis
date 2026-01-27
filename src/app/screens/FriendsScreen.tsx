@@ -297,3 +297,4 @@ export function FriendsScreen({ onNavigate, showToast }: FriendsScreenProps) {
     </div>
   );
 }
+export default FriendsScreen;

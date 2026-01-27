@@ -286,3 +286,4 @@ export function VoteSessionScreen({ onNavigate, showToast }: VoteSessionScreenPr
     </div>
   );
 }
+export default VoteSessionScreen;

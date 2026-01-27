@@ -262,3 +262,5 @@ export function ApiDocsScreen({ onNavigate, showToast }: ApiDocsScreenProps) {
     </div>
   );
 }
+
+export default ApiDocsScreen;

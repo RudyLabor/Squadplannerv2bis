@@ -308,3 +308,4 @@ export function ChallengesScreen({ onNavigate, showToast }: ChallengesScreenProp
     </div>
   );
 }
+export default ChallengesScreen;

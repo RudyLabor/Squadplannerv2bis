@@ -393,3 +393,4 @@ export function WeeklyRecapScreen({ onNavigate, showToast }: WeeklyRecapScreenPr
     </div>
   );
 }
+export default WeeklyRecapScreen;

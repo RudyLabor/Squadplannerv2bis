@@ -318,3 +318,4 @@ export function TournamentsScreen({ onNavigate, showToast }: TournamentsScreenPr
     </div>
   );
 }
+export default TournamentsScreen;

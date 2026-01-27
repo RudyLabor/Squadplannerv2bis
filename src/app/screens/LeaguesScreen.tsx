@@ -60,3 +60,5 @@ export function LeaguesScreen({ onNavigate, showToast }: LeaguesScreenProps) {
     </div>
   );
 }
+
+export default LeaguesScreen;

@@ -264,3 +264,5 @@ export function EsportIntegrationsScreen({ onNavigate, showToast }: EsportIntegr
     </div>
   );
 }
+
+export default EsportIntegrationsScreen;

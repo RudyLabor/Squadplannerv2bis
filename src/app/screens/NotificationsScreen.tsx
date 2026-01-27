@@ -200,3 +200,5 @@ export function NotificationsScreen({ onNavigate, showToast }: NotificationsScre
     </div>
   );
 }
+
+export default NotificationsScreen;

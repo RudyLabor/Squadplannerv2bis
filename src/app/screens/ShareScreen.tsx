@@ -217,3 +217,4 @@ export function ShareScreen({ onNavigate, showToast }: ShareScreenProps) {
     </div>
   );
 }
+export default ShareScreen;

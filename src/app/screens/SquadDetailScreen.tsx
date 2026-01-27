@@ -1,37 +1,49 @@
-import { ArrowLeft, Plus, Users, Calendar, Clock, CheckCircle2, XCircle, TrendingUp, History, Sparkles, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Plus, Users, Calendar, Clock, CheckCircle2, XCircle, Sparkles, MessageCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
 import { Button } from '@/app/components/ui/Button';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 import { useTranslation } from '@/i18n/useTranslation';
-import { ReliabilityBadge } from '@/app/components/ReliabilityBadge';
-import { usePerformanceMonitor } from '@/app/hooks/usePerformanceMonitor';
-import { squadsAPI, sessionsAPI, intelligenceAPI } from '@/utils/api';
-import { AnimatedCard, AnimatedList, AnimatedListItem, AnimatedSection, ParallaxSection } from '@/app/components/animations';
-import { staggerContainer, easings } from '@/utils/motion-variants';
-import { GoogleCalendarSyncButton } from '@/app/components/GoogleCalendarSyncButton';
+import { squadsAPI } from '@/utils/api';
+import { AnimatedCard } from '@/app/components/animations';
 
 interface SquadDetailScreenProps {
   onNavigate?: (screen: string) => void;
   showToast?: (message: string, type?: 'success' | 'error' | 'info') => void;
+  data?: any;
 }
 
-export function SquadDetailScreen({ onNavigate, showToast }: SquadDetailScreenProps) {
+export function SquadDetailScreen({ onNavigate, showToast, data }: SquadDetailScreenProps) {
   const { t } = useTranslation();
   
   // Mock data for demo
-  const squad = {
-    id: '1',
-    name: 'Les Legends',
-    game: 'Apex Legends',
-    memberCount: 5,
-    nextSession: {
-      date: '2026-01-28',
-      time: '20:00',
-      confirmed: 4,
-      total: 5
-    }
-  };
+  // State for squad data
+  const [squad, setSquad] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Load squad data
+  // Load squad data
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const response = await squadsAPI.getSquads(); // Assuming we want the first squad or list
+        // For Detail Screen usually we need an ID from nav params, but here we fallback to first squad
+        if (response.squads && response.squads.length > 0) {
+           setSquad(response.squads[0]);
+        }
+      } catch (e: any) {
+        console.error(e);
+        showToast?.('Erreur de chargement: ' + e.message, 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  if (loading || !squad) {
+    return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-[#F5F3F0] pb-20">
@@ -121,12 +133,39 @@ export function SquadDetailScreen({ onNavigate, showToast }: SquadDetailScreenPr
             <h3 className="text-lg font-semibold text-[rgba(28,25,23,0.95)] mb-4">
               {t('squad.members')}
             </h3>
-            <div className="text-[rgba(28,25,23,0.6)]">
-              {squad.memberCount} membres
+            <div className="space-y-4">
+              {squad.members.map((member: any) => (
+                <div key={member.id} className="flex items-center justify-between p-2 rounded-xl hover:bg-[rgba(120,113,108,0.05)] transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <ImageWithFallback src={member.avatar} alt={member.name} className="w-10 h-10 rounded-full" />
+                      {member.online && (
+                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#10B981] border-2 border-[#FDFCFB] rounded-full"></div>
+                      )}
+                    </div>
+                    <div>
+                      <div className="font-semibold text-[rgba(28,25,23,0.95)] flex items-center gap-2">
+                        {member.name}
+                        {member.reliability >= 95 && <Sparkles className="w-3 h-3 text-[#F59E0B]" />}
+                      </div>
+                      <div className="text-xs text-[rgba(28,25,23,0.6)]">
+                         Fiabilité: {member.reliability}%
+                      </div>
+                    </div>
+                  </div>
+                  {member.online && (
+                    <span className="text-xs font-medium text-[#10B981] bg-[#ECFDF5] px-2 py-1 rounded-full">
+                      En ligne
+                    </span>
+                  )}
+                </div>
+              ))}
             </div>
           </AnimatedCard>
+
         </div>
       </div>
     </div>
   );
 }
+export default SquadDetailScreen;

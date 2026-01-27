@@ -274,3 +274,4 @@ export function PremiumScreen({ onNavigate, showToast }: PremiumScreenProps) {
     </div>
   );
 }
+export default PremiumScreen;

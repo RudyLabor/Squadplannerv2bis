@@ -44,7 +44,7 @@ export function SquadsScreen({ onNavigate, useMockData = false }: SquadsScreenPr
   const loadSquads = async () => {
     setIsLoading(true);
     try {
-      const { squads: userSquads } = await squadsAPI.getAll();
+      const { squads: userSquads } = await squadsAPI.getSquads();
       console.log('✅ Squads loaded:', userSquads?.length || 0);
       setSquads(userSquads || []);
     } catch (error: any) {
@@ -94,7 +94,7 @@ export function SquadsScreen({ onNavigate, useMockData = false }: SquadsScreenPr
             />
           </div>
           <Button
-            variant="primary"
+            variant="default"
             onClick={() => onNavigate('create-squad')}
             className="h-12 px-5 bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] hover:from-[var(--primary-600)] hover:to-[var(--primary-700)] text-white rounded-2xl shadow-lg shadow-[var(--primary-500)]/20"
           >
@@ -214,3 +214,4 @@ export function SquadsScreen({ onNavigate, useMockData = false }: SquadsScreenPr
     </div>
   );
 }
+export default SquadsScreen;

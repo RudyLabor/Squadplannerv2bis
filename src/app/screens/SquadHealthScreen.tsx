@@ -222,3 +222,4 @@ export function SquadHealthScreen({ onNavigate, showToast, squadId }: SquadHealt
     </div>
   );
 }
+export default SquadHealthScreen;

@@ -169,3 +169,4 @@ export function PrivacyScreen({ onNavigate, showToast }: PrivacyScreenProps) {
     </div>
   );
 }
+export default PrivacyScreen;

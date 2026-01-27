@@ -234,3 +234,4 @@ export function SearchPlayersScreen({ onNavigate, showToast }: SearchPlayersScre
     </div>
   );
 }
+export default SearchPlayersScreen;

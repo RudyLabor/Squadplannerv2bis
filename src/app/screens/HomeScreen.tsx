@@ -1,25 +1,54 @@
-import { Plus, Calendar, Users, TrendingUp, Clock, ArrowRight, Sparkles, Brain, BarChart3, Repeat, HeartPulse, Trophy, Target, UsersRound, Swords, RotateCcw, Activity } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useState, useEffect } from 'react';
-import { Card } from '@/app/components/ui/Card';
-import { Button } from '@/app/components/ui/Button';
-import { SwipeableRSVP } from '@/app/components/ui/SwipeableRSVP';
-import { Celebration } from '@/app/components/ui/Celebration';
-import { AnimatedNumber } from '@/app/components/ui/AnimatedNumber';
-import { useTranslation } from '@/i18n/useTranslation';
-import { useHaptic } from '@/app/hooks/useHaptic';
-import { useSoundEffects } from '@/app/hooks/useSoundEffects';
-import { games } from '@/data/games';
-import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
-import { usePerformanceMonitor } from '@/app/hooks/usePerformanceMonitor';
-import { sessionsAPI, squadsAPI } from '@/utils/api';
-import { useAuth } from '@/app/contexts/AuthContext';
-import { AnimatedCard, AnimatedCardSimple, AnimatedList, AnimatedListItem, AnimatedSection, ParallaxSection } from '@/app/components/animations';
-import { staggerContainer, staggerItem, easings } from '@/utils/motion-variants';
+import {
+  Plus,
+  Calendar,
+  Users,
+  TrendingUp,
+  Clock,
+  ArrowRight,
+  Sparkles,
+  Brain,
+  BarChart3,
+  Repeat,
+  HeartPulse,
+  Trophy,
+  Target,
+  UsersRound,
+  Swords,
+  RotateCcw,
+  Activity,
+} from "lucide-react";
+import { motion } from "motion/react";
+import { useState, useEffect } from "react";
+import { Card } from "@/app/components/ui/Card";
+import { Button } from "@/app/components/ui/Button";
+import { SwipeableRSVP } from "@/app/components/ui/SwipeableRSVP";
+import { Celebration } from "@/app/components/ui/Celebration";
+import { AnimatedNumber } from "@/app/components/ui/AnimatedNumber";
+import { useTranslation } from "@/i18n/useTranslation";
+import { useHaptic } from "@/app/hooks/useHaptic";
+import { useSoundEffects } from "@/app/hooks/useSoundEffects";
+import { games } from "@/data/games";
+import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
+import { usePerformanceMonitor } from "@/app/hooks/usePerformanceMonitor";
+import { sessionsAPI, squadsAPI } from "@/utils/api";
+import { useAuth } from "@/app/contexts/AuthContext";
+import {
+  AnimatedCard,
+  AnimatedCardSimple,
+  AnimatedList,
+  AnimatedListItem,
+  AnimatedSection,
+  ParallaxSection,
+} from "@/app/components/animations";
+import {
+  staggerContainer,
+  staggerItem,
+  easings,
+} from "@/utils/motion-variants";
 
 interface HomeScreenProps {
   onNavigate: (screen: string, data?: any) => void;
-  showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
+  showToast: (message: string, type?: "success" | "error" | "info") => void;
 }
 
 export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
@@ -32,10 +61,12 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
   const [showWelcomeBanner, setShowWelcomeBanner] = useState(true);
   const [nextSession, setNextSession] = useState<any>(null);
   const [squads, setSquads] = useState<any[]>([]);
+  const [sessionsCount, setSessionsCount] = useState(0);
+  const [userReliability, setUserReliability] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   // 🔍 Performance Monitoring
-  usePerformanceMonitor('HomeScreen');
+  usePerformanceMonitor("HomeScreen");
 
   // Load data from backend - ONLY IF AUTHENTICATED
   useEffect(() => {
@@ -50,51 +81,74 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
   const loadHomeData = async () => {
     setIsLoading(true);
     try {
-      const [sessionsResponse, squadsResponse] = await Promise.all([
-        sessionsAPI.getAll().catch(err => {
-          // Silent fail for auth errors - user might not be logged in yet
-          if (err.message?.includes('401') || err.message?.includes('Unauthorized') || err.message?.includes('Invalid JWT')) {
-            console.log('⚠️ Not authenticated yet, skipping sessions load');
-            return { sessions: [] };
+      const { authAPI } = await import('@/utils/api');
+
+      const [sessionsResponse, squadsResponse, profileResponse] = await Promise.all([
+        sessionsAPI.getSessions().catch((err) => {
+          if (
+            err.message?.includes("401") ||
+            err.message?.includes("Unauthorized") ||
+            err.message?.includes("Invalid JWT")
+          ) {
+             return { sessions: [] };
           }
           throw err;
         }),
-        squadsAPI.getAll().catch(err => {
-          // Silent fail for auth errors - user might not be logged in yet
-          if (err.message?.includes('401') || err.message?.includes('Unauthorized') || err.message?.includes('Invalid JWT')) {
-            console.log('⚠️ Not authenticated yet, skipping squads load');
+        squadsAPI.getSquads().catch((err) => {
+          if (
+            err.message?.includes("401") ||
+            err.message?.includes("Unauthorized") ||
+            err.message?.includes("Invalid JWT")
+          ) {
             return { squads: [] };
           }
           throw err;
         }),
+        authAPI.getProfile().catch((err) => {
+           console.log('⚠️ Error fetching profile', err);
+           return { user: { reliabilityScore: 0 }};
+        })
       ]);
 
       // Get the next upcoming session
-      const upcoming = sessionsResponse.sessions?.find((s: any) => new Date(s.date) > new Date());
+      const upcoming = sessionsResponse.sessions?.find(
+        (s: any) => new Date(s.date) > new Date(),
+      );
       setNextSession(upcoming);
-      
+
       setSquads(squadsResponse.squads || []);
+      setSessionsCount(sessionsResponse.sessions?.length || 0);
+
+      // Defensively check for profile structure
+      const user = profileResponse.user || profileResponse;
+      const reliability = user?.reliabilityScore || 0;
+      setUserReliability(reliability);
     } catch (error: any) {
       // Log detailed error but don't show it to user for empty states
-      console.log('Chargement des données:', error.message || 'Aucune donnée disponible');
+      console.log(
+        "Chargement des données:",
+        error.message || "Aucune donnée disponible",
+      );
       // Set empty arrays for new users
       setSquads([]);
       setNextSession(null);
+      setSessionsCount(0);
+      setUserReliability(0);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleRSVP = async (response: 'yes' | 'no' | 'maybe') => {
-    notification('success');
-    play('success');
-    
+  const handleRSVP = async (response: "yes" | "no" | "maybe") => {
+    notification("success");
+    play("success");
+
     const messages = {
-      yes: 'Tu es partant ! 🎮',
-      no: 'Réponse enregistrée',
-      maybe: 'Peut-être noté 👍'
+      yes: "Tu es partant ! 🎮",
+      no: "Réponse enregistrée",
+      maybe: "Peut-être noté 👍",
     };
-    
+
     setRsvpResponse(response);
 
     if (!nextSession) return;
@@ -102,15 +156,15 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
     try {
       // Call API to save RSVP
       await sessionsAPI.rsvp(nextSession.id, nextSession.slotId, response);
-      
-      if (response === 'yes') {
+
+      if (response === "yes") {
         setShowCelebration(true);
       } else {
-        showToast(messages[response], 'success');
+        showToast(messages[response], "success");
       }
     } catch (error: any) {
-      console.error('RSVP error:', error);
-      showToast(error.message || 'Erreur lors de la réponse', 'error');
+      console.error("RSVP error:", error);
+      showToast(error.message || "Erreur lors de la réponse", "error");
       setRsvpResponse(null); // Reset on error
     }
   };
@@ -118,7 +172,6 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
   return (
     <div className="min-h-screen pb-24 pt-safe relative">
       <div className="px-4 py-8 max-w-2xl mx-auto">
-        
         {/* ✨ Header ultra-raffiné avec Parallax */}
         <ParallaxSection speed={0.2} enableFade={false} className="mb-10">
           <motion.div
@@ -127,73 +180,100 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
             transition={{ duration: 0.6, ease: easings.apple }}
           >
             <h1 className="text-4xl font-semibold text-[var(--fg-primary)] mb-2 tracking-tight">
-              {t('home.hero.title')}
+              {t("home.hero.title")}
             </h1>
             <p className="text-base text-[var(--fg-tertiary)] font-normal max-w-md">
-              {t('home.hero.subtitle')}
+              {t("home.hero.subtitle")}
             </p>
           </motion.div>
         </ParallaxSection>
 
         {/* ✨ Stats premium avec Stagger orchestré */}
-        <motion.div 
+        <motion.div
           className="grid grid-cols-3 gap-3 mb-10"
           variants={staggerContainer}
           initial="hidden"
           animate="visible"
         >
           <AnimatedCardSimple delay={100} direction="up" threshold={0.1}>
-            <motion.div 
+            <motion.div
               className="bg-white rounded-2xl p-5 border-[0.5px] border-[var(--border-subtle)] shadow-sm hover:shadow-xl transition-shadow duration-300"
-              whileHover={{ 
-                boxShadow: '0 20px 40px rgba(0,0,0,0.08)',
-                transition: { duration: 0.2 } 
+              whileHover={{
+                boxShadow: "0 20px 40px rgba(0,0,0,0.08)",
+                transition: { duration: 0.2 },
               }}
             >
-              <Calendar className="w-5 h-5 text-[var(--fg-tertiary)] mb-3" strokeWidth={1.5} />
+              <Calendar
+                className="w-5 h-5 text-[var(--fg-tertiary)] mb-3"
+                strokeWidth={1.5}
+              />
               <div className="text-3xl font-semibold text-[var(--fg-primary)] mb-1 tracking-tight">
-                <AnimatedNumber value={247} duration={1.8} />
+                {/* Real Data: Count of sessions */}
+                <AnimatedNumber value={sessionsCount} duration={1.8} />
               </div>
-              <div className="text-xs text-[var(--fg-tertiary)] font-medium">Sessions</div>
+              <div className="text-xs text-[var(--fg-tertiary)] font-medium">
+                Sessions
+              </div>
             </motion.div>
           </AnimatedCardSimple>
 
           <AnimatedCardSimple delay={150} direction="up" threshold={0.1}>
-            <motion.div 
+            <motion.div
               className="bg-white rounded-2xl p-5 border-[0.5px] border-[var(--border-subtle)] shadow-sm hover:shadow-xl transition-shadow duration-300"
-              whileHover={{ 
-                boxShadow: '0 20px 40px rgba(0,0,0,0.08)',
-                transition: { duration: 0.2 } 
+              whileHover={{
+                boxShadow: "0 20px 40px rgba(0,0,0,0.08)",
+                transition: { duration: 0.2 },
               }}
             >
-              <Users className="w-5 h-5 text-[var(--fg-tertiary)] mb-3" strokeWidth={1.5} />
+              <Users
+                className="w-5 h-5 text-[var(--fg-tertiary)] mb-3"
+                strokeWidth={1.5}
+              />
               <div className="text-3xl font-semibold text-[var(--fg-primary)] mb-1 tracking-tight">
-                <AnimatedNumber value={1800} suffix="K" duration={2} />
+                {/* Real Data: Count of squads */}
+                <AnimatedNumber value={squads.length} duration={2} />
               </div>
-              <div className="text-xs text-[var(--fg-tertiary)] font-medium">Joueurs</div>
+              <div className="text-xs text-[var(--fg-tertiary)] font-medium">
+                Squads
+              </div>
             </motion.div>
           </AnimatedCardSimple>
 
           <AnimatedCardSimple delay={200} direction="up" threshold={0.1}>
-            <motion.div 
+            <motion.div
               className="bg-white rounded-2xl p-5 border-[0.5px] border-[var(--border-subtle)] shadow-sm hover:shadow-xl transition-shadow duration-300"
-              whileHover={{ 
-                boxShadow: '0 20px 40px rgba(0,0,0,0.08)',
-                transition: { duration: 0.2 } 
+              whileHover={{
+                boxShadow: "0 20px 40px rgba(0,0,0,0.08)",
+                transition: { duration: 0.2 },
               }}
             >
-              <TrendingUp className="w-5 h-5 text-[var(--primary-500)] mb-3" strokeWidth={1.5} />
+              <TrendingUp
+                className="w-5 h-5 text-[var(--primary-500)] mb-3"
+                strokeWidth={1.5}
+              />
               <div className="text-3xl font-semibold text-[var(--fg-primary)] mb-1 tracking-tight">
-                <AnimatedNumber value={89} suffix="%" duration={2.2} />
+                {/* Real Data: Reliability Score */}
+                <AnimatedNumber
+                  value={userReliability}
+                  suffix="%"
+                  duration={2.2}
+                />
               </div>
-              <div className="text-xs text-[var(--fg-tertiary)] font-medium">Fiabilité</div>
+              <div className="text-xs text-[var(--fg-tertiary)] font-medium">
+                Fiabilité
+              </div>
             </motion.div>
           </AnimatedCardSimple>
         </motion.div>
 
         {/* ✨ Next Session avec animation premium */}
         {nextSession && (
-          <AnimatedCard delay={250} direction="up" threshold={0.1} className="mb-10">
+          <AnimatedCard
+            delay={250}
+            direction="up"
+            threshold={0.1}
+            className="mb-10"
+          >
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-[var(--fg-primary)] tracking-tight">
@@ -204,22 +284,25 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
                 </span>
               </div>
 
-              <SwipeableRSVP onResponse={handleRSVP} disabled={rsvpResponse !== null}>
+              <SwipeableRSVP
+                onResponse={handleRSVP}
+                disabled={rsvpResponse !== null}
+              >
                 <motion.div
                   className="bg-white rounded-2xl overflow-hidden border-[0.5px] border-[var(--border-subtle)] shadow-lg"
-                  whileHover={{ 
-                    boxShadow: '0 25px 50px rgba(0,0,0,0.12)',
-                    transition: { duration: 0.3 } 
+                  whileHover={{
+                    boxShadow: "0 25px 50px rgba(0,0,0,0.12)",
+                    transition: { duration: 0.3 },
                   }}
                 >
                   <div className="relative h-40">
-                    <ImageWithFallback 
+                    <ImageWithFallback
                       src={nextSession.gameImage}
                       alt={nextSession.game}
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-                    
+
                     <div className="absolute bottom-5 left-5 right-5">
                       <div className="flex items-center justify-between">
                         <div>
@@ -231,7 +314,10 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
                           </div>
                         </div>
                         <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/20 backdrop-blur-xl border border-white/30">
-                          <Users className="w-4 h-4 text-white" strokeWidth={2} />
+                          <Users
+                            className="w-4 h-4 text-white"
+                            strokeWidth={2}
+                          />
                           <span className="text-sm font-semibold text-white">
                             {nextSession.confirmed}/{nextSession.total}
                           </span>
@@ -256,7 +342,7 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
         )}
 
         {/* ✨ Quick Actions avec stagger */}
-        <motion.div 
+        <motion.div
           className="grid grid-cols-2 gap-3 mb-10"
           variants={staggerContainer}
           initial="hidden"
@@ -264,8 +350,8 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
         >
           <AnimatedCardSimple delay={300} direction="up" threshold={0.1}>
             <Button
-              variant="primary"
-              onClick={() => onNavigate('create-squad')}
+              variant="default"
+              onClick={() => onNavigate("create-squad")}
               className="h-14 w-full text-sm font-semibold bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] hover:from-[var(--primary-600)] hover:to-[var(--primary-700)] text-white rounded-2xl shadow-lg shadow-[var(--primary-500)]/20 hover:shadow-2xl hover:shadow-[var(--primary-500)]/40 transition-all duration-300"
             >
               <Plus className="w-5 h-5" strokeWidth={2} />
@@ -276,7 +362,7 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
           <AnimatedCardSimple delay={350} direction="up" threshold={0.1}>
             <Button
               variant="ghost"
-              onClick={() => onNavigate('join-squad')}
+              onClick={() => onNavigate("join-squad")}
               className="h-14 w-full text-sm font-semibold bg-white border-[0.5px] border-[var(--border-medium)] hover:border-[var(--border-strong)] rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300"
             >
               <Users className="w-5 h-5" strokeWidth={2} />
@@ -285,10 +371,15 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
           </AnimatedCardSimple>
         </motion.div>
 
-        <AnimatedCardSimple delay={400} direction="up" threshold={0.1} className="mb-10">
+        <AnimatedCardSimple
+          delay={400}
+          direction="up"
+          threshold={0.1}
+          className="mb-10"
+        >
           <Button
             variant="ghost"
-            onClick={() => onNavigate('propose-session')}
+            onClick={() => onNavigate("propose-session")}
             className="h-14 w-full text-sm font-semibold bg-white border-[0.5px] border-[var(--border-medium)] hover:border-[var(--border-strong)] rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300"
           >
             <Clock className="w-5 h-5" strokeWidth={2} />
@@ -298,7 +389,7 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
 
         {/* ✨ Intelligence & Outils avec animations orchestrées */}
         <div className="mb-10">
-          <motion.h2 
+          <motion.h2
             className="text-lg font-semibold text-[var(--fg-primary)] tracking-tight mb-4"
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -307,8 +398,8 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
           >
             Intelligence & Outils
           </motion.h2>
-          
-          <motion.div 
+
+          <motion.div
             className="grid grid-cols-2 gap-3 mb-3"
             variants={staggerContainer}
             initial="hidden"
@@ -317,10 +408,10 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
           >
             <AnimatedCard delay={450} direction="up" threshold={0.1}>
               <motion.button
-                onClick={() => onNavigate('intelligence')}
+                onClick={() => onNavigate("intelligence")}
                 className="w-full bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-5 text-white shadow-md hover:shadow-2xl transition-all text-left"
-                whileHover={{ 
-                  boxShadow: '0 25px 50px rgba(139, 92, 246, 0.3)',
+                whileHover={{
+                  boxShadow: "0 25px 50px rgba(139, 92, 246, 0.3)",
                 }}
               >
                 <TrendingUp className="w-6 h-6 mb-3" strokeWidth={2} />
@@ -331,10 +422,10 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
 
             <AnimatedCard delay={500} direction="up" threshold={0.1}>
               <motion.button
-                onClick={() => onNavigate('weekly-recap')}
+                onClick={() => onNavigate("weekly-recap")}
                 className="w-full bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] rounded-2xl p-5 text-white shadow-md hover:shadow-2xl transition-all text-left"
-                whileHover={{ 
-                  boxShadow: '0 25px 50px rgba(251, 191, 36, 0.3)',
+                whileHover={{
+                  boxShadow: "0 25px 50px rgba(251, 191, 36, 0.3)",
                 }}
               >
                 <Calendar className="w-6 h-6 mb-3" strokeWidth={2} />
@@ -344,7 +435,7 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
             </AnimatedCard>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             className="grid grid-cols-2 gap-3"
             variants={staggerContainer}
             initial="hidden"
@@ -353,23 +444,37 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
           >
             <AnimatedCardSimple delay={550} direction="up" threshold={0.1}>
               <button
-                onClick={() => onNavigate('recurring-session')}
+                onClick={() => onNavigate("recurring-session")}
                 className="w-full bg-white rounded-2xl p-4 border-[0.5px] border-[var(--border-subtle)] shadow-sm hover:shadow-lg transition-all text-left"
               >
-                <RotateCcw className="w-5 h-5 text-[var(--primary-500)] mb-2" strokeWidth={2} />
-                <div className="text-sm font-bold text-[var(--fg-primary)] mb-0.5">Rituels</div>
-                <div className="text-xs text-[var(--fg-tertiary)]">Sessions auto</div>
+                <RotateCcw
+                  className="w-5 h-5 text-[var(--primary-500)] mb-2"
+                  strokeWidth={2}
+                />
+                <div className="text-sm font-bold text-[var(--fg-primary)] mb-0.5">
+                  Rituels
+                </div>
+                <div className="text-xs text-[var(--fg-tertiary)]">
+                  Sessions auto
+                </div>
               </button>
             </AnimatedCardSimple>
 
             <AnimatedCardSimple delay={600} direction="up" threshold={0.1}>
               <button
-                onClick={() => onNavigate('squad-health')}
+                onClick={() => onNavigate("squad-health")}
                 className="w-full bg-white rounded-2xl p-4 border-[0.5px] border-[var(--border-subtle)] shadow-sm hover:shadow-lg transition-all text-left"
               >
-                <Activity className="w-5 h-5 text-[var(--secondary-500)] mb-2" strokeWidth={2} />
-                <div className="text-sm font-bold text-[var(--fg-primary)] mb-0.5">Cohésion</div>
-                <div className="text-xs text-[var(--fg-tertiary)]">Santé squad</div>
+                <Activity
+                  className="w-5 h-5 text-[var(--secondary-500)] mb-2"
+                  strokeWidth={2}
+                />
+                <div className="text-sm font-bold text-[var(--fg-primary)] mb-0.5">
+                  Cohésion
+                </div>
+                <div className="text-xs text-[var(--fg-tertiary)]">
+                  Santé squad
+                </div>
               </button>
             </AnimatedCardSimple>
           </motion.div>
@@ -377,7 +482,7 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
 
         {/* ✨ Social & Compétition */}
         <div className="mb-10">
-          <motion.h2 
+          <motion.h2
             className="text-lg font-semibold text-[var(--fg-primary)] tracking-tight mb-4"
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -386,8 +491,8 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
           >
             Social & Compétition
           </motion.h2>
-          
-          <motion.div 
+
+          <motion.div
             className="grid grid-cols-2 gap-3 mb-3"
             variants={staggerContainer}
             initial="hidden"
@@ -396,10 +501,10 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
           >
             <AnimatedCard delay={650} direction="up" threshold={0.1}>
               <motion.button
-                onClick={() => onNavigate('leaderboard')}
+                onClick={() => onNavigate("leaderboard")}
                 className="w-full bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] rounded-2xl p-5 text-white shadow-md hover:shadow-2xl transition-all text-left"
-                whileHover={{ 
-                  boxShadow: '0 25px 50px rgba(251, 191, 36, 0.3)',
+                whileHover={{
+                  boxShadow: "0 25px 50px rgba(251, 191, 36, 0.3)",
                 }}
               >
                 <Trophy className="w-6 h-6 mb-3" strokeWidth={2} />
@@ -410,10 +515,10 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
 
             <AnimatedCard delay={700} direction="up" threshold={0.1}>
               <motion.button
-                onClick={() => onNavigate('tournaments')}
+                onClick={() => onNavigate("tournaments")}
                 className="w-full bg-gradient-to-br from-[var(--secondary-500)] to-[var(--secondary-600)] rounded-2xl p-5 text-white shadow-md hover:shadow-2xl transition-all text-left"
-                whileHover={{ 
-                  boxShadow: '0 25px 50px rgba(20, 184, 166, 0.3)',
+                whileHover={{
+                  boxShadow: "0 25px 50px rgba(20, 184, 166, 0.3)",
                 }}
               >
                 <Swords className="w-6 h-6 mb-3" strokeWidth={2} />
@@ -423,7 +528,7 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
             </AnimatedCard>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             className="grid grid-cols-2 gap-3"
             variants={staggerContainer}
             initial="hidden"
@@ -432,23 +537,37 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
           >
             <AnimatedCardSimple delay={750} direction="up" threshold={0.1}>
               <button
-                onClick={() => onNavigate('challenges')}
+                onClick={() => onNavigate("challenges")}
                 className="w-full bg-white rounded-2xl p-4 border-[0.5px] border-[var(--border-subtle)] shadow-sm hover:shadow-lg transition-all text-left"
               >
-                <Target className="w-5 h-5 text-[var(--primary-500)] mb-2" strokeWidth={2} />
-                <div className="text-sm font-bold text-[var(--fg-primary)] mb-0.5">Défis</div>
-                <div className="text-xs text-[var(--fg-tertiary)]">Hebdomadaires</div>
+                <Target
+                  className="w-5 h-5 text-[var(--primary-500)] mb-2"
+                  strokeWidth={2}
+                />
+                <div className="text-sm font-bold text-[var(--fg-primary)] mb-0.5">
+                  Défis
+                </div>
+                <div className="text-xs text-[var(--fg-tertiary)]">
+                  Hebdomadaires
+                </div>
               </button>
             </AnimatedCardSimple>
 
             <AnimatedCardSimple delay={800} direction="up" threshold={0.1}>
               <button
-                onClick={() => onNavigate('discover-squads')}
+                onClick={() => onNavigate("discover-squads")}
                 className="w-full bg-white rounded-2xl p-4 border-[0.5px] border-[var(--border-subtle)] shadow-sm hover:shadow-lg transition-all text-left"
               >
-                <UsersRound className="w-5 h-5 text-[var(--secondary-500)] mb-2" strokeWidth={2} />
-                <div className="text-sm font-bold text-[var(--fg-primary)] mb-0.5">Découvrir</div>
-                <div className="text-xs text-[var(--fg-tertiary)]">Squads publiques</div>
+                <UsersRound
+                  className="w-5 h-5 text-[var(--secondary-500)] mb-2"
+                  strokeWidth={2}
+                />
+                <div className="text-sm font-bold text-[var(--fg-primary)] mb-0.5">
+                  Découvrir
+                </div>
+                <div className="text-xs text-[var(--fg-tertiary)]">
+                  Squads publiques
+                </div>
               </button>
             </AnimatedCardSimple>
           </motion.div>
@@ -456,7 +575,7 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
 
         {/* ✨ Communauté & B2B */}
         <div className="mt-8">
-          <motion.h2 
+          <motion.h2
             className="text-lg font-semibold text-[var(--fg-primary)] tracking-tight mb-4"
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -465,8 +584,8 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
           >
             Communauté & B2B
           </motion.h2>
-          
-          <motion.div 
+
+          <motion.div
             className="grid grid-cols-2 gap-3"
             variants={staggerContainer}
             initial="hidden"
@@ -475,7 +594,7 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
           >
             <AnimatedCardSimple delay={850} direction="up" threshold={0.1}>
               <button
-                onClick={() => onNavigate('community')}
+                onClick={() => onNavigate("community")}
                 className="w-full bg-white rounded-2xl p-4 border-[0.5px] border-[var(--border-subtle)] shadow-sm hover:shadow-lg transition-all text-left"
               >
                 <div className="text-2xl mb-2">🌍</div>
@@ -490,7 +609,7 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
 
             <AnimatedCardSimple delay={900} direction="up" threshold={0.1}>
               <button
-                onClick={() => onNavigate('leagues')}
+                onClick={() => onNavigate("leagues")}
                 className="w-full bg-white rounded-2xl p-4 border-[0.5px] border-[var(--border-subtle)] shadow-sm hover:shadow-lg transition-all text-left"
               >
                 <div className="text-2xl mb-2">🏆</div>
@@ -505,7 +624,7 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
 
             <AnimatedCardSimple delay={950} direction="up" threshold={0.1}>
               <button
-                onClick={() => onNavigate('seasons')}
+                onClick={() => onNavigate("seasons")}
                 className="w-full bg-white rounded-2xl p-4 border-[0.5px] border-[var(--border-subtle)] shadow-sm hover:shadow-lg transition-all text-left"
               >
                 <div className="text-2xl mb-2">📅</div>
@@ -520,19 +639,15 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
 
             <AnimatedCard delay={1000} direction="up" threshold={0.1}>
               <motion.button
-                onClick={() => onNavigate('organization')}
+                onClick={() => onNavigate("organization")}
                 className="w-full bg-gradient-to-br from-[var(--error-500)] to-[var(--warning-500)] rounded-2xl p-4 text-white shadow-md hover:shadow-2xl transition-all text-left"
-                whileHover={{ 
-                  boxShadow: '0 25px 50px rgba(239, 68, 68, 0.3)',
+                whileHover={{
+                  boxShadow: "0 25px 50px rgba(239, 68, 68, 0.3)",
                 }}
               >
                 <div className="text-2xl mb-2">🏢</div>
-                <div className="text-sm font-semibold mb-1">
-                  Mode B2B
-                </div>
-                <div className="text-xs text-white/80">
-                  Équipes esport
-                </div>
+                <div className="text-sm font-semibold mb-1">Mode B2B</div>
+                <div className="text-xs text-white/80">Équipes esport</div>
               </motion.button>
             </AnimatedCard>
           </motion.div>
@@ -540,7 +655,7 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
 
         {/* ✨ Mes Squads avec animations en cascade */}
         <div>
-          <motion.div 
+          <motion.div
             className="flex items-center justify-between mb-4"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -550,8 +665,8 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
             <h2 className="text-lg font-semibold text-[var(--fg-primary)] tracking-tight mt-10">
               Mes Squads
             </h2>
-            <button 
-              onClick={() => onNavigate('squads')}
+            <button
+              onClick={() => onNavigate("squads")}
               className="flex items-center gap-1.5 text-sm text-[var(--primary-500)] hover:text-[var(--primary-600)] font-medium transition-colors"
             >
               Voir tout
@@ -559,7 +674,7 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
             </button>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             className="space-y-3"
             variants={staggerContainer}
             initial="hidden"
@@ -572,17 +687,17 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
                 delay={1050 + index * 50}
                 direction="up"
                 threshold={0.1}
-                onClick={() => onNavigate('squad-detail', { id: squad.id })}
+                onClick={() => onNavigate("squad-detail", { id: squad.id })}
               >
                 <motion.div
                   className="bg-white rounded-2xl p-4 border-[0.5px] border-[var(--border-subtle)] shadow-sm cursor-pointer"
-                  whileHover={{ 
-                    boxShadow: '0 20px 40px rgba(0,0,0,0.08)',
+                  whileHover={{
+                    boxShadow: "0 20px 40px rgba(0,0,0,0.08)",
                   }}
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 ring-1 ring-[var(--border-subtle)]">
-                      <ImageWithFallback 
+                      <ImageWithFallback
                         src={squad.gameImage}
                         alt={squad.game}
                         className="w-full h-full object-cover"
@@ -617,8 +732,9 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
             ))}
           </motion.div>
         </div>
-
       </div>
     </div>
   );
 }
+
+export default HomeScreen;

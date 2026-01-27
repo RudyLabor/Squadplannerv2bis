@@ -395,3 +395,4 @@ export function IntelligenceScreen({ onNavigate, showToast }: IntelligenceScreen
     </div>
   );
 }
+export default IntelligenceScreen;

@@ -579,3 +579,4 @@ export function IntegrationsScreen({ onNavigate, showToast, useMockData = false 
     </div>
   );
 }
+export default IntegrationsScreen;

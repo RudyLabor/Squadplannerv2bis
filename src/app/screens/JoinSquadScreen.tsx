@@ -105,3 +105,4 @@ export function JoinSquadScreen({ onNavigate, showToast }: JoinSquadScreenProps)
     </div>
   );
 }
+export default JoinSquadScreen;

@@ -1,17 +1,18 @@
 import { ArrowLeft, Calendar, TrendingUp } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { intelligenceAPI } from '@/utils/api';
+import { sessionsAPI } from '@/utils/api';
 
 interface AvailabilityHeatmapScreenProps {
   onNavigate: (screen: string, data?: any) => void;
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
+  useMockData?: boolean;
   data?: {
     squadId?: string;
   };
 }
 
-export function AvailabilityHeatmapScreen({ onNavigate, showToast, data }: AvailabilityHeatmapScreenProps) {
+export function AvailabilityHeatmapScreen({ onNavigate, showToast, data, useMockData = false }: AvailabilityHeatmapScreenProps) {
   const [heatmap, setHeatmap] = useState<number[][]>([]);
   const [loading, setLoading] = useState(true);
   const [sessionsCount, setSessionsCount] = useState(0);
@@ -25,13 +26,60 @@ export function AvailabilityHeatmapScreen({ onNavigate, showToast, data }: Avail
   }, [data?.squadId]);
 
   const loadHeatmap = async () => {
-    if (!data?.squadId) return;
+    if (!data?.squadId && !useMockData) return;
 
     setLoading(true);
     try {
-      const response = await intelligenceAPI.getAvailabilityHeatmap(data.squadId);
-      setHeatmap(response.heatmap || []);
-      setSessionsCount(response.sessionsCount || 0);
+      if (useMockData) {
+        // Simulation intelligence artificielle
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Generate a random heatmap
+        const mockHeatmap = Array(7).fill(null).map(() => 
+          Array(24).fill(0).map(() => {
+            const r = Math.random();
+            if (r > 0.8) return Math.floor(Math.random() * 25) + 75; // Excellent
+            if (r > 0.6) return Math.floor(Math.random() * 25) + 50; // Bon
+            if (r > 0.4) return Math.floor(Math.random() * 25) + 25; // Moyen
+            if (r > 0.2) return Math.floor(Math.random() * 25);      // Faible
+            return 0; // Aucune
+          })
+        );
+        
+        setHeatmap(mockHeatmap);
+        setSessionsCount(42);
+      } else {
+        // REAL LOGIC
+        const { sessions } = await sessionsAPI.getSessions(data?.squadId);
+        
+        // Initialize Heatmap 7x24
+        const map = Array(7).fill(null).map(() => Array(24).fill(0));
+        let count = 0;
+        
+        sessions.forEach((session: any) => {
+          if (session.status !== 'confirmed') return;
+          const slot = session.slots.find((s: any) => s.id === session.selectedSlotId);
+          if (!slot) return;
+          
+          const date = new Date(`${slot.date}T${slot.time}:00`);
+          const day = date.getDay();
+          const hour = date.getHours();
+          
+          const yesCount = slot.responses?.filter((r: any) => r.response === 'yes').length || 0;
+          const participation = yesCount / (session.playersNeeded || 5);
+          
+          // Add heat based on participation
+          map[day][hour] += participation * 25; // Scale up to 100 max over multiple sessions
+          
+          // Cap at 100
+          if (map[day][hour] > 100) map[day][hour] = 100;
+          
+          count++;
+        });
+        
+        setHeatmap(map);
+        setSessionsCount(count);
+      }
     } catch (error: any) {
       console.error('Load heatmap error:', error);
       showToast(error.message || 'Erreur lors du chargement de la heatmap', 'error');
@@ -186,3 +234,5 @@ export function AvailabilityHeatmapScreen({ onNavigate, showToast, data }: Avail
     </div>
   );
 }
+
+export default AvailabilityHeatmapScreen;

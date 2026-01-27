@@ -307,3 +307,4 @@ export function DiscoverSquadsScreen({ onNavigate, showToast }: DiscoverSquadsSc
     </div>
   );
 }
+export default DiscoverSquadsScreen;

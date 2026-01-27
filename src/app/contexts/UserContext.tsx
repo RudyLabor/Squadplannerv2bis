@@ -31,6 +31,12 @@ export interface UserProfile {
     };
     [key: string]: any;
   };
+  notificationSettings?: {
+    pushReminder24h?: boolean;
+    pushReminder1h?: boolean;
+    emailReminder24h?: boolean;
+    smartNudges?: boolean;
+  };
 }
 
 interface UserContextType {
@@ -54,6 +60,12 @@ const defaultProfile: UserProfile = {
   reliabilityScore: 100,
   totalSessions: 0,
   attendedSessions: 0,
+  notificationSettings: {
+    pushReminder24h: true,
+    pushReminder1h: true,
+    emailReminder24h: false,
+    smartNudges: true,
+  },
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -230,6 +242,15 @@ export function useUser() {
           sessionsAttended: 0,
           sessionsProposed: 0,
           isPremium: false,
+          notificationSettings: {
+            pushReminder24h: true,
+            pushReminder1h: true,
+            emailReminder24h: false,
+            smartNudges: true,
+          },
+          integrations: {
+            discord: { connected: false },
+          },
         },
         updateUserProfile: () => {},
         refreshProfile: async () => {},

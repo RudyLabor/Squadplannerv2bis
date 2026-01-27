@@ -94,3 +94,5 @@ export function OrganizationScreen({ onNavigate, showToast }: OrganizationScreen
     </div>
   );
 }
+
+export default OrganizationScreen;

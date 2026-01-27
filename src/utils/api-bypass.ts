@@ -5,6 +5,12 @@
 import { projectId, publicAnonKey } from '@/utils/supabase/info';
 import { getSupabase } from '@/utils/supabase/client';
 
+// Helper type for KV rows to avoid 'never' inference
+interface KVRow {
+  key: string;
+  value: any;
+}
+
 const KV_TABLE = 'kv_store_e884809f';
 const API_BASE = `https://${projectId}.supabase.co/functions/v1/make-server-e884809f`;
 
@@ -20,7 +26,7 @@ async function getCurrentUserId(): Promise<string | null> {
 /**
  * Get auth token from current session
  */
-async function getAuthToken(): Promise<string | null> {
+export async function getAuthToken(): Promise<string | null> {
   const supabase = getSupabase();
   const { data: { session } } = await supabase.auth.getSession();
   return session?.access_token || null;
@@ -45,6 +51,8 @@ export async function getProfileBypass() {
     .select('value')
     .eq('key', `user:${userId}`)
     .single();
+  
+  const result = data as any;
 
   if (error) {
     if (error.code === 'PGRST116') {
@@ -83,7 +91,7 @@ export async function getProfileBypass() {
     throw error;
   }
 
-  const profile = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+  const profile = typeof result.value === 'string' ? JSON.parse(result.value) : result.value;
   console.log('✅ BYPASS: Profile retrieved');
   return { profile };
 }
@@ -160,6 +168,8 @@ export async function getSquadsBypass() {
     .from(KV_TABLE)
     .select('value')
     .like('key', 'squad:%');
+  
+  const rows = (data || []) as any[];
 
   if (error) {
     console.error('❌ BYPASS: Error getting squads:', error);
@@ -167,7 +177,7 @@ export async function getSquadsBypass() {
   }
 
   // Filter squads where user is a member
-  const squads = data
+  const squads = rows
     .map(row => typeof row.value === 'string' ? JSON.parse(row.value) : row.value)
     .filter(squad => squad.members?.some((m: any) => m.userId === userId));
 
@@ -178,7 +188,7 @@ export async function getSquadsBypass() {
 /**
  * Get user's sessions using direct KV access
  */
-export async function getSessionsBypass() {
+export async function getSessionsBypass(squadId?: string) {
   const userId = await getCurrentUserId();
   if (!userId) {
     throw new Error('Not authenticated');
@@ -194,7 +204,9 @@ export async function getSessionsBypass() {
     .select('value')
     .like('key', 'squad:%');
 
-  const userSquadIds = squadData
+  const squads = (squadData || []) as any[];
+
+  const userSquadIds = squads
     ?.map(row => typeof row.value === 'string' ? JSON.parse(row.value) : row.value)
     .filter(squad => squad.members?.some((m: any) => m.userId === userId))
     .map(squad => squad.id) || [];
@@ -207,14 +219,19 @@ export async function getSessionsBypass() {
     .select('value')
     .like('key', 'session:%');
 
+  const sessionsRows = (sessionData || []) as any[];
+
   if (error) {
     console.error('❌ BYPASS: Error getting sessions:', error);
     throw error;
   }
 
-  const sessions = sessionData
+  const sessions = sessionsRows
     ?.map(row => typeof row.value === 'string' ? JSON.parse(row.value) : row.value)
-    .filter(session => userSquadIds.includes(session.squadId)) || [];
+    .filter(session => {
+      if (squadId) return session.squadId === squadId;
+      return userSquadIds.includes(session.squadId);
+    }) || [];
 
   console.log(`✅ BYPASS: Retrieved ${sessions.length} sessions`);
   return { sessions };

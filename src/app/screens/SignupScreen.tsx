@@ -237,3 +237,4 @@ export function SignupScreen({ onNavigate, onSignup, showToast }: SignupScreenPr
     </div>
   );
 }
+export default SignupScreen;

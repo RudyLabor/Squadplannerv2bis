@@ -374,3 +374,4 @@ export function SquadChatScreen({
     </div>
   );
 }
+export default SquadChatScreen;

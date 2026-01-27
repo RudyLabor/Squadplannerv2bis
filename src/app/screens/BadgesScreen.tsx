@@ -1,7 +1,7 @@
-import { ArrowLeft, Crown, Star, Award, Lock, Check } from 'lucide-react';
+import { ArrowLeft, Crown, Star, Award, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Button } from '@/app/components/ui/Button';
+
 import { mockBadges } from '@/data/mockData';
 import { statsAPI } from '@/utils/api';
 import { useUser } from '@/app/contexts/UserContext';
@@ -22,20 +22,22 @@ interface Badge {
   unlocked: boolean;
   equipped: boolean;
   unlockedAt: string | null;
+  bg?: string;
+  color?: string;
 }
 
 export function BadgesScreen({ onNavigate, showToast, useMockData = false }: BadgesScreenProps) {
-  const { user } = useUser();
+  const { userProfile: user } = useUser();
   const [equippedBadges, setEquippedBadges] = useState<string[]>(['1', '2', '3']);
   const [badges, setBadges] = useState<Badge[]>([]);
-  const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
     if (useMockData) {
       // Mode démo pour la galerie
-      setBadges(mockBadges);
+      setBadges(mockBadges as unknown as Badge[]);
       setEquippedBadges(mockBadges.filter(b => b.equipped).map(b => b.id));
-      setLoading(false);
+
     } else {
       loadBadges();
     }
@@ -43,7 +45,6 @@ export function BadgesScreen({ onNavigate, showToast, useMockData = false }: Bad
 
   const loadBadges = async () => {
     if (!user?.id) {
-      setLoading(false);
       return;
     }
 
@@ -60,14 +61,20 @@ export function BadgesScreen({ onNavigate, showToast, useMockData = false }: Bad
         unlocked: true,
         equipped: false,
         unlockedAt: badge.unlockedAt,
+        bg: badge.rarity === 'legendary' ? 'bg-[var(--warning-50)]' :
+            badge.rarity === 'epic' ? 'bg-[var(--primary-50)]' :
+            badge.rarity === 'rare' ? 'bg-[var(--secondary-50)]' :
+            'bg-[var(--bg-subtle)]',
+        color: badge.rarity === 'legendary' ? 'text-[var(--warning-600)]' :
+               badge.rarity === 'epic' ? 'text-[var(--primary-600)]' :
+               badge.rarity === 'rare' ? 'text-[var(--secondary-600)]' :
+               'text-[var(--fg-secondary)]',
       }));
 
       setBadges(mappedBadges);
-      setLoading(false);
     } catch (error: any) {
       console.error('Error loading badges:', error);
       setBadges([]);
-      setLoading(false);
     }
   };
 
@@ -260,3 +267,4 @@ export function BadgesScreen({ onNavigate, showToast, useMockData = false }: Bad
     </div>
   );
 }
+export default BadgesScreen;

@@ -333,3 +333,4 @@ export function SquadCompositionScreen({ onNavigate, showToast }: SquadCompositi
     </div>
   );
 }
+export default SquadCompositionScreen;

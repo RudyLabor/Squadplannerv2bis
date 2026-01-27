@@ -439,3 +439,5 @@ export function QATestsScreen({ onNavigate, showToast }: QATestsScreenProps) {
     </div>
   );
 }
+
+export default QATestsScreen;

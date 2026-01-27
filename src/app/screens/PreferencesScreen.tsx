@@ -243,3 +243,4 @@ export function PreferencesScreen({ onNavigate, showToast }: PreferencesScreenPr
     </div>
   );
 }
+export default PreferencesScreen;

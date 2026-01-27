@@ -1,4 +1,6 @@
-import { Calendar, Plus, Users, Clock, CheckCircle, XCircle, AlertCircle, Filter, Zap, Check, X } from 'lucide-react';
+import { Calendar, Plus, Users, Clock, CheckCircle, XCircle, AlertCircle, Filter, Zap, Check, X, Globe } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Button } from '@/app/components/ui/Button';
@@ -39,18 +41,40 @@ export function SessionsScreen({ onNavigate, showToast = () => {}, useMockData =
   const loadSessions = async () => {
     setIsLoading(true);
     try {
-      const { sessions: allSessions } = await sessionsAPI.getAll();
-      setSessions(allSessions || []);
+      const { sessions: allSessions } = await sessionsAPI.getSessions();
+      
+      // Map backend data to UI format
+      const formattedSessions = allSessions.map((s: any) => {
+        // Use confirmed slot if available, otherwise first slot
+        // In a real multi-slot voting system, we'd need more complex logic here
+        const displaySlot = s.selectedSlotId 
+          ? s.slots?.find((slot: any) => slot.id === s.selectedSlotId) 
+          : s.slots?.[0];
+          
+        const dateStr = displaySlot?.date || '';
+        const isToday = new Date(dateStr).toDateString() === new Date().toDateString();
+        
+        // Calculate confirmed participants (yes responses)
+        const yesCount = displaySlot?.responses?.filter((r: any) => r.response === 'yes').length || 0;
+        
+        return {
+          ...s,
+          date: dateStr,
+          time: displaySlot?.time || '',
+          isToday,
+          readyCount: yesCount,
+          totalPlayers: s.playersNeeded,
+          selectedSlotId: displaySlot?.id,
+          relativeTime: dateStr && displaySlot?.time 
+            ? formatDistanceToNow(new Date(`${dateStr}T${displaySlot.time}:00`), { addSuffix: true, locale: fr })
+            : ''
+        };
+      });
+
+      setSessions(formattedSessions || []);
     } catch (error: any) {
       console.error('Load sessions error:', error);
-      console.error('Error message:', error?.message);
-      console.error('Error details:', {
-        name: error?.name,
-        message: error?.message,
-        stack: error?.stack
-      });
       // Keep empty array on error
-      // Show error toast if it's an auth error
       if (error?.message?.includes('Session') || error?.message?.includes('reconnecter')) {
         showToast(error.message, 'error');
       }
@@ -216,6 +240,14 @@ export function SessionsScreen({ onNavigate, showToast = () => {}, useMockData =
                         <div className="flex items-center gap-2 text-[var(--fg-secondary)]">
                           <Clock className="w-4 h-4 text-[var(--fg-tertiary)]" strokeWidth={1.5} />
                           <span className="font-medium">{session.time}</span>
+                          {session.relativeTime && (
+                            <span className="text-[var(--fg-tertiary)] ml-1 text-xs">
+                              ({session.relativeTime})
+                            </span>
+                          )}
+                          <span className="text-[var(--primary-500)] text-xs font-semibold bg-[var(--primary-50)] px-1.5 py-0.5 rounded ml-2">
+                            Paris
+                          </span>
                         </div>
                       </div>
 
@@ -284,7 +316,7 @@ export function SessionsScreen({ onNavigate, showToast = () => {}, useMockData =
           className="mt-8"
         >
           <Button
-            variant="primary"
+            variant="default"
             onClick={() => onNavigate('propose-session')}
             className="w-full h-14 text-base font-bold bg-gradient-to-r from-[var(--primary-500)] to-[var(--primary-600)] hover:from-[var(--primary-600)] hover:to-[var(--primary-700)] text-white rounded-2xl shadow-lg shadow-[var(--primary-500)]/20 hover:shadow-xl hover:shadow-[var(--primary-500)]/30 transition-all duration-200"
           >
@@ -296,3 +328,4 @@ export function SessionsScreen({ onNavigate, showToast = () => {}, useMockData =
     </div>
   );
 }
+export default SessionsScreen;

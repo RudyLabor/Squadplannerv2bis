@@ -1,7 +1,7 @@
 // 🔗 SQUAD PLANNER - API Client
 // Centralized API calls to Supabase backend
 
-import { projectId, publicAnonKey } from '@/utils/supabase/info';
+import { projectId } from '@/utils/supabase/info';
 import { getSupabase } from '@/utils/supabase/client';
 import { getProfileBypass, getSquadsBypass, getSessionsBypass, updateProfileBypass } from '@/utils/api-bypass';
 import { USE_BYPASS_MODE } from '@/utils/api-config';
@@ -273,7 +273,7 @@ export const sessionsAPI = {
    * Get all sessions for a squad
    */
   async getSessions(squadId?: string) {
-    if (USE_BYPASS_MODE && squadId) {
+    if (USE_BYPASS_MODE) {
       console.log('🚨 Using BYPASS mode for getSessions');
       return getSessionsBypass(squadId);
     }
@@ -292,8 +292,8 @@ export const sessionsAPI = {
   /**
    * Create a new session
    */
-  async createSession(sessionData: any) {
-    return apiCall('/sessions', {
+  async createSession(squadId: string, sessionData: any) {
+    return apiCall(`/squads/${squadId}/sessions`, {
       method: 'POST',
       body: JSON.stringify(sessionData),
     });
@@ -321,19 +321,27 @@ export const sessionsAPI = {
   /**
    * RSVP to a session
    */
-  async rsvp(sessionId: string, status: 'yes' | 'no' | 'maybe') {
+  async rsvp(sessionId: string, slotId: string, response: 'yes' | 'no' | 'maybe') {
     return apiCall(`/sessions/${sessionId}/rsvp`, {
       method: 'POST',
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ slotId, response }),
     });
+  },
+
+  /**
+   * Get check-ins for a session
+   */
+  async getCheckIns(sessionId: string) {
+    return apiCall(`/sessions/${sessionId}/check-in`);
   },
 
   /**
    * Check in to a session
    */
-  async checkIn(sessionId: string) {
-    return apiCall(`/sessions/${sessionId}/checkin`, {
+  async checkIn(sessionId: string, status: string, note?: string) {
+    return apiCall(`/sessions/${sessionId}/check-in`, {
       method: 'POST',
+      body: JSON.stringify({ status, note }),
     });
   },
 };

@@ -1,17 +1,18 @@
-import { ArrowLeft, MapPin, Users, Clock, CheckCircle, XCircle, AlertCircle, Navigation } from 'lucide-react';
+import { ArrowLeft, Clock, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Button } from '@/app/components/ui/Button';
-import { mockSessions, mockUser } from '@/data/mockData';
+import { mockSessions } from '@/data/mockData';
 import { sessionsAPI } from '@/utils/api';
 import { useUser } from '@/app/contexts/UserContext';
 import { useHaptic } from '@/app/hooks/useHaptic';
 import { useSoundEffects } from '@/app/hooks/useSoundEffects';
 import { Celebration } from '@/app/components/ui/Celebration';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
+import { DeepLinkButton } from '@/app/components/ui/DeepLinkButton';
 
 interface CheckInScreenProps {
-  onNavigate: (screen: string) => void;
+  onNavigate: (screen: string, data?: any) => void;
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
   useMockData?: boolean;
   data?: {
@@ -21,12 +22,11 @@ interface CheckInScreenProps {
 }
 
 export function CheckInScreen({ onNavigate, showToast, useMockData = false, data }: CheckInScreenProps) {
-  const { user } = useUser();
+  const { userProfile: user } = useUser();
   const [userStatus, setUserStatus] = useState<'present' | 'late' | 'absent' | null>(null);
   const [session, setSession] = useState<any>(null);
   const [checkIns, setCheckIns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [lateMinutes, setLateMinutes] = useState('');
   const [showCelebration, setShowCelebration] = useState(false);
   const { notification } = useHaptic();
@@ -53,7 +53,7 @@ export function CheckInScreen({ onNavigate, showToast, useMockData = false, data
 
     try {
       // Get all sessions and find the one we need
-      const response = await sessionsAPI.getAll();
+      const response = await sessionsAPI.getSessions();
       const foundSession = response.sessions?.find((s: any) => s.id === data.sessionId);
       
       if (!foundSession) {
@@ -155,9 +155,7 @@ export function CheckInScreen({ onNavigate, showToast, useMockData = false, data
   // Calculate stats from check-ins
   const presentCount = checkIns.filter(ci => ci.status === 'present').length;
   const lateCount = checkIns.filter(ci => ci.status === 'late').length;
-  const absentCount = checkIns.filter(ci => ci.status === 'absent').length;
   const totalExpected = session.confirmedSlot?.responses?.filter((r: any) => r.response === 'yes').length || 0;
-  const allReady = presentCount === totalExpected;
 
   return (
     <div className="min-h-screen pb-24 pt-safe">

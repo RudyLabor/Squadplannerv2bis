@@ -241,3 +241,4 @@ export function LeaderboardScreen({ onNavigate, showToast, useMockData = false }
     </div>
   );
 }
+export default LeaderboardScreen;

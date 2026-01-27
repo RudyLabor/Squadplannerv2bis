@@ -392,3 +392,4 @@ export function ProfileScreen({ onNavigate, showToast, onLogout, userEmail, user
     </div>
   );
 }
+export default ProfileScreen;

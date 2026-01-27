@@ -191,3 +191,5 @@ export function LeadershipAnalysisScreen({ onNavigate, showToast }: LeadershipAn
     </div>
   );
 }
+
+export default LeadershipAnalysisScreen;

@@ -303,3 +303,4 @@ export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreen
     </div>
   );
 }
+export default AchievementsScreen;

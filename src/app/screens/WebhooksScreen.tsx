@@ -348,3 +348,5 @@ export function WebhooksScreen({ onNavigate, showToast }: WebhooksScreenProps) {
     </div>
   );
 }
+
+export default WebhooksScreen;

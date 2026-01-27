@@ -301,3 +301,5 @@ export function TestSetupScreen({ onNavigate, showToast }: TestSetupScreenProps)
     </div>
   );
 }
+
+export default TestSetupScreen;

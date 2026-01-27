@@ -89,3 +89,5 @@ export function StreamerDashboardScreen({ onNavigate, showToast }: StreamerDashb
     </div>
   );
 }
+
+export default StreamerDashboardScreen;

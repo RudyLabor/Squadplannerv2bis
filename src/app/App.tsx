@@ -17,7 +17,7 @@ import { CommandPalette } from '@/app/components/CommandPalette';
 import { ToastContainer, useToast } from '@/app/components/ui/Toast';
 import { SplashScreen } from '@/app/components/SplashScreen';
 import { LanguageSwitcher } from '@/app/components/LanguageSwitcher';
-import { Skeleton } from '@/app/components/ui/Skeleton';
+import { Skeleton } from '@/app/components/ui/skeleton';
 import { PerformanceDebugPanel } from '@/app/components/PerformanceDebugPanel';
 
 // Hooks
@@ -35,70 +35,71 @@ if (typeof window !== 'undefined') {
 
 // Lazy load screens for better performance
 const LoginScreen = lazy(() => import('@/app/screens/LoginScreen'));
-const SignupScreen = lazy(() => import('@/app/screens/SignupScreen').then(m => ({ default: m.SignupScreen })));
-const HomeScreen = lazy(() => import('@/app/screens/HomeScreen').then(m => ({ default: m.HomeScreen })));
-const SquadsScreen = lazy(() => import('@/app/screens/SquadsScreen').then(m => ({ default: m.SquadsScreen })));
-const SquadDetailScreen = lazy(() => import('@/app/screens/SquadDetailScreen').then(m => ({ default: m.SquadDetailScreen })));
-const SessionsScreen = lazy(() => import('@/app/screens/SessionsScreen').then(m => ({ default: m.SessionsScreen })));
-const ProfileScreen = lazy(() => import('@/app/screens/ProfileScreen').then(m => ({ default: m.ProfileScreen })));
-const EditProfileScreen = lazy(() => import('@/app/screens/EditProfileScreen').then(m => ({ default: m.EditProfileScreen })));
-const ProposeSessionScreen = lazy(() => import('@/app/screens/ProposeSessionScreen').then(m => ({ default: m.ProposeSessionScreen })));
-const CreateSquadScreen = lazy(() => import('@/app/screens/CreateSquadScreen').then(m => ({ default: m.CreateSquadScreen })));
-const FeaturesDemoScreen = lazy(() => import('@/app/screens/FeaturesDemoScreen').then(m => ({ default: m.FeaturesDemoScreen })));
-const IntegrationsScreen = lazy(() => import('@/app/screens/IntegrationsScreen').then(m => ({ default: m.IntegrationsScreen })));
-const JoinSquadScreen = lazy(() => import('@/app/screens/JoinSquadScreen').then(m => ({ default: m.JoinSquadScreen })));
-const VoteSessionScreen = lazy(() => import('@/app/screens/VoteSessionScreen').then(m => ({ default: m.VoteSessionScreen })));
+const SignupScreen = lazy(() => import('@/app/screens/SignupScreen'));
+const HomeScreen = lazy(() => import('@/app/screens/HomeScreen'));
+const SquadsScreen = lazy(() => import('@/app/screens/SquadsScreen'));
+const SquadDetailScreen = lazy(() => import('@/app/screens/SquadDetailScreen'));
+const SessionsScreen = lazy(() => import('@/app/screens/SessionsScreen'));
+const ProfileScreen = lazy(() => import('@/app/screens/ProfileScreen'));
+const EditProfileScreen = lazy(() => import('@/app/screens/EditProfileScreen'));
+const ProposeSessionScreen = lazy(() => import('@/app/screens/ProposeSessionScreen'));
+const CreateSquadScreen = lazy(() => import('@/app/screens/CreateSquadScreen'));
+const FeaturesDemoScreen = lazy(() => import('@/app/screens/FeaturesDemoScreen'));
+const IntegrationsScreen = lazy(() => import('@/app/screens/IntegrationsScreen'));
+const JoinSquadScreen = lazy(() => import('@/app/screens/JoinSquadScreen'));
+const VoteSessionScreen = lazy(() => import('@/app/screens/VoteSessionScreen'));
 const CheckInScreen = lazy(() => import('@/app/screens/CheckInScreen'));
-const SquadChatScreen = lazy(() => import('@/app/screens/SquadChatScreen').then(m => ({ default: m.SquadChatScreen })));
+const SquadChatScreen = lazy(() => import('@/app/screens/SquadChatScreen'));
 const DiscordBotScreen = lazy(() => import('@/app/screens/DiscordBotScreen'));
 const CoachingToolsScreen = lazy(() => import('@/app/screens/CoachingToolsScreen'));
-const NotificationSettingsScreen = lazy(() => import('@/app/screens/NotificationSettingsScreen').then(m => ({ default: m.NotificationSettingsScreen })));
-const SmartSuggestionsScreen = lazy(() => import('@/app/screens/SmartSuggestionsScreen').then(m => ({ default: m.SmartSuggestionsScreen })));
-const NotificationsScreen = lazy(() => import('@/app/screens/NotificationsScreen').then(m => ({ default: m.NotificationsScreen })));
-const AvailabilityHeatmapScreen = lazy(() => import('@/app/screens/AvailabilityHeatmapScreen').then(m => ({ default: m.AvailabilityHeatmapScreen })));
-const TestSetupScreen = lazy(() => import('@/app/screens/TestSetupScreen').then(m => ({ default: m.TestSetupScreen })));
-const QATestsScreen = lazy(() => import('@/app/screens/QATestsScreen').then(m => ({ default: m.QATestsScreen })));
-const PremiumScreen = lazy(() => import('@/app/screens/PremiumScreen').then(m => ({ default: m.PremiumScreen })));
-const AdvancedStatsScreen = lazy(() => import('@/app/screens/AdvancedStatsScreen').then(m => ({ default: m.AdvancedStatsScreen })));
+const NotificationSettingsScreen = lazy(() => import('@/app/screens/NotificationSettingsScreen'));
+const SmartSuggestionsScreen = lazy(() => import('@/app/screens/SmartSuggestionsScreen'));
+const NotificationsScreen = lazy(() => import('@/app/screens/NotificationsScreen'));
+const AvailabilityHeatmapScreen = lazy(() => import('@/app/screens/AvailabilityHeatmapScreen'));
+const TestSetupScreen = lazy(() => import('@/app/screens/TestSetupScreen'));
+const QATestsScreen = lazy(() => import('@/app/screens/QATestsScreen'));
+const PremiumScreen = lazy(() => import('@/app/screens/PremiumScreen'));
+const AdvancedStatsScreen = lazy(() => import('@/app/screens/AdvancedStatsScreen'));
 const CalendarSyncScreen = lazy(() => import('@/app/screens/CalendarSyncScreen'));
-const IntelligenceScreen = lazy(() => import('@/app/screens/IntelligenceScreen').then(m => ({ default: m.IntelligenceScreen })));
-const SquadHealthScreen = lazy(() => import('@/app/screens/SquadHealthScreen').then(m => ({ default: m.SquadHealthScreen })));
-const RecurringSessionScreen = lazy(() => import('@/app/screens/RecurringSessionScreen').then(m => ({ default: m.RecurringSessionScreen })));
-const WeeklyRecapScreen = lazy(() => import('@/app/screens/WeeklyRecapScreen').then(m => ({ default: m.WeeklyRecapScreen })));
-const PrivacyScreen = lazy(() => import('@/app/screens/PrivacyScreen').then(m => ({ default: m.PrivacyScreen })));
-const PreferencesScreen = lazy(() => import('@/app/screens/PreferencesScreen').then(m => ({ default: m.PreferencesScreen })));
+const IntelligenceScreen = lazy(() => import('@/app/screens/IntelligenceScreen'));
+const SquadHealthScreen = lazy(() => import('@/app/screens/SquadHealthScreen'));
+const RecurringSessionScreen = lazy(() => import('@/app/screens/RecurringSessionScreen'));
+const WeeklyRecapScreen = lazy(() => import('@/app/screens/WeeklyRecapScreen'));
+const PrivacyScreen = lazy(() => import('@/app/screens/PrivacyScreen'));
+const PreferencesScreen = lazy(() => import('@/app/screens/PreferencesScreen'));
+const DiscordConnectScreen = lazy(() => import('@/app/screens/DiscordConnectScreen'));
 
 // ROADMAP #2 - Social + Compétition
-const LeaderboardScreen = lazy(() => import('@/app/screens/LeaderboardScreen').then(m => ({ default: m.LeaderboardScreen })));
-const AchievementsScreen = lazy(() => import('@/app/screens/AchievementsScreen').then(m => ({ default: m.AchievementsScreen })));
-const FriendsScreen = lazy(() => import('@/app/screens/FriendsScreen').then(m => ({ default: m.FriendsScreen })));
+const LeaderboardScreen = lazy(() => import('@/app/screens/LeaderboardScreen'));
+const AchievementsScreen = lazy(() => import('@/app/screens/AchievementsScreen'));
+const FriendsScreen = lazy(() => import('@/app/screens/FriendsScreen'));
 const ActivityFeedScreen = lazy(() => import('@/app/screens/ActivityFeedScreen'));
-const PublicProfileScreen = lazy(() => import('@/app/screens/PublicProfileScreen').then(m => ({ default: m.PublicProfileScreen })));
-const BadgesScreen = lazy(() => import('@/app/screens/BadgesScreen').then(m => ({ default: m.BadgesScreen })));
-const TournamentsScreen = lazy(() => import('@/app/screens/TournamentsScreen').then(m => ({ default: m.TournamentsScreen })));
-const SearchPlayersScreen = lazy(() => import('@/app/screens/SearchPlayersScreen').then(m => ({ default: m.SearchPlayersScreen })));
-const DiscoverSquadsScreen = lazy(() => import('@/app/screens/DiscoverSquadsScreen').then(m => ({ default: m.DiscoverSquadsScreen })));
-const ChallengesScreen = lazy(() => import('@/app/screens/ChallengesScreen').then(m => ({ default: m.ChallengesScreen })));
-const RankingScreen = lazy(() => import('@/app/screens/RankingScreen').then(m => ({ default: m.RankingScreen })));
-const ShareScreen = lazy(() => import('@/app/screens/ShareScreen').then(m => ({ default: m.ShareScreen })));
+const PublicProfileScreen = lazy(() => import('@/app/screens/PublicProfileScreen'));
+const BadgesScreen = lazy(() => import('@/app/screens/BadgesScreen'));
+const TournamentsScreen = lazy(() => import('@/app/screens/TournamentsScreen'));
+const SearchPlayersScreen = lazy(() => import('@/app/screens/SearchPlayersScreen'));
+const DiscoverSquadsScreen = lazy(() => import('@/app/screens/DiscoverSquadsScreen'));
+const ChallengesScreen = lazy(() => import('@/app/screens/ChallengesScreen'));
+const RankingScreen = lazy(() => import('@/app/screens/RankingScreen'));
+const ShareScreen = lazy(() => import('@/app/screens/ShareScreen'));
 
 // ROADMAP #3 - Écosystème + IA + Communauté + B2B
-const ApiDocsScreen = lazy(() => import('@/app/screens/ApiDocsScreen').then(m => ({ default: m.ApiDocsScreen })));
-const PluginsScreen = lazy(() => import('@/app/screens/PluginsScreen').then(m => ({ default: m.PluginsScreen })));
-const WebhooksScreen = lazy(() => import('@/app/screens/WebhooksScreen').then(m => ({ default: m.WebhooksScreen })));
-const EsportIntegrationsScreen = lazy(() => import('@/app/screens/EsportIntegrationsScreen').then(m => ({ default: m.EsportIntegrationsScreen })));
-const SquadCompositionScreen = lazy(() => import('@/app/screens/SquadCompositionScreen').then(m => ({ default: m.SquadCompositionScreen })));
-const LeadershipAnalysisScreen = lazy(() => import('@/app/screens/LeadershipAnalysisScreen').then(m => ({ default: m.LeadershipAnalysisScreen })));
-const SquadManagementScreen = lazy(() => import('@/app/screens/SquadManagementScreen').then(m => ({ default: m.SquadManagementScreen })));
-const CommunityScreen = lazy(() => import('@/app/screens/CommunityScreen').then(m => ({ default: m.CommunityScreen })));
-const LeaguesScreen = lazy(() => import('@/app/screens/LeaguesScreen').then(m => ({ default: m.LeaguesScreen })));
-const SeasonsScreen = lazy(() => import('@/app/screens/SeasonsScreen').then(m => ({ default: m.SeasonsScreen })));
-const HistoryScreen = lazy(() => import('@/app/screens/HistoryScreen').then(m => ({ default: m.HistoryScreen })));
+const ApiDocsScreen = lazy(() => import('@/app/screens/ApiDocsScreen'));
+const PluginsScreen = lazy(() => import('@/app/screens/PluginsScreen'));
+const WebhooksScreen = lazy(() => import('@/app/screens/WebhooksScreen'));
+const EsportIntegrationsScreen = lazy(() => import('@/app/screens/EsportIntegrationsScreen'));
+const SquadCompositionScreen = lazy(() => import('@/app/screens/SquadCompositionScreen'));
+const LeadershipAnalysisScreen = lazy(() => import('@/app/screens/LeadershipAnalysisScreen'));
+const SquadManagementScreen = lazy(() => import('@/app/screens/SquadManagementScreen'));
+const CommunityScreen = lazy(() => import('@/app/screens/CommunityScreen'));
+const LeaguesScreen = lazy(() => import('@/app/screens/LeaguesScreen'));
+const SeasonsScreen = lazy(() => import('@/app/screens/SeasonsScreen'));
+const HistoryScreen = lazy(() => import('@/app/screens/HistoryScreen'));
 const AutoCoachingScreen = lazy(() => import('@/app/screens/AutoCoachingScreen'));
 const EsportTeamScreen = lazy(() => import('@/app/screens/EsportTeamScreen'));
 const AcademyScreen = lazy(() => import('@/app/screens/AcademyScreen'));
-const StreamerDashboardScreen = lazy(() => import('@/app/screens/StreamerDashboardScreen').then(m => ({ default: m.StreamerDashboardScreen })));
-const OrganizationScreen = lazy(() => import('@/app/screens/OrganizationScreen').then(m => ({ default: m.OrganizationScreen })));
+const StreamerDashboardScreen = lazy(() => import('@/app/screens/StreamerDashboardScreen'));
+const OrganizationScreen = lazy(() => import('@/app/screens/OrganizationScreen'));
 
 // Design Documentation
 const DesignDocScreen = lazy(() => import('@/app/screens/DesignDocScreen'));
@@ -109,12 +110,12 @@ function ScreenLoader() {
   return (
     <div className="min-h-screen pb-24 px-4 pt-safe space-y-4">
       <div className="py-6">
-        <Skeleton width="200px" height="32px" className="mb-2" />
-        <Skeleton width="150px" height="20px" />
+        <Skeleton className="w-[200px] h-8 mb-2" />
+        <Skeleton className="w-[150px] h-5" />
       </div>
-      <Skeleton width="100%" height="200px" />
-      <Skeleton width="100%" height="150px" />
-      <Skeleton width="100%" height="150px" />
+      <Skeleton className="w-full h-[200px]" />
+      <Skeleton className="w-full h-[150px]" />
+      <Skeleton className="w-full h-[150px]" />
     </div>
   );
 }
@@ -366,8 +367,8 @@ function AppContent() {
                   {currentScreen.name === 'sessions' && <SessionsScreen onNavigate={handleNavigate} showToast={showToast} />}
                   {currentScreen.name === 'profile' && <ProfileScreen onNavigate={handleNavigate} showToast={showToast} onLogout={handleLogout} userEmail={userEmail} userName={userName} isPremium={isPremium} />}
                   {currentScreen.name === 'edit-profile' && <EditProfileScreen onNavigate={handleNavigate} showToast={showToast} />}
-                  {currentScreen.name === 'propose-session' && <ProposeSessionScreen onNavigate={handleNavigate} showToast={showToast} />}
-                  {currentScreen.name === 'create-session' && <ProposeSessionScreen onNavigate={handleNavigate} showToast={showToast} />}
+                  {currentScreen.name === 'propose-session' && <ProposeSessionScreen onNavigate={handleNavigate} showToast={showToast} data={currentScreen.data} />}
+                  {currentScreen.name === 'create-session' && <ProposeSessionScreen onNavigate={handleNavigate} showToast={showToast} data={currentScreen.data} />}
                   {currentScreen.name === 'create-squad' && <CreateSquadScreen onNavigate={handleNavigate} showToast={showToast} />}
                   {currentScreen.name === 'features-demo' && <FeaturesDemoScreen onNavigate={handleNavigate} showToast={showToast} />}
                   {currentScreen.name === 'integrations' && <IntegrationsScreen onNavigate={handleNavigate} showToast={showToast} />}
@@ -376,6 +377,7 @@ function AppContent() {
                   {currentScreen.name === 'check-in' && <CheckInScreen onNavigate={handleNavigate} showToast={showToast} />}
                   {currentScreen.name === 'squad-chat' && <SquadChatScreen onNavigate={handleNavigate} showToast={showToast} data={currentScreen.data} />}
                   {currentScreen.name === 'discord-bot' && <DiscordBotScreen onNavigate={handleNavigate} showToast={showToast} />}
+                  {currentScreen.name === 'discord-connect' && <DiscordConnectScreen onNavigate={handleNavigate} showToast={showToast} />}
                   {currentScreen.name === 'coaching-tools' && <CoachingToolsScreen onNavigate={handleNavigate} showToast={showToast} />}
                   {currentScreen.name === 'login' && <LoginScreen onNavigate={handleNavigate} showToast={showToast} onLogin={handleLogin} />}
                   {currentScreen.name === 'signup' && <SignupScreen onNavigate={handleNavigate} showToast={showToast} onSignup={handleSignup} />}

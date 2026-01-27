@@ -10,7 +10,7 @@ import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 import { squadsAPI } from '@/utils/api';
 
 interface CreateSquadScreenProps {
-  onNavigate: (screen: string) => void;
+  onNavigate: (screen: string, data?: any) => void;
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
@@ -64,7 +64,7 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
     setIsCreating(true);
 
     try {
-      const { squad } = await squadsAPI.create({
+      const { squad } = await squadsAPI.createSquad({
         name: squadName,
         game: selectedGame.name,
         avatar: selectedGame.image,
@@ -140,7 +140,7 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
                 className="flex-1 px-4 py-3 rounded-xl border-[0.5px] border-[var(--border-medium)] bg-[var(--bg-subtle)] text-sm text-[var(--fg-secondary)] font-mono"
               />
               <Button
-                variant="primary"
+                variant="default"
                 onClick={handleCopyLink}
                 className="px-6 bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] text-white rounded-xl shadow-lg shadow-[var(--primary-500)]/20"
               >
@@ -387,3 +387,5 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
     </div>
   );
 }
+
+export default CreateSquadScreen;

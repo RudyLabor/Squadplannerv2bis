@@ -1,4 +1,4 @@
-import { ArrowLeft, Calendar, Clock, Plus, X, Gamepad2, Users } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Plus, X, Gamepad2, Users, Repeat, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@/app/components/ui/Button';
@@ -36,9 +36,23 @@ export function ProposeSessionScreen({ onNavigate, showToast, data }: ProposeSes
   const [comment, setComment] = useState('');
   const [playersNeeded, setPlayersNeeded] = useState('5');
   const [multiSlot, setMultiSlot] = useState(false);
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [template, setTemplate] = useState<'ranked' | 'chill' | 'scrim' | null>(null);
   const [slots, setSlots] = useState<Slot[]>([
     { id: '1', date: '', time: '', duration: '2' }
   ]);
+
+  const toggleTemplate = (t: 'ranked' | 'chill' | 'scrim') => {
+    if (template === t) {
+      setTemplate(null);
+      setTitle('');
+    } else {
+      setTemplate(t);
+      if (t === 'ranked') setTitle('Ranked Grind 🏆');
+      if (t === 'chill') setTitle('Chill & Fun 🍺');
+      if (t === 'scrim') setTitle('Pracc / Scrim ⚔️');
+    }
+  };
 
   const addSlot = () => {
     if (slots.length >= 5) {
@@ -105,7 +119,7 @@ export function ProposeSessionScreen({ onNavigate, showToast, data }: ProposeSes
     }
 
     try {
-      await sessionsAPI.create(data.squadId, {
+      await sessionsAPI.createSession(data.squadId, {
         title,
         game: selectedGame?.name || '',
         playersNeeded: parseInt(playersNeeded),
@@ -116,6 +130,8 @@ export function ProposeSessionScreen({ onNavigate, showToast, data }: ProposeSes
           duration: parseInt(slot.duration),
         })),
         multiSlot,
+        isRecurring,
+        template,
       });
 
       showToast(multiSlot 
@@ -134,7 +150,7 @@ export function ProposeSessionScreen({ onNavigate, showToast, data }: ProposeSes
 
   useEffect(() => {
     if (data?.squadId) {
-      squadsAPI.getById(data.squadId).then(response => {
+      squadsAPI.getSquad(data.squadId).then(response => {
         if (response.squad) {
           const game = games.find(g => g.name === response.squad.game);
           if (game) {
@@ -223,6 +239,45 @@ export function ProposeSessionScreen({ onNavigate, showToast, data }: ProposeSes
             />
           </div>
 
+          {/* Templates */}
+          <div>
+            <label className="text-sm text-[var(--fg-secondary)] mb-3 block font-semibold">
+              Type de session (Templates)
+            </label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => toggleTemplate('ranked')}
+                className={`flex-1 h-12 rounded-xl text-xs font-bold border transition-all ${
+                  template === 'ranked'
+                    ? 'bg-[var(--warning-50)] border-[var(--warning-500)] text-[var(--warning-700)] ring-2 ring-[var(--warning-200)]'
+                    : 'bg-white border-[var(--border-medium)] text-[var(--fg-secondary)] hover:border-[var(--warning-300)]'
+                }`}
+              >
+                🏆 Ranked
+              </button>
+              <button
+                onClick={() => toggleTemplate('chill')}
+                className={`flex-1 h-12 rounded-xl text-xs font-bold border transition-all ${
+                  template === 'chill'
+                    ? 'bg-[var(--success-50)] border-[var(--success-500)] text-[var(--success-700)] ring-2 ring-[var(--success-200)]'
+                    : 'bg-white border-[var(--border-medium)] text-[var(--fg-secondary)] hover:border-[var(--success-300)]'
+                }`}
+              >
+                🍺 Chill
+              </button>
+              <button
+                onClick={() => toggleTemplate('scrim')}
+                className={`flex-1 h-12 rounded-xl text-xs font-bold border transition-all ${
+                  template === 'scrim'
+                    ? 'bg-[var(--error-50)] border-[var(--error-500)] text-[var(--error-700)] ring-2 ring-[var(--error-200)]'
+                    : 'bg-white border-[var(--border-medium)] text-[var(--fg-secondary)] hover:border-[var(--error-300)]'
+                }`}
+              >
+                ⚔️ Scrim
+              </button>
+            </div>
+          </div>
+
           {/* Game Picker */}
           <div>
             <label className="text-sm text-[var(--fg-secondary)] mb-3 block font-semibold">
@@ -300,6 +355,40 @@ export function ProposeSessionScreen({ onNavigate, showToast, data }: ProposeSes
                 </button>
               )}
             </div>
+            
+            {!multiSlot && (
+              <div className="mb-4">
+                <button
+                  onClick={() => setIsRecurring(!isRecurring)}
+                  className={`w-full flex items-center justify-between p-4 rounded-xl border-[0.5px] transition-all ${
+                    isRecurring 
+                      ? 'bg-[var(--primary-50)] border-[var(--primary-200)]' 
+                      : 'bg-white border-[var(--border-medium)]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      isRecurring ? 'bg-[var(--primary-100)] text-[var(--primary-600)]' : 'bg-[var(--bg-subtle)] text-[var(--fg-tertiary)]'
+                    }`}>
+                      <Repeat className="w-5 h-5" />
+                    </div>
+                    <div className="text-left">
+                      <div className={`text-sm font-semibold ${isRecurring ? 'text-[var(--primary-700)]' : 'text-[var(--fg-primary)]'}`}>
+                        Répéter chaque semaine
+                      </div>
+                      <div className="text-xs text-[var(--fg-tertiary)]">
+                        Crée automatiquement cette session
+                      </div>
+                    </div>
+                  </div>
+                  <div className={`w-6 h-6 rounded-full border flex items-center justify-center ${
+                    isRecurring ? 'bg-[var(--primary-500)] border-[var(--primary-500)]' : 'border-[var(--border-strong)]'
+                  }`}>
+                    {isRecurring && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
+                  </div>
+                </button>
+              </div>
+            )}
 
             <div className="space-y-4">
               <AnimatePresence mode="popLayout">
@@ -408,7 +497,7 @@ export function ProposeSessionScreen({ onNavigate, showToast, data }: ProposeSes
         {/* Submit */}
         <div className="mt-8">
           <Button
-            variant="primary"
+            variant="default"
             onClick={handlePropose}
             disabled={!isValid}
             className="w-full h-14 text-base font-semibold bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] hover:from-[var(--primary-600)] hover:to-[var(--primary-700)] text-white rounded-xl shadow-lg shadow-[var(--primary-500)]/20 hover:shadow-xl hover:shadow-[var(--primary-500)]/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -443,3 +532,5 @@ export function ProposeSessionScreen({ onNavigate, showToast, data }: ProposeSes
     </div>
   );
 }
+
+export default ProposeSessionScreen;

@@ -89,3 +89,5 @@ export function HistoryScreen({ onNavigate, showToast }: HistoryScreenProps) {
     </div>
   );
 }
+
+export default HistoryScreen;

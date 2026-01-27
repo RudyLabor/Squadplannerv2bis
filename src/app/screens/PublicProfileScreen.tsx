@@ -259,3 +259,4 @@ export function PublicProfileScreen({ onNavigate, showToast }: PublicProfileScre
     </div>
   );
 }
+export default PublicProfileScreen;

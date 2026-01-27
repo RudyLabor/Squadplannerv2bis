@@ -108,3 +108,5 @@ export function SquadManagementScreen({ onNavigate, showToast }: SquadManagement
     </div>
   );
 }
+
+export default SquadManagementScreen;

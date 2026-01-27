@@ -235,3 +235,4 @@ export function AdvancedStatsScreen({ onNavigate, showToast }: AdvancedStatsScre
     </div>
   );
 }
+export default AdvancedStatsScreen;

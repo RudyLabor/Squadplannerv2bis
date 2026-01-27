@@ -77,3 +77,5 @@ export function SeasonsScreen({ onNavigate, showToast }: SeasonsScreenProps) {
     </div>
   );
 }
+
+export default SeasonsScreen;

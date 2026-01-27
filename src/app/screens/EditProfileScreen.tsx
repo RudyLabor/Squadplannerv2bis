@@ -416,3 +416,4 @@ export function EditProfileScreen({ onNavigate, showToast }: EditProfileScreenPr
     </div>
   );
 }
+export default EditProfileScreen;

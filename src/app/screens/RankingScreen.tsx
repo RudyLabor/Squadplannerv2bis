@@ -254,3 +254,4 @@ export function RankingScreen({ onNavigate, showToast }: RankingScreenProps) {
     </div>
   );
 }
+export default RankingScreen;

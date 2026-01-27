@@ -2,6 +2,7 @@ import { ArrowLeft, Calendar, Check, Download, ExternalLink, Crown } from 'lucid
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Button } from '@/app/components/ui/Button';
+import { useUser } from '@/app/contexts/UserContext';
 
 interface CalendarSyncScreenProps {
   onNavigate: (screen: string) => void;
@@ -9,7 +10,8 @@ interface CalendarSyncScreenProps {
 }
 
 export function CalendarSyncScreen({ onNavigate, showToast }: CalendarSyncScreenProps) {
-  const isPremium = false; // TODO: Get from context
+  const { userProfile } = useUser();
+  const isPremium = userProfile?.isPremium ?? false;
   const [connectedCalendars, setConnectedCalendars] = useState<string[]>([]);
 
   const calendars = [
@@ -88,7 +90,7 @@ export function CalendarSyncScreen({ onNavigate, showToast }: CalendarSyncScreen
               Synchronisez vos sessions automatiquement avec Google Calendar, Apple Calendar ou Outlook.
             </p>
             <Button
-              variant="primary"
+              variant="default"
               onClick={() => onNavigate('premium')}
               className="w-full h-14 bg-white text-[var(--primary-500)] hover:bg-white/90 rounded-2xl shadow-xl font-bold"
             >
@@ -218,7 +220,7 @@ export function CalendarSyncScreen({ onNavigate, showToast }: CalendarSyncScreen
                       Déconnecter
                     </Button>
                     <Button
-                      variant="primary"
+                      variant="default"
                       onClick={() => showToast('Calendrier à jour !', 'success')}
                       className="flex-1 h-11 bg-[var(--success-500)] hover:bg-[var(--success-600)] text-white rounded-xl shadow-md font-semibold text-sm"
                     >
@@ -228,7 +230,7 @@ export function CalendarSyncScreen({ onNavigate, showToast }: CalendarSyncScreen
                   </div>
                 ) : (
                   <Button
-                    variant="primary"
+                    variant="default"
                     onClick={() => handleConnect(calendar.id)}
                     className="w-full h-11 bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] hover:from-[var(--primary-600)] hover:to-[var(--primary-700)] text-white rounded-xl shadow-lg shadow-[var(--primary-500)]/20 font-semibold text-sm transition-all duration-200"
                   >

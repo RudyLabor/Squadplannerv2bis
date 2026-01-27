@@ -267,3 +267,5 @@ export function PluginsScreen({ onNavigate, showToast }: PluginsScreenProps) {
     </div>
   );
 }
+
+export default PluginsScreen;

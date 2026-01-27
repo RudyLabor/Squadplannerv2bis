@@ -61,3 +61,5 @@ export function CommunityScreen({ onNavigate, showToast }: CommunityScreenProps)
     </div>
   );
 }
+
+export default CommunityScreen;

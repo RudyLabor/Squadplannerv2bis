@@ -58,3 +58,4 @@ export function FeaturesDemoScreen({ onNavigate }: FeaturesDemoScreenProps) {
     </div>
   );
 }
+export default FeaturesDemoScreen;

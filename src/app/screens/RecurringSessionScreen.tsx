@@ -384,3 +384,4 @@ export function RecurringSessionScreen({ onNavigate, showToast }: RecurringSessi
     </div>
   );
 }
+export default RecurringSessionScreen;
