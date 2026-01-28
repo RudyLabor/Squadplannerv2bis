@@ -122,6 +122,9 @@ function ScreenLoader() {
   );
 }
 
+// TEMPORARY: Bypass auth for development - must match AuthContext and ProtectedRoute
+const BYPASS_AUTH = true;
+
 function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -170,6 +173,12 @@ function AppContent() {
   };
 
   useEffect(() => {
+    // Skip auth redirect when bypass is enabled
+    if (BYPASS_AUTH) {
+      if (isAuthPage) navigate('/home');
+      return;
+    }
+
     if (!authLoading) {
       if (isAuthenticated && user) {
         if (isAuthPage) navigate('/home');
