@@ -53,6 +53,7 @@ const ProposeSessionScreen = lazy(() => import('@/app/screens/ProposeSessionScre
 const CreateSquadScreen = lazy(() => import('@/app/screens/CreateSquadScreen')) as any;
 const IntegrationsScreen = lazy(() => import('@/app/screens/IntegrationsScreen')) as any;
 const JoinSquadScreen = lazy(() => import('@/app/screens/JoinSquadScreen')) as any;
+const JoinViaLinkScreen = lazy(() => import('@/app/screens/JoinViaLinkScreen')) as any;
 const VoteSessionScreen = lazy(() => import('@/app/screens/VoteSessionScreen')) as any;
 const CheckInScreen = lazy(() => import('@/app/screens/CheckInScreen')) as any;
 const SquadChatScreen = lazy(() => import('@/app/screens/SquadChatScreen')) as any;
@@ -276,6 +277,7 @@ function AppContent() {
                     <Route path="/create-squad" element={<ProtectedRoute><CreateSquadScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
                     <Route path="/integrations" element={<ProtectedRoute><IntegrationsScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
                     <Route path="/join-squad" element={<ProtectedRoute><JoinSquadScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/join/:code" element={<ProtectedRoute><JoinViaLinkScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
 
                     {/* Hub 2: Squads - Additional Routes */}
                     <Route path="/chat/:squadId" element={<ProtectedRoute><SquadChatScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />

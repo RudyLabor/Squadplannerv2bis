@@ -1,4 +1,4 @@
-import { ArrowLeft, Calendar, Check, Download, ExternalLink, Crown } from 'lucide-react';
+import { ArrowLeft, Calendar, Check, Download, ExternalLink, Crown, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
@@ -6,6 +6,9 @@ import { useUser } from '@/app/contexts/UserContext';
 import { tokenManager } from '@/utils/tokenManager';
 import { oauthHelper } from '@/utils/oauth';
 import { sessionsAPI } from '@/app/services/api';
+import { exportSessionsToICS } from '@/utils/ics-generator';
+import { useSessions } from '@/app/contexts/SessionsContext';
+import { useSquads } from '@/app/contexts/SquadsContext';
 
 interface CalendarSyncScreenProps {
   onNavigate: (screen: string) => void;
@@ -14,9 +17,12 @@ interface CalendarSyncScreenProps {
 
 export function CalendarSyncScreen({ onNavigate, showToast }: CalendarSyncScreenProps) {
   const { userProfile } = useUser();
+  const { sessions } = useSessions();
+  const { currentSquad } = useSquads();
   const isPremium = userProfile?.isPremium ?? false;
   const [connectedCalendars, setConnectedCalendars] = useState<string[]>([]);
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Check if Google Calendar is connected
   useEffect(() => {
@@ -131,14 +137,32 @@ export function CalendarSyncScreen({ onNavigate, showToast }: CalendarSyncScreen
     setConnectedCalendars(connectedCalendars.filter(id => id !== calendarId));
   };
 
-  const handleExportICS = () => {
-    if (!isPremium) {
-      showToast('Fonctionnalité Premium', 'info');
-      setTimeout(() => onNavigate('premium'), 1000);
+  const handleExportICS = async () => {
+    // Allow export for everyone (not just premium) - it's a basic feature
+    if (!sessions || sessions.length === 0) {
+      showToast('Aucune session à exporter', 'info');
       return;
     }
 
-    showToast('Fichier .ics téléchargé !', 'success');
+    setIsExporting(true);
+    try {
+      // Filter confirmed/pending sessions (not cancelled)
+      const validSessions = sessions.filter(s => s.status !== 'cancelled');
+
+      if (validSessions.length === 0) {
+        showToast('Aucune session active à exporter', 'info');
+        return;
+      }
+
+      // Export to ICS
+      exportSessionsToICS(validSessions, currentSquad?.name);
+      showToast(`${validSessions.length} session(s) exportée(s) !`, 'success');
+    } catch (error) {
+      console.error('Export ICS error:', error);
+      showToast('Erreur lors de l\'export', 'error');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   if (!isPremium) {
@@ -332,10 +356,20 @@ export function CalendarSyncScreen({ onNavigate, showToast }: CalendarSyncScreen
           <Button
             variant="ghost"
             onClick={handleExportICS}
-            className="w-full h-12 bg-white border-[0.5px] border-[var(--border-medium)] hover:border-[var(--border-strong)] rounded-xl shadow-sm font-semibold"
+            disabled={isExporting}
+            className="w-full h-12 bg-white border-[0.5px] border-[var(--border-medium)] hover:border-[var(--border-strong)] rounded-xl shadow-sm font-semibold disabled:opacity-50"
           >
-            <Download className="w-5 h-5" strokeWidth={2} />
-            Télécharger .ics
+            {isExporting ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" strokeWidth={2} />
+                Export en cours...
+              </>
+            ) : (
+              <>
+                <Download className="w-5 h-5" strokeWidth={2} />
+                Télécharger .ics ({sessions?.filter(s => s.status !== 'cancelled').length || 0} sessions)
+              </>
+            )}
           </Button>
         </div>
 
