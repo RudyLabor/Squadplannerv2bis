@@ -21,6 +21,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -61,7 +62,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, username: string, displayName?: string) => {
     setLoading(true);
     try {
-      const { user: newUser } = await authService.signUp(email, password, username, displayName);
+      const { user: authUser } = await authService.signUp(email, password, username, displayName);
+      // Fetch full profile to match User interface
+      const newUser = await authService.getCurrentUser();
       setUser(newUser);
     } catch (error) {
       console.error('Signup error:', error);
@@ -105,7 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signUp, signIn, signOut, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, signUp, signIn, signOut, refreshUser, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );

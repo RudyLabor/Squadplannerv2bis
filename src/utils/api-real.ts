@@ -1,7 +1,5 @@
 
-import { getSupabase } from '@/utils/supabase/client';
-
-const supabase = getSupabase();
+import { supabase } from '@/utils/supabase/client';
 
 // ============================================================
 // TYPES (aligned with SQL Schema)

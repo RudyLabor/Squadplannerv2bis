@@ -1,11 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { notificationsAPI } from '@/app/services/api';
 import { useAuth } from './AuthContext';
-import { createClient } from '@supabase/supabase-js';
-import { projectId, publicAnonKey } from '@/utils/supabase/info';
-
-const supabaseUrl = `https://${projectId}.supabase.co`;
-const supabase = createClient(supabaseUrl, publicAnonKey);
+import { supabase } from '@/utils/supabase/client';
 
 interface Notification {
   id: string;

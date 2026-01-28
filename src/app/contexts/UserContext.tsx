@@ -107,8 +107,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const loadProfileFromBackend = async () => {
     setIsLoadingProfile(true);
     try {
-      const { getSupabase } = await import('@/utils/supabase/client');
-      const supabase = getSupabase();
+      const { supabase } = await import('@/utils/supabase/client');
       
       const { data: { session } } = await supabase.auth.getSession();
       

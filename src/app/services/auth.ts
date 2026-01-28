@@ -1,9 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
-import { projectId, publicAnonKey } from '@/utils/supabase/info';
-
-// Initialiser le client Supabase
-const supabaseUrl = `https://${projectId}.supabase.co`;
-const supabase = createClient(supabaseUrl, publicAnonKey);
+import { supabase } from '@/utils/supabase/client';
 
 export const authService = {
   // Sign up

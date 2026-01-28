@@ -1,27 +1,16 @@
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import { projectId, publicAnonKey } from '@/utils/supabase/info';
 
-let supabaseClient: ReturnType<typeof createSupabaseClient> | null = null;
+const supabaseUrl = `https://${projectId}.supabase.co`;
 
-export function getSupabase() {
-  if (supabaseClient) {
-    return supabaseClient;
-  }
+// Singleton instance
+export const supabase = createClient(supabaseUrl, publicAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+  },
+});
 
-  const supabaseUrl = `https://${projectId}.supabase.co`;
-  
-  supabaseClient = createSupabaseClient(supabaseUrl, publicAnonKey, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-    },
-  });
-
-  return supabaseClient;
-}
-
-// Alias for compatibility
-export function createClient() {
-  return getSupabase();
-}
+// Backwards compatibility for legacy code
+export const getSupabase = () => supabase;
