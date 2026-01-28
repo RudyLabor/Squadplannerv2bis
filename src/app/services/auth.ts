@@ -18,28 +18,26 @@ export const authService = {
     if (authError) throw authError;
 
     if (authData.user) {
-      // 2. Créer l'entrée dans la table publique users si elle n'existe pas déjà (géré par trigger idéalement, mais on le force ici au cas où)
-      // Note: On vérifie d'abord si l'utilisateur existe pour éviter les doublons si le trigger est actif
-      const { data: existingUser } = await supabase
-        .from('users')
+      // 2. Créer l'entrée dans la table publique profiles si elle n'existe pas déjà (géré par trigger idéalement, mais on le force ici au cas où)
+      const { data: existingProfile } = await supabase
+        .from('profiles')
         .select('id')
         .eq('id', authData.user.id)
         .single();
 
-      if (!existingUser) {
+      if (!existingProfile) {
         const { error: profileError } = await supabase
-          .from('users')
+          .from('profiles')
           .insert({
-            id: authData.user.id, // Important: Lier l'ID auth à l'ID public
+            id: authData.user.id,
             email: email,
             username: username,
             display_name: displayName || username,
-            auth_id: authData.user.id
+            // auth_id column is redundant as id IS the auth_id in profiles table
           });
           
         if (profileError) {
           console.error('Error creating user profile:', profileError);
-          // On ne throw pas ici car le compte auth est créé, on pourra réessayer plus tard
         }
       }
     }
@@ -78,7 +76,7 @@ export const authService = {
     if (!sessionData.session?.user) return null;
 
     const { data: user, error } = await supabase
-      .from('users')
+      .from('profiles')
       .select('*')
       .eq('id', sessionData.session.user.id)
       .single();
