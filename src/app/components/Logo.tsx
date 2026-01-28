@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { usePerformanceDebug } from '@/app/hooks/usePerformanceMonitor';
 
 interface LogoProps {
