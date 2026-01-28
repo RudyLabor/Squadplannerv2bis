@@ -11,6 +11,13 @@ import { projectId, publicAnonKey } from '@/utils/supabase/info';
 
 const supabaseUrl = `https://${projectId}.supabase.co`;
 
+// Custom fetch without signal to prevent AbortError
+const customFetch: typeof fetch = (url, options = {}) => {
+  // Remove signal to prevent timeout errors
+  const { signal, ...restOptions } = options as RequestInit;
+  return fetch(url, restOptions);
+};
+
 // Create typed Supabase client with improved error handling
 export const supabase = createClient<Database>(supabaseUrl, publicAnonKey, {
   auth: {
@@ -31,14 +38,7 @@ export const supabase = createClient<Database>(supabaseUrl, publicAnonKey, {
     headers: {
       'x-application-name': 'squad-planner',
     },
-    // Increase fetch timeout to prevent AbortError
-    fetch: (url, options = {}) => {
-      return fetch(url, {
-        ...options,
-        signal: options.signal,
-        // Don't set timeout on the signal to avoid AbortError
-      });
-    },
+    fetch: customFetch,
   },
 });
 

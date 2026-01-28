@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clear Storage - Squad Planner</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 500px;
+      text-align: center;
+    }
+    h1 {
+      margin: 0 0 1rem 0;
+      color: #333;
+    }
+    p {
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    button:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+    }
+    .success {
+      color: #22c55e;
+      font-weight: 600;
+      margin-top: 1rem;
+      display: none;
+    }
+    .info {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-top: 1rem;
+      font-size: 0.875rem;
+      color: #0369a1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧹 Nettoyer le Stockage</h1>
+    <p>
+      Si vous rencontrez des erreurs "AbortError" lors de la connexion,
+      cette page nettoiera toutes les données de session stockées localement.
+    </p>
+
+    <button onclick="clearStorage()">Nettoyer Maintenant</button>
+
+    <div class="success" id="success">
+      ✅ Stockage nettoyé avec succès !<br>
+      Vous pouvez maintenant <a href="/" style="color: #667eea;">retourner à l'application</a>
+    </div>
+
+    <div class="info">
+      <strong>Ce qui sera nettoyé:</strong><br>
+      • Sessions Supabase Auth<br>
+      • Tokens d'accès stockés<br>
+      • Données de cache localStorage
+    </div>
+  </div>
+
+  <script>
+    function clearStorage() {
+      try {
+        // Clear all localStorage
+        localStorage.clear();
+
+        // Clear all sessionStorage
+        sessionStorage.clear();
+
+        // Clear all cookies
+        document.cookie.split(";").forEach(function(c) {
+          document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
+
+        // Show success message
+        document.getElementById('success').style.display = 'block';
+
+        console.log('✅ Storage cleared successfully');
+
+        // Redirect to home after 3 seconds
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 3000);
+      } catch (error) {
+        console.error('Error clearing storage:', error);
+        alert('Erreur lors du nettoyage: ' + error.message);
+      }
+    }
+  </script>
+</body>
+</html>
