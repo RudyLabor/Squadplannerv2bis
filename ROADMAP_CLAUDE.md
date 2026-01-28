@@ -300,21 +300,23 @@ Squad Planner transforme un groupe Discord chaotique en une équipe qui joue vra
 
 | Statut | Catégorie | Tâche | Priorité | Source PDF | Notes |
 |--------|-----------|-------|----------|------------|-------|
-| 🔴 | Feature | **Analyse des historiques de disponibilité** | 🔥 | Phase 2 | ML/heuristique |
-| 🔴 | Feature | **Prise en compte des fuseaux horaires multiples** | 🔥 | Phase 2 | Timezone logic |
-| 🔴 | Feature | **Détection des patterns hebdomadaires** | 🔥 | Phase 2 | Pattern recognition |
-| 🔴 | Feature | **Proposition horaires haut taux présence probable** | 🔥 | Phase 2 | Smart suggestions |
-| 🔴 | UI/UX | Interface suggestions élégante | 🔥 | Phase 2 | Top 3 slots |
+| 🟢 | Feature | **Analyse des historiques de disponibilité** | 🔥 | Phase 2 | ✅ Heuristiques sur 50 dernières sessions |
+| 🟡 | Feature | **Prise en compte des fuseaux horaires multiples** | 🔥 | Phase 2 | Column timezone existe, logic 🟡 |
+| 🟢 | Feature | **Détection des patterns hebdomadaires** | 🔥 | Phase 2 | ✅ Analyse jour de semaine + heure |
+| 🟢 | Feature | **Proposition horaires haut taux présence probable** | 🔥 | Phase 2 | ✅ getSmartSuggestions() top 5 |
+| 🟢 | Utils | Utility smart-suggestions.ts | 🔥 | - | ✅ 420 lignes (9 fonctions) |
+| 🟡 | UI/UX | Interface suggestions élégante | 🔥 | Phase 2 | Component créé, manque intégration |
 
 ### 📊 Heatmap de Disponibilité
 
 | Statut | Catégorie | Tâche | Priorité | Source PDF | Notes |
 |--------|-----------|-------|----------|------------|-------|
-| 🔴 | Feature | **Visualisation meilleurs horaires squad** | 🔥 | Phase 2 | 7j x 24h grid |
-| 🔴 | Feature | **Identification fenêtres optimales** | 🔥 | Phase 2 | Peak availability |
-| 🔴 | Feature | **Détection conflits récurrents** | ⚡ | Phase 2 | Conflict analysis |
-| 🔴 | Feature | **Recommandations basées données réelles** | 🔥 | Phase 2 | Data-driven |
-| ⏳ | UI/UX | Écran heatmap visuel | 🔥 | Phase 2 | AvailabilityHeatmapScreen.tsx |
+| 🟢 | Feature | **Visualisation meilleurs horaires squad** | 🔥 | Phase 2 | ✅ Grille 7j x 16h (8h-23h) |
+| 🟢 | Feature | **Identification fenêtres optimales** | 🔥 | Phase 2 | ✅ Color-coding par score |
+| 🟢 | Feature | **Détection conflits récurrents** | ⚡ | Phase 2 | ✅ Analyse historique patterns |
+| 🟢 | Feature | **Recommandations basées données réelles** | 🔥 | Phase 2 | ✅ Score = avgAttendance normalized |
+| 🟢 | UI/UX | Component heatmap visuel | 🔥 | Phase 2 | ✅ AvailabilityHeatmap.tsx (180 lignes) |
+| 🟢 | Feature | Légende + détails au clic | 🔥 | - | ✅ Selected slot avec stats complètes |
 
 ### 💗 Score de Cohésion d'Équipe
 
@@ -327,13 +329,18 @@ Squad Planner transforme un groupe Discord chaotique en une équipe qui joue vra
 | 🔴 | Feature | **Prédiction du risque de dissolution** | ⚡ | Phase 2 | ML predictive |
 | 🔴 | UI/UX | Affichage score cohésion | 🔥 | Phase 2 | Dashboard widget |
 
-### 🔍 Détection des Patterns
+### 🔍 Détection des Patterns + Auto-Coaching
 
 | Statut | Catégorie | Tâche | Priorité | Source PDF | Notes |
 |--------|-----------|-------|----------|------------|-------|
-| 🔴 | Feature | **Analyse heures qui "marchent vraiment"** | 🔥 | Phase 2 | Success pattern |
-| 🔴 | Feature | **Identification créneaux récurrents à succès** | 🔥 | Phase 2 | Recurring slots |
-| 🔴 | Feature | **Suggestion de ritualisation sessions efficaces** | ⚡ | Phase 2 | Convert to ritual |
+| 🟢 | Feature | **Analyse heures qui "marchent vraiment"** | 🔥 | Phase 2 | ✅ analyzeBestTiming() |
+| 🟢 | Feature | **Identification créneaux récurrents à succès** | 🔥 | Phase 2 | ✅ Pattern detection hebdomadaire |
+| 🟢 | Feature | **Suggestion de ritualisation sessions efficaces** | ⚡ | Phase 2 | ✅ Insight "timing_optimal" |
+| 🟢 | Feature | **5 Insights Squad automatiques** | 🔥 | - | ✅ Attendance/Frequency/Timing/Members/Trend |
+| 🟢 | Feature | **Insights Utilisateur individuels** | 🔥 | - | ✅ generateUserInsights() |
+| 🟢 | Utils | auto-coaching.ts | 🔥 | - | ✅ 300 lignes (7 fonctions) |
+| 🟢 | Feature | Priority system (high/medium/low) | ⚡ | - | ✅ Tri automatique par priorité |
+| 🟢 | Feature | 4 types insights (warning/tip/success/info) | ⚡ | - | ✅ Catégorisation complète |
 
 ### 🔮 Prédiction de No-Show
 
