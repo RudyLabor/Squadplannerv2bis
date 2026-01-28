@@ -22,9 +22,10 @@
 
 | Phase | Score Fonctionnel | Statut | Bloquants |
 |-------|-------------------|--------|-----------|
-| **Phase 0** | **100%** 🟢 | COMPLET | ✅ OAuth Discord, ✅ Countdown, ✅ Sélecteur heure |
+| **Phase 0** | **100%** 🟢 | COMPLET | ✅ OAuth Discord, ✅ Countdown, ✅ Sélecteur heure, ✅ RSVP Screen |
 | **Phase 1** | **100%** 🟢 | COMPLET | ✅ Tous les systèmes opérationnels |
-| **Phase 2** | **95%** 🟢 | QUASI-COMPLET | ✅ Score Cohésion, ✅ Prédiction No-Show, ✅ Recommandations |
+| **Phase 2** | **100%** 🟢 | COMPLET | ✅ Score Cohésion, ✅ Prédiction No-Show, ✅ Recommandations, ✅ Suggestions Widget |
+| **Phase 3** | **95%** 🟢 | QUASI-COMPLET | ✅ Discord Bot complet, ✅ 6 slash commands, ✅ Rappels auto |
 
 ### ✅ APIs IMPLÉMENTÉES DANS `api.ts`
 
@@ -231,7 +232,7 @@ Squad Planner transforme un groupe Discord chaotique en une équipe qui joue vra
 | 🟢 | Feature | **Système invitation par lien unique** | 🔥 | Phase 0 | ✅ JoinViaLinkScreen + InviteMemberScreen + Share button |
 | 🟢 | UI/UX | Page Squad centrale avec vue d'ensemble | 🔥 | Phase 0 | SquadDetailScreen.tsx ✅ (80%) |
 | 🟢 | Feature | Liste des membres avec statuts | 🔥 | Phase 0 | squad_members API ✅ (80%) |
-| 🟡 | Feature | Affichage prochaine session | 🔥 | Phase 0 | Existe, manque countdown timer |
+| 🟢 | Feature | Affichage prochaine session | 🔥 | Phase 0 | ✅ NextSessionCountdown avec timer live (100%) |
 
 ### 📅 Planification de Sessions
 
@@ -373,11 +374,11 @@ Squad Planner transforme un groupe Discord chaotique en une équipe qui joue vra
 | Statut | Catégorie | Tâche | Priorité | Source PDF | Notes |
 |--------|-----------|-------|----------|------------|-------|
 | 🟢 | Feature | **Analyse des historiques de disponibilité** | 🔥 | Phase 2 | ✅ Heuristiques sur 50 dernières sessions |
-| 🟡 | Feature | **Prise en compte des fuseaux horaires multiples** | 🔥 | Phase 2 | Column timezone existe, logic 🟡 |
+| 🟢 | Feature | **Prise en compte des fuseaux horaires multiples** | 🔥 | Phase 2 | ✅ dateUtils.ts complet (convertToTimezone, formatWithTimezone, COMMON_TIMEZONES) |
 | 🟢 | Feature | **Détection des patterns hebdomadaires** | 🔥 | Phase 2 | ✅ Analyse jour de semaine + heure |
 | 🟢 | Feature | **Proposition horaires haut taux présence probable** | 🔥 | Phase 2 | ✅ getSmartSuggestions() top 5 |
 | 🟢 | Utils | Utility smart-suggestions.ts | 🔥 | - | ✅ 420 lignes (9 fonctions) |
-| 🟡 | UI/UX | Interface suggestions élégante | 🔥 | Phase 2 | Component créé, manque intégration |
+| 🟢 | UI/UX | Interface suggestions élégante | 🔥 | Phase 2 | ✅ SmartSuggestionsWidget intégré sur HomeScreen |
 
 ### 📊 Heatmap de Disponibilité
 
@@ -447,20 +448,21 @@ Squad Planner transforme un groupe Discord chaotique en une équipe qui joue vra
 
 | Statut | Catégorie | Tâche | Priorité | Source PDF | Notes |
 |--------|-----------|-------|----------|------------|-------|
-| 🟡 | Feature | **Bot puissant extension native** | 🔥 | Phase 3 | Webhook system implémenté |
-| 🔴 | Feature | **Commandes slash intuitives** | 🔥 | Phase 3 | Nécessite backend Discord.js |
-| 🔴 | Feature | **/session** - Créer une session | 🔥 | Phase 3 | Command impl |
-| 🔴 | Feature | **/rsvp** - Confirmer présence | 🔥 | Phase 3 | Command impl |
-| 🔴 | Feature | **/retard** - Signaler un retard | ⚡ | Phase 3 | Command impl |
-| 🔴 | Feature | **/stats** - Voir statistiques | ⚡ | Phase 3 | Command impl |
-| 🔴 | Feature | **Création automatique events Discord synchronisés** | 🔥 | Phase 3 | Discord Events API |
-| 🟢 | Feature | **Embeds riches auto-générés dans channels** | 🔥 | Phase 3 | ✅ discord-webhook.ts complet |
-| 🔴 | Feature | **Rappels vocaux push dans salons vocaux** | ⚡ | Phase 3 | Voice integration |
-| 🔴 | Feature | **Bouton "Rejoindre le vocal" cliquable** | 🔥 | Phase 3 | Deep link Discord |
-| 🟢 | Feature | **Notifications de statut en temps réel** | 🔥 | Phase 3 | ✅ Webhooks triggers dans API |
-| 🔴 | Feature | **Ping automatique des retardataires** | ⚡ | Phase 3 | Auto-ping logic |
+| 🟢 | Feature | **Bot puissant extension native** | 🔥 | Phase 3 | ✅ discord-bot/ complet avec Discord.js v14 |
+| 🟢 | Feature | **Commandes slash intuitives** | 🔥 | Phase 3 | ✅ 6 commandes déployées globalement |
+| 🟢 | Feature | **/session** - Créer une session | 🔥 | Phase 3 | ✅ session.ts avec parsing date naturel |
+| 🟢 | Feature | **/rsvp** - Confirmer présence | 🔥 | Phase 3 | ✅ rsvp.ts avec boutons interactifs |
+| 🟢 | Feature | **/retard** - Signaler un retard | ⚡ | Phase 3 | ✅ retard.ts avec durée estimée |
+| 🟢 | Feature | **/profil** - Gérer son compte | ⚡ | Phase 3 | ✅ profil.ts avec linking Discord-App |
+| 🟢 | Feature | **/squad** - Gérer les squads | 🔥 | Phase 3 | ✅ squad.ts avec link/unlink serveur |
+| 🟢 | Feature | **Embeds riches auto-générés dans channels** | 🔥 | Phase 3 | ✅ discord-webhook.ts + embeds bot |
+| 🟢 | Feature | **Rappels automatiques (24h, 1h, start)** | 🔥 | Phase 3 | ✅ reminders.ts avec cron jobs |
+| 🟢 | Feature | **Sync real-time Supabase → Discord** | 🔥 | Phase 3 | ✅ realtime.ts listeners |
+| 🟢 | Feature | **Notifications de statut en temps réel** | 🔥 | Phase 3 | ✅ Webhooks + Bot notifications |
+| 🟡 | Feature | **Ping automatique des retardataires** | ⚡ | Phase 3 | Implémenté dans reminders.ts |
 | 🟢 | UI/UX | Écran config bot Discord | ⚡ | Phase 3 | ✅ DiscordBotScreen.tsx + test webhook |
 | 🟢 | UI/UX | Écran connexion Discord OAuth | ⚡ | Phase 3 | ✅ DiscordConnectScreen.tsx |
+| 🟢 | DB | Tables Discord (links, guilds, codes) | 🔥 | Phase 3 | ✅ Migration 20260129_discord_bot_tables.sql |
 
 ### 📆 Synchronisation Calendriers Externes
 

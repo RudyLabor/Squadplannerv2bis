@@ -34,6 +34,7 @@ import {
   SquadCard,
 } from "@/app/components/ui/DesignSystem";
 import { getCountdownString, getRelativeTimeString, isSessionSoon } from "@/utils/dateUtils";
+import { SmartSuggestionsWidget } from "@/app/components/SmartSuggestionsWidget";
 
 interface HomeScreenProps {
   onNavigate: (screen: string, data?: any) => void;
@@ -288,6 +289,9 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         {nextSession && (
           <NextSessionCountdown session={nextSession} onNavigate={onNavigate} />
         )}
+
+        {/* Smart Suggestions Widget */}
+        <SmartSuggestionsWidget onNavigate={onNavigate} maxSuggestions={2} />
 
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-3 mb-4">

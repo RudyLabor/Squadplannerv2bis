@@ -41,12 +41,14 @@ export const supabase = createClient(
 );
 
 // Initialize Discord client
+// Note: GuildMembers requires Privileged Intent in Discord Developer Portal
+// For now, using only non-privileged intents
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildVoiceStates,
+    // GatewayIntentBits.GuildMembers, // Requires privileged intent
+    // GatewayIntentBits.GuildVoiceStates, // Optional
   ],
 });
 
