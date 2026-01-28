@@ -5,8 +5,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Users } from "lucide-react";
-import { squadsAPI } from "@/utils/api";
-import { useAuth } from "@/app/contexts/AuthContext";
+import { useSquads } from "@/app/contexts/SquadsContext";
 import {
   PageHeader,
   SearchBar,
@@ -20,66 +19,37 @@ interface SquadsScreenProps {
 }
 
 export function SquadsScreen({ onNavigate }: SquadsScreenProps) {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { squads, loading: squadsLoading, refreshSquads } = useSquads();
   const [searchQuery, setSearchQuery] = useState("");
-  const [squads, setSquads] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [transformedSquads, setTransformedSquads] = useState<any[]>([]);
 
-  // Load squads
+  // Initial load
   useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-      loadSquads();
-    } else if (!authLoading) {
-      setIsLoading(false);
-    }
-  }, [authLoading, isAuthenticated]);
+    refreshSquads();
+  }, []);
 
-  const loadSquads = async () => {
-    setIsLoading(true);
-    try {
-      const { squads: userSquads } = await squadsAPI.getSquads();
-      
-      // Transform squads for display
-      const transformedSquads = (userSquads || []).map((squad: any) => ({
+  // Transform squads whenever they change
+  useEffect(() => {
+    if (squads) {
+      const transformed = squads.map((squad: any) => ({
         ...squad,
-        membersCount: Array.isArray(squad.members) ? squad.members.length : (squad.members || 0),
-        reliabilityScore: squad.reliabilityScore || Math.floor(Math.random() * 20) + 80,
-        activeSessions: squad.activeSessions || Math.floor(Math.random() * 5),
-        nextSessionText: formatNextSession(squad.nextSession),
+        membersCount: squad.total_members || 0,
+        reliabilityScore: squad.reliability_score || 85,
+        activeSessions: 0, // Could be linked to sessions if needed
+        nextSessionText: squad.next_session_date ? "Prochainement" : undefined,
       }));
-      
-      setSquads(transformedSquads);
-    } catch (error) {
-      console.error("Load squads error:", error);
-      setSquads([]);
-    } finally {
-      setIsLoading(false);
+      setTransformedSquads(transformed);
     }
-  };
+  }, [squads]);
 
-  const formatNextSession = (nextSession: any): string | undefined => {
-    if (!nextSession) return undefined;
-    if (typeof nextSession === 'string') return nextSession;
-    if (nextSession.date) {
-      const date = new Date(nextSession.date);
-      return date.toLocaleDateString('fr-FR', { 
-        month: 'short', 
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
-    return 'Prochainement';
-  };
-
-  const filteredSquads = squads.filter(
+  const filteredSquads = transformedSquads.filter(
     (squad) =>
       squad.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       squad.game.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Loading state
-  if (isLoading) {
+  if (squadsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

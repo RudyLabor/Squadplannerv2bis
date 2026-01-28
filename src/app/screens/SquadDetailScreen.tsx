@@ -16,7 +16,8 @@ import {
   Crown,
   Shield,
 } from "lucide-react";
-import { squadsAPI, sessionsAPI } from "@/utils/api";
+import { useSquads } from "@/app/contexts/SquadsContext";
+import { useSessions } from "@/app/contexts/SessionsContext";
 import { ActionButton, Avatar, Badge } from "@/app/components/ui/DesignSystem";
 
 interface SquadDetailScreenProps {
@@ -30,48 +31,30 @@ export function SquadDetailScreen({
   showToast,
   data,
 }: SquadDetailScreenProps) {
-  const [squad, setSquad] = useState<any>(null);
-  const [sessions, setSessions] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { currentSquad: squad, getSquadById, loading: squadLoading } = useSquads();
+  const { sessions, getSquadSessions, rsvpToSession, loading: sessionsLoading } = useSessions();
 
   useEffect(() => {
     if (data?.squadId) {
-      loadSquadData();
+      getSquadById(data.squadId);
+      getSquadSessions(data.squadId, 'upcoming');
     }
   }, [data?.squadId]);
 
-  const loadSquadData = async () => {
-    setIsLoading(true);
+  const handleRSVP = async (sessionId: string, response: "yes" | "no") => {
     try {
-      const [squadResponse, sessionsResponse] = await Promise.all([
-        squadsAPI.getSquad(data!.squadId!),
-        sessionsAPI.getSessions(),
-      ]);
-
-      const squadData = squadResponse.squad || squadResponse;
-      setSquad(squadData);
-
-      // Filter sessions for this squad
-      const squadSessions = (sessionsResponse.sessions || []).filter(
-        (s: any) => s.squadId === data!.squadId
+      await rsvpToSession(sessionId, response);
+      showToast(
+        response === "yes" ? "Participation confirmée !" : "Absence notée",
+        "success"
       );
-      setSessions(squadSessions);
-    } catch (error) {
-      console.error("Load squad error:", error);
-    } finally {
-      setIsLoading(false);
+    } catch (err: any) {
+      showToast("Erreur lors de l'RSVP", "error");
     }
   };
 
-  const handleRSVP = async (response: "yes" | "no") => {
-    showToast(
-      response === "yes" ? "Participation confirmée !" : "Absence notée",
-      "success"
-    );
-  };
-
   // Loading state
-  if (isLoading) {
+  if (squadLoading || sessionsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -135,31 +118,28 @@ export function SquadDetailScreen({
             <>
               <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
                 <Clock className="w-4 h-4" />
-                {new Date(nextSession.date).toLocaleDateString("fr-FR", {
+                {new Date(nextSession.scheduled_date).toLocaleDateString("fr-FR", {
                   year: "numeric",
                   month: "2-digit",
                   day: "2-digit",
                 })}{" "}
                 à{" "}
-                {new Date(nextSession.date).toLocaleTimeString("fr-FR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                {nextSession.scheduled_time}
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
                 <Users className="w-4 h-4" />
-                {nextSession.confirmedCount || 0}/{nextSession.totalSlots || 5}{" "}
+                {nextSession.rsvps?.filter((r: any) => r.response === 'yes').length || 0}/{nextSession.required_players || 5}{" "}
                 confirmés
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={() => handleRSVP("yes")}
+                  onClick={() => handleRSVP(nextSession.id, "yes")}
                   className="flex-1 h-10 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-full transition-colors"
                 >
                   Je suis dispo
                 </button>
                 <button
-                  onClick={() => handleRSVP("no")}
+                  onClick={() => handleRSVP(nextSession.id, "no")}
                   className="px-4 h-10 text-red-500 hover:bg-red-50 font-medium rounded-full transition-colors"
                 >
                   Indisponible

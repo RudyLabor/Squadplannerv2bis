@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { useNavigate } from 'react-router-dom';
 import { usePerformanceDebug } from '@/app/hooks/usePerformanceMonitor';
 
 interface LogoProps {
@@ -6,16 +6,15 @@ interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
   animated?: boolean;
   className?: string;
-  onNavigate?: (screen: string) => void;
 }
 
 export function Logo({ 
   variant = 'full', 
   size = 'md', 
   animated = false,
-  className = '',
-  onNavigate
+  className = ''
 }: LogoProps) {
+  const navigate = useNavigate();
   const { handleSecretTap, isMonitoring } = usePerformanceDebug();
   
   // Header variant - MINIMALISTE 2026
@@ -25,10 +24,8 @@ export function Logo({
         onClick={(e) => {
           // Secret tap for performance monitoring
           handleSecretTap();
-          // Navigate to home if onNavigate is provided
-          if (onNavigate) {
-            onNavigate('home');
-          }
+          // Navigate to home
+          navigate('/home');
         }}
         className={`relative inline-flex items-center gap-1.5 ${className} cursor-pointer`}
         whileHover={animated ? { scale: 1.02 } : undefined}

@@ -47,17 +47,29 @@ export function ProposeSessionScreen({
     loadSquads();
   }, []);
 
+  const calculateEndTime = (start: string, durationStr: string) => {
+    const startDate = new Date(start);
+    const hours = parseInt(durationStr.replace('h', ''));
+    startDate.setHours(startDate.getHours() + hours);
+    return startDate.toISOString();
+  };
+
   const loadSquads = async () => {
     try {
       const response = await squadsAPI.getSquads();
-      setSquads(response.squads || []);
+      const loadedSquads = response.squads || []; // Access the nested squads array
+      setSquads(loadedSquads);
+      
+      // If a squad was passed via navigation, keep it.
+      // Otherwise, if no squad is selected yet, default to the first one available.
       if (data?.squadId) {
         setSelectedSquad(data.squadId);
-      } else if (response.squads?.length > 0) {
-        setSelectedSquad(response.squads[0].id);
+      } else if (!selectedSquad && loadedSquads.length > 0) {
+        setSelectedSquad(loadedSquads[0].id);
       }
     } catch (error) {
       console.error("Load squads error:", error);
+      showToast("Impossible de charger vos squads", "error");
     }
   };
 
@@ -78,13 +90,11 @@ export function ProposeSessionScreen({
     setIsCreating(true);
     try {
       const game = GAMES.find((g) => g.id === selectedGame);
-      await sessionsAPI.createSession({
-        squadId: selectedSquad,
+      await sessionsAPI.createSession(selectedSquad, {
         title: title.trim(),
         game: game?.name || selectedGame || "Non spécifié",
-        date: `${date}T${time}:00`,
-        duration,
-        totalSlots: playerCount,
+        start_time: `${date}T${time}:00`,
+        end_time: calculateEndTime(`${date}T${time}:00`, duration),
         description: comment,
       });
       showToast("Session créée avec succès !", "success");

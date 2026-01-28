@@ -7,7 +7,7 @@ import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 import { useHaptic } from '@/app/hooks/useHaptic';
 import { useUser } from '@/app/contexts/UserContext';
 import { useAuth } from '@/app/contexts/AuthContext';
-import { projectId, publicAnonKey } from '@/utils/supabase/info';
+import { uploadService } from '@/app/services/upload';
 
 interface EditProfileScreenProps {
   onNavigate: (screen: string, data?: any) => void;
@@ -18,7 +18,7 @@ export function EditProfileScreen({ onNavigate, showToast }: EditProfileScreenPr
   const { impact } = useHaptic();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { userProfile, updateUserProfile } = useUser();
-  const { getAccessToken } = useAuth();
+  const { user } = useAuth();
 
   // Local state for editing
   const [formData, setFormData] = useState({
@@ -30,11 +30,12 @@ export function EditProfileScreen({ onNavigate, showToast }: EditProfileScreenPr
     birthday: userProfile.birthday,
     favoriteGame: userProfile.favoriteGame,
     playStyle: userProfile.playStyle,
-    availableHours: userProfile.availableHours,
   });
 
   const [avatarUrl, setAvatarUrl] = useState(userProfile.avatarUrl);
+  const [pendingAvatarFile, setPendingAvatarFile] = useState<File | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleChange = (field: string, value: string) => {
     setFormData({ ...formData, [field]: value });
@@ -43,36 +44,47 @@ export function EditProfileScreen({ onNavigate, showToast }: EditProfileScreenPr
 
   const handleSave = async () => {
     impact();
+    setIsSaving(true);
     
     try {
       console.log('💾 Saving profile...');
+      let finalAvatarUrl = avatarUrl;
 
-      // Use the API method which handles token refresh automatically
+      // 1. Upload new avatar if exists
+      if (pendingAvatarFile && user) {
+        showToast('Téléchargement de l\'avatar...', 'info');
+        finalAvatarUrl = await uploadService.uploadAvatar(pendingAvatarFile, user.id);
+      }
+
+      // 2. Update profile data
       const { authAPI } = await import('@/utils/api');
       const data = await authAPI.updateProfile({
-        ...formData,
-        avatarUrl,
+        display_name: formData.displayName,
+        username: formData.username,
+        email: formData.email,
+        bio: formData.bio,
+        location: formData.location,
+        birthday: formData.birthday,
+        favorite_game: formData.favoriteGame,
+        play_style: formData.playStyle,
+        avatar_url: finalAvatarUrl,
       });
 
       console.log('✅ Profile saved:', data);
 
-      // Save to global context (and localStorage) AFTER backend success
-      updateUserProfile({ ...formData, avatarUrl });
+      // 3. Update global context
+      updateUserProfile({ ...formData, avatarUrl: finalAvatarUrl });
       showToast('Profil mis à jour avec succès ! 🎉', 'success');
       setHasChanges(false);
+      setPendingAvatarFile(null);
       
       // Navigate back
       setTimeout(() => onNavigate('profile'), 500);
     } catch (error: any) {
       console.error('❌ Save profile error:', error);
-      
-      // Check if it's an auth error
-      if (error.message?.includes('Session') || error.message?.includes('reconnecter')) {
-        showToast('Session expirée. Veuillez vous reconnecter.', 'error');
-        onNavigate('login');
-      } else {
-        showToast(error.message || 'Erreur lors de la sauvegarde', 'error');
-      }
+      showToast(error.message || 'Erreur lors de la sauvegarde', 'error');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -101,14 +113,11 @@ export function EditProfileScreen({ onNavigate, showToast }: EditProfileScreenPr
     }
 
     // Create preview URL
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const imageUrl = event.target?.result as string;
-      setAvatarUrl(imageUrl);
-      setHasChanges(true);
-      showToast('Photo de profil mise à jour ! 📸', 'success');
-    };
-    reader.readAsDataURL(file);
+    const previewUrl = URL.createObjectURL(file);
+    setAvatarUrl(previewUrl);
+    setPendingAvatarFile(file);
+    setHasChanges(true);
+    showToast('Photo de profil sélectionnée ! 📸', 'info');
   };
 
   const handleDeleteAccount = () => {
@@ -142,15 +151,19 @@ export function EditProfileScreen({ onNavigate, showToast }: EditProfileScreenPr
           
           <Button
             onClick={handleSave}
-            disabled={!hasChanges}
+            disabled={!hasChanges || isSaving}
             className={`h-10 px-6 text-sm font-semibold rounded-2xl transition-all duration-200 ${
-              hasChanges
+              hasChanges && !isSaving
                 ? 'bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] hover:from-[var(--primary-600)] hover:to-[var(--primary-700)] text-white shadow-lg shadow-[var(--primary-500)]/20 hover:shadow-xl hover:shadow-[var(--primary-500)]/30'
                 : 'bg-[var(--bg-elevated)] text-[var(--fg-tertiary)] cursor-not-allowed'
             }`}
           >
-            <Save className="w-4 h-4" strokeWidth={2} />
-            Enregistrer
+            {isSaving ? (
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Save className="w-4 h-4" strokeWidth={2} />
+            )}
+            {isSaving ? 'Envoi...' : 'Enregistrer'}
           </Button>
         </div>
       </div>
@@ -360,16 +373,6 @@ export function EditProfileScreen({ onNavigate, showToast }: EditProfileScreenPr
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[var(--fg-secondary)] mb-2">
-                <Clock className="w-4 h-4 inline mr-1.5" strokeWidth={2} />
-                Horaires de disponibilité
-              </label>
-              <Input
-                value={formData.availableHours}
-                onChange={(e) => handleChange('availableHours', e.target.value)}
-                placeholder="Ex: 20:00 - 00:00"
-                className="rounded-2xl"
-              />
               <p className="text-xs text-[var(--fg-tertiary)] mt-1.5">
                 Aide votre squad à planifier des sessions
               </p>

@@ -25,111 +25,15 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
     setIsLoading(true);
 
     try {
-      console.log('🔑 Attempting login with:', { email, passwordLength: password.length });
       await signIn(email, password);
-      
-      console.log('✅ signIn completed successfully');
-      
-      const isPremium = true;
-      
-      console.log('📞 Calling onLogin callback');
-      onLogin?.(email, isPremium);
-      
-      console.log('🎉 Showing success toast');
-      showToast?.(`Bienvenue ${email.split('@')[0]} ! 🎮`, 'success');
-      
-      console.log('🚀 Navigating to home');
+      onLogin?.(email, true);
+      showToast?.(`Bienvenue ! 🎮`, 'success');
       onNavigate?.('home');
-      
-      console.log('✅ Login flow completed');
     } catch (error: any) {
-      console.error('❌ Login error details:', {
-        message: error.message,
-        name: error.name,
-        status: error.status,
-        code: error.code,
-        fullError: error
-      });
-      
       const errorMessage = error.message || 'Erreur lors de la connexion';
-      
-      if (errorMessage.includes('Invalid login credentials') || 
-          errorMessage.includes('Invalid') || 
-          errorMessage.includes('credentials')) {
-        showToast?.(
-          `Identifiants incorrects. Vérifiez votre email et mot de passe. Email: ${email}`, 
-          'error'
-        );
-      } else if (errorMessage.includes('Email not confirmed')) {
-        showToast?.('Email non confirmé. Veuillez vérifier votre boîte mail.', 'error');
-      } else {
-        showToast?.(`Erreur: ${errorMessage}`, 'error');
-      }
+      showToast?.(`Erreur de connexion : ${errorMessage}`, 'error');
     } finally {
       setIsLoading(false);
-      console.log('🏁 handleLogin completed (loading=false)');
-    }
-  };
-
-  const handleDemoLogin = async () => {
-    const demoEmail = 'demo@squadplanner.com';
-    const demoPassword = 'demo123456';
-    
-    console.log('🚀 Starting demo login...');
-    setEmail(demoEmail);
-    setPassword(demoPassword);
-    setIsLoading(true);
-    
-    try {
-      console.log('🔑 Attempting to sign in with demo account...');
-      await signIn(demoEmail, demoPassword);
-      console.log('✅ Demo login successful!');
-      onLogin?.(demoEmail, true);
-      showToast?.('Connexion démo réussie ! 🚀', 'success');
-      onNavigate?.('home');
-    } catch (error: any) {
-      console.log('❌ Demo login failed:', error.message);
-      console.log('🔄 Trying to create demo account...');
-      
-      try {
-        console.log('📝 Creating new demo user...');
-        await signUp(demoEmail, demoPassword, 'Demo User', '🎮');
-        
-        console.log('✅ Demo user created and signed in!');
-        onLogin?.(demoEmail, true);
-        showToast?.('Compte démo créé et connecté ! 🚀', 'success');
-        onNavigate?.('home');
-      } catch (signupError: any) {
-        console.error('❌ Demo account creation failed:', signupError);
-        console.error('Error details:', {
-          message: signupError.message,
-          name: signupError.name,
-          stack: signupError.stack
-        });
-        
-        if (signupError.message?.includes('already been registered') || signupError.message?.includes('already exists')) {
-          console.log('⚠️ Demo account exists but password mismatch. Trying with unique email...');
-          
-          const uniqueDemoEmail = `demo-${Date.now()}@squadplanner.com`;
-          const uniqueDemoPassword = 'demo123456';
-          
-          try {
-            console.log('📝 Creating unique demo user:', uniqueDemoEmail);
-            await signUp(uniqueDemoEmail, uniqueDemoPassword, 'Demo User', '🎮');
-            onLogin?.(uniqueDemoEmail, true);
-            showToast?.('Session démo créée ! 🚀', 'success');
-            onNavigate?.('home');
-          } catch (uniqueError: any) {
-            console.error('❌ Failed to create unique demo account:', uniqueError);
-            showToast?.('Erreur de connexion démo. Veuillez créer un compte.', 'error');
-          }
-        } else {
-          showToast?.('Erreur : ' + signupError.message, 'error');
-        }
-      }
-    } finally {
-      setIsLoading(false);
-      console.log('🏁 Demo login flow completed');
     }
   };
 

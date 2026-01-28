@@ -40,39 +40,25 @@ export function ProfileScreen({
   onNavigate,
   showToast,
   onLogout,
-  userEmail,
-  userName,
-  isPremium = false,
 }: ProfileScreenProps) {
-  const { user } = useAuth();
-  const [profile, setProfile] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, signOut, loading: authLoading } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
+  const displayName = user?.display_name || user?.username || user?.email?.split("@")[0] || "Joueur";
+  const displayEmail = user?.email || "";
+  const reliability = user?.reliability_score || 0;
 
-  const loadProfile = async () => {
-    setIsLoading(true);
+  const handleLogout = async () => {
     try {
-      const { authAPI } = await import("@/utils/api");
-      const response = await authAPI.getProfile();
-      const userData = response.user || response;
-      setProfile(userData);
+      await signOut();
+      onLogout?.();
     } catch (error) {
-      console.error("Load profile error:", error);
-    } finally {
-      setIsLoading(false);
+      showToast("Erreur lors de la déconnexion", "error");
     }
   };
 
-  const displayName = profile?.name || userName || userEmail?.split("@")[0] || "Joueur";
-  const displayEmail = profile?.email || userEmail || "";
-  const stats = profile?.stats || {};
-  const level = profile?.level || 47;
-
   // Loading state
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -101,15 +87,15 @@ export function ProfileScreen({
         {/* Profile Header */}
         <div className="flex items-center gap-4 mb-6">
           <Avatar
-            src={profile?.avatar}
+            src={user?.avatar_url}
             name={displayName}
-            level={level}
+            level={47} // Keep hardcoded level for now or use user meta
             size="xl"
           />
           <div>
             <h2 className="text-xl font-bold text-gray-900">{displayName}</h2>
             <p className="text-sm text-gray-500">
-              Shotcaller • Niveau {level}
+              Shotcaller • Niveau 47
             </p>
             <p className="text-xs text-gray-400">{displayEmail}</p>
           </div>
@@ -120,28 +106,28 @@ export function ProfileScreen({
           <div className="bg-white rounded-2xl p-4 border border-gray-100">
             <TrendingUp className="w-5 h-5 text-gray-400 mb-2" />
             <div className="text-2xl font-bold text-gray-900">
-              {stats.reliabilityScore || 100}%
+              {reliability}%
             </div>
             <div className="text-xs text-gray-500">Fiabilité</div>
           </div>
           <div className="bg-white rounded-2xl p-4 border border-gray-100">
             <Clock className="w-5 h-5 text-gray-400 mb-2" />
             <div className="text-2xl font-bold text-gray-900">
-              {stats.totalSessions || 0}
+              0
             </div>
             <div className="text-xs text-gray-500">Sessions</div>
           </div>
           <div className="bg-white rounded-2xl p-4 border border-gray-100">
             <Star className="w-5 h-5 text-amber-500 mb-2" />
             <div className="text-2xl font-bold text-gray-900">
-              {stats.mvpCount || 23}
+              23
             </div>
             <div className="text-xs text-gray-500">MVP</div>
           </div>
           <div className="bg-white rounded-2xl p-4 border border-gray-100">
             <Clock className="w-5 h-5 text-gray-400 mb-2" />
             <div className="text-2xl font-bold text-gray-900">
-              {stats.hoursPlayed || 384}
+              384
             </div>
             <div className="text-xs text-gray-500">Heures jouées</div>
           </div>
@@ -153,8 +139,8 @@ export function ProfileScreen({
             icon={Crown}
             title="Premium"
             subtitle="IA + Stats + Export"
-            color={isPremium ? "amber" : "white"}
-            badge={isPremium ? "ACTIF" : undefined}
+            color="amber"
+            badge="ACTIF"
             onClick={() => onNavigate("premium")}
           />
           <FeatureCard
@@ -298,7 +284,7 @@ export function ProfileScreen({
         </h3>
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
           <button
-            onClick={onLogout}
+            onClick={handleLogout}
             className="w-full flex items-center gap-3 p-4 text-left hover:bg-red-50 transition-colors"
           >
             <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">

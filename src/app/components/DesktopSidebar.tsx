@@ -11,12 +11,12 @@ import {
   LogOut,
   ChevronRight
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from '@/i18n/useTranslation';
 import { Logo } from '@/app/components/Logo';
 
 interface DesktopSidebarProps {
   activeTab: string;
-  onNavigate: (screen: string) => void;
   onLogout: () => void;
   userName: string;
   isPremium: boolean;
@@ -24,11 +24,11 @@ interface DesktopSidebarProps {
 
 export function DesktopSidebar({ 
   activeTab, 
-  onNavigate, 
   onLogout,
   userName,
   isPremium 
 }: DesktopSidebarProps) {
+  const navigate = useNavigate();
   const { t } = useTranslation();
 
   const mainNavItems = [
@@ -50,13 +50,13 @@ export function DesktopSidebar({
       <div className="flex flex-col h-full">
         {/* Logo Header - Cliquable */}
         <div className="p-6 pb-4 border-b border-[var(--border-subtle)]">
-          <Logo variant="header" onNavigate={onNavigate} />
+          <Logo variant="header" />
         </div>
 
         {/* User Profile Card */}
         <div className="p-4">
           <button
-            onClick={() => onNavigate('profile')}
+            onClick={() => navigate('/profile')}
             className="w-full bg-white rounded-2xl p-4 flex items-center gap-3 border-[0.5px] border-[var(--border-subtle)] shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 group"
           >
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] flex items-center justify-center shadow-md">
@@ -95,7 +95,7 @@ export function DesktopSidebar({
                 return (
                   <button
                     key={item.id}
-                    onClick={() => onNavigate(item.id)}
+                    onClick={() => navigate(`/${item.id}`)}
                     className={`
                       w-full flex items-center gap-3 px-3 py-2.5 rounded-xl
                       transition-all duration-200 relative
@@ -134,7 +134,7 @@ export function DesktopSidebar({
                 return (
                   <button
                     key={item.id}
-                    onClick={() => onNavigate(item.id)}
+                    onClick={() => navigate(`/${item.id}`)}
                     className={`
                       w-full flex items-center gap-3 px-3 py-2.5 rounded-xl
                       transition-all duration-200
@@ -156,7 +156,7 @@ export function DesktopSidebar({
         {/* Footer Actions */}
         <div className="p-4 space-y-2 border-t border-[var(--border-subtle)]">
           <button
-            onClick={() => onNavigate('preferences')}
+            onClick={() => navigate('/preferences')}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[var(--fg-secondary)] hover:bg-[var(--bg-subtle)] hover:text-[var(--fg-primary)] transition-all duration-200"
           >
             <Settings className="w-5 h-5" strokeWidth={1.5} />

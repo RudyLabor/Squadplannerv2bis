@@ -7,14 +7,15 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Warm Premium Palette - Amber + Teal
+        // Brand Colors (Aligned with design-tokens.ts)
         primary: {
           50: '#FFFBEB',
           100: '#FEF3C7',
           200: '#FDE68A',
           300: '#FCD34D',
           400: '#FBBF24',
-          500: '#F59E0B',
+          500: '#F59E0B', // DEFAULT
+          DEFAULT: '#F59E0B',
           600: '#D97706',
           700: '#B45309',
           800: '#92400E',
@@ -26,12 +27,14 @@ module.exports = {
           200: '#99F6E4',
           300: '#5EEAD4',
           400: '#2DD4BF',
-          500: '#14B8A6',
+          500: '#14B8A6', // DEFAULT
+          DEFAULT: '#14B8A6',
           600: '#0D9488',
           700: '#0F766E',
           800: '#115E59',
           900: '#134E4A',
         },
+        // Semantic Colors
         success: {
           50: '#ECFDF5',
           500: '#10B981',
@@ -47,15 +50,24 @@ module.exports = {
           500: '#F43F5E',
           700: '#BE123C',
         },
+        purple: {
+          50: '#F5F3FF',
+          500: '#8B5CF6',
+          700: '#6D28D9',
+        },
+        // Backgrounds
         bg: {
           base: '#F5F3F0',
           elevated: '#FDFCFB',
           subtle: '#EAE7E3',
         },
+        // Foreground / Text
         fg: {
           primary: 'rgba(28, 25, 23, 0.95)',
           secondary: 'rgba(28, 25, 23, 0.70)',
           tertiary: 'rgba(28, 25, 23, 0.50)',
+          disabled: 'rgba(28, 25, 23, 0.25)',
+          inverse: '#FFFFFF',
         },
       },
       fontFamily: {
@@ -71,7 +83,18 @@ module.exports = {
         xl: '20px',
         '2xl': '24px',
         '3xl': '28px',
+        full: '9999px',
       },
+      boxShadow: {
+        xs: '0 1px 2px rgba(28, 25, 23, 0.05)',
+        sm: '0 1px 2px rgba(28, 25, 23, 0.05)',
+        md: '0 4px 8px rgba(28, 25, 23, 0.08), 0 2px 4px rgba(28, 25, 23, 0.04)',
+        lg: '0 8px 16px rgba(28, 25, 23, 0.10), 0 4px 8px rgba(28, 25, 23, 0.06)',
+        xl: '0 16px 32px rgba(28, 25, 23, 0.12), 0 8px 16px rgba(28, 25, 23, 0.08)',
+        '2xl': '0 24px 48px rgba(28, 25, 23, 0.15), 0 12px 24px rgba(28, 25, 23, 0.10)',
+        'glow-primary': '0 8px 16px rgba(245, 158, 11, 0.15), 0 4px 8px rgba(245, 158, 11, 0.10)',
+        'glow-success': '0 8px 16px rgba(16, 185, 129, 0.15), 0 4px 8px rgba(16, 185, 129, 0.10)',
+      }
     },
   },
   plugins: [],

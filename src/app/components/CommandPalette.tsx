@@ -1,6 +1,7 @@
 import { memo, useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, Users, Calendar, Plus, Home, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface Command {
   id: string;
@@ -14,10 +15,10 @@ interface Command {
 interface CommandPaletteProps {
   isOpen: boolean;
   onClose: () => void;
-  onNavigate: (screen: string) => void;
 }
 
-const CommandPaletteComponent = ({ isOpen, onClose, onNavigate }: CommandPaletteProps) => {
+const CommandPaletteComponent = ({ isOpen, onClose }: CommandPaletteProps) => {
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -27,7 +28,7 @@ const CommandPaletteComponent = ({ isOpen, onClose, onNavigate }: CommandPalette
       label: 'Aller à l\'accueil',
       description: 'Vue d\'ensemble et prochaines sessions',
       icon: <Home className="w-4 h-4" />,
-      action: () => { onNavigate('home'); onClose(); },
+      action: () => { navigate('/home'); onClose(); },
       keywords: ['home', 'accueil', 'dashboard']
     },
     {
@@ -35,7 +36,7 @@ const CommandPaletteComponent = ({ isOpen, onClose, onNavigate }: CommandPalette
       label: 'Voir mes squads',
       description: 'Liste de toutes vos équipes',
       icon: <Users className="w-4 h-4" />,
-      action: () => { onNavigate('squads'); onClose(); },
+      action: () => { navigate('/squads'); onClose(); },
       keywords: ['squads', 'équipes', 'teams']
     },
     {
@@ -43,7 +44,7 @@ const CommandPaletteComponent = ({ isOpen, onClose, onNavigate }: CommandPalette
       label: 'Voir mes sessions',
       description: 'Sessions passées et à venir',
       icon: <Calendar className="w-4 h-4" />,
-      action: () => { onNavigate('sessions'); onClose(); },
+      action: () => { navigate('/sessions'); onClose(); },
       keywords: ['sessions', 'planning', 'calendar']
     },
     {
@@ -51,7 +52,7 @@ const CommandPaletteComponent = ({ isOpen, onClose, onNavigate }: CommandPalette
       label: 'Mon profil',
       description: 'Statistiques et paramètres',
       icon: <User className="w-4 h-4" />,
-      action: () => { onNavigate('profile'); onClose(); },
+      action: () => { navigate('/profile'); onClose(); },
       keywords: ['profil', 'profile', 'stats']
     },
     {
@@ -59,7 +60,7 @@ const CommandPaletteComponent = ({ isOpen, onClose, onNavigate }: CommandPalette
       label: 'Créer une squad',
       description: 'Nouvelle équipe de jeu',
       icon: <Plus className="w-4 h-4" />,
-      action: () => { onNavigate('create-squad'); onClose(); },
+      action: () => { navigate('/create-squad'); onClose(); },
       keywords: ['créer', 'squad', 'nouveau', 'équipe']
     },
     {
@@ -67,10 +68,10 @@ const CommandPaletteComponent = ({ isOpen, onClose, onNavigate }: CommandPalette
       label: 'Planifier une session',
       description: 'Proposer un nouveau créneau',
       icon: <Plus className="w-4 h-4" />,
-      action: () => { onNavigate('create-session'); onClose(); },
+      action: () => { navigate('/create-session'); onClose(); },
       keywords: ['planifier', 'session', 'nouveau', 'créer']
     }
-  ], [onNavigate, onClose]);
+  ], [navigate, onClose]);
 
   const filteredCommands = useMemo(() => {
     if (!search) return commands;

@@ -9,18 +9,23 @@ import { LucideIcon } from 'lucide-react';
 // ============================================
 // COULEURS DE RÉFÉRENCE (pour documentation)
 // ============================================
+import { COLORS as TOKENS_COLORS } from '@/theme/design-tokens';
+
+// ============================================
+// COULEURS DE RÉFÉRENCE (pour documentation)
+// ============================================
 export const COLORS = {
-  bgBase: '#F5F3F0',      // Fond principal beige
-  bgCard: '#FFFFFF',      // Cards blanches
-  primary: '#F59E0B',     // Amber - boutons CTA
-  primaryDark: '#D97706', // Amber dark - hover
-  success: '#10B981',     // Vert - fiabilité haute
-  warning: '#F59E0B',     // Orange - fiabilité moyenne
-  purple: '#8B5CF6',      // Violet - Intelligence IA
-  teal: '#14B8A6',        // Teal - Récap hebdo
-  textPrimary: '#111827', // Gris 900
-  textSecondary: '#6B7280', // Gris 500
-  border: '#E5E7EB',      // Bordure légère
+  bgBase: TOKENS_COLORS.background.base,
+  bgCard: TOKENS_COLORS.background.elevated,
+  primary: TOKENS_COLORS.primary.DEFAULT,
+  primaryDark: TOKENS_COLORS.primary[600],
+  success: TOKENS_COLORS.success.DEFAULT,
+  warning: TOKENS_COLORS.warning.DEFAULT,
+  purple: TOKENS_COLORS.purple.DEFAULT,
+  teal: TOKENS_COLORS.secondary.DEFAULT,
+  textPrimary: TOKENS_COLORS.text.primary,
+  textSecondary: TOKENS_COLORS.text.secondary,
+  border: 'rgba(120, 113, 108, 0.15)', // Using transparent stone for blend
 };
 
 // ============================================

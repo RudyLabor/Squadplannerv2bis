@@ -79,7 +79,6 @@ import { CoachingToolsScreen } from './CoachingToolsScreen';
 import { DiscordBotScreen } from './DiscordBotScreen';
 import { EsportIntegrationsScreen } from './EsportIntegrationsScreen';
 import { EsportTeamScreen } from './EsportTeamScreen';
-import { FeaturesDemoScreen } from './FeaturesDemoScreen';
 import { IntegrationsScreen } from './IntegrationsScreen';
 import { IntelligenceScreen } from './IntelligenceScreen';
 import { LeadershipAnalysisScreen } from './LeadershipAnalysisScreen';
@@ -153,7 +152,6 @@ export default function DesignDocScreen({ onNavigate, showToast }: DesignDocScre
     '/discord-bot': DiscordBotScreen,
     '/esport-integrations': EsportIntegrationsScreen,
     '/esport-team': EsportTeamScreen,
-    '/features-demo': FeaturesDemoScreen,
     '/integrations': IntegrationsScreen,
     '/intelligence': IntelligenceScreen,
     '/leadership-analysis': LeadershipAnalysisScreen,
@@ -331,7 +329,6 @@ export default function DesignDocScreen({ onNavigate, showToast }: DesignDocScre
     {
       name: 'Démo & Tests',
       screens: [
-        { name: 'Démo Fonctionnalités', route: '/features-demo', color: 'rose' },
         { name: 'Tests QA', route: '/qa-tests', color: 'rose' },
         { name: 'Configuration Tests', route: '/test-setup', color: 'rose' }
       ]

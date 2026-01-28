@@ -48,7 +48,6 @@ import { CoachingToolsScreen } from './CoachingToolsScreen';
 import { DiscordBotScreen } from './DiscordBotScreen';
 import { EsportIntegrationsScreen } from './EsportIntegrationsScreen';
 import { EsportTeamScreen } from './EsportTeamScreen';
-import { FeaturesDemoScreen } from './FeaturesDemoScreen';
 import { IntegrationsScreen } from './IntegrationsScreen';
 import { IntelligenceScreen } from './IntelligenceScreen';
 import { LeadershipAnalysisScreen } from './LeadershipAnalysisScreen';
@@ -249,7 +248,6 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
       screens: [
         { name: 'API Docs', route: '/api-docs', component: ApiDocsScreen },
         { name: 'Plugins', route: '/plugins', component: PluginsScreen },
-        { name: 'Features Demo', route: '/features-demo', component: FeaturesDemoScreen },
         { name: 'Test Setup', route: '/test-setup', component: TestSetupScreen },
         { name: 'QA Tests', route: '/qa-tests', component: QATestsScreen },
       ]

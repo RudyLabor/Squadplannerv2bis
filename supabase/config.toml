@@ -1,9 +1,6 @@
 # Supabase Configuration for Squad Planner
 # Documentation: https://supabase.com/docs/guides/cli/config
 
-[project]
-name = "squad-planner"
-
 # Supabase Studio configuration
 [studio]
 enabled = true
@@ -65,11 +62,7 @@ file_size_limit = "50MiB"
 buckets = []
 
 # Edge Functions configuration
-[functions]
-enabled = true
-
-# Edge Function: server
-[[functions.server]]
+[functions.server]
 verify_jwt = false
 
 # Realtime configuration
@@ -83,4 +76,4 @@ enabled = false
 
 # Experimental features
 [experimental]
-enabled = false
+# Add experimental keys here if needed

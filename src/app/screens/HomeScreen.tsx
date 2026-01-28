@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 import { sessionsAPI, squadsAPI } from "@/utils/api";
 import { useAuth } from "@/app/contexts/AuthContext";
+import { useSquads } from "@/app/contexts/SquadsContext";
+import { useSessions } from "@/app/contexts/SessionsContext";
 import {
   PageHeader,
   StatCard,
@@ -41,65 +43,35 @@ interface HomeScreenProps {
 }
 
 export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
-  const { isAuthenticated } = useAuth();
-  const [squads, setSquads] = useState<any[]>([]);
-  const [sessionsCount, setSessionsCount] = useState(0);
-  const [userReliability, setUserReliability] = useState(0);
+  const { user } = useAuth();
+  const { squads, loading: squadsLoading, refreshSquads } = useSquads();
+  const { sessions, getSquadSessions, loading: sessionsLoading } = useSessions();
+  
+  const [transformedSquads, setTransformedSquads] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load data
+  // Initial load
   useEffect(() => {
-    if (isAuthenticated) {
-      loadHomeData();
-    } else {
+    if (user) {
+      refreshSquads();
+    }
+  }, [user]);
+
+  // Transform squads whenever they change
+  useEffect(() => {
+    if (squads) {
+      const transformed = squads.map((squad: any) => ({
+        ...squad,
+        membersCount: squad.total_members || 0,
+        nextSessionText: squad.next_session_date ? "Prochainement" : null,
+      }));
+      setTransformedSquads(transformed);
       setIsLoading(false);
     }
-  }, [isAuthenticated]);
-
-  const loadHomeData = async () => {
-    setIsLoading(true);
-    try {
-      const { authAPI } = await import("@/utils/api");
-
-      const [sessionsResponse, squadsResponse, profileResponse] =
-        await Promise.all([
-          sessionsAPI.getSessions().catch(() => ({ sessions: [] })),
-          squadsAPI.getSquads().catch(() => ({ squads: [] })),
-          authAPI.getProfile().catch(() => ({ user: null })),
-        ]);
-
-      // Transform squads for display
-      const transformedSquads = (squadsResponse.squads || []).map(
-        (squad: any) => ({
-          ...squad,
-          membersCount: Array.isArray(squad.members)
-            ? squad.members.length
-            : squad.members || 0,
-          nextSessionText:
-            squad.nextSession && typeof squad.nextSession === "object"
-              ? "Prochainement"
-              : squad.nextSession || null,
-        })
-      );
-
-      setSquads(transformedSquads);
-      setSessionsCount(sessionsResponse.sessions?.length || 0);
-
-      const user = profileResponse.user || profileResponse;
-      const stats = user?.stats || {};
-      setUserReliability(stats.reliabilityScore || 0);
-    } catch (error) {
-      console.log("Chargement des données:", error);
-      setSquads([]);
-      setSessionsCount(0);
-      setUserReliability(0);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [squads]);
 
   // Loading state
-  if (isLoading) {
+  if (squadsLoading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -125,19 +97,19 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
         <StatsRow>
           <StatCard
             icon={Calendar}
-            value={sessionsCount}
+            value={0}
             label="Sessions"
             iconColor="text-gray-400"
           />
           <StatCard
             icon={Users}
-            value={squads.length > 0 ? `${squads.length * 4}` : "0"}
+            value={transformedSquads.length > 0 ? `${transformedSquads.length * 4}` : "0"}
             label="Joueurs"
             iconColor="text-gray-400"
           />
           <StatCard
             icon={TrendingUp}
-            value={`${userReliability}%`}
+            value={`${user?.reliability_score || 0}%`}
             label="Fiabilité"
             iconColor="text-amber-500"
           />
@@ -164,9 +136,18 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
           variant="secondary"
           icon={Clock}
           onClick={() => onNavigate("propose-session")}
-          className="w-full mb-8"
+          className="w-full mb-3"
         >
           Proposer Session
+        </ActionButton>
+
+        <ActionButton
+          variant="primary"
+          icon={Crown}
+          onClick={() => onNavigate("features-demo")}
+          className="w-full mb-8 bg-gradient-to-r from-indigo-500 to-purple-600 border-none text-white shadow-lg"
+        >
+          🗺️ PLAN DU SITE (ACCÈS 61 ÉCRANS)
         </ActionButton>
 
         {/* Intelligence & Outils */}
@@ -275,7 +256,7 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
         </div>
 
         {/* Mes Squads */}
-        {squads.length > 0 && (
+        {transformedSquads.length > 0 && (
           <>
             <SectionHeader
               title="Mes Squads"
@@ -290,19 +271,19 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
               }
             />
             <div className="grid grid-cols-2 gap-3">
-              {squads.slice(0, 4).map((squad) => (
+              {transformedSquads.slice(0, 4).map((squad) => (
                 <SquadCard
                   key={squad.id}
                   name={squad.name}
                   game={squad.game}
                   gameImage={
-                    squad.gameImage ||
+                    squad.avatar_url ||
                     "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=200&h=200&fit=crop"
                   }
                   members={squad.membersCount}
-                  reliability={squad.reliabilityScore || 85}
+                  reliability={squad.reliability_score || 85}
                   nextSession={squad.nextSessionText}
-                  sessionsCount={squad.activeSessions || 0}
+                  sessionsCount={0}
                   onClick={() =>
                     onNavigate("squad-detail", { squadId: squad.id })
                   }
@@ -313,7 +294,7 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
         )}
 
         {/* Empty state if no squads */}
-        {squads.length === 0 && (
+        {transformedSquads.length === 0 && (
           <div className="bg-white rounded-2xl p-6 text-center border border-gray-100">
             <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Users className="w-8 h-8 text-amber-500" />

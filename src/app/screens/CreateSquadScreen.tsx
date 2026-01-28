@@ -1,18 +1,12 @@
-/**
- * ➕ CREATE SQUAD SCREEN - Aligné sur maquette Figma
- * Design System v2 - Mobile-first
- */
-
 import { useState } from "react";
 import { ArrowLeft, Gamepad2, Users } from "lucide-react";
-import { squadsAPI } from "@/utils/api";
+import { useSquads } from "@/app/contexts/SquadsContext";
 import { ActionButton, Input } from "@/app/components/ui/DesignSystem";
 
 interface CreateSquadScreenProps {
   onNavigate: (screen: string, data?: any) => void;
   showToast: (message: string, type?: "success" | "error" | "info") => void;
 }
-
 const GAMES = [
   { id: "valorant", name: "Valorant", icon: "🎯" },
   { id: "lol", name: "League of Legends", icon: "⚔️" },
@@ -37,6 +31,7 @@ const DAYS = [
 const DURATIONS = ["1h", "2h", "3h", "4h"];
 
 export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenProps) {
+  const { createSquad } = useSquads();
   const [name, setName] = useState("");
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
@@ -63,11 +58,10 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
     setIsCreating(true);
     try {
       const game = GAMES.find((g) => g.id === selectedGame);
-      await squadsAPI.createSquad({
+      await createSquad({
         name: name.trim(),
         game: game?.name || selectedGame,
-        preferredDays: selectedDays,
-        sessionDuration: duration,
+        // (Preferred days/durations can be added to the Squad interface if needed)
       });
       showToast("Squad créée avec succès !", "success");
       onNavigate("squads");

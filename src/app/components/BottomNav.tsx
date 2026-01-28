@@ -1,16 +1,20 @@
 import { motion } from 'motion/react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Users, Calendar, User } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 
 interface BottomNavProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
   onCommandOpen: () => void;
   isMobile: boolean;
 }
 
-export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
+export function BottomNav({ onCommandOpen }: BottomNavProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Extraire l'onglet actif du pathname
+  const activeTab = location.pathname.split('/')[1] || 'home';
   
   const tabs = [
     { id: 'home', labelKey: 'nav.home', icon: Home },
@@ -37,7 +41,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
               return (
                 <motion.button
                   key={tab.id}
-                  onClick={() => onTabChange(tab.id)}
+                  onClick={() => navigate(`/${tab.id}`)}
                   className="relative flex flex-col items-center gap-1 py-3 px-5 rounded-2xl flex-1"
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.15 }}
