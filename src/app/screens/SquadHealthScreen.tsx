@@ -1,7 +1,10 @@
-import { ArrowLeft, Heart, Users, TrendingUp, AlertCircle, Clock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, Heart, Users, TrendingUp, AlertCircle, Clock, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { SquadCohesion, generateMockCohesionMetrics, generateMockSquadMembers } from '@/app/components/SquadCohesion';
 import { ReliabilityProfile, generateMockReliabilityStats } from '@/app/components/ReliabilityProfile';
+import { calculateSquadCohesion, CohesionResult, MemberStats } from '@/utils/cohesion-calculator';
+import { useSquads } from '@/app/contexts/SquadsContext';
 
 interface SquadHealthScreenProps {
   onNavigate: (screen: string, data?: any) => void;
@@ -10,16 +13,52 @@ interface SquadHealthScreenProps {
 }
 
 export function SquadHealthScreen({ onNavigate, showToast, squadId }: SquadHealthScreenProps) {
-  // Mock data - en production, cela viendrait du backend
+  const { squads } = useSquads();
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [cohesionMetrics, setCohesionMetrics] = useState<CohesionResult | null>(null);
+  const [members, setMembers] = useState<MemberStats[]>([]);
+
+  // Trouver le squad actuel
+  const currentSquad = squads?.find((s: any) => s.id === squadId) || squads?.[0];
+
   const squad = {
-    id: squadId || 'squad-1',
-    name: 'Les Tryharders',
-    game: 'Valorant',
-    avatar: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400',
+    id: currentSquad?.id || squadId || 'squad-1',
+    name: currentSquad?.name || 'Squad',
+    game: currentSquad?.game || 'Gaming',
+    avatar: currentSquad?.avatar_url || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400',
   };
 
-  const members = generateMockSquadMembers();
-  const cohesionMetrics = generateMockCohesionMetrics();
+  // Charger les données de cohésion
+  useEffect(() => {
+    const loadCohesionData = async () => {
+      if (!squad.id || squad.id === 'squad-1') {
+        // Utiliser les données mock si pas de squad réel
+        setCohesionMetrics(generateMockCohesionMetrics());
+        setMembers(generateMockSquadMembers() as MemberStats[]);
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const { cohesion, members: memberStats } = await calculateSquadCohesion(squad.id);
+        setCohesionMetrics(cohesion);
+        setMembers(memberStats.length > 0 ? memberStats : generateMockSquadMembers() as MemberStats[]);
+      } catch (error) {
+        console.error('Error loading cohesion data:', error);
+        // Fallback aux données mock
+        setCohesionMetrics(generateMockCohesionMetrics());
+        setMembers(generateMockSquadMembers() as MemberStats[]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadCohesionData();
+  }, [squad.id]);
+
+  // Données de fiabilité de l'utilisateur
   const userReliability = generateMockReliabilityStats();
 
   const handleActionClick = (action: string, data?: any) => {
@@ -69,10 +108,25 @@ export function SquadHealthScreen({ onNavigate, showToast, squadId }: SquadHealt
     },
   ];
 
+  // Afficher un loader pendant le chargement
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-10 h-10 text-amber-500 animate-spin mx-auto mb-4" />
+          <p className="text-gray-500">Analyse de la cohésion en cours...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Utiliser les métriques calculées ou des valeurs par défaut
+  const metrics = cohesionMetrics || generateMockCohesionMetrics();
+
   return (
     <div className="min-h-screen pb-24 pt-safe">
       <div className="px-4 py-8 max-w-2xl mx-auto">
-        
+
         {/* Header */}
         <div className="flex items-center gap-3 mb-8">
           <button
@@ -116,9 +170,9 @@ export function SquadHealthScreen({ onNavigate, showToast, squadId }: SquadHealt
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
             <div className="text-xs opacity-80 mb-1">Diagnostic rapide</div>
             <div className="text-sm font-semibold">
-              {cohesionMetrics.score >= 80 
+              {metrics.score >= 80
                 ? '✅ Votre squad est en excellente santé'
-                : cohesionMetrics.score >= 60
+                : metrics.score >= 60
                 ? '⚠️ Quelques points d\'attention'
                 : '🚨 Action requise pour stabiliser la squad'
               }
@@ -135,8 +189,8 @@ export function SquadHealthScreen({ onNavigate, showToast, squadId }: SquadHealt
           <SquadCohesion
             squadId={squad.id}
             squadName={squad.name}
-            members={members}
-            metrics={cohesionMetrics}
+            members={members as any}
+            metrics={metrics}
             onActionClick={handleActionClick}
           />
         </div>

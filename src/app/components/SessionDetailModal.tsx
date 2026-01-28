@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, Clock, MapPin, Users, Edit, Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { SessionRSVPCard } from './SessionRSVPCard';
+import { NoShowPrediction } from './NoShowPrediction';
 import { sessionsAPI } from '@/app/services/api';
 import { useAuth } from '@/app/contexts/AuthContext';
 
@@ -239,6 +240,14 @@ export function SessionDetailModal({
                       }
                       onRSVP={handleRSVP}
                     />
+
+                    {/* Prédiction No-Show (IA) */}
+                    {session.rsvps && session.rsvps.length > 0 && (
+                      <NoShowPrediction
+                        sessionId={sessionId}
+                        rsvps={session.rsvps}
+                      />
+                    )}
 
                     {/* Actions (si owner) */}
                     {session.proposed_by === user?.id && (

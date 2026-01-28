@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, Gamepad2, Users, Calendar, Clock } from "lucide-react";
 import { sessionsAPI, squadsAPI } from "@/utils/api";
 import { ActionButton } from "@/app/components/ui/DesignSystem";
+import { TimePicker } from "@/app/components/TimePicker";
 
 interface ProposeSessionScreenProps {
   onNavigate: (screen: string, data?: any) => void;
@@ -39,6 +40,7 @@ export function ProposeSessionScreen({
   const [duration, setDuration] = useState("2h");
   const [comment, setComment] = useState("");
   const [showGamePicker, setShowGamePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [squads, setSquads] = useState<any[]>([]);
   const [selectedSquad, setSelectedSquad] = useState<string | null>(data?.squadId || null);
@@ -253,15 +255,16 @@ export function ProposeSessionScreen({
             </div>
             <div>
               <p className="text-xs text-gray-400 mb-1">HEURE</p>
-              <div className="relative">
-                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="time"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  className="w-full h-12 pl-10 pr-4 bg-white rounded-xl border border-gray-200 text-gray-900"
-                />
-              </div>
+              <button
+                type="button"
+                onClick={() => setShowTimePicker(true)}
+                className="w-full h-12 bg-white rounded-xl border border-gray-200 text-left px-4 flex items-center gap-3 hover:border-gray-300 transition-colors"
+              >
+                <Clock className="w-4 h-4 text-gray-400" />
+                <span className={time ? 'text-gray-900 font-medium' : 'text-gray-400'}>
+                  {time ? `${time.split(':')[0]}h${time.split(':')[1]}` : 'Sélectionner'}
+                </span>
+              </button>
             </div>
           </div>
           <div>
@@ -346,6 +349,14 @@ export function ProposeSessionScreen({
           </div>
         </div>
       )}
+
+      {/* Time Picker Modal (2 colonnes) */}
+      <TimePicker
+        isOpen={showTimePicker}
+        onClose={() => setShowTimePicker(false)}
+        onSelect={(selectedTime) => setTime(selectedTime)}
+        selectedTime={time}
+      />
     </div>
   );
 }
