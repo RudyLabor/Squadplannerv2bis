@@ -8,6 +8,7 @@ import { Plus, Calendar, Clock, Users, Check, X } from "lucide-react";
 import { sessionsAPI } from "@/utils/api";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { PageHeader, ActionButton, Badge } from "@/app/components/ui/DesignSystem";
+import { SessionDetailModal } from "@/app/components/SessionDetailModal";
 
 interface SessionsScreenProps {
   onNavigate: (screen: string, data?: any) => void;
@@ -17,10 +18,11 @@ interface SessionsScreenProps {
 type FilterType = "all" | "today" | "upcoming";
 
 export function SessionsScreen({ onNavigate, showToast }: SessionsScreenProps) {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [sessions, setSessions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>("all");
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
@@ -43,9 +45,9 @@ export function SessionsScreen({ onNavigate, showToast }: SessionsScreenProps) {
     }
   };
 
-  const handleRSVP = async (sessionId: string, response: "yes" | "no") => {
+  const handleRSVP = async (sessionId: string, response: "yes" | "no" | "maybe") => {
     try {
-      await sessionsAPI.rsvpSession(sessionId, response);
+      await sessionsAPI.rsvp(sessionId, response);
       showToast(response === "yes" ? "Participation confirmée !" : "Absence notée", "success");
       loadSessions();
     } catch (error) {
@@ -94,6 +96,19 @@ export function SessionsScreen({ onNavigate, showToast }: SessionsScreenProps) {
 
   return (
     <div className="min-h-screen pb-24">
+      {/* Session Detail Modal avec RSVP système complet */}
+      {selectedSessionId && (
+        <SessionDetailModal
+          sessionId={selectedSessionId}
+          isOpen={!!selectedSessionId}
+          onClose={() => setSelectedSessionId(null)}
+          onRSVP={() => {
+            loadSessions(); // Refresh list after RSVP
+          }}
+          showToast={showToast}
+        />
+      )}
+
       <div className="px-4 py-6">
         {/* Header */}
         <PageHeader
@@ -133,7 +148,7 @@ export function SessionsScreen({ onNavigate, showToast }: SessionsScreenProps) {
                     session={session}
                     time={time}
                     onRSVP={handleRSVP}
-                    onNavigate={onNavigate}
+                    onOpenDetail={setSelectedSessionId}
                   />
                 ))}
               </div>
@@ -171,11 +186,11 @@ export function SessionsScreen({ onNavigate, showToast }: SessionsScreenProps) {
 interface SessionCardProps {
   session: any;
   time: string;
-  onRSVP: (sessionId: string, response: "yes" | "no") => void;
-  onNavigate: (screen: string, data?: any) => void;
+  onRSVP: (sessionId: string, response: "yes" | "no" | "maybe") => void;
+  onOpenDetail: (sessionId: string) => void;
 }
 
-function SessionCard({ session, time, onRSVP, onNavigate }: SessionCardProps) {
+function SessionCard({ session, time, onRSVP, onOpenDetail }: SessionCardProps) {
   const date = new Date(session.date);
   const formattedDate = date.toLocaleDateString("fr-FR", {
     year: "numeric",
@@ -200,7 +215,7 @@ function SessionCard({ session, time, onRSVP, onNavigate }: SessionCardProps) {
       {/* Card */}
       <div
         className="flex-1 bg-white rounded-2xl p-4 border border-gray-100 cursor-pointer hover:shadow-md transition-shadow"
-        onClick={() => onNavigate("session-detail", { sessionId: session.id })}
+        onClick={() => onOpenDetail(session.id)}
       >
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">

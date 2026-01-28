@@ -11,7 +11,8 @@
       "Bash(start https://app.supabase.com/project/cwtoprbowdqcemdjrtir/auth/url-configuration)",
       "Bash(start https://app.supabase.com/project/cwtoprbowdqcemdjrtir/sql/new)",
       "Bash(npx supabase:*)",
-      "Bash(cmd /c ULTRA-SIMPLE-SETUP.bat)"
+      "Bash(cmd /c ULTRA-SIMPLE-SETUP.bat)",
+      "Read(//c/Users/RudyL/Desktop/Présentation SquadPlanner/**)"
     ]
   }
 }
