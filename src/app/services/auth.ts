@@ -1,5 +1,19 @@
 import { supabase } from '@/utils/supabase/client';
 
+// Utility function to add timeout to promises
+const withTimeout = <T>(promise: Promise<T>, timeoutMs: number, errorMessage: string): Promise<T> => {
+  let timeoutId: NodeJS.Timeout;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error(errorMessage));
+    }, timeoutMs);
+  });
+
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    clearTimeout(timeoutId);
+  });
+};
+
 export const authService = {
   // Sign up
   signUp: async (email: string, password: string, username: string, displayName?: string) => {
@@ -66,13 +80,25 @@ export const authService = {
 
   // Sign in
   signIn: async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    console.log('[AUTH] Starting signIn for:', email);
 
-    if (error) throw error;
-    return data;
+    try {
+      const { data, error } = await withTimeout(
+        supabase.auth.signInWithPassword({ email, password }),
+        15000, // 15 second timeout
+        'Connexion timeout - vérifiez votre connexion internet'
+      );
+
+      if (error) {
+        console.error('[AUTH] signIn error:', error);
+        throw error;
+      }
+      console.log('[AUTH] signIn success, session:', !!data.session);
+      return data;
+    } catch (err: any) {
+      console.error('[AUTH] signIn caught error:', err);
+      throw err;
+    }
   },
 
   // Sign out
@@ -91,26 +117,61 @@ export const authService = {
 
   // Get current user (Profil complet depuis la DB)
   getCurrentUser: async () => {
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (!sessionData.session?.user) return null;
+    console.log('[AUTH] getCurrentUser called');
 
-    const { data: user, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', sessionData.session.user.id)
-      .single();
+    try {
+      const { data: sessionData, error: sessionError } = await withTimeout(
+        supabase.auth.getSession(),
+        10000,
+        'Session timeout'
+      );
 
-    if (error) {
-        // Fallback: si pas de profil public, on renvoie les metadata de l'user auth
-        console.warn('User profile not found, falling back to auth metadata');
-        return {
-            id: sessionData.session.user.id,
-            email: sessionData.session.user.email,
-            ...sessionData.session.user.user_metadata
-        };
+      if (sessionError) {
+        console.error('[AUTH] getSession error:', sessionError);
+        return null;
+      }
+
+      if (!sessionData.session?.user) {
+        console.log('[AUTH] No session found');
+        return null;
+      }
+
+      console.log('[AUTH] Session found, userId:', sessionData.session.user.id);
+
+      // Wrap the Supabase query in a promise for timeout
+      const profileQuery = async () => {
+        return supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', sessionData.session!.user.id)
+          .single();
+      };
+
+      const { data: user, error } = await withTimeout(
+        profileQuery(),
+        10000,
+        'Profile fetch timeout'
+      );
+
+      if (error) {
+          // Fallback: si pas de profil public, on renvoie les metadata de l'user auth
+          console.warn('[AUTH] Profile not found, using fallback. Error:', error.message);
+          const fallbackUser = {
+              id: sessionData.session.user.id,
+              email: sessionData.session.user.email || '',
+              username: sessionData.session.user.email?.split('@')[0] || 'user',
+              ...sessionData.session.user.user_metadata
+          };
+          console.log('[AUTH] Fallback user:', fallbackUser);
+          return fallbackUser;
+      }
+
+      console.log('[AUTH] Profile loaded:', user?.username);
+      return user;
+    } catch (err: any) {
+      console.error('[AUTH] getCurrentUser error:', err);
+      return null;
     }
-
-    return user;
   },
 
   // Listen to auth changes

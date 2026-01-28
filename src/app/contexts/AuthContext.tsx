@@ -5,7 +5,7 @@ interface User {
   id: string;
   email: string;
   username: string;
-  display_name: string;
+  display_name?: string; // Optional car peut ne pas exister dans la DB
   avatar_url?: string;
   role?: string;
   reliability_score?: number;
@@ -75,16 +75,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
+    console.log('[AuthContext] signIn started');
     setLoading(true);
     try {
-      await authService.signIn(email, password);
+      const authResult = await authService.signIn(email, password);
+      console.log('[AuthContext] signIn completed, getting user profile...');
       const currentUser = await authService.getCurrentUser();
+      console.log('[AuthContext] currentUser:', currentUser);
       setUser(currentUser);
+      console.log('[AuthContext] User state updated');
     } catch (error) {
-      console.error('Sign in error:', error);
+      console.error('[AuthContext] Sign in error:', error);
       throw error;
     } finally {
       setLoading(false);
+      console.log('[AuthContext] Loading set to false');
     }
   };
 

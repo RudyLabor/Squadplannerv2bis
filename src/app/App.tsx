@@ -123,7 +123,7 @@ function ScreenLoader() {
 function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAuthenticated, signOut, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, signOut, loading: authLoading } = useAuth();
   const { userProfile } = useUser();
   const { showToast } = useToast();
   const isMobile = useIsMobile();

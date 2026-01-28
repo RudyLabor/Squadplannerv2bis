@@ -26,7 +26,7 @@ export const supabase = createClient<Database>(supabaseUrl, publicAnonKey, {
     detectSessionInUrl: true,
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     flowType: 'pkce',
-    debug: false,
+    debug: true, // Enable debug mode to see auth flow
     storageKey: 'squad-planner-auth',
   },
   realtime: {
