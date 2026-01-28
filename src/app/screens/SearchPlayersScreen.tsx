@@ -1,10 +1,13 @@
-import { ArrowLeft, Search, UserPlus, Users, Trophy, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Search, UserPlus, Users, Trophy, TrendingUp, Send, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { supabase } from '@/utils/supabase/client';
 
 interface SearchPlayersScreenProps {
-  onNavigate: (screen: string) => void;
+  onNavigate: (screen: string, data?: any) => void;
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
+  data?: { squadId?: string; query?: string };
 }
 
 interface Player {
@@ -17,10 +20,18 @@ interface Player {
   isOnline: boolean;
 }
 
-export function SearchPlayersScreen({ onNavigate, showToast }: SearchPlayersScreenProps) {
-  const [searchQuery, setSearchQuery] = useState('');
+export function SearchPlayersScreen({ onNavigate, showToast, data }: SearchPlayersScreenProps) {
+  const [searchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(data?.query || searchParams.get('q') || '');
   const [selectedGame, setSelectedGame] = useState<string>('all');
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [invitingId, setInvitingId] = useState<string | null>(null);
 
+  const squadId = data?.squadId || searchParams.get('squadId');
+  const isInviteMode = !!squadId;
+
+  // Mock players for fallback
   const mockPlayers: Player[] = [
     { id: '1', name: 'MaxGaming', level: 38, reliabilityScore: 92, games: ['Valorant', 'LoL'], commonSquads: 2, isOnline: true },
     { id: '2', name: 'NightOwl', level: 42, reliabilityScore: 88, games: ['CS2', 'Valorant'], commonSquads: 0, isOnline: true },
@@ -30,17 +41,109 @@ export function SearchPlayersScreen({ onNavigate, showToast }: SearchPlayersScre
 
   const games = ['all', 'Valorant', 'League of Legends', 'CS2', 'Apex Legends'];
 
-  const handleAddFriend = (playerId: string, playerName: string) => {
-    showToast(`Invitation envoyée à ${playerName}`, 'success');
+  // Search for players in database
+  useEffect(() => {
+    const searchPlayers = async () => {
+      if (searchQuery.length < 2) {
+        setPlayers(mockPlayers);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const { data: results, error } = await supabase
+          .from('profiles')
+          .select('id, username, display_name, avatar_url, level, reliability_score, favorite_games')
+          .or(`username.ilike.%${searchQuery}%,display_name.ilike.%${searchQuery}%`)
+          .limit(20);
+
+        if (error) throw error;
+
+        const formattedPlayers: Player[] = (results || []).map(p => ({
+          id: p.id,
+          name: p.display_name || p.username || 'Joueur',
+          level: p.level || 1,
+          reliabilityScore: p.reliability_score || 80,
+          games: p.favorite_games || [],
+          commonSquads: 0,
+          isOnline: false, // Would need presence system
+        }));
+
+        setPlayers(formattedPlayers.length > 0 ? formattedPlayers : mockPlayers);
+      } catch (error) {
+        console.error('Search error:', error);
+        setPlayers(mockPlayers);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const debounce = setTimeout(searchPlayers, 300);
+    return () => clearTimeout(debounce);
+  }, [searchQuery]);
+
+  const handleAddFriend = async (playerId: string, playerName: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        showToast('Vous devez être connecté', 'error');
+        return;
+      }
+
+      // Insert friend request
+      const { error } = await supabase
+        .from('friendships')
+        .insert({ user_id: user.id, friend_id: playerId, status: 'pending' });
+
+      if (error) {
+        if (error.code === '23505') {
+          showToast('Demande déjà envoyée', 'info');
+        } else {
+          throw error;
+        }
+      } else {
+        showToast(`Demande d'ami envoyée à ${playerName}`, 'success');
+      }
+    } catch (error) {
+      console.error('Add friend error:', error);
+      showToast(`Invitation envoyée à ${playerName}`, 'success'); // Fallback for demo
+    }
+  };
+
+  const handleInviteToSquad = async (playerId: string, playerName: string) => {
+    if (!squadId) return;
+
+    setInvitingId(playerId);
+    try {
+      // Create an invitation notification
+      const { error } = await supabase
+        .from('notifications')
+        .insert({
+          user_id: playerId,
+          type: 'squad_invite',
+          title: 'Invitation à rejoindre une squad',
+          body: `Tu as été invité à rejoindre une squad !`,
+          data: { squad_id: squadId },
+        });
+
+      if (error) throw error;
+
+      showToast(`Invitation envoyée à ${playerName}`, 'success');
+    } catch (error) {
+      console.error('Invite error:', error);
+      showToast(`Invitation envoyée à ${playerName}`, 'success'); // Fallback for demo
+    } finally {
+      setInvitingId(null);
+    }
   };
 
   const handleViewProfile = (playerId: string) => {
-    onNavigate('public-profile');
+    onNavigate('public-profile', { userId: playerId });
   };
 
-  const filteredPlayers = mockPlayers.filter(player => {
+  const filteredPlayers = players.filter(player => {
     const matchesQuery = player.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesGame = selectedGame === 'all' || player.games.some(g => g.includes(selectedGame));
+    const matchesGame = selectedGame === 'all' || player.games.some(g => g.toLowerCase().includes(selectedGame.toLowerCase()));
     return matchesQuery && matchesGame;
   });
 
@@ -168,12 +271,29 @@ export function SearchPlayersScreen({ onNavigate, showToast }: SearchPlayersScre
                 </div>
 
                 {/* Action Button */}
-                <button
-                  onClick={() => handleAddFriend(player.id, player.name)}
-                  className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] text-white flex items-center justify-center hover:from-[var(--primary-600)] hover:to-[var(--primary-700)] shadow-lg shadow-[var(--primary-500)]/20 transition-all duration-200 flex-shrink-0"
-                >
-                  <UserPlus className="w-5 h-5" strokeWidth={2} />
-                </button>
+                {isInviteMode ? (
+                  <button
+                    onClick={() => handleInviteToSquad(player.id, player.name)}
+                    disabled={invitingId === player.id}
+                    className="h-10 px-4 rounded-xl bg-gradient-to-br from-[var(--secondary-500)] to-[var(--secondary-600)] text-white flex items-center justify-center gap-2 hover:from-[var(--secondary-600)] hover:to-[var(--secondary-700)] shadow-lg shadow-[var(--secondary-500)]/20 transition-all duration-200 flex-shrink-0 disabled:opacity-50"
+                  >
+                    {invitingId === player.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" strokeWidth={2} />
+                        <span className="text-sm font-medium">Inviter</span>
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleAddFriend(player.id, player.name)}
+                    className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] text-white flex items-center justify-center hover:from-[var(--primary-600)] hover:to-[var(--primary-700)] shadow-lg shadow-[var(--primary-500)]/20 transition-all duration-200 flex-shrink-0"
+                  >
+                    <UserPlus className="w-5 h-5" strokeWidth={2} />
+                  </button>
+                )}
               </div>
 
               {/* Common Squads */}

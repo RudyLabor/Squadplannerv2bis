@@ -3,8 +3,8 @@
 **Objectif**: Transformer Squad Planner en "l'infrastructure de coordination sociale du gaming"
 **Vision**: L'équivalent de Notion, Slack ou Linear, mais pour le temps et l'engagement humain
 **Standard**: Zéro bug, UI/UX top 1% mondial (Linear/Stripe/Apple)
-**Dernière mise à jour**: 29 janvier 2026 - 01h00
-**Statuts mis à jour**: 🟢 PHASE 0: 100% | 🟢 PHASE 1: 100% | 🟢 PHASE 2: 95% | 🟡 PHASE 3: 35%
+**Dernière mise à jour**: 29 janvier 2026 - 02h30
+**Statuts mis à jour**: 🟢 PHASE 0: 100% | 🟢 PHASE 1: 100% | 🟢 PHASE 2: 95% | 🟡 PHASE 3: 45%
 
 ---
 
@@ -228,7 +228,7 @@ Squad Planner transforme un groupe Discord chaotique en une équipe qui joue vra
 | Statut | Catégorie | Tâche | Priorité | Source PDF | Notes |
 |--------|-----------|-------|----------|------------|-------|
 | 🟢 | Feature | Création squad (nom, jeu, **fuseau horaire**) | 🔥 | Phase 0 | squadsAPI.create() ✅ (90%) |
-| 🟡 | Feature | **Système invitation par lien unique** | 🔥 | Phase 0 | API existe (70%), manque UI/deep link |
+| 🟢 | Feature | **Système invitation par lien unique** | 🔥 | Phase 0 | ✅ JoinViaLinkScreen + InviteMemberScreen + Share button |
 | 🟢 | UI/UX | Page Squad centrale avec vue d'ensemble | 🔥 | Phase 0 | SquadDetailScreen.tsx ✅ (80%) |
 | 🟢 | Feature | Liste des membres avec statuts | 🔥 | Phase 0 | squad_members API ✅ (80%) |
 | 🟡 | Feature | Affichage prochaine session | 🔥 | Phase 0 | Existe, manque countdown timer |
@@ -468,11 +468,11 @@ Squad Planner transforme un groupe Discord chaotique en une équipe qui joue vra
 
 | Statut | Catégorie | Tâche | Priorité | Source PDF | Notes |
 |--------|-----------|-------|----------|------------|-------|
-| 🔴 | Feature | **Google Calendar: Export auto sessions confirmées** | ⚡ | Phase 3 | .ics generation |
-| 🔴 | Feature | **Apple Calendar: Synchronisation iCal native** | 💡 | Phase 3 | iCal format |
-| 🔴 | Feature | **Outlook: Intégration entreprise** | 💡 | Phase 3 | Outlook API |
-| 🔴 | Feature | **Webhooks: API ouverte intégrations tierces** | ⚡ | Phase 3 | Webhook system |
-| ⏳ | UI/UX | Écran sync calendrier | ⚡ | Phase 3 | CalendarSyncScreen.tsx |
+| 🟢 | Feature | **Export .ICS (Google/Apple/Outlook)** | ⚡ | Phase 3 | ✅ ics-generator.ts (280 lignes) RFC 5545 |
+| 🟢 | Feature | **Apple Calendar: Synchronisation iCal native** | 💡 | Phase 3 | ✅ Format .ics compatible |
+| 🟢 | Feature | **Outlook: Export calendrier** | 💡 | Phase 3 | ✅ Format .ics compatible |
+| 🟢 | Feature | **Webhooks: API ouverte intégrations tierces** | ⚡ | Phase 3 | ✅ discord-webhook.ts intégré |
+| 🟢 | UI/UX | Écran sync calendrier | ⚡ | Phase 3 | ✅ CalendarSyncScreen.tsx fonctionnel |
 
 ### 🎙️ Automatisation Vocale
 
@@ -775,7 +775,7 @@ Squad Planner transforme un groupe Discord chaotique en une équipe qui joue vra
 | **Phase 0 - MVP** | 100% | 100% | 100% | **100%** 🟢 | ✅ COMPLET |
 | **Phase 1 - Engagement** | 100% | 100% | 100% | **100%** 🟢 | ✅ COMPLET |
 | **Phase 2 - Intelligence** | 100% | 95% | 95% | **95%** 🟢 | ✅ QUASI-COMPLET |
-| **Phase 3 - Discord** | 10% | 60% | 40% | **35%** 🟡 | EN COURS |
+| **Phase 3 - Discord** | 15% | 70% | 50% | **45%** 🟡 | EN COURS |
 | **Phase 4 - Monétisation** | 5% | 30% | 0% | **5%** ⏳ | À FAIRE |
 | **Phase 5 - Écosystème** | 5% | 20% | 0% | **3%** ⏳ | À FAIRE |
 
@@ -955,7 +955,7 @@ Pour maximiser la vélocité, nous utilisons:
 
 **🎉 Phases 0, 1, 2 COMPLÈTES! Prêt pour Phase 3 - Intégration Discord Bot.**
 
-### 7 Features Implémentées (28-29 janvier 2026)
+### 10 Features Implémentées (28-29 janvier 2026)
 
 | # | Feature | Fichier(s) Créé(s)/Modifié(s) |
 |---|---------|-------------------------------|
@@ -966,6 +966,9 @@ Pour maximiser la vélocité, nous utilisons:
 | 5 | OAuth Discord | `DiscordConnectScreen.tsx` (Supabase OAuth natif) |
 | 6 | Recommandations Stratégiques | `strategic-recommendations.ts` + `IntelligenceScreen.tsx` |
 | 7 | **Discord Webhooks Complet** | `discord-webhook.ts` + `api.ts` + `DiscordBotScreen.tsx` |
+| 8 | **Export Calendrier .ICS** | `ics-generator.ts` + `CalendarSyncScreen.tsx` |
+| 9 | **Deep Link Invitations** | `JoinViaLinkScreen.tsx` + route `/join/:code` |
+| 10 | **Partage Squad + Invite** | `InviteMemberScreen.tsx` + `SquadDetailScreen.tsx` (share button) |
 
 ### Discord Webhooks (Phase 3 - Nouveau)
 
@@ -986,6 +989,6 @@ Pour maximiser la vélocité, nous utilisons:
 
 
 ---
-**Last Updated:** 2026-01-29T01:00:00.000Z
-**Status:** 🟢 Phase 0: 100% | 🟢 Phase 1: 100% | 🟢 Phase 2: 95% | 🟡 Phase 3: 35%
+**Last Updated:** 2026-01-29T02:30:00.000Z
+**Status:** 🟢 Phase 0: 100% | 🟢 Phase 1: 100% | 🟢 Phase 2: 95% | 🟡 Phase 3: 45%
 **Next:** Phase 3 - Bot Discord slash commands (nécessite backend Discord.js)
