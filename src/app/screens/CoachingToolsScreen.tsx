@@ -1,6 +1,6 @@
 import { ArrowLeft, Crown, Target, Shield, Zap, Users, TrendingUp, Award, Plus, X } from 'lucide-react';
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 

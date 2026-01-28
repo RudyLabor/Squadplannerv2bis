@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { LogIn, Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { useAuth } from '@/app/contexts/AuthContext';
 
 interface LoginScreenProps {

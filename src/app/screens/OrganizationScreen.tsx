@@ -1,5 +1,5 @@
 import { ArrowLeft, Building2, Users, TrendingUp, BarChart3, Settings } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 interface OrganizationScreenProps {
   onNavigate?: (screen: string, params?: Record<string, unknown>) => void;

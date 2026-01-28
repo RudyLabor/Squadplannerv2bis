@@ -10,7 +10,7 @@
  */
 
 import { useState, useCallback, useMemo } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Users, TrendingUp, Calendar, Plus } from 'lucide-react';
 import { usePerformanceMonitor } from '@/app/hooks/usePerformanceMonitor';
 import { useOptimizedFetch, useBatchFetch, useOptimisticUpdate } from '@/app/hooks/useOptimizedFetch';

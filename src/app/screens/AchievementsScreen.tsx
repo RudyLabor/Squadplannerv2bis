@@ -1,5 +1,5 @@
 import { ArrowLeft, Trophy, Lock, Check, Target, Flame, Zap, Award, Star, Crown, Shield } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 
 interface AchievementsScreenProps {

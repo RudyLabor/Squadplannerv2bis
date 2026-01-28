@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Share2, Download, Link2, Check, MessageCircle } from 'lucide-react';
 import { generateICS, downloadICS, copyToClipboard } from '@/utils/dateUtils';
 

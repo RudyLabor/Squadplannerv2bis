@@ -1,6 +1,6 @@
 import { Suspense, lazy, useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAnimationConfig } from '@/utils/device';
 import { TranslationProvider } from '@/i18n/useTranslation';
 import { AuthProvider } from '@/app/contexts/AuthContext';
@@ -241,9 +241,10 @@ function AppContent() {
         )}
 
         <div className={`
-          max-w-md mx-auto
-          ${isDesktop && isAuthenticated && showMainNav ? 'ml-72 pt-16 max-w-xl' : ''}
-          min-h-screen relative
+          min-h-screen relative mx-auto
+          ${isDesktop && isAuthenticated && showMainNav 
+            ? 'ml-72 pt-16 max-w-5xl px-6' 
+            : 'max-w-md px-4'}
         `}>
           {isMobile && <div className="h-11" />}
 

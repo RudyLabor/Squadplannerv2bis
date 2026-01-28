@@ -1,4 +1,4 @@
-import { motion, useMotionValue, useTransform, PanInfo } from 'motion/react';
+import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Check, X, HelpCircle } from 'lucide-react';
 import { useState } from 'react';
 

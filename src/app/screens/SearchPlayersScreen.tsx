@@ -1,5 +1,5 @@
 import { ArrowLeft, Search, UserPlus, Users, Trophy, TrendingUp } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 
 interface SearchPlayersScreenProps {

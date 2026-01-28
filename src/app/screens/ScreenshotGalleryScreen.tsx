@@ -1,5 +1,5 @@
 import React, { useState, useRef, Suspense } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Download, ChevronLeft, ChevronRight, Grid3x3, X } from 'lucide-react';
 import * as domtoimage from 'dom-to-image-more';
 import { Button } from '@/app/components/ui/button';

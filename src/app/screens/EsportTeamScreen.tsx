@@ -1,5 +1,5 @@
 import { ArrowLeft, Trophy, Users, Target, BarChart3, Shield } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 interface EsportTeamScreenProps {
   onNavigate?: (screen: string, params?: Record<string, unknown>) => void;

@@ -1,5 +1,5 @@
 import { ArrowLeft, Link2, MessageSquare, Calendar, Trophy, Target, XCircle, CheckCircle2, Sparkles, ChevronRight, Loader2 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { integrationsAPI, type Integrations } from '@/utils/integrationsAPI';

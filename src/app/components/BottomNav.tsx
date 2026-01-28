@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Users, Calendar, User } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';

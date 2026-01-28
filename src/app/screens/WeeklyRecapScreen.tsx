@@ -1,5 +1,5 @@
 import { ArrowLeft, Calendar, TrendingUp, Trophy, Clock, Users, Zap, Award, Star, Target, Share2 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
 import CountUp from 'react-countup';
 

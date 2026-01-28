@@ -1,5 +1,5 @@
 import { Check, X, HelpCircle, Calendar, Clock, Users } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Badge } from '@/app/components/ui/badge';
 import { AnimatedProgressBar } from '@/app/components/ui/AnimatedProgressBar';
 

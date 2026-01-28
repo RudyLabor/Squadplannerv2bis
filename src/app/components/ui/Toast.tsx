@@ -1,5 +1,5 @@
 import { memo, useEffect, useState, forwardRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, XCircle, AlertCircle, X } from 'lucide-react';
 
 export interface ToastProps {

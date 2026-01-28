@@ -1,6 +1,6 @@
 import { ArrowLeft, CheckCircle, Trophy } from 'lucide-react';
 import { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
 import { SlotVoting } from '@/app/components/SlotVoting';
 import { AnimatedProgressBar } from '@/app/components/ui/AnimatedProgressBar';

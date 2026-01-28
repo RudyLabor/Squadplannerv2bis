@@ -1,5 +1,5 @@
 import { ArrowLeft, UserPlus, Users, Clock, Check, X, Search, MoreVertical } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 

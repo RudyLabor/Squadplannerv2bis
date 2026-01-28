@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Users, TrendingUp, AlertCircle, CheckCircle2, Clock, Zap, Heart, UserX } from 'lucide-react';
 
 interface SquadMember {

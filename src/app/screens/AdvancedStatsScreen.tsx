@@ -1,5 +1,5 @@
 import { ArrowLeft, TrendingUp, Clock, Users, Target, Award, Calendar, Zap, Crown } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
 
 interface AdvancedStatsScreenProps {

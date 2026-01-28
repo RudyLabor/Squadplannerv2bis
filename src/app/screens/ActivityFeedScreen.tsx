@@ -1,5 +1,5 @@
 import { ArrowLeft, Trophy, Users, Calendar, CheckCircle, UserPlus, Star, Zap, TrendingUp } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 
 interface ActivityFeedScreenProps {

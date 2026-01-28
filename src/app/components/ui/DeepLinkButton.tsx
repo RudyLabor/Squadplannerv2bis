@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { ExternalLink, MessageCircle, Gamepad2 } from 'lucide-react';
 import { useState } from 'react';
 

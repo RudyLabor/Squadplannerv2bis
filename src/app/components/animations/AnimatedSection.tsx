@@ -1,4 +1,4 @@
-import { motion, MotionProps } from 'motion/react';
+import { motion, MotionProps } from 'framer-motion';
 import { ReactNode } from 'react';
 import { fadeIn, fadeInUp, fadeInLeft, fadeInRight, scrollRevealViewport, gpuAcceleration } from '@/app/utils/animations';
 

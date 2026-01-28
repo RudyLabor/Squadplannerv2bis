@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Trophy, Medal, TrendingUp, Star, Crown, Award, Target, Zap } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 import { mockPlayers } from '@/data/mockData';
 import { statsAPI } from '@/utils/api';

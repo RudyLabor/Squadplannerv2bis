@@ -1,5 +1,5 @@
 import { ArrowLeft, GitBranch, GitMerge, Users, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 interface SquadManagementScreenProps {
   onNavigate?: (screen: string, params?: Record<string, unknown>) => void;

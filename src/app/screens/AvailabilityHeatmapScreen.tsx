@@ -1,6 +1,6 @@
 import { ArrowLeft, Calendar, TrendingUp } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { sessionsAPI } from '@/utils/api';
 
 interface AvailabilityHeatmapScreenProps {

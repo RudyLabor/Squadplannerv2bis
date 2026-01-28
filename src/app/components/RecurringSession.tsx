@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Repeat, Calendar, Clock, Pause, Play, Trash2, Settings } from 'lucide-react';
 
 type RecurrencePattern = 'daily' | 'weekly' | 'biweekly' | 'monthly';

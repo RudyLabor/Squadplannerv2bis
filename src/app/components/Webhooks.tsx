@@ -1,7 +1,7 @@
 // 🔗 SQUAD PLANNER - Système de Webhooks
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Webhook, Plus, Trash2, Edit2, Check, X, Copy, ExternalLink, Zap, Activity } from 'lucide-react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';

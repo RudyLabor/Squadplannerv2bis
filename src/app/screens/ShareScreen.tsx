@@ -1,5 +1,5 @@
 import { ArrowLeft, Share2, Link as LinkIcon, Check, Twitter, MessageCircle, Copy } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 
 interface ShareScreenProps {

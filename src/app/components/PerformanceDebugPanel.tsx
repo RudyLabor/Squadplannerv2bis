@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, BarChart3, RefreshCw } from 'lucide-react';
 import { perfMonitor } from '@/app/hooks/usePerformanceMonitor';
 

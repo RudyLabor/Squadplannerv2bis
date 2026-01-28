@@ -1,6 +1,6 @@
 import { Clock, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface TimePickerProps {
   isOpen: boolean;

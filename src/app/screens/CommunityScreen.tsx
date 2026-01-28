@@ -1,5 +1,5 @@
 import { ArrowLeft, Globe, Users, TrendingUp, Calendar } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 interface CommunityScreenProps {
   onNavigate?: (screen: string, params?: Record<string, unknown>) => void;

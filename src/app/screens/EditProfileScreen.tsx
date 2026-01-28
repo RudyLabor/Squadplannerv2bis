@@ -1,6 +1,6 @@
 import { ArrowLeft, Camera, Save, Mail, User, AtSign, MapPin, Calendar, Trophy, Clock, Trash2 } from 'lucide-react';
 import { useState, useRef } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';

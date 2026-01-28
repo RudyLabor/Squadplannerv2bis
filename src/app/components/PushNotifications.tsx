@@ -1,7 +1,7 @@
 // 🔔 SQUAD PLANNER - Système de Rappels Push (T-24h, T-1h)
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, BellOff, Clock, Zap, Check, X } from 'lucide-react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';

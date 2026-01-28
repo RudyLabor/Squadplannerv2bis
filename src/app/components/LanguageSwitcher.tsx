@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Languages, Check } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';

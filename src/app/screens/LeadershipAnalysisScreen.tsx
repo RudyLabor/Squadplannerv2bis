@@ -1,5 +1,5 @@
 import { ArrowLeft, Crown, TrendingUp, Users, Target, Star, Award } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 interface LeadershipAnalysisScreenProps {
   onNavigate?: (screen: string, params?: Record<string, unknown>) => void;

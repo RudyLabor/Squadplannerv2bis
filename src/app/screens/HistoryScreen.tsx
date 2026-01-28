@@ -1,5 +1,5 @@
 import { ArrowLeft, Clock, TrendingUp, BarChart3 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 interface HistoryScreenProps {
   onNavigate?: (screen: string, params?: Record<string, unknown>) => void;

@@ -4,7 +4,7 @@
  * Premium animation variants for motion/react
  */
 
-import { Variants } from 'motion/react';
+import { Variants } from 'framer-motion';
 
 // ============================================================
 // EASING FUNCTIONS

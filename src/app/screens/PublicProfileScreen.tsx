@@ -1,5 +1,5 @@
 import { ArrowLeft, Trophy, TrendingUp, Users, Calendar, UserPlus, MessageCircle, Shield, Star, Award } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 
 interface PublicProfileScreenProps {

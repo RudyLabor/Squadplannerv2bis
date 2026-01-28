@@ -1,6 +1,6 @@
 import { ArrowLeft, Bell, Calendar, Trophy, AlertCircle, CheckCircle2, Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { notificationsAPI } from '@/utils/api';
 import { useUser } from '@/app/contexts/UserContext';
 

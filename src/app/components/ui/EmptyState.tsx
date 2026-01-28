@@ -1,5 +1,5 @@
 import { memo, ReactNode } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
 
 interface EmptyStateProps {

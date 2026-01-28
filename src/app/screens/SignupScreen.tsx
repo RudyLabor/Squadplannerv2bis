@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { UserPlus, Mail, Lock, User, ArrowLeft, Eye, EyeOff } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { useAuth } from '@/app/contexts/AuthContext';
 
 interface SignupScreenProps {

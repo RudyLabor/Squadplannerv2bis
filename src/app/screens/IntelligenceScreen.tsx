@@ -1,5 +1,5 @@
 import { ArrowLeft, Sparkles, Calendar, Clock, TrendingUp, Zap, Target, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
 import { HeatmapAvailability } from '@/app/components/HeatmapAvailability';
 

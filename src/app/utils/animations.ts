@@ -4,7 +4,7 @@
  * Reusable animation variants, easings, and helpers
  */
 
-import { Variants, Transition } from 'motion/react';
+import { Variants, Transition } from 'framer-motion';
 
 // ============================================================
 // GPU ACCELERATION

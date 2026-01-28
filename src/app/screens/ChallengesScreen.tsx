@@ -1,5 +1,5 @@
 import { ArrowLeft, Target, Trophy, Clock, Zap, Award, TrendingUp, CheckCircle } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 
 interface ChallengesScreenProps {

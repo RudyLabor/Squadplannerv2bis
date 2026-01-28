@@ -1,5 +1,5 @@
 import { ArrowLeft, Webhook, Plus, Trash2, Edit3, Check, X, Zap, AlertCircle } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 
 interface WebhooksScreenProps {

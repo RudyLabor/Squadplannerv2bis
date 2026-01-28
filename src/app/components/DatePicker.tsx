@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight, Calendar, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface DatePickerProps {
   isOpen: boolean;

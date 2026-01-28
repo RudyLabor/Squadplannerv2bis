@@ -1,5 +1,5 @@
 import { ArrowLeft, Users, TrendingUp, Globe, Lock, UserPlus, Search, Star } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 
 interface DiscoverSquadsScreenProps {

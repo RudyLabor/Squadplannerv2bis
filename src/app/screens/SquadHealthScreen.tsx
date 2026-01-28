@@ -1,5 +1,5 @@
 import { ArrowLeft, Heart, Users, TrendingUp, AlertCircle, Clock } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { SquadCohesion, generateMockCohesionMetrics, generateMockSquadMembers } from '@/app/components/SquadCohesion';
 import { ReliabilityProfile, generateMockReliabilityStats } from '@/app/components/ReliabilityProfile';
 

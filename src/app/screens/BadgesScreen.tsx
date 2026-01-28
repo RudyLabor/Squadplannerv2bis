@@ -1,6 +1,6 @@
 import { ArrowLeft, Crown, Star, Award, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 import { mockBadges } from '@/data/mockData';
 import { statsAPI } from '@/utils/api';

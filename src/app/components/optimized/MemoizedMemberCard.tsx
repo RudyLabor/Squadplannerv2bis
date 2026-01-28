@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 import { ReliabilityBadge } from '@/app/components/ReliabilityBadge';
 

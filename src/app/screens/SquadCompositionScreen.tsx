@@ -1,5 +1,5 @@
 import { ArrowLeft, Users, TrendingUp, AlertTriangle, Sparkles, CheckCircle2, XCircle } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 interface SquadCompositionScreenProps {
   onNavigate?: (screen: string, params?: Record<string, unknown>) => void;

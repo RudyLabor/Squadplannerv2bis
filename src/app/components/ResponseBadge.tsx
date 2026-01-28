@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { AlertCircle, CheckCircle, Clock, XCircle } from 'lucide-react';
 
 type ResponseStatus = 'pending' | 'confirmed' | 'declined' | 'urgent';

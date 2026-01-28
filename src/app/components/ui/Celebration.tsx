@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 
 interface CelebrationProps {

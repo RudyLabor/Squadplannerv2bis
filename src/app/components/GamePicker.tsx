@@ -1,6 +1,6 @@
 import { X, Search, Check } from 'lucide-react';
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Game, games, categoryLabels, categoryIcons } from '@/data/games';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 

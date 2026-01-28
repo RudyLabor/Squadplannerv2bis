@@ -1,5 +1,5 @@
 import { memo, useEffect, useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Users, Calendar, Plus, Home, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 

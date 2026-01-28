@@ -1,5 +1,5 @@
 import { ArrowLeft, Puzzle, Check, Download, Settings, ExternalLink } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 
 interface PluginsScreenProps {

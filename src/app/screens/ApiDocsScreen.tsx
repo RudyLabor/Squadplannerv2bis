@@ -1,5 +1,5 @@
 import { ArrowLeft, Code2, BookOpen, Terminal, Key, Webhook, Copy, CheckCircle2 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 
 interface ApiDocsScreenProps {

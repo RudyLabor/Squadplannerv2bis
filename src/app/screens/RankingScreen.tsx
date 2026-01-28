@@ -1,5 +1,5 @@
 import { ArrowLeft, Trophy, TrendingUp, Award, Target, Zap, Crown } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 interface RankingScreenProps {
   onNavigate: (screen: string) => void;

@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Users, TrendingUp, Wifi } from 'lucide-react';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 

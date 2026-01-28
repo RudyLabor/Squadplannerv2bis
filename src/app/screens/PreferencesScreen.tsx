@@ -1,5 +1,5 @@
 import { ArrowLeft, Globe, Clock, Gamepad2, Timer, Palette, Zap } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Button } from '@/app/components/ui/button';
 

@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Trophy, TrendingUp, TrendingDown, Award, AlertTriangle, CheckCircle2, XCircle, Clock, Flame } from 'lucide-react';
 
 interface Badge {
