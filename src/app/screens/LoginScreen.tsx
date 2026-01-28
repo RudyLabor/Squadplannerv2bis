@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { LogIn, Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight } from 'lucide-react';
+import { LogIn, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/app/contexts/AuthContext';
+import { supabase } from '@/utils/supabase/client';
 
 interface LoginScreenProps {
   onNavigate?: (screen: string, params?: Record<string, unknown>) => void;
@@ -14,7 +15,29 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const { signIn } = useAuth();
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      showToast?.('Entrez votre email pour réinitialiser le mot de passe', 'error');
+      return;
+    }
+
+    setIsResettingPassword(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+
+      if (error) throw error;
+      showToast?.('Email de réinitialisation envoyé ! Vérifiez votre boîte mail.', 'success');
+    } catch (error: any) {
+      showToast?.(`Erreur: ${error.message}`, 'error');
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -30,8 +53,19 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
       showToast?.(`Bienvenue ! 🎮`, 'success');
       onNavigate?.('home');
     } catch (error: any) {
-      const errorMessage = error.message || 'Erreur lors de la connexion';
-      showToast?.(`Erreur de connexion : ${errorMessage}`, 'error');
+      console.error('[LoginScreen] Login error:', error);
+      let errorMessage = error.message || 'Erreur lors de la connexion';
+
+      // Translate common Supabase errors to French
+      if (errorMessage.includes('Invalid login credentials')) {
+        errorMessage = 'Email ou mot de passe incorrect';
+      } else if (errorMessage.includes('Email not confirmed')) {
+        errorMessage = 'Veuillez confirmer votre email avant de vous connecter';
+      } else if (errorMessage.includes('timeout')) {
+        errorMessage = 'Connexion lente - réessayez';
+      }
+
+      showToast?.(errorMessage, 'error');
     } finally {
       setIsLoading(false);
     }
@@ -188,10 +222,11 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
               {/* Forgot Password */}
               <div className="text-center pt-1">
                 <button
-                  onClick={() => {}}
-                  className="text-sm font-medium text-[var(--fg-tertiary)] hover:text-[var(--primary-600)] transition-colors"
+                  onClick={handleForgotPassword}
+                  disabled={isResettingPassword}
+                  className="text-sm font-medium text-[var(--fg-tertiary)] hover:text-[var(--primary-600)] transition-colors disabled:opacity-50"
                 >
-                  Mot de passe oublié ?
+                  {isResettingPassword ? 'Envoi en cours...' : 'Mot de passe oublié ?'}
                 </button>
               </div>
             </div>

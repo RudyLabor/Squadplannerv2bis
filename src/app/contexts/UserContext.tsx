@@ -122,26 +122,29 @@ export function UserProvider({ children }: { children: ReactNode }) {
       }
 
       try {
-        const { profile } = await authAPI.getProfile();
-        
+        // authAPI.getProfile() returns the profile directly, not { profile }
+        const profile = await authAPI.getProfile();
+        console.log('[UserContext] Profile loaded:', profile);
+
         if (profile) {
           setUserProfile({
             id: profile.id,
-            displayName: profile.name || defaultProfile.displayName,
-            username: `@${profile.name?.toLowerCase().replace(/\s+/g, '')}` || defaultProfile.username,
+            // DB uses snake_case, UI uses camelCase
+            displayName: profile.display_name || profile.username || defaultProfile.displayName,
+            username: profile.username ? `@${profile.username}` : defaultProfile.username,
             email: profile.email || user?.email || '',
             bio: profile.bio || defaultProfile.bio,
             location: profile.location || defaultProfile.location,
             birthday: profile.birthday || defaultProfile.birthday,
-            favoriteGame: profile.favoriteGame || defaultProfile.favoriteGame,
-            playStyle: profile.playStyle || defaultProfile.playStyle,
-            avatarUrl: profile.avatar || defaultProfile.avatarUrl,
-            isPremium: profile.isPremium || false,
-            reliabilityScore: profile.reliabilityScore || 100,
-            totalSessions: profile.totalSessions || 0,
-            attendedSessions: profile.attendedSessions || 0,
-            createdAt: profile.createdAt,
-            integrations: profile.integrations || {},
+            favoriteGame: profile.favorite_game || defaultProfile.favoriteGame,
+            playStyle: profile.play_style || defaultProfile.playStyle,
+            avatarUrl: profile.avatar_url || defaultProfile.avatarUrl,
+            isPremium: profile.is_premium || false,
+            reliabilityScore: profile.reliability_score || 100,
+            totalSessions: profile.total_sessions || 0,
+            attendedSessions: profile.sessions_attended || 0,
+            createdAt: profile.created_at,
+            integrations: {},
           });
         } else {
           setUserProfile({
