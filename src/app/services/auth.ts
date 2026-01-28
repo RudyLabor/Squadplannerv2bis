@@ -11,38 +11,57 @@ export const authService = {
         data: {
           username,
           display_name: displayName || username,
-        }
+        },
+        // Add email redirect URL for confirmation
+        emailRedirectTo: `${window.location.origin}/auth/confirm`,
       }
     });
 
     if (authError) throw authError;
 
-    if (authData.user) {
-      // 2. Créer l'entrée dans la table publique profiles si elle n'existe pas déjà (géré par trigger idéalement, mais on le force ici au cas où)
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', authData.user.id)
-        .single();
+    // Check if email confirmation is required
+    const emailConfirmationRequired = authData.user && !authData.session;
 
-      if (!existingProfile) {
-        const { error: profileError } = await supabase
+    if (emailConfirmationRequired) {
+      // Return user without session - email confirmation needed
+      return {
+        user: authData.user,
+        session: null,
+        emailConfirmationRequired: true,
+      };
+    }
+
+    if (authData.user && authData.session) {
+      // 2. Only create profile if we have a session (user is confirmed)
+      // Try to create profile, but don't fail if it exists (trigger should handle this)
+      try {
+        const { data: existingProfile } = await supabase
           .from('profiles')
-          .insert({
-            id: authData.user.id,
-            email: email,
-            username: username,
-            display_name: displayName || username,
-            // auth_id column is redundant as id IS the auth_id in profiles table
-          });
-          
-        if (profileError) {
-          console.error('Error creating user profile:', profileError);
+          .select('id')
+          .eq('id', authData.user.id)
+          .maybeSingle(); // Use maybeSingle to avoid error if not found
+
+        if (!existingProfile) {
+          await supabase
+            .from('profiles')
+            .insert({
+              id: authData.user.id,
+              email: email,
+              username: username,
+              display_name: displayName || username,
+            });
         }
+      } catch (profileError) {
+        // Log but don't throw - profile creation is not critical at signup
+        console.warn('Could not create profile, will be created on first login:', profileError);
       }
     }
 
-    return { user: authData.user, session: authData.session };
+    return {
+      user: authData.user,
+      session: authData.session,
+      emailConfirmationRequired: false,
+    };
   },
 
   // Sign in

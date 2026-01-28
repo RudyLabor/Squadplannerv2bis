@@ -38,21 +38,33 @@ export function SignupScreen({ onNavigate, onSignup, showToast }: SignupScreenPr
 
     try {
       console.log('📝 Starting signup process for:', email);
-      
+
       // Real signup via backend
-      await signUp(email, password, name);
-      
+      const result = await signUp(email, password, name) as any;
+
+      // Check if email confirmation is required
+      if (result?.emailConfirmationRequired) {
+        console.log('📧 Email confirmation required');
+        showToast?.(
+          'Compte créé ! Un email de confirmation a été envoyé à votre adresse. Vérifiez votre boîte mail.',
+          'success'
+        );
+        // Optionally redirect to a "check your email" page
+        // For now, just stay on this page with the success message
+        return;
+      }
+
       const isPremium = true; // All new users get Premium for now
-      
+
       onSignup?.(email, name, isPremium);
       showToast?.(`Compte créé ! Bienvenue ${name} ! 🎉`, 'success');
       onNavigate?.('home');
     } catch (error: any) {
       console.error('❌ Signup error:', error);
-      
+
       // Handle specific error cases
       const errorMessage = error.message || 'Erreur lors de la création du compte';
-      
+
       if (errorMessage.includes('already been registered') || errorMessage.includes('already exists')) {
         console.log('⚠️ Account already exists for:', email);
         showToast?.('Un compte existe déjà avec cet email. Essayez de vous connecter ou contactez le support si vous avez oublié votre mot de passe.', 'error');

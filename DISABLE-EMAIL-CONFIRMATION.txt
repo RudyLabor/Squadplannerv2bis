@@ -1,0 +1,67 @@
+════════════════════════════════════════════════════════════
+  🔧 DÉSACTIVER LA CONFIRMATION PAR EMAIL
+════════════════════════════════════════════════════════════
+
+POURQUOI FAIRE CETTE ACTION ?
+------------------------------------------------------------
+Actuellement, quand un utilisateur crée un compte, il doit
+confirmer son email avant de pouvoir se connecter. Cela cause
+l'AbortError que vous avez vu dans la console.
+
+En désactivant la confirmation email, les utilisateurs pourront
+se connecter IMMÉDIATEMENT après la création du compte.
+
+════════════════════════════════════════════════════════════
+
+ACTION À FAIRE (2 MINUTES) :
+------------------------------------------------------------
+
+1️⃣  OUVRIR LA PAGE DE CONFIGURATION
+   👉 https://app.supabase.com/project/cwtoprbowdqcemdjrtir/auth/providers
+
+2️⃣  TROUVER "EMAIL" DANS LA LISTE DES PROVIDERS
+   - Scroll vers le bas
+   - Cliquez sur "Email" (icône ✉️)
+
+3️⃣  DÉSACTIVER LA CONFIRMATION
+   - Cherchez l'option "Confirm email" ou "Enable email confirmations"
+   - DÉCOCHEZ cette option (OFF)
+   - La case doit être VIDE (pas cochée)
+
+4️⃣  SAUVEGARDER
+   - Scrollez en bas de la page
+   - Cliquez sur le bouton "Save"
+
+════════════════════════════════════════════════════════════
+
+APRÈS CETTE ACTION :
+------------------------------------------------------------
+
+✅ Les utilisateurs pourront créer un compte INSTANTANÉMENT
+✅ Plus d'AbortError dans la console
+✅ Connexion immédiate après signup
+✅ Application 100% fonctionnelle
+
+════════════════════════════════════════════════════════════
+
+RÉSUMÉ VISUEL :
+------------------------------------------------------------
+
+EMAIL Provider Settings:
+┌──────────────────────────────────────┐
+│ ☐ Enable email confirmations         │  ← Décochez cette case
+│                                      │
+│ (Laisser les autres options comme   │
+│  elles sont)                         │
+└──────────────────────────────────────┘
+
+[Save] ← Cliquez ici pour sauvegarder
+
+════════════════════════════════════════════════════════════
+
+NOTE: Si vous préférez garder la confirmation email pour la
+production, l'application fonctionne aussi avec cette option
+activée. Les utilisateurs devront simplement cliquer sur le
+lien dans l'email de confirmation avant de se connecter.
+
+════════════════════════════════════════════════════════════

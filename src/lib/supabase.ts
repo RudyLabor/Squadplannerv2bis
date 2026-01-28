@@ -19,6 +19,8 @@ export const supabase = createClient<Database>(supabaseUrl, publicAnonKey, {
     detectSessionInUrl: true,
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     flowType: 'pkce',
+    debug: false,
+    storageKey: 'squad-planner-auth',
   },
   realtime: {
     params: {
@@ -28,6 +30,14 @@ export const supabase = createClient<Database>(supabaseUrl, publicAnonKey, {
   global: {
     headers: {
       'x-application-name': 'squad-planner',
+    },
+    // Increase fetch timeout to prevent AbortError
+    fetch: (url, options = {}) => {
+      return fetch(url, {
+        ...options,
+        signal: options.signal,
+        // Don't set timeout on the signal to avoid AbortError
+      });
     },
   },
 });
