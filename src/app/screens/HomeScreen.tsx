@@ -21,7 +21,6 @@ import {
   Swords,
   Building2,
   Gamepad2,
-  Crown,
 } from "lucide-react";
 import { sessionsAPI, squadsAPI } from "@/utils/api";
 import { useAuth } from "@/app/contexts/AuthContext";
@@ -139,15 +138,6 @@ export function HomeScreen({ onNavigate, showToast }: HomeScreenProps) {
           className="w-full mb-3"
         >
           Proposer Session
-        </ActionButton>
-
-        <ActionButton
-          variant="primary"
-          icon={Crown}
-          onClick={() => onNavigate("features-demo")}
-          className="w-full mb-8 bg-gradient-to-r from-indigo-500 to-purple-600 border-none text-white shadow-lg"
-        >
-          🗺️ PLAN DU SITE (ACCÈS 61 ÉCRANS)
         </ActionButton>
 
         {/* Intelligence & Outils */}
