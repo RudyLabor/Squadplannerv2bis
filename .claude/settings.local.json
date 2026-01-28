@@ -2,7 +2,16 @@
   "permissions": {
     "allow": [
       "Bash(wc:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: Complete Squad Planner v2.0 - Production Ready\n\n🚀 Implémentation complète de toutes les phases:\n\n✅ Phase 1: Sécurité & Fondations\n- 21 RLS policies ajoutées pour toutes les tables\n- Client Supabase typé \\(src/lib/supabase.ts\\)\n- Real-time configuré \\(sessions, squads, members, friendships\\)\n- FriendsContext avec subscriptions temps réel\n\n✅ Phase 2: APIs Complètes\n- 6 APIs implémentées \\(friendships, achievements, challenges, tournaments, availability, analytics\\)\n- 40+ routes ajoutées pour tous les 61 écrans\n- Navigation complète fonctionnelle\n\n✅ Phase 3: Intégrations Externes\n- OAuth Helper pour 6 providers \\(Discord, Google, Twitch, Steam, Riot, Battle.net\\)\n- Token Manager avec refresh automatique\n- Google Calendar Sync fonctionnel\n- Stripe Integration \\(Premium/Pro\\)\n- Discord Webhooks avec event management\n\n✅ Phase 4: Intelligence & Coaching\n- Intelligence Engine \\(optimal times, compatibility, no-show prediction, squad health\\)\n- AutoCoachingScreen avec données réelles\n- AcademyScreen enrichi avec modules de formation\n\n✅ Phase 5: Push & Automation\n- Web Push Notifications complètes\n- Service Worker configuré\n- NotificationSettingsScreen avec gestion push\n- Recurring Sessions Automation SQL\n- Discord Bot avec webhook management\n\n✅ Phase 6: Déploiement\n- .env.example avec toutes les variables\n- DEPLOYMENT.md guide complet mis à jour\n- Build production testé et validé\n- Configuration Vercel prête\n\n📦 Fichiers ajoutés:\n- src/lib/supabase.ts\n- src/types/database.types.ts\n- src/app/contexts/FriendsContext.tsx\n- src/app/screens/OAuthCallbackScreen.tsx\n- src/utils/oauth.ts\n- src/utils/tokenManager.ts\n- src/utils/stripe.ts\n- src/utils/intelligence.ts\n- src/utils/push-notifications.ts\n- supabase/migrations/20260128_recurring_sessions_automation.sql\n- .env.example\n\n🎯 Application prête pour déploiement Vercel!\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(vercel project:*)",
+      "Bash(vercel env:*)",
+      "Bash(npm install:*)",
+      "Bash(start https://app.supabase.com/project/cwtoprbowdqcemdjrtir/auth/url-configuration)",
+      "Bash(start https://app.supabase.com/project/cwtoprbowdqcemdjrtir/sql/new)",
+      "Bash(npx supabase:*)",
+      "Bash(cmd /c ULTRA-SIMPLE-SETUP.bat)"
     ]
   }
 }

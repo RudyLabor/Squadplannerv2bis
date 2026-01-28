@@ -11,13 +11,14 @@ import { projectId, publicAnonKey } from '@/utils/supabase/info';
 
 const supabaseUrl = `https://${projectId}.supabase.co`;
 
-// Create typed Supabase client
+// Create typed Supabase client with improved error handling
 export const supabase = createClient<Database>(supabaseUrl, publicAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+    flowType: 'pkce',
   },
   realtime: {
     params: {

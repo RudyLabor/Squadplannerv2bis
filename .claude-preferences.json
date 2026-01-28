@@ -1,0 +1,53 @@
+{
+  "user_preferences": {
+    "name": "Rudy",
+    "work_mode": "full_autonomy",
+    "description": "Mode autonomie complète activé - Claude peut exécuter toutes les actions nécessaires sans demander de confirmation une fois qu'une roadmap est établie",
+    "rules": [
+      "Une fois qu'on s'est mis d'accord sur une roadmap/plan, exécuter toutes les étapes de manière autonome",
+      "Ne pas demander de confirmations intermédiaires pour chaque action",
+      "Prendre les décisions techniques appropriées pour atteindre l'objectif",
+      "Informer l'utilisateur des actions effectuées, mais ne pas attendre de validation",
+      "Si un choix technique critique se présente, poser la question, mais pour les détails d'implémentation, décider de manière autonome",
+      "Utiliser les outils nécessaires (Bash, Edit, Write, etc.) sans hésitation"
+    ],
+    "project_context": {
+      "name": "Squad Planner v2.0",
+      "type": "Full-stack web application",
+      "stack": [
+        "React 18",
+        "TypeScript",
+        "Vite",
+        "Tailwind CSS v4",
+        "Supabase (PostgreSQL + Auth + Real-time)",
+        "Vercel (hosting)"
+      ],
+      "deployment_urls": {
+        "production": "https://squad-planner-v2-rudy.vercel.app",
+        "supabase_project": "https://app.supabase.com/project/cwtoprbowdqcemdjrtir",
+        "vercel_dashboard": "https://vercel.com/rudys-projects-253845f1/squad-planner-v2-rudy"
+      },
+      "key_features": [
+        "27 tables database with RLS policies",
+        "61 screens (mobile & desktop)",
+        "Real-time messaging and notifications",
+        "OAuth integrations (Discord, Google, Twitch, Steam, Riot, Battle.net)",
+        "Smart AI suggestions for session planning",
+        "Auto-coaching system",
+        "Discord webhooks",
+        "Calendar sync",
+        "Stripe payments (optional)",
+        "Web push notifications (optional)"
+      ]
+    },
+    "communication_style": {
+      "verbose": false,
+      "action_oriented": true,
+      "show_progress": true,
+      "emoji_usage": "moderate",
+      "language": "French"
+    },
+    "established": "2026-01-28T15:00:00Z",
+    "last_updated": "2026-01-28T15:00:00Z"
+  }
+}

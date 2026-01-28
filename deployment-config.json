@@ -1,0 +1,31 @@
+{
+  "supabase": {
+    "url": "https://cwtoprbowdqcemdjrtir.supabase.co",
+    "anon_key": "COPIEZ_DEPUIS_DASHBOARD",
+    "project_id": "cwtoprbowdqcemdjrtir"
+  },
+  "vercel": {
+    "project_url": "https://squad-planner-v2-rudy.vercel.app",
+    "env_vars": {
+      "VITE_SUPABASE_URL": "https://cwtoprbowdqcemdjrtir.supabase.co",
+      "VITE_SUPABASE_ANON_KEY": "COPIEZ_DEPUIS_DASHBOARD"
+    }
+  },
+  "auth_urls": {
+    "site_url": "https://squad-planner-v2-rudy.vercel.app",
+    "redirect_urls": [
+      "https://squad-planner-v2-rudy.vercel.app",
+      "https://squad-planner-v2-rudy.vercel.app/**",
+      "https://*.vercel.app",
+      "https://squad-planner-v2-rudy.vercel.app/oauth/callback"
+    ]
+  },
+  "instructions": {
+    "step_1": "Copiez la clé ANON depuis Supabase Dashboard",
+    "step_2": "Remplacez COPIEZ_DEPUIS_DASHBOARD dans ce fichier",
+    "step_3": "Exécutez: node apply-config.js",
+    "step_4": "Collez FULL_DB_SETUP.sql dans Supabase SQL Editor",
+    "step_5": "Configurez les Auth URLs dans Supabase",
+    "step_6": "Redéployez: vercel --prod"
+  }
+}
