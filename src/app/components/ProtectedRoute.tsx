@@ -6,8 +6,16 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
+// TEMPORARY: Bypass auth for development - set to false to re-enable auth
+const BYPASS_AUTH = true;
+
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
+
+  // Bypass auth check if flag is set
+  if (BYPASS_AUTH) {
+    return <>{children}</>;
+  }
 
   if (loading) {
     return (

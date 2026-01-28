@@ -28,6 +28,23 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// TEMPORARY: Bypass auth for development - set to false to re-enable auth
+const BYPASS_AUTH = true;
+
+// Mock user for development when auth is bypassed
+const MOCK_USER: User = {
+  id: 'dev-user-001',
+  email: 'dev@squadplanner.app',
+  username: 'DevUser',
+  display_name: 'Développeur Test',
+  avatar_url: undefined,
+  role: 'admin',
+  reliability_score: 95,
+  xp_points: 1500,
+  level: 10,
+  is_premium: true,
+};
+
 // Fonction pour nettoyer le cache (uniquement sur demande explicite)
 const clearAllAppCache = async () => {
   if (typeof window === 'undefined') return;
@@ -63,9 +80,10 @@ const clearAllAppCache = async () => {
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const initDone = useRef(false);
+  // Use mock user if auth is bypassed
+  const [user, setUser] = useState<User | null>(BYPASS_AUTH ? MOCK_USER : null);
+  const [loading, setLoading] = useState(BYPASS_AUTH ? false : true);
+  const initDone = useRef(BYPASS_AUTH ? true : false);
 
   useEffect(() => {
     // Prevent double initialization in StrictMode
