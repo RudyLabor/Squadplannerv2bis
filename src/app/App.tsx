@@ -107,6 +107,7 @@ const DesignDocScreen = lazy(() => import('@/app/screens/DesignDocScreen')) as a
 const ScreenshotGalleryScreen = lazy(() => import('@/app/screens/ScreenshotGalleryScreen')) as any;
 const OAuthCallbackScreen = lazy(() => import('@/app/screens/OAuthCallbackScreen')) as any;
 const InviteMemberScreen = lazy(() => import('@/app/screens/InviteMemberScreen')) as any;
+const RSVPScreen = lazy(() => import('@/app/screens/RSVPScreen')) as any;
 
 function ScreenLoader() {
   return (
@@ -302,6 +303,7 @@ function AppContent() {
                     <Route path="/esport-team" element={<ProtectedRoute><EsportTeamScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
 
                     {/* Hub 3: Sessions - Additional Routes */}
+                    <Route path="/rsvp/:sessionId" element={<ProtectedRoute><RSVPScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
                     <Route path="/vote-session/:sessionId" element={<ProtectedRoute><VoteSessionScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
                     <Route path="/check-in/:sessionId" element={<ProtectedRoute><CheckInScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
                     <Route path="/recurring-sessions" element={<ProtectedRoute><RecurringSessionScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />

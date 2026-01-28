@@ -4,8 +4,9 @@
  */
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, Clock, MapPin, Users, Edit, Trash2 } from 'lucide-react';
+import { X, Calendar, Clock, MapPin, Users, Edit, Trash2, ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SessionRSVPCard } from './SessionRSVPCard';
 import { NoShowPrediction } from './NoShowPrediction';
 import { sessionsAPI } from '@/app/services/api';
@@ -17,6 +18,7 @@ interface SessionDetailModalProps {
   onClose: () => void;
   onRSVP?: (response: 'yes' | 'no' | 'maybe') => void;
   showToast?: (message: string, type?: 'success' | 'error' | 'info') => void;
+  onNavigate?: (screen: string, params?: Record<string, string>) => void;
 }
 
 export function SessionDetailModal({
@@ -25,11 +27,23 @@ export function SessionDetailModal({
   onClose,
   onRSVP: onRSVPProp,
   showToast,
+  onNavigate,
 }: SessionDetailModalProps) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Navigation vers l'écran RSVP dédié
+  const handleOpenFullRSVP = () => {
+    onClose();
+    if (onNavigate) {
+      onNavigate(`rsvp/${sessionId}`);
+    } else {
+      navigate(`/rsvp/${sessionId}`);
+    }
+  };
 
   useEffect(() => {
     if (isOpen && sessionId) {
@@ -240,6 +254,15 @@ export function SessionDetailModal({
                       }
                       onRSVP={handleRSVP}
                     />
+
+                    {/* Bouton vers écran RSVP complet */}
+                    <button
+                      onClick={handleOpenFullRSVP}
+                      className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-amber-50 hover:bg-amber-100 rounded-xl font-medium text-amber-700 transition-colors"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      Voir tous les détails RSVP
+                    </button>
 
                     {/* Prédiction No-Show (IA) */}
                     {session.rsvps && session.rsvps.length > 0 && (

@@ -8,6 +8,7 @@ import { ArrowLeft, Gamepad2, Users, Calendar, Clock } from "lucide-react";
 import { sessionsAPI, squadsAPI } from "@/utils/api";
 import { ActionButton } from "@/app/components/ui/DesignSystem";
 import { TimePicker } from "@/app/components/TimePicker";
+import { DatePicker } from "@/app/components/DatePicker";
 
 interface ProposeSessionScreenProps {
   onNavigate: (screen: string, data?: any) => void;
@@ -41,6 +42,7 @@ export function ProposeSessionScreen({
   const [comment, setComment] = useState("");
   const [showGamePicker, setShowGamePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [squads, setSquads] = useState<any[]>([]);
   const [selectedSquad, setSelectedSquad] = useState<string | null>(data?.squadId || null);
@@ -243,15 +245,19 @@ export function ProposeSessionScreen({
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div>
               <p className="text-xs text-gray-400 mb-1">DATE</p>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="w-full h-12 pl-10 pr-4 bg-white rounded-xl border border-gray-200 text-gray-900"
-                />
-              </div>
+              <button
+                type="button"
+                onClick={() => setShowDatePicker(true)}
+                className="w-full h-12 bg-white rounded-xl border border-gray-200 text-left px-4 flex items-center gap-3 hover:border-gray-300 transition-colors"
+              >
+                <Calendar className="w-4 h-4 text-gray-400" />
+                <span className={date ? 'text-gray-900 font-medium' : 'text-gray-400'}>
+                  {date ? new Date(date + 'T00:00:00').toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'short'
+                  }) : 'Choisir'}
+                </span>
+              </button>
             </div>
             <div>
               <p className="text-xs text-gray-400 mb-1">HEURE</p>
@@ -356,6 +362,15 @@ export function ProposeSessionScreen({
         onClose={() => setShowTimePicker(false)}
         onSelect={(selectedTime) => setTime(selectedTime)}
         selectedTime={time}
+      />
+
+      {/* Date Picker Modal avec raccourcis */}
+      <DatePicker
+        isOpen={showDatePicker}
+        onClose={() => setShowDatePicker(false)}
+        onSelect={(selectedDate) => setDate(selectedDate)}
+        selectedDate={date}
+        minDate={new Date().toISOString().split('T')[0]}
       />
     </div>
   );

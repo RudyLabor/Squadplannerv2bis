@@ -1,5 +1,5 @@
-import { ChevronLeft, ChevronRight, Calendar, X } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, Calendar, X, Zap } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface DatePickerProps {
@@ -8,6 +8,19 @@ interface DatePickerProps {
   onSelect: (date: string) => void;
   selectedDate?: string;
   minDate?: string;
+}
+
+// Helper pour formater la date en ISO
+function formatDateToISO(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// Helper pour obtenir le nom du jour
+function getDayName(date: Date): string {
+  return date.toLocaleDateString('fr-FR', { weekday: 'long' });
 }
 
 export function DatePicker({ isOpen, onClose, onSelect, selectedDate, minDate }: DatePickerProps) {
@@ -19,6 +32,68 @@ export function DatePicker({ isOpen, onClose, onSelect, selectedDate, minDate }:
       setCurrentMonth(new Date(selectedDate));
     }
   }, [selectedDate]);
+
+  // Générer les raccourcis rapides
+  const quickDates = useMemo(() => {
+    const dates = [];
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    // Aujourd'hui
+    dates.push({
+      label: "Aujourd'hui",
+      date: formatDateToISO(now),
+      sublabel: now.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }),
+      emoji: '📅'
+    });
+
+    // Demain
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    dates.push({
+      label: 'Demain',
+      date: formatDateToISO(tomorrow),
+      sublabel: tomorrow.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }),
+      emoji: '🌅'
+    });
+
+    // Après-demain
+    const dayAfter = new Date(now);
+    dayAfter.setDate(dayAfter.getDate() + 2);
+    const dayAfterName = getDayName(dayAfter);
+    dates.push({
+      label: dayAfterName.charAt(0).toUpperCase() + dayAfterName.slice(1),
+      date: formatDateToISO(dayAfter),
+      sublabel: dayAfter.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }),
+      emoji: '📆'
+    });
+
+    // Prochain week-end (Samedi)
+    const nextSaturday = new Date(now);
+    const daysUntilSaturday = (6 - nextSaturday.getDay() + 7) % 7;
+    nextSaturday.setDate(nextSaturday.getDate() + (daysUntilSaturday === 0 ? 7 : daysUntilSaturday));
+    if (nextSaturday > dayAfter) {
+      dates.push({
+        label: 'Samedi',
+        date: formatDateToISO(nextSaturday),
+        sublabel: nextSaturday.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }),
+        emoji: '🎮'
+      });
+    } else {
+      // Si samedi est proche, ajouter dimanche
+      const nextSunday = new Date(now);
+      const daysUntilSunday = (7 - nextSunday.getDay()) % 7;
+      nextSunday.setDate(nextSunday.getDate() + (daysUntilSunday === 0 ? 7 : daysUntilSunday));
+      dates.push({
+        label: 'Dimanche',
+        date: formatDateToISO(nextSunday),
+        sublabel: nextSunday.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }),
+        emoji: '🛋️'
+      });
+    }
+
+    return dates.slice(0, 4);
+  }, []);
 
   const monthNames = [
     'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
@@ -159,8 +234,49 @@ export function DatePicker({ isOpen, onClose, onSelect, selectedDate, minDate }:
             </button>
           </div>
 
+          {/* Quick Date Shortcuts */}
+          <div className="px-6 pt-4 pb-2">
+            <div className="flex items-center gap-2 mb-3">
+              <Zap className="w-4 h-4 text-amber-500" />
+              <span className="text-xs font-semibold text-[var(--fg-tertiary)] uppercase tracking-wide">Raccourcis</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {quickDates.map((quick, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setTempSelectedDate(quick.date);
+                    // Auto-navigate to the month of the selected date
+                    setCurrentMonth(new Date(quick.date + 'T00:00:00'));
+                  }}
+                  className={`p-3 rounded-xl text-left transition-all ${
+                    tempSelectedDate === quick.date
+                      ? 'bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] text-white shadow-lg shadow-[var(--primary-500)]/20'
+                      : 'bg-[var(--bg-subtle)] hover:bg-[var(--bg-muted)]'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{quick.emoji}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className={`font-medium text-sm truncate ${
+                        tempSelectedDate === quick.date ? 'text-white' : 'text-[var(--fg-primary)]'
+                      }`}>
+                        {quick.label}
+                      </p>
+                      <p className={`text-xs truncate ${
+                        tempSelectedDate === quick.date ? 'text-white/80' : 'text-[var(--fg-tertiary)]'
+                      }`}>
+                        {quick.sublabel}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Calendar */}
-          <div className="p-6">
+          <div className="p-6 pt-4">
             {/* Month Navigation */}
             <div className="flex items-center justify-between mb-6">
               <button

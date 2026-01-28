@@ -106,6 +106,7 @@ export function SessionsScreen({ onNavigate, showToast }: SessionsScreenProps) {
             loadSessions(); // Refresh list after RSVP
           }}
           showToast={showToast}
+          onNavigate={onNavigate}
         />
       )}
 
