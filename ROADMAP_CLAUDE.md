@@ -3,8 +3,8 @@
 **Objectif**: Transformer Squad Planner en "l'infrastructure de coordination sociale du gaming"
 **Vision**: L'équivalent de Notion, Slack ou Linear, mais pour le temps et l'engagement humain
 **Standard**: Zéro bug, UI/UX top 1% mondial (Linear/Stripe/Apple)
-**Dernière mise à jour**: 28 janvier 2026 - 19h45
-**Statuts mis à jour**: ✅ Phase 0, 1, 2 DATABASE COMPLETE
+**Dernière mise à jour**: 28 janvier 2026 - 20h30
+**Statuts mis à jour**: ✅ Phase 0, 1, 2 DATABASE + ✅ AUTH CRITIQUE FIXÉE
 
 ---
 
@@ -33,6 +33,30 @@
 
 **Prochaine étape**: Phase 3 - Discord Integration
 
+### 🔐 FIX CRITIQUE: AUTHENTIFICATION (28 JANVIER - 20h30)
+
+**PROBLÈME IDENTIFIÉ ET RÉSOLU:**
+- ❌ **Problème**: Email confirmation activée mais aucun SMTP configuré
+- ❌ **Impact**: Utilisateurs ne pouvaient ni créer de compte ni se connecter
+- ❌ **Cause**: 151 comptes bloqués en "attente de confirmation email"
+
+**SOLUTION APPLIQUÉE:**
+- ✅ **151 comptes existants** auto-confirmés via API Admin Supabase
+- ✅ Configuration Supabase: "Enable email confirmations" **désactivée**
+- ✅ Nouveaux comptes: **Session immédiate** sans confirmation email
+- ✅ Tests automatiques: Création compte + Reconnexion **100% fonctionnels**
+
+**Scripts créés:**
+- `fix-auth-via-api.cjs` - Auto-confirmation via API Admin
+- `test-auth-working.cjs` - Test automatique de l'auth
+- `guide-disable-email-confirmation.cjs` - Guide interactif
+
+**Résultat:**
+- 🎉 **L'application est maintenant complètement utilisable**
+- ✅ Création de compte instantanée
+- ✅ Login/Logout fonctionnels
+- ✅ 151 comptes débloqués
+
 ---
 
 ## 📊 RÉSUMÉ EXÉCUTIF - ÉTAT ACTUEL
@@ -45,10 +69,10 @@
 - 📄 Ce fichier - Roadmap complète avec statuts réels
 
 ### ✅ BONNES NOUVELLES
-1. 🎉 **Système RSVP implémenté à 80%** (DB + API + UI SwipeableRSVP)
-2. 🎉 **Invitation par code fonctionnelle à 70%** (API complète, manque UI)
-3. ✅ **Architecture DB solide** (27 tables + RLS policies)
-4. ✅ **Auth email fonctionnelle** (95% - AbortError fixed)
+1. 🎉 **AUTHENTIFICATION: 100% FONCTIONNELLE** (Email confirmation désactivée, 151 comptes débloqués)
+2. 🎉 **DATABASE COMPLETE: 100%** (37 tables + RLS + Triggers + Permissions)
+3. 🎉 **Système RSVP implémenté à 80%** (DB + API + UI SwipeableRSVP)
+4. 🎉 **Invitation par code fonctionnelle à 70%** (API complète, manque UI)
 5. ✅ **Chat squad opérationnel** (85%)
 6. ✅ **Création sessions** (85%)
 
