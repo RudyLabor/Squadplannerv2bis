@@ -238,7 +238,7 @@ Squad Planner transforme un groupe Discord chaotique en une équipe qui joue vra
 | Statut | Catégorie | Tâche | Priorité | Source PDF | Notes |
 |--------|-----------|-------|----------|------------|-------|
 | 🟢 | Feature | Création session: date, heure, jeu, **durée** | 🔥 | Phase 0 | ProposeSessionScreen.tsx ✅ (85%) |
-| 🟡 | UI/UX | Interface calendrier intuitive | 🔥 | Phase 0 | Calendrier basic existe (60%) |
+| 🟢 | UI/UX | Interface calendrier intuitive | 🔥 | Phase 0 | ✅ DatePicker avec raccourcis rapides (100%) |
 | 🟢 | UI/UX | **Sélecteur heure optimisé (2 colonnes)** | 🔥 | Phase 0 | ✅ TimePicker.tsx intégré dans ProposeSessionScreen |
 | 🟢 | Feature | Commentaires et détails additionnels | ⚡ | Phase 0 | Description/notes ✅ |
 
@@ -274,7 +274,7 @@ Squad Planner transforme un groupe Discord chaotique en une équipe qui joue vra
 | Statut | Catégorie | Tâche | Priorité | Source PDF | Notes |
 |--------|-----------|-------|----------|------------|-------|
 | 🟢 | Feature | Chat de squad minimal | 🔥 | Phase 0 | SquadChatScreen.tsx ✅ (85%) |
-| 🟡 | Feature | Notifications push | 🔥 | Phase 0 | Hooks créés, intégration partielle (60%) |
+| 🟢 | Feature | Notifications push | 🔥 | Phase 0 | ✅ push_subscriptions table + SW + UI complète (100%) |
 | 🟢 | Feature | Système de commentaires | ⚡ | Phase 0 | Messages sur sessions ✅ |
 
 ---
@@ -658,10 +658,10 @@ Squad Planner transforme un groupe Discord chaotique en une équipe qui joue vra
 
 | Statut | Catégorie | Tâche | Priorité | Notes |
 |--------|-----------|-------|----------|-------|
-| 🔴 | UI/UX | **Écran RSVP dédié** | 🔥 | **Manquant entièrement** |
-| 🔴 | UI/UX | Cards membres avec statuts visuels | 🔥 | ✅⏳❌ icons |
-| 🔴 | UI/UX | Boutons action rapides | 🔥 | Quick RSVP |
-| 🔴 | UI/UX | Jauge complétion | 🔥 | Progress bar |
+| 🟢 | UI/UX | **Écran RSVP dédié** | 🔥 | ✅ RSVPScreen.tsx créé avec navigation |
+| 🟢 | UI/UX | Cards membres avec statuts visuels | 🔥 | ✅ RSVPMemberCard avec ✅⏳❌ |
+| 🟢 | UI/UX | Boutons action rapides | 🔥 | ✅ 3 boutons: Partant/Peut-être/Absent |
+| 🟢 | UI/UX | Jauge complétion | 🔥 | ✅ Progress bar animée + stats |
 
 ### 5️⃣ Profil Joueur
 
