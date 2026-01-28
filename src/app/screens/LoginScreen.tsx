@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LogIn, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { LogIn, Mail, Lock, Eye, EyeOff, ArrowRight, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { supabase } from '@/utils/supabase/client';
@@ -16,7 +16,8 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
-  const { signIn } = useAuth();
+  const [showCacheClearHint, setShowCacheClearHint] = useState(false);
+  const { signIn, clearAllCache } = useAuth();
 
   const handleForgotPassword = async () => {
     if (!email) {
@@ -40,11 +41,14 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
   };
 
   const handleLogin = async () => {
+    console.log('[LoginScreen] handleLogin called with email:', email);
+
     if (!email || !password) {
       showToast?.('Veuillez remplir tous les champs', 'error');
       return;
     }
 
+    console.log('[LoginScreen] Starting login attempt...');
     setIsLoading(true);
 
     try {
@@ -63,8 +67,14 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
         errorMessage = 'Veuillez confirmer votre email avant de vous connecter';
       } else if (errorMessage.includes('timeout')) {
         errorMessage = 'Connexion lente - réessayez';
+        setShowCacheClearHint(true);
+      } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+        errorMessage = 'Problème de connexion réseau';
+        setShowCacheClearHint(true);
       }
 
+      // Show cache clear hint for any persistent errors
+      setShowCacheClearHint(true);
       showToast?.(errorMessage, 'error');
     } finally {
       setIsLoading(false);
@@ -229,6 +239,26 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
                   {isResettingPassword ? 'Envoi en cours...' : 'Mot de passe oublié ?'}
                 </button>
               </div>
+
+              {/* Cache Clear Hint - shown after errors */}
+              {showCacheClearHint && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl"
+                >
+                  <p className="text-xs text-amber-800 mb-2">
+                    Problème de connexion ? Essayez de vider le cache.
+                  </p>
+                  <button
+                    onClick={clearAllCache}
+                    className="flex items-center gap-2 text-xs font-medium text-amber-700 hover:text-amber-900 transition-colors"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    Vider le cache et réessayer
+                  </button>
+                </motion.div>
+              )}
             </div>
 
             {/* Divider */}

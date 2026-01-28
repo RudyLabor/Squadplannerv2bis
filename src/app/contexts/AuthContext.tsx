@@ -1,11 +1,12 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { authService } from '@/app/services/auth';
+import { supabase } from '@/utils/supabase/client';
 
 interface User {
   id: string;
   email: string;
   username: string;
-  display_name?: string; // Optional car peut ne pas exister dans la DB
+  display_name?: string;
   avatar_url?: string;
   role?: string;
   reliability_score?: number;
@@ -21,51 +22,152 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  clearAllCache: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Fonction pour nettoyer le cache (uniquement sur demande explicite)
+const clearAllAppCache = async () => {
+  if (typeof window === 'undefined') return;
+
+  console.log('[AuthContext] Clearing all cache...');
+
+  // 1. Déconnecter de Supabase
+  try {
+    await supabase.auth.signOut({ scope: 'local' });
+  } catch (e) {
+    console.warn('[AuthContext] Error signing out:', e);
+  }
+
+  // 2. Nettoyer localStorage des clés Supabase
+  const allKeys = Object.keys(localStorage);
+  allKeys.forEach(key => {
+    if (key.startsWith('sb-') ||
+        key.startsWith('supabase') ||
+        key.includes('squad-planner')) {
+      localStorage.removeItem(key);
+    }
+  });
+
+  // 3. Nettoyer sessionStorage
+  const sessionKeys = Object.keys(sessionStorage);
+  sessionKeys.forEach(key => {
+    if (key.startsWith('sb-') || key.startsWith('supabase')) {
+      sessionStorage.removeItem(key);
+    }
+  });
+
+  console.log('[AuthContext] Cache cleared');
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const initDone = useRef(false);
 
   useEffect(() => {
-    // Vérifier la session au chargement
-    checkSession();
+    // Prevent double initialization in StrictMode
+    if (initDone.current) return;
+    initDone.current = true;
 
-    // Écouter les changements d'authentification
-    const subscription = authService.onAuthStateChange((user) => {
-      setUser(user);
-      setLoading(false);
+    let isMounted = true;
+
+    const initAuth = async () => {
+      console.log('[AuthContext] Starting auth initialization...');
+
+      try {
+        // Récupérer la session existante
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (!isMounted) return;
+
+        if (error) {
+          console.error('[AuthContext] getSession error:', error);
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+
+        if (!session) {
+          console.log('[AuthContext] No existing session');
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+
+        console.log('[AuthContext] Session found, loading user profile...');
+
+        // Session trouvée, récupérer le profil
+        const currentUser = await authService.getCurrentUser();
+
+        if (!isMounted) return;
+
+        if (currentUser && currentUser.id) {
+          console.log('[AuthContext] User loaded:', currentUser.username || currentUser.email);
+          setUser(currentUser as User);
+        } else {
+          console.log('[AuthContext] No user profile found');
+          setUser(null);
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error('[AuthContext] Init error:', error);
+        if (isMounted) {
+          setUser(null);
+          setLoading(false);
+        }
+      }
+    };
+
+    // Écouter les changements d'auth APRÈS l'initialisation
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('[AuthContext] Auth state changed:', event, 'hasSession:', !!session);
+
+      if (!isMounted) return;
+
+      // Ignorer l'événement INITIAL_SESSION car on le gère déjà dans initAuth
+      if (event === 'INITIAL_SESSION') {
+        return;
+      }
+
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+        return;
+      }
+
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        if (session) {
+          try {
+            const currentUser = await authService.getCurrentUser();
+            if (isMounted && currentUser && currentUser.id) {
+              setUser(currentUser as User);
+            }
+          } catch (e) {
+            console.error('[AuthContext] Error loading user after auth change:', e);
+          }
+        }
+      }
     });
 
+    // Lancer l'initialisation
+    initAuth();
+
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
 
-  const checkSession = async () => {
-    try {
-      const session = await authService.getSession();
-      if (session) {
-        const currentUser = await authService.getCurrentUser();
-        setUser(currentUser);
-      }
-    } catch (error) {
-      console.error('Error checking session:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const signUp = async (email: string, password: string, username: string, displayName?: string) => {
     setLoading(true);
     try {
-      const { user: authUser } = await authService.signUp(email, password, username, displayName);
-      // Fetch full profile to match User interface
+      await authService.signUp(email, password, username, displayName);
       const newUser = await authService.getCurrentUser();
-      setUser(newUser);
+      if (newUser) {
+        setUser(newUser as User);
+      }
     } catch (error) {
       console.error('Signup error:', error);
       throw error;
@@ -78,18 +180,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     console.log('[AuthContext] signIn started');
     setLoading(true);
     try {
-      const authResult = await authService.signIn(email, password);
+      await authService.signIn(email, password);
       console.log('[AuthContext] signIn completed, getting user profile...');
+
       const currentUser = await authService.getCurrentUser();
       console.log('[AuthContext] currentUser:', currentUser);
-      setUser(currentUser);
+
+      if (currentUser && currentUser.id) {
+        setUser(currentUser as User);
+      }
       console.log('[AuthContext] User state updated');
     } catch (error) {
       console.error('[AuthContext] Sign in error:', error);
       throw error;
     } finally {
       setLoading(false);
-      console.log('[AuthContext] Loading set to false');
     }
   };
 
@@ -99,6 +204,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
     } catch (error) {
       console.error('Sign out error:', error);
+      setUser(null);
       throw error;
     }
   };
@@ -106,14 +212,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshUser = async () => {
     try {
       const currentUser = await authService.getCurrentUser();
-      setUser(currentUser);
+      if (currentUser && currentUser.id) {
+        setUser(currentUser as User);
+      }
     } catch (error) {
       console.error('Refresh user error:', error);
     }
   };
 
+  const clearAllCache = async () => {
+    setLoading(true);
+    try {
+      await clearAllAppCache();
+      setUser(null);
+      window.location.reload();
+    } catch (error) {
+      console.error('[AuthContext] Clear cache error:', error);
+      setLoading(false);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, signUp, signIn, signOut, refreshUser, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      signUp,
+      signIn,
+      signOut,
+      refreshUser,
+      clearAllCache,
+      isAuthenticated: !!user
+    }}>
       {children}
     </AuthContext.Provider>
   );

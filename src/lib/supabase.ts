@@ -11,12 +11,7 @@ import { projectId, publicAnonKey } from '@/utils/supabase/info';
 
 const supabaseUrl = `https://${projectId}.supabase.co`;
 
-// Custom fetch without signal to prevent AbortError
-const customFetch: typeof fetch = (url, options = {}) => {
-  // Remove signal to prevent timeout errors
-  const { signal, ...restOptions } = options as RequestInit;
-  return fetch(url, restOptions);
-};
+// Use native fetch - don't remove AbortSignal as it causes requests to hang indefinitely
 
 // Create typed Supabase client with improved error handling
 export const supabase = createClient<Database>(supabaseUrl, publicAnonKey, {
@@ -26,8 +21,7 @@ export const supabase = createClient<Database>(supabaseUrl, publicAnonKey, {
     detectSessionInUrl: true,
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     flowType: 'pkce',
-    debug: true, // Enable debug mode to see auth flow
-    storageKey: 'squad-planner-auth',
+    // Use default storage key for better compatibility
   },
   realtime: {
     params: {
@@ -38,7 +32,6 @@ export const supabase = createClient<Database>(supabaseUrl, publicAnonKey, {
     headers: {
       'x-application-name': 'squad-planner',
     },
-    fetch: customFetch,
   },
 });
 

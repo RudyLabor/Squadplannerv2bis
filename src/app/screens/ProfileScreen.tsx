@@ -23,6 +23,7 @@ import {
   TrendingUp,
   Clock,
   Star,
+  RefreshCw,
 } from "lucide-react";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { Avatar, ListItem, FeatureCard, Badge } from "@/app/components/ui/DesignSystem";
@@ -41,7 +42,7 @@ export function ProfileScreen({
   showToast,
   onLogout,
 }: ProfileScreenProps) {
-  const { user, signOut, loading: authLoading } = useAuth();
+  const { user, signOut, clearAllCache, loading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const displayName = user?.display_name || user?.username || user?.email?.split("@")[0] || "Joueur";
@@ -54,6 +55,16 @@ export function ProfileScreen({
       onLogout?.();
     } catch (error) {
       showToast("Erreur lors de la déconnexion", "error");
+    }
+  };
+
+  const handleClearCache = async () => {
+    try {
+      showToast("Nettoyage du cache en cours...", "info");
+      await clearAllCache();
+      // La page sera rechargée automatiquement par clearAllCache
+    } catch (error) {
+      showToast("Erreur lors du nettoyage du cache", "error");
     }
   };
 
@@ -278,7 +289,26 @@ export function ProfileScreen({
           />
         </div>
 
-        {/* Déconnexion */}
+        {/* Maintenance & Déconnexion */}
+        <h3 className="text-base font-semibold text-gray-900 mb-3">
+          Maintenance
+        </h3>
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden mb-4">
+          <button
+            onClick={handleClearCache}
+            className="w-full flex items-center gap-3 p-4 text-left hover:bg-amber-50 transition-colors"
+          >
+            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+              <RefreshCw className="w-5 h-5 text-amber-600" />
+            </div>
+            <div className="flex-1">
+              <div className="font-medium text-amber-700 text-sm">Vider le cache</div>
+              <div className="text-xs text-gray-500">Résout les problèmes de connexion</div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </button>
+        </div>
+
         <h3 className="text-base font-semibold text-gray-900 mb-3">
           Déconnexion
         </h3>
