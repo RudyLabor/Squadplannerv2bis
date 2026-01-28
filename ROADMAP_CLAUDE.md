@@ -826,26 +826,32 @@ Ce document est **vivant** et sera mis à jour après:
 
 ## 📚 RESSOURCES & RÉFÉRENCES
 
-### Documents Source
-- ✅ Roadmap 1.pdf - Vision & Positionnement
-- ✅ Guide simple et complet.pdf - Fonctionnalités utilisateur
-- ✅ **Squad-Planner-Checklist-Complete-de-Developpement.pdf** - **MASTER REFERENCE**
-- ⏳ Roadmap 2.pdf (agent en cours)
-- ⏳ Roadmap 3.pdf (agent en cours)
-- ⏳ Architecture et fonctionnalités.pdf (agent en cours)
-- ⏳ Étude concurrentielle.pdf (agent en cours)
-- ⏳ Identité Visuelle.pdf (agent en cours)
-- ⏳ Projections CA.pdf (agent en cours)
+### Documents Source Analysés
+- ✅ **Squad-Planner-Checklist-Complete-de-Developpement.pdf** - **MASTER REFERENCE** (analysé)
+- ✅ Vision & positionnement (intégré dans ROADMAP)
+- ✅ Fonctionnalités utilisateur (intégré dans GAP-ANALYSIS)
 
-### Fichiers Projet
+### Documents Source Restants
+- ❓ Roadmap 2.pdf - Non fourni dans le projet
+- ❓ Roadmap 3.pdf - Non fourni dans le projet
+- ❓ Architecture et fonctionnalités.pdf - Non fourni dans le projet
+- ❓ Étude concurrentielle.pdf - Non fourni dans le projet
+- ❓ Identité Visuelle.pdf - Non fourni dans le projet
+- ❓ Projections CA.pdf - Non fourni dans le projet
+
+**Note**: Si tu veux que j'analyse ces documents, mets-les dans le projet et je les analyserai immédiatement.
+
+### Fichiers Projet Générés
 - [GAP-ANALYSIS.md](GAP-ANALYSIS.md) - Rapport audit complet 10 pages
 - [ROADMAP_CLAUDE.md](ROADMAP_CLAUDE.md) - Ce document
-- [ABORTERROR-FIX-V2.md](ABORTERROR-FIX-V2.md) - Fix auth récent
+- [DEPLOYMENT-STATUS.md](DEPLOYMENT-STATUS.md) - Statut déploiement Phase 0-1-2
 - [FULL_DB_SETUP.sql](FULL_DB_SETUP.sql) - Schema DB complet avec RLS
+- [supabase/DEPLOY_ALL_MIGRATIONS.sql](supabase/DEPLOY_ALL_MIGRATIONS.sql) - Migrations combinées
+- `/scripts/*` - 27 scripts d'automatisation
 
 ### Agents Actifs
-- **Agent a923aaf**: Analyse 7 PDF restants (background)
-- **Agent a9a7f5c**: Audit code vs Checklist PDF (background)
+- ❌ Aucun agent en cours
+- ✅ Tous les travaux précédents complétés et commitées
 
 ---
 
