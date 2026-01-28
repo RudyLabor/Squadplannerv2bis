@@ -1,20 +1,139 @@
-import { ArrowLeft, Bot, Zap, Check, Copy, Terminal, MessageSquare, Users, Calendar } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowLeft, Zap, Check, Copy, Terminal, MessageSquare, Users, Calendar, Webhook } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
+import { useSquads } from '../contexts/SquadsContext';
+import { supabase } from '@/lib/supabase';
 
 interface DiscordBotScreenProps {
   onNavigate: (screen: string) => void;
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
+interface WebhookConfig {
+  id?: string;
+  squad_id: string;
+  url: string;
+  events: string[];
+  is_active: boolean;
+}
+
 export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProps) {
-  const [botToken, setBotToken] = useState('');
-  const [serverId, setServerId] = useState('');
-  const [channelId, setChannelId] = useState('');
-  const [isConnected, setIsConnected] = useState(false);
+  const { currentSquad } = useSquads();
+  const [webhookUrl, setWebhookUrl] = useState('');
+  const [webhooks, setWebhooks] = useState<WebhookConfig[]>([]);
+  const [selectedEvents, setSelectedEvents] = useState<string[]>([
+    'session_created',
+    'session_updated',
+    'member_joined',
+    'rsvp_submitted',
+  ]);
+  const [loading, setLoading] = useState(false);
   const [copiedCommand, setCopiedCommand] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (currentSquad?.id) {
+      loadWebhooks();
+    }
+  }, [currentSquad]);
+
+  const loadWebhooks = async () => {
+    if (!currentSquad) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('webhooks')
+        .select('*')
+        .eq('squad_id', currentSquad.id)
+        .eq('is_active', true);
+
+      if (error) throw error;
+
+      setWebhooks((data || []) as WebhookConfig[]);
+
+      if (data && data.length > 0) {
+        setWebhookUrl(data[0].url);
+        setSelectedEvents(data[0].events || []);
+      }
+    } catch (error) {
+      console.error('[Discord Bot] Load webhooks error:', error);
+    }
+  };
+
+  const handleSaveWebhook = async () => {
+    if (!currentSquad) {
+      showToast('Sélectionnez un squad', 'error');
+      return;
+    }
+
+    if (!webhookUrl) {
+      showToast('Entrez une URL de webhook Discord', 'error');
+      return;
+    }
+
+    if (!webhookUrl.includes('discord.com/api/webhooks/')) {
+      showToast('URL de webhook Discord invalide', 'error');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const { data, error } = await supabase
+        .from('webhooks')
+        .upsert({
+          squad_id: currentSquad.id,
+          url: webhookUrl,
+          events: selectedEvents,
+          is_active: true,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setWebhooks([data as WebhookConfig]);
+      showToast('Webhook Discord configuré !', 'success');
+    } catch (error: any) {
+      console.error('[Discord Bot] Save webhook error:', error);
+      showToast(error.message || 'Erreur lors de la configuration', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteWebhook = async () => {
+    if (!currentSquad || webhooks.length === 0) return;
+
+    try {
+      setLoading(true);
+
+      const { error } = await supabase
+        .from('webhooks')
+        .update({ is_active: false })
+        .eq('squad_id', currentSquad.id);
+
+      if (error) throw error;
+
+      setWebhooks([]);
+      setWebhookUrl('');
+      showToast('Webhook Discord supprimé', 'info');
+    } catch (error: any) {
+      console.error('[Discord Bot] Delete webhook error:', error);
+      showToast(error.message || 'Erreur lors de la suppression', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleEvent = (event: string) => {
+    setSelectedEvents((prev) =>
+      prev.includes(event) ? prev.filter((e) => e !== event) : [...prev, event]
+    );
+  };
+
+  const isConnected = webhooks.length > 0;
 
   const slashCommands = [
     {
@@ -51,24 +170,6 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
     },
   ];
 
-  const handleConnect = () => {
-    if (!botToken || !serverId || !channelId) {
-      showToast('Veuillez remplir tous les champs', 'error');
-      return;
-    }
-
-    setIsConnected(true);
-    showToast('Bot Discord connecté avec succès !', 'success');
-  };
-
-  const handleDisconnect = () => {
-    setIsConnected(false);
-    setBotToken('');
-    setServerId('');
-    setChannelId('');
-    showToast('Bot Discord déconnecté', 'info');
-  };
-
   const copyCommand = (command: string) => {
     navigator.clipboard.writeText(command);
     setCopiedCommand(command);
@@ -99,8 +200,26 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
           <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-[var(--success-500)]' : 'bg-[var(--fg-tertiary)]'}`} />
         </div>
 
-        {/* Connection Status */}
-        {isConnected ? (
+        {/* Webhook Configuration */}
+        {!currentSquad ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-yellow-50 rounded-2xl p-6 mb-8 border border-yellow-200"
+          >
+            <div className="flex items-start gap-3">
+              <Zap className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" strokeWidth={2} />
+              <div>
+                <h3 className="text-sm font-semibold text-yellow-900 mb-1">
+                  Sélectionnez un squad
+                </h3>
+                <p className="text-xs text-yellow-700">
+                  Vous devez sélectionner un squad pour configurer le webhook Discord.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        ) : isConnected ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -108,32 +227,35 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
           >
             <div className="flex items-center gap-4 mb-4">
               <div className="w-14 h-14 rounded-2xl bg-[var(--success-500)] flex items-center justify-center flex-shrink-0">
-                <Bot className="w-7 h-7 text-white" strokeWidth={2} />
+                <Webhook className="w-7 h-7 text-white" strokeWidth={2} />
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-bold text-[var(--fg-primary)] mb-1">
-                  Bot actif
+                  Webhook actif
                 </h3>
                 <p className="text-sm text-[var(--fg-secondary)]">
-                  Connecté au serveur Discord
+                  Notifications envoyées à Discord
                 </p>
               </div>
               <Button
                 variant="ghost"
-                onClick={handleDisconnect}
+                onClick={handleDeleteWebhook}
+                disabled={loading}
                 className="h-10 px-4 bg-white/80 hover:bg-white border-[0.5px] border-[var(--border-medium)] rounded-xl text-sm font-semibold"
               >
-                Déconnecter
+                Supprimer
               </Button>
             </div>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-[var(--fg-tertiary)]">Server ID:</span>
-                <span className="font-mono text-[var(--fg-secondary)]">{serverId}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[var(--fg-tertiary)]">Channel ID:</span>
-                <span className="font-mono text-[var(--fg-secondary)]">{channelId}</span>
+              <div>
+                <span className="text-[var(--fg-tertiary)] text-xs">Événements actifs:</span>
+                <div className="flex flex-wrap gap-1.5 mt-1.5">
+                  {selectedEvents.map((event) => (
+                    <span key={event} className="px-2 py-0.5 bg-white text-[var(--success-700)] text-xs font-medium rounded-full">
+                      {event.replace(/_/g, ' ')}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
           </motion.div>
@@ -144,64 +266,64 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
             className="bg-white rounded-2xl p-6 mb-8 border-[0.5px] border-[var(--border-subtle)] shadow-sm"
           >
             <h3 className="text-lg font-semibold text-[var(--fg-primary)] mb-5">
-              Configuration
+              Configuration Webhook Discord
             </h3>
 
             <div className="space-y-4 mb-6">
               <div>
                 <label className="text-sm text-[var(--fg-secondary)] mb-2 block font-semibold">
-                  Bot Token
+                  URL du Webhook Discord
                 </label>
                 <Input
-                  type="password"
-                  value={botToken}
-                  onChange={(e) => setBotToken(e.target.value)}
-                  placeholder="MTIzNDU2Nzg5MDEyMzQ1Njc4OQ..."
+                  type="text"
+                  value={webhookUrl}
+                  onChange={(e) => setWebhookUrl(e.target.value)}
+                  placeholder="https://discord.com/api/webhooks/..."
                   className="font-mono text-sm"
                 />
+                <p className="text-xs text-[var(--fg-tertiary)] mt-1.5">
+                  Créez un webhook dans les paramètres de votre serveur Discord
+                </p>
               </div>
 
               <div>
                 <label className="text-sm text-[var(--fg-secondary)] mb-2 block font-semibold">
-                  Server ID
+                  Événements à notifier
                 </label>
-                <Input
-                  value={serverId}
-                  onChange={(e) => setServerId(e.target.value)}
-                  placeholder="123456789012345678"
-                  className="font-mono text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-[var(--fg-secondary)] mb-2 block font-semibold">
-                  Channel ID
-                </label>
-                <Input
-                  value={channelId}
-                  onChange={(e) => setChannelId(e.target.value)}
-                  placeholder="987654321098765432"
-                  className="font-mono text-sm"
-                />
+                <div className="space-y-2">
+                  {[
+                    { id: 'session_created', label: 'Session créée' },
+                    { id: 'session_updated', label: 'Session modifiée' },
+                    { id: 'member_joined', label: 'Membre rejoint' },
+                    { id: 'rsvp_submitted', label: 'RSVP reçu' },
+                  ].map((event) => (
+                    <label key={event.id} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedEvents.includes(event.id)}
+                        onChange={() => toggleEvent(event.id)}
+                        className="w-4 h-4 rounded border-gray-300"
+                      />
+                      <span className="text-sm text-[var(--fg-primary)]">{event.label}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
 
             <Button
               variant="primary"
-              onClick={handleConnect}
-              className="w-full h-12 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-xl font-semibold shadow-md"
+              onClick={handleSaveWebhook}
+              disabled={loading || !webhookUrl}
+              className="w-full h-12 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-xl font-semibold shadow-md disabled:opacity-50"
             >
-              <Bot className="w-5 h-5" strokeWidth={2} />
-              Connecter le Bot
+              <Webhook className="w-5 h-5" strokeWidth={2} />
+              {loading ? 'Configuration...' : 'Configurer le Webhook'}
             </Button>
 
             <div className="mt-4 p-4 bg-[var(--bg-muted)] rounded-xl">
               <p className="text-xs text-[var(--fg-tertiary)] leading-relaxed">
-                💡 <strong>Besoin d'aide ?</strong> Consultez notre{' '}
-                <a href="#" className="text-[var(--primary-500)] font-semibold underline">
-                  guide de configuration Discord
-                </a>{' '}
-                pour créer votre bot.
+                💡 <strong>Comment créer un webhook ?</strong> Allez dans Paramètres du serveur → Intégrations → Webhooks → Nouveau Webhook
               </p>
             </div>
           </motion.div>

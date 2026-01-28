@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { squadsAPI } from '@/app/services/api';
 import { useAuth } from './AuthContext';
+import { supabase } from '@/lib/supabase';
 
 interface Squad {
   id: string;
@@ -50,6 +51,53 @@ export function SquadsProvider({ children }: { children: ReactNode }) {
       setSquads([]);
     }
   }, [user]);
+
+  // Real-time subscriptions for squads and squad members
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('squads_realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'squads',
+        },
+        (payload: any) => {
+          console.log('Squad updated:', payload.new);
+          setSquads((prev) =>
+            prev.map((s) => (s.id === payload.new.id ? { ...s, ...payload.new } : s))
+          );
+
+          if (currentSquad?.id === payload.new.id) {
+            setCurrentSquad((prev) => (prev ? { ...prev, ...payload.new } : null));
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'squad_members',
+        },
+        (payload: any) => {
+          console.log('Squad member changed:', payload);
+          // Refresh the affected squad to get updated member count
+          const squadId = payload.new?.squad_id || payload.old?.squad_id;
+          if (squadId) {
+            getSquadById(squadId).catch(console.error);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, currentSquad?.id]);
 
   const refreshSquads = async () => {
     if (!user) return;

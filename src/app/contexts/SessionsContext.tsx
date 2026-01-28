@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { sessionsAPI, squadsAPI } from '@/app/services/api';
 import { useAuth } from './AuthContext';
+import { supabase } from '@/lib/supabase';
 
 interface Session {
   id: string;
@@ -36,6 +37,82 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
   const [currentSession, setCurrentSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Real-time subscriptions for sessions and RSVPs
+  useEffect(() => {
+    if (!user) return;
+
+    // Subscribe to session updates
+    const channel = supabase
+      .channel('sessions_realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'sessions',
+        },
+        (payload) => {
+          console.log('Session updated:', payload.new);
+          setSessions((prev) =>
+            prev.map((s) => (s.id === payload.new.id ? { ...s, ...payload.new } : s))
+          );
+
+          if (currentSession?.id === payload.new.id) {
+            setCurrentSession((prev) => (prev ? { ...prev, ...payload.new } : null));
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'sessions',
+        },
+        (payload) => {
+          console.log('New session created:', payload.new);
+          setSessions((prev) => [payload.new as Session, ...prev]);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'sessions',
+        },
+        (payload) => {
+          console.log('Session deleted:', payload.old.id);
+          setSessions((prev) => prev.filter((s) => s.id !== payload.old.id));
+
+          if (currentSession?.id === payload.old.id) {
+            setCurrentSession(null);
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'session_rsvps',
+        },
+        (payload: any) => {
+          console.log('RSVP changed:', payload);
+          // Refresh the affected session to get updated RSVPs
+          const sessionId = payload.new?.session_id || payload.old?.session_id;
+          if (sessionId) {
+            getSessionById(sessionId).catch(console.error);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, currentSession?.id]);
 
   const getSquadSessions = async (squadId: string, status?: 'upcoming' | 'past' | 'all') => {
     setLoading(true);

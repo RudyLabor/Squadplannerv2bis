@@ -1,8 +1,11 @@
 import { ArrowLeft, Calendar, Check, Download, ExternalLink, Crown } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
 import { useUser } from '@/app/contexts/UserContext';
+import { tokenManager } from '@/utils/tokenManager';
+import { oauthHelper } from '@/utils/oauth';
+import { sessionsAPI } from '@/app/services/api';
 
 interface CalendarSyncScreenProps {
   onNavigate: (screen: string) => void;
@@ -13,6 +16,67 @@ export function CalendarSyncScreen({ onNavigate, showToast }: CalendarSyncScreen
   const { userProfile } = useUser();
   const isPremium = userProfile?.isPremium ?? false;
   const [connectedCalendars, setConnectedCalendars] = useState<string[]>([]);
+  const [isGoogleConnected, setIsGoogleConnected] = useState(false);
+
+  // Check if Google Calendar is connected
+  useEffect(() => {
+    checkGoogleConnection();
+  }, []);
+
+  const checkGoogleConnection = async () => {
+    try {
+      const connected = await tokenManager.isConnected('google');
+      setIsGoogleConnected(connected);
+      if (connected) {
+        setConnectedCalendars(['google']);
+      }
+    } catch (error) {
+      console.error('Error checking Google connection:', error);
+    }
+  };
+
+  const syncSessionToGoogleCalendar = async (sessionId: string) => {
+    try {
+      const token = await tokenManager.getToken('google');
+      const { session } = await sessionsAPI.getById(sessionId);
+
+      const event = {
+        summary: session.title,
+        description: session.description || 'Session Squad Planner',
+        start: {
+          dateTime: `${session.scheduled_date}T${session.scheduled_time}`,
+          timeZone: 'Europe/Paris',
+        },
+        end: {
+          dateTime: calculateEndTime(session.scheduled_date, session.scheduled_time, session.duration || '2 hours'),
+          timeZone: 'Europe/Paris',
+        },
+      };
+
+      const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(event),
+      });
+
+      if (!response.ok) throw new Error('Calendar sync failed');
+
+      showToast('Session ajoutée au calendrier ✓', 'success');
+    } catch (error: any) {
+      console.error('Calendar sync error:', error);
+      showToast('Erreur de synchronisation', 'error');
+    }
+  };
+
+  const calculateEndTime = (date: string, time: string, duration: string): string => {
+    const startDateTime = new Date(`${date}T${time}`);
+    const durationHours = parseInt(duration) || 2;
+    startDateTime.setHours(startDateTime.getHours() + durationHours);
+    return startDateTime.toISOString().slice(0, 16);
+  };
 
   const calendars = [
     {
@@ -38,13 +102,26 @@ export function CalendarSyncScreen({ onNavigate, showToast }: CalendarSyncScreen
     },
   ];
 
-  const handleConnect = (calendarId: string) => {
+  const handleConnect = async (calendarId: string) => {
     if (!isPremium) {
       showToast('Fonctionnalité Premium', 'info');
       setTimeout(() => onNavigate('premium'), 1000);
       return;
     }
 
+    // Real OAuth flow for Google Calendar
+    if (calendarId === 'google') {
+      if (isGoogleConnected) {
+        showToast('Google Calendar déjà connecté', 'info');
+        return;
+      }
+
+      showToast('Redirection vers Google...', 'info');
+      oauthHelper.startFlow('google');
+      return;
+    }
+
+    // Mock for other calendars (Apple, Outlook)
     showToast(`${calendars.find(c => c.id === calendarId)?.name} connecté !`, 'success');
     setConnectedCalendars([...connectedCalendars, calendarId]);
   };

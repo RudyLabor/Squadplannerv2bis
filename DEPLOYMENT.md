@@ -133,22 +133,37 @@ vercel
 **Via Dashboard Vercel** :
 
 1. Aller dans **Settings** → **Environment Variables**
-2. Ajouter :
+2. Ajouter les variables **obligatoires** :
 
 | Name | Value | Environment |
 |------|-------|-------------|
 | `VITE_SUPABASE_URL` | `https://xxx.supabase.co` | Production, Preview, Development |
 | `VITE_SUPABASE_ANON_KEY` | `your_anon_key` | Production, Preview, Development |
 
+3. Ajouter les variables **optionnelles** (selon les fonctionnalités activées) :
+
+| Name | Value | Environment | Fonction |
+|------|-------|-------------|----------|
+| `VITE_VAPID_PUBLIC_KEY` | `your_vapid_public_key` | Production | Web Push Notifications |
+| `VITE_STRIPE_PUBLISHABLE_KEY` | `pk_live_xxx` | Production | Paiements Premium |
+| `VITE_STRIPE_PREMIUM_PRICE_ID` | `price_xxx` | Production | Prix Premium |
+| `VITE_STRIPE_PRO_PRICE_ID` | `price_xxx` | Production | Prix Pro |
+| `VITE_API_URL` | `https://your-api.com` | Production | Backend personnalisé |
+
 **Via CLI** :
 
 ```bash
-# Production
+# Variables obligatoires
 vercel env add VITE_SUPABASE_URL production
-# Entrer: https://xxx.supabase.co
-
 vercel env add VITE_SUPABASE_ANON_KEY production
-# Entrer: your_anon_key
+
+# Variables optionnelles (Web Push)
+vercel env add VITE_VAPID_PUBLIC_KEY production
+
+# Variables optionnelles (Stripe)
+vercel env add VITE_STRIPE_PUBLISHABLE_KEY production
+vercel env add VITE_STRIPE_PREMIUM_PRICE_ID production
+vercel env add VITE_STRIPE_PRO_PRICE_ID production
 ```
 
 ### 2.3 Déployer
@@ -170,7 +185,99 @@ git push origin main
 
 ---
 
-## 🔐 Étape 3 : Configuration Auth URL
+## 🔧 Étape 3 : Configuration des fonctionnalités avancées
+
+### 3.1 Web Push Notifications
+
+1. **Générer les clés VAPID** :
+```bash
+npx web-push generate-vapid-keys
+```
+
+2. **Configurer dans Vercel** :
+   - Ajouter la clé publique VAPID dans les variables d'environnement
+   - La clé privée doit rester sur le backend (ne JAMAIS l'exposer)
+
+3. **Vérifier le Service Worker** :
+   - Le fichier `public/sw.js` est déjà configuré
+   - Vercel le servira automatiquement à la racine
+
+4. **Tester** :
+   - Ouvrir l'app déployée
+   - Aller dans Paramètres → Notifications
+   - Activer les notifications push
+   - Tester avec le bouton "Test"
+
+### 3.2 Webhooks Discord
+
+1. **Créer un Webhook Discord** :
+   - Paramètres du serveur → Intégrations → Webhooks
+   - Nouveau Webhook
+   - Copier l'URL
+
+2. **Configurer dans l'app** :
+   - Connexion → Sélectionner un squad
+   - Intégrations → Discord Bot
+   - Coller l'URL du webhook
+   - Sélectionner les événements à notifier
+
+3. **Tester** :
+   - Créer une session
+   - Vérifier que la notification apparaît dans Discord
+
+### 3.3 Intégrations OAuth (Optionnel)
+
+Pour activer Discord, Google Calendar, Twitch, etc:
+
+1. **Dans Supabase** :
+   - Authentication → Providers
+   - Activer chaque provider souhaité
+   - Configurer les credentials OAuth
+
+2. **Ajouter les Redirect URIs** :
+   ```
+   https://your-domain.vercel.app/oauth/callback
+   https://*.vercel.app/oauth/callback
+   ```
+
+3. **Providers supportés** :
+   - Discord
+   - Google (Calendar sync)
+   - Twitch
+   - Steam
+   - Riot Games
+   - Battle.net
+
+### 3.4 Stripe (Paiements Premium)
+
+1. **Créer un compte Stripe** :
+   - https://dashboard.stripe.com
+
+2. **Créer des produits** :
+   - Products → Add Product
+   - Créer "Squad Planner Premium" (mensuel/annuel)
+   - Créer "Squad Planner Pro" (mensuel/annuel)
+   - Copier les Price IDs
+
+3. **Configurer les webhooks** :
+   - Developers → Webhooks → Add endpoint
+   - Endpoint URL: `https://your-api.com/webhooks/stripe`
+   - Événements à écouter:
+     - `checkout.session.completed`
+     - `customer.subscription.updated`
+     - `customer.subscription.deleted`
+
+4. **Ajouter les clés dans Vercel** :
+   - Clé publique (commence par `pk_`)
+   - Price IDs des produits
+
+5. **Tester** :
+   - Mode test d'abord (clés `pk_test_`)
+   - Puis passer en production (clés `pk_live_`)
+
+---
+
+## 🔐 Étape 4 : Configuration Auth URL
 
 ### 3.1 Mise à jour Supabase
 

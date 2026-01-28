@@ -453,6 +453,428 @@ export const messagesAPI = {
 };
 
 // ============================================================================
+// FRIENDSHIPS API
+// ============================================================================
+
+export const friendshipsAPI = {
+  getAll: async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('friendships')
+      .select('*, friend:users!friend_id(id, username, display_name, avatar_url, reliability_score)')
+      .eq('user_id', user.id)
+      .eq('status', 'accepted')
+      .order('accepted_at', { ascending: false });
+
+    if (error) throw error;
+    return { friends: data || [] };
+  },
+
+  sendRequest: async (friendId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('friendships')
+      .insert({
+        user_id: user.id,
+        friend_id: friendId,
+        status: 'pending'
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { request: data };
+  },
+
+  acceptRequest: async (requestId: string) => {
+    const { data, error } = await supabase
+      .from('friendships')
+      .update({
+        status: 'accepted',
+        accepted_at: new Date().toISOString()
+      })
+      .eq('id', requestId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { friendship: data };
+  },
+
+  rejectRequest: async (requestId: string) => {
+    const { data, error } = await supabase
+      .from('friendships')
+      .update({ status: 'rejected' })
+      .eq('id', requestId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { friendship: data };
+  },
+
+  getPending: async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('friendships')
+      .select('*, user:users!user_id(id, username, display_name, avatar_url)')
+      .eq('friend_id', user.id)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return { requests: data || [] };
+  },
+
+  remove: async (friendshipId: string) => {
+    const { error } = await supabase
+      .from('friendships')
+      .delete()
+      .eq('id', friendshipId);
+
+    if (error) throw error;
+    return { success: true };
+  },
+};
+
+// ============================================================================
+// ACHIEVEMENTS API
+// ============================================================================
+
+export const achievementsAPI = {
+  getAll: async () => {
+    const { data, error } = await supabase
+      .from('achievements')
+      .select('*')
+      .eq('is_active', true)
+      .order('display_order');
+
+    if (error) throw error;
+    return { achievements: data || [] };
+  },
+
+  getUserProgress: async (userId?: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user && !userId) throw new Error('Not authenticated');
+
+    const targetUserId = userId || user.id;
+
+    const { data, error } = await supabase
+      .from('user_achievements')
+      .select('*, achievement:achievements(*)')
+      .eq('user_id', targetUserId)
+      .order('unlocked_at', { ascending: false });
+
+    if (error) throw error;
+    return { progress: data || [] };
+  },
+
+  getUnlocked: async (userId?: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user && !userId) throw new Error('Not authenticated');
+
+    const targetUserId = userId || user.id;
+
+    const { data, error } = await supabase
+      .from('user_achievements')
+      .select('*, achievement:achievements(*)')
+      .eq('user_id', targetUserId)
+      .eq('unlocked', true)
+      .order('unlocked_at', { ascending: false });
+
+    if (error) throw error;
+    return { achievements: data || [] };
+  },
+};
+
+// ============================================================================
+// CHALLENGES API
+// ============================================================================
+
+export const challengesAPI = {
+  getActive: async () => {
+    const now = new Date().toISOString();
+    const { data, error } = await supabase
+      .from('challenges')
+      .select('*')
+      .eq('is_active', true)
+      .lte('start_date', now)
+      .gte('end_date', now)
+      .order('end_date', { ascending: true });
+
+    if (error) throw error;
+    return { challenges: data || [] };
+  },
+
+  getUserProgress: async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('user_challenge_progress')
+      .select('*, challenge:challenges(*)')
+      .eq('user_id', user.id)
+      .order('started_at', { ascending: false });
+
+    if (error) throw error;
+    return { progress: data || [] };
+  },
+
+  getById: async (challengeId: string) => {
+    const { data, error } = await supabase
+      .from('challenges')
+      .select('*')
+      .eq('id', challengeId)
+      .single();
+
+    if (error) throw error;
+    return { challenge: data };
+  },
+
+  claimReward: async (progressId: string) => {
+    const { data, error } = await supabase
+      .from('user_challenge_progress')
+      .update({
+        rewards_claimed: true,
+        claimed_at: new Date().toISOString()
+      })
+      .eq('id', progressId)
+      .eq('completed', true)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { progress: data };
+  },
+};
+
+// ============================================================================
+// TOURNAMENTS API
+// ============================================================================
+
+export const tournamentsAPI = {
+  getAll: async (status?: string) => {
+    let query = supabase
+      .from('tournaments')
+      .select('*, organizer:users!organizer_id(id, username, display_name, avatar_url)')
+      .order('start_date', { ascending: false });
+
+    if (status) {
+      query = query.eq('status', status);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return { tournaments: data || [] };
+  },
+
+  getById: async (tournamentId: string) => {
+    const { data, error } = await supabase
+      .from('tournaments')
+      .select(`
+        *,
+        organizer:users!organizer_id(id, username, display_name, avatar_url),
+        teams:tournament_teams(
+          id,
+          status,
+          seed,
+          wins,
+          losses,
+          squad:squads(id, name, avatar_url, game)
+        )
+      `)
+      .eq('id', tournamentId)
+      .single();
+
+    if (error) throw error;
+    return { tournament: data };
+  },
+
+  register: async (tournamentId: string, squadId: string) => {
+    const { data, error } = await supabase
+      .from('tournament_teams')
+      .insert({
+        tournament_id: tournamentId,
+        squad_id: squadId,
+        status: 'registered'
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { registration: data };
+  },
+
+  unregister: async (registrationId: string) => {
+    const { error } = await supabase
+      .from('tournament_teams')
+      .delete()
+      .eq('id', registrationId);
+
+    if (error) throw error;
+    return { success: true };
+  },
+};
+
+// ============================================================================
+// AVAILABILITY API
+// ============================================================================
+
+export const availabilityAPI = {
+  getSlots: async (userId: string, startDate: string, endDate: string) => {
+    const { data, error } = await supabase
+      .from('availability_slots')
+      .select('*')
+      .eq('user_id', userId)
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .order('date');
+
+    if (error) throw error;
+    return { slots: data || [] };
+  },
+
+  getMySlots: async (startDate: string, endDate: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    return availabilityAPI.getSlots(user.id, startDate, endDate);
+  },
+
+  setSlot: async (date: string, startTime: string, endTime: string, isAvailable: boolean) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('availability_slots')
+      .upsert({
+        user_id: user.id,
+        date,
+        start_time: startTime,
+        end_time: endTime,
+        is_available: isAvailable
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { slot: data };
+  },
+
+  deleteSlot: async (slotId: string) => {
+    const { error } = await supabase
+      .from('availability_slots')
+      .delete()
+      .eq('id', slotId);
+
+    if (error) throw error;
+    return { success: true };
+  },
+
+  getSquadAvailability: async (squadId: string, startDate: string, endDate: string) => {
+    // Get all members of the squad
+    const { data: members, error: membersError } = await supabase
+      .from('squad_members')
+      .select('user_id')
+      .eq('squad_id', squadId);
+
+    if (membersError) throw membersError;
+
+    const userIds = members?.map(m => m.user_id) || [];
+    if (userIds.length === 0) return { availability: [] };
+
+    // Get availability for all members
+    const { data, error } = await supabase
+      .from('availability_slots')
+      .select('*, user:users(id, username, display_name, avatar_url)')
+      .in('user_id', userIds)
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .eq('is_available', true)
+      .order('date');
+
+    if (error) throw error;
+    return { availability: data || [] };
+  },
+};
+
+// ============================================================================
+// ANALYTICS API
+// ============================================================================
+
+export const analyticsAPI = {
+  getSquadStats: async (squadId: string, periodType: 'daily' | 'weekly' | 'monthly') => {
+    const { data, error } = await supabase
+      .from('analytics_squad')
+      .select('*')
+      .eq('squad_id', squadId)
+      .eq('period_type', periodType)
+      .order('period_start', { ascending: false })
+      .limit(10);
+
+    if (error) throw error;
+    return { stats: data || [] };
+  },
+
+  getUserStats: async (userId?: string, periodType: 'daily' | 'weekly' | 'monthly' = 'weekly') => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user && !userId) throw new Error('Not authenticated');
+
+    const targetUserId = userId || user.id;
+
+    const { data, error } = await supabase
+      .from('analytics_user')
+      .select('*')
+      .eq('user_id', targetUserId)
+      .eq('period_type', periodType)
+      .order('period_start', { ascending: false })
+      .limit(10);
+
+    if (error) throw error;
+    return { stats: data || [] };
+  },
+
+  getLatestSquadStats: async (squadId: string) => {
+    const { data, error } = await supabase
+      .from('analytics_squad')
+      .select('*')
+      .eq('squad_id', squadId)
+      .eq('period_type', 'weekly')
+      .order('period_start', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error; // Ignore no rows error
+    return { stats: data || null };
+  },
+
+  getLatestUserStats: async (userId?: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user && !userId) throw new Error('Not authenticated');
+
+    const targetUserId = userId || user.id;
+
+    const { data, error } = await supabase
+      .from('analytics_user')
+      .select('*')
+      .eq('user_id', targetUserId)
+      .eq('period_type', 'weekly')
+      .order('period_start', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error; // Ignore no rows error
+    return { stats: data || null };
+  },
+};
+
+// ============================================================================
 // HEALTH CHECK
 // ============================================================================
 

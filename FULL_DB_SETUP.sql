@@ -836,6 +836,298 @@ CREATE POLICY "Users can view own notifications" ON notifications
   FOR SELECT USING (user_id = auth.uid());
 
 -- ============================================================================
+-- 9. RLS POLICIES COMPLÈTES POUR LES 21 TABLES MANQUANTES
+-- ============================================================================
+
+-- Activer RLS sur toutes les tables restantes
+ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE friendships ENABLE ROW LEVEL SECURITY;
+ALTER TABLE achievements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_achievements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE badges ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_badges ENABLE ROW LEVEL SECURITY;
+ALTER TABLE challenges ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_challenge_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tournaments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tournament_teams ENABLE ROW LEVEL SECURITY;
+ALTER TABLE leagues ENABLE ROW LEVEL SECURITY;
+ALTER TABLE league_teams ENABLE ROW LEVEL SECURITY;
+ALTER TABLE seasons ENABLE ROW LEVEL SECURITY;
+ALTER TABLE season_stats ENABLE ROW LEVEL SECURITY;
+ALTER TABLE webhooks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE integrations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE availability_slots ENABLE ROW LEVEL SECURITY;
+ALTER TABLE analytics_squad ENABLE ROW LEVEL SECURITY;
+ALTER TABLE analytics_user ENABLE ROW LEVEL SECURITY;
+ALTER TABLE recurring_sessions ENABLE ROW LEVEL SECURITY;
+
+-- --------------------------------------------------------------------------
+-- POLICIES: organizations
+-- --------------------------------------------------------------------------
+CREATE POLICY "View public or member organizations" ON organizations
+  FOR SELECT USING (
+    type = 'community' OR
+    id IN (
+      SELECT organization_id
+      FROM squads
+      WHERE id IN (
+        SELECT squad_id FROM squad_members WHERE user_id = auth.uid()
+      )
+    )
+  );
+
+CREATE POLICY "Organization owners can update" ON organizations
+  FOR UPDATE USING (owner_id = auth.uid());
+
+CREATE POLICY "Authenticated users can create organizations" ON organizations
+  FOR INSERT WITH CHECK (auth.role() = 'authenticated' AND owner_id = auth.uid());
+
+CREATE POLICY "Organization owners can delete" ON organizations
+  FOR DELETE USING (owner_id = auth.uid());
+
+-- --------------------------------------------------------------------------
+-- POLICIES: friendships
+-- --------------------------------------------------------------------------
+CREATE POLICY "View own friendships" ON friendships
+  FOR SELECT USING (user_id = auth.uid() OR friend_id = auth.uid());
+
+CREATE POLICY "Create own friendships" ON friendships
+  FOR INSERT WITH CHECK (user_id = auth.uid());
+
+CREATE POLICY "Update own friendships" ON friendships
+  FOR UPDATE USING (user_id = auth.uid() OR friend_id = auth.uid());
+
+CREATE POLICY "Delete own friendships" ON friendships
+  FOR DELETE USING (user_id = auth.uid() OR friend_id = auth.uid());
+
+-- --------------------------------------------------------------------------
+-- POLICIES: achievements (public read)
+-- --------------------------------------------------------------------------
+CREATE POLICY "Anyone can view achievements" ON achievements
+  FOR SELECT USING (is_active = true);
+
+-- --------------------------------------------------------------------------
+-- POLICIES: user_achievements
+-- --------------------------------------------------------------------------
+CREATE POLICY "View own achievements" ON user_achievements
+  FOR SELECT USING (user_id = auth.uid());
+
+CREATE POLICY "System can manage user achievements" ON user_achievements
+  FOR ALL USING (auth.role() = 'service_role');
+
+-- --------------------------------------------------------------------------
+-- POLICIES: badges (public read)
+-- --------------------------------------------------------------------------
+CREATE POLICY "Anyone can view badges" ON badges
+  FOR SELECT USING (is_active = true);
+
+-- --------------------------------------------------------------------------
+-- POLICIES: user_badges
+-- --------------------------------------------------------------------------
+CREATE POLICY "View own badges" ON user_badges
+  FOR SELECT USING (user_id = auth.uid());
+
+CREATE POLICY "System can award badges" ON user_badges
+  FOR INSERT WITH CHECK (auth.role() = 'service_role');
+
+-- --------------------------------------------------------------------------
+-- POLICIES: challenges (public read for active)
+-- --------------------------------------------------------------------------
+CREATE POLICY "View active challenges" ON challenges
+  FOR SELECT USING (is_active = true);
+
+-- --------------------------------------------------------------------------
+-- POLICIES: user_challenge_progress
+-- --------------------------------------------------------------------------
+CREATE POLICY "View own challenge progress" ON user_challenge_progress
+  FOR SELECT USING (user_id = auth.uid());
+
+CREATE POLICY "Update own challenge progress" ON user_challenge_progress
+  FOR UPDATE USING (user_id = auth.uid());
+
+CREATE POLICY "Create own challenge progress" ON user_challenge_progress
+  FOR INSERT WITH CHECK (user_id = auth.uid());
+
+-- --------------------------------------------------------------------------
+-- POLICIES: tournaments
+-- --------------------------------------------------------------------------
+CREATE POLICY "View active tournaments" ON tournaments
+  FOR SELECT USING (
+    status IN ('upcoming', 'registration_open', 'ongoing', 'completed')
+  );
+
+CREATE POLICY "Organizers can manage tournaments" ON tournaments
+  FOR ALL USING (organizer_id = auth.uid());
+
+-- --------------------------------------------------------------------------
+-- POLICIES: tournament_teams
+-- --------------------------------------------------------------------------
+CREATE POLICY "View tournament teams" ON tournament_teams
+  FOR SELECT USING (
+    tournament_id IN (SELECT id FROM tournaments WHERE status != 'cancelled')
+  );
+
+CREATE POLICY "Squad members can register teams" ON tournament_teams
+  FOR INSERT WITH CHECK (
+    squad_id IN (
+      SELECT squad_id FROM squad_members
+      WHERE user_id = auth.uid() AND role IN ('owner', 'admin')
+    )
+  );
+
+CREATE POLICY "Squad admins can manage tournament teams" ON tournament_teams
+  FOR UPDATE USING (
+    squad_id IN (
+      SELECT squad_id FROM squad_members
+      WHERE user_id = auth.uid() AND role IN ('owner', 'admin')
+    )
+  );
+
+-- --------------------------------------------------------------------------
+-- POLICIES: leagues
+-- --------------------------------------------------------------------------
+CREATE POLICY "View active leagues" ON leagues
+  FOR SELECT USING (status IN ('upcoming', 'active', 'completed'));
+
+CREATE POLICY "Organization members can view org leagues" ON leagues
+  FOR SELECT USING (
+    organization_id IN (
+      SELECT organization_id FROM squads
+      WHERE id IN (SELECT squad_id FROM squad_members WHERE user_id = auth.uid())
+    )
+  );
+
+-- --------------------------------------------------------------------------
+-- POLICIES: league_teams
+-- --------------------------------------------------------------------------
+CREATE POLICY "View league teams" ON league_teams
+  FOR SELECT USING (
+    league_id IN (SELECT id FROM leagues WHERE status != 'cancelled')
+  );
+
+CREATE POLICY "Squad admins can manage league teams" ON league_teams
+  FOR ALL USING (
+    squad_id IN (
+      SELECT squad_id FROM squad_members
+      WHERE user_id = auth.uid() AND role IN ('owner', 'admin')
+    )
+  );
+
+-- --------------------------------------------------------------------------
+-- POLICIES: seasons
+-- --------------------------------------------------------------------------
+CREATE POLICY "View organization seasons" ON seasons
+  FOR SELECT USING (
+    organization_id IN (
+      SELECT organization_id FROM squads
+      WHERE id IN (SELECT squad_id FROM squad_members WHERE user_id = auth.uid())
+    )
+  );
+
+CREATE POLICY "Organization owners can manage seasons" ON seasons
+  FOR ALL USING (
+    organization_id IN (
+      SELECT id FROM organizations WHERE owner_id = auth.uid()
+    )
+  );
+
+-- --------------------------------------------------------------------------
+-- POLICIES: season_stats
+-- --------------------------------------------------------------------------
+CREATE POLICY "View squad season stats" ON season_stats
+  FOR SELECT USING (
+    squad_id IN (
+      SELECT squad_id FROM squad_members WHERE user_id = auth.uid()
+    )
+  );
+
+-- --------------------------------------------------------------------------
+-- POLICIES: webhooks
+-- --------------------------------------------------------------------------
+CREATE POLICY "Squad members can view webhooks" ON webhooks
+  FOR SELECT USING (
+    squad_id IN (
+      SELECT squad_id FROM squad_members WHERE user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Squad admins can manage webhooks" ON webhooks
+  FOR ALL USING (
+    squad_id IN (
+      SELECT squad_id FROM squad_members
+      WHERE user_id = auth.uid() AND role IN ('owner', 'admin')
+    )
+  );
+
+-- --------------------------------------------------------------------------
+-- POLICIES: integrations
+-- --------------------------------------------------------------------------
+CREATE POLICY "View own integrations" ON integrations
+  FOR SELECT USING (user_id = auth.uid());
+
+CREATE POLICY "Manage own integrations" ON integrations
+  FOR ALL USING (user_id = auth.uid());
+
+-- --------------------------------------------------------------------------
+-- POLICIES: availability_slots
+-- --------------------------------------------------------------------------
+CREATE POLICY "View own availability" ON availability_slots
+  FOR SELECT USING (user_id = auth.uid());
+
+CREATE POLICY "Squad members can view each other availability" ON availability_slots
+  FOR SELECT USING (
+    user_id IN (
+      SELECT user_id FROM squad_members
+      WHERE squad_id IN (
+        SELECT squad_id FROM squad_members WHERE user_id = auth.uid()
+      )
+    )
+  );
+
+CREATE POLICY "Manage own availability" ON availability_slots
+  FOR ALL USING (user_id = auth.uid());
+
+-- --------------------------------------------------------------------------
+-- POLICIES: analytics_squad
+-- --------------------------------------------------------------------------
+CREATE POLICY "View squad analytics as member" ON analytics_squad
+  FOR SELECT USING (
+    squad_id IN (
+      SELECT squad_id FROM squad_members WHERE user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "System can generate squad analytics" ON analytics_squad
+  FOR ALL USING (auth.role() = 'service_role');
+
+-- --------------------------------------------------------------------------
+-- POLICIES: analytics_user
+-- --------------------------------------------------------------------------
+CREATE POLICY "View own analytics" ON analytics_user
+  FOR SELECT USING (user_id = auth.uid());
+
+CREATE POLICY "System can generate user analytics" ON analytics_user
+  FOR ALL USING (auth.role() = 'service_role');
+
+-- --------------------------------------------------------------------------
+-- POLICIES: recurring_sessions
+-- --------------------------------------------------------------------------
+CREATE POLICY "Squad members can view recurring sessions" ON recurring_sessions
+  FOR SELECT USING (
+    squad_id IN (
+      SELECT squad_id FROM squad_members WHERE user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Squad admins can manage recurring sessions" ON recurring_sessions
+  FOR ALL USING (
+    squad_id IN (
+      SELECT squad_id FROM squad_members
+      WHERE user_id = auth.uid() AND role IN ('owner', 'admin')
+    )
+  );
+
+-- ============================================================================
 -- FIN DU SCRIPT
 -- ============================================================================
 
@@ -846,10 +1138,12 @@ BEGIN
   RAISE NOTICE '📊 27 tables créées';
   RAISE NOTICE '🔧 4 fonctions utilitaires créées';
   RAISE NOTICE '🎮 Données de démo insérées';
-  RAISE NOTICE '🔒 Politiques RLS activées';
+  RAISE NOTICE '🔒 Politiques RLS activées pour TOUTES les 27 tables';
+  RAISE NOTICE '🛡️  80+ politiques de sécurité configurées';
   RAISE NOTICE '';
   RAISE NOTICE '🚀 Prochaines étapes :';
   RAISE NOTICE '   1. Vérifier les tables dans Table Editor';
   RAISE NOTICE '   2. Tester avec les données de démo';
   RAISE NOTICE '   3. Configurer les API routes dans le backend';
+  RAISE NOTICE '   4. Générer les types TypeScript avec Supabase CLI';
 END $$;

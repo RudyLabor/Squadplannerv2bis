@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { integrationsAPI, type Integrations } from '@/utils/integrationsAPI';
 import { projectId } from '@/utils/supabase/info';
+import { oauthHelper, type OAuthProvider } from '@/utils/oauth';
 
 interface IntegrationsScreenProps {
   onNavigate: (screen: string) => void;
@@ -71,34 +72,19 @@ export function IntegrationsScreen({ onNavigate, showToast, useMockData = false 
     setConnecting(platform);
 
     try {
-      // Real OAuth flow for Discord and Google
-      if (platform === 'discord' || platform === 'google') {
+      // OAuth providers that support real OAuth flow
+      const oauthProviders: OAuthProvider[] = ['discord', 'google', 'twitch', 'steam', 'riot', 'battlenet'];
+
+      if (oauthProviders.includes(platform as OAuthProvider)) {
         showToast(`Redirection vers ${displayName}...`, 'info');
-        
-        // Get OAuth authorization URL from backend
-        const response = await fetch(
-          `https://${projectId}.supabase.co/functions/v1/make-server-e884809f/oauth/${platform}/authorize`,
-          {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${accessToken}`,
-            },
-          }
-        );
 
-        if (!response.ok) {
-          throw new Error('Failed to get OAuth URL');
-        }
+        // Use our new OAuth helper to start the flow
+        oauthHelper.startFlow(platform as OAuthProvider);
 
-        const data = await response.json();
-        
-        if (data.authUrl) {
-          // Redirect to OAuth provider
-          window.location.href = data.authUrl;
-          return;
-        }
+        // The OAuth flow will redirect the user, so no need to continue
+        return;
       } else {
-        // Fake OAuth flow for other platforms (Twitch, Steam, Riot, Battle.net)
+        // Fallback for platforms without OAuth configured yet
         showToast(`Connexion à ${displayName} en cours...`, 'info');
         await new Promise(resolve => setTimeout(resolve, 1500));
 

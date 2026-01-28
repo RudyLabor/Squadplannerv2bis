@@ -9,6 +9,7 @@ import { SquadsProvider } from '@/app/contexts/SquadsContext';
 import { SessionsProvider } from '@/app/contexts/SessionsContext';
 import { NotificationsProvider } from '@/app/contexts/NotificationsContext';
 import { MessagesProvider } from '@/app/contexts/MessagesContext';
+import { FriendsProvider } from '@/app/contexts/FriendsContext';
 import { ToastProvider, useToast } from '@/app/components/Toast';
 import { ErrorBoundary } from '@/app/components/ErrorBoundary';
 import { ProtectedRoute } from '@/app/components/ProtectedRoute';
@@ -103,6 +104,7 @@ const StreamerDashboardScreen = lazy(() => import('@/app/screens/StreamerDashboa
 const OrganizationScreen = lazy(() => import('@/app/screens/OrganizationScreen')) as any;
 const DesignDocScreen = lazy(() => import('@/app/screens/DesignDocScreen')) as any;
 const ScreenshotGalleryScreen = lazy(() => import('@/app/screens/ScreenshotGalleryScreen')) as any;
+const OAuthCallbackScreen = lazy(() => import('@/app/screens/OAuthCallbackScreen')) as any;
 
 function ScreenLoader() {
   return (
@@ -274,7 +276,73 @@ function AppContent() {
                     <Route path="/create-squad" element={<ProtectedRoute><CreateSquadScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
                     <Route path="/integrations" element={<ProtectedRoute><IntegrationsScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
                     <Route path="/join-squad" element={<ProtectedRoute><JoinSquadScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
-                    
+
+                    {/* Hub 2: Squads - Additional Routes */}
+                    <Route path="/chat/:squadId" element={<ProtectedRoute><SquadChatScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/squad-health/:squadId" element={<ProtectedRoute><SquadHealthScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/squad-composition/:squadId" element={<ProtectedRoute><SquadCompositionScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/leadership-analysis/:squadId" element={<ProtectedRoute><LeadershipAnalysisScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/squad-management/:squadId" element={<ProtectedRoute><SquadManagementScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/discover-squads" element={<ProtectedRoute><DiscoverSquadsScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/esport-team" element={<ProtectedRoute><EsportTeamScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+
+                    {/* Hub 3: Sessions - Additional Routes */}
+                    <Route path="/vote-session/:sessionId" element={<ProtectedRoute><VoteSessionScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/check-in/:sessionId" element={<ProtectedRoute><CheckInScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/recurring-sessions" element={<ProtectedRoute><RecurringSessionScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/auto-coaching" element={<ProtectedRoute><AutoCoachingScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/coaching-tools" element={<ProtectedRoute><CoachingToolsScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/academy" element={<ProtectedRoute><AcademyScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+
+                    {/* Hub 1: Home & Dashboard - Additional Routes */}
+                    <Route path="/notification-settings" element={<ProtectedRoute><NotificationSettingsScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/smart-suggestions" element={<ProtectedRoute><SmartSuggestionsScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/notifications" element={<ProtectedRoute><NotificationsScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/availability" element={<ProtectedRoute><AvailabilityHeatmapScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/calendar-sync" element={<ProtectedRoute><CalendarSyncScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/weekly-recap" element={<ProtectedRoute><WeeklyRecapScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/test-setup" element={<ProtectedRoute><TestSetupScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/qa-tests" element={<ProtectedRoute><QATestsScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+
+                    {/* Hub 4: Profile & Ecosystem - Additional Routes */}
+                    <Route path="/profile/:userId" element={<ProtectedRoute><PublicProfileScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/premium" element={<ProtectedRoute><PremiumScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/advanced-stats" element={<ProtectedRoute><AdvancedStatsScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/achievements" element={<ProtectedRoute><AchievementsScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/badges" element={<ProtectedRoute><BadgesScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/history" element={<ProtectedRoute><HistoryScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/preferences" element={<ProtectedRoute><PreferencesScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/privacy" element={<ProtectedRoute><PrivacyScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/discord-connect" element={<ProtectedRoute><DiscordConnectScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/discord-bot" element={<ProtectedRoute><DiscordBotScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+
+                    {/* Community & B2B Routes */}
+                    <Route path="/community" element={<ProtectedRoute><CommunityScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/activity" element={<ProtectedRoute><ActivityFeedScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/friends" element={<ProtectedRoute><FriendsScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/search-players" element={<ProtectedRoute><SearchPlayersScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/tournaments" element={<ProtectedRoute><TournamentsScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/leagues" element={<ProtectedRoute><LeaguesScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/seasons" element={<ProtectedRoute><SeasonsScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/ranking" element={<ProtectedRoute><RankingScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/challenges" element={<ProtectedRoute><ChallengesScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/share" element={<ProtectedRoute><ShareScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/streamer-dashboard" element={<ProtectedRoute><StreamerDashboardScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/organization" element={<ProtectedRoute><OrganizationScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/api-docs" element={<ProtectedRoute><ApiDocsScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/plugins" element={<ProtectedRoute><PluginsScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/webhooks" element={<ProtectedRoute><WebhooksScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/esport-integrations" element={<ProtectedRoute><EsportIntegrationsScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/intelligence" element={<ProtectedRoute><IntelligenceScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+
+                    {/* Design & Development Routes */}
+                    <Route path="/design-doc" element={<DesignDocScreen onNavigate={handleNavigate} showToast={showToast} />} />
+                    <Route path="/screenshots" element={<ScreenshotGalleryScreen onNavigate={handleNavigate} showToast={showToast} />} />
+
+                    {/* OAuth Callback Route */}
+                    <Route path="/oauth/callback" element={<OAuthCallbackScreen showToast={showToast} />} />
+
                     <Route path="*" element={<Navigate to="/home" replace />} />
                   </Routes>
                 </motion.div>
@@ -313,7 +381,9 @@ export default function App() {
                   <SessionsProvider>
                     <NotificationsProvider>
                       <MessagesProvider>
-                        <AppContent />
+                        <FriendsProvider>
+                          <AppContent />
+                        </FriendsProvider>
                       </MessagesProvider>
                     </NotificationsProvider>
                   </SessionsProvider>

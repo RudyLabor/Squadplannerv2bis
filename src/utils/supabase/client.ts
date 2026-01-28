@@ -1,16 +1,31 @@
-import { createClient } from '@supabase/supabase-js';
-import { projectId, publicAnonKey } from '@/utils/supabase/info';
+/**
+ * Supabase Client - Legacy Export
+ *
+ * This file maintains backwards compatibility for existing code.
+ * New code should import from '@/lib/supabase' instead.
+ */
 
-const supabaseUrl = `https://${projectId}.supabase.co`;
+// Re-export from the new typed client
+export { supabase, getSupabase } from '@/lib/supabase';
 
-// Singleton instance
-export const supabase = createClient(supabaseUrl, publicAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-  },
-});
-
-// Backwards compatibility for legacy code
-export const getSupabase = () => supabase;
+// Also export all type helpers for convenience
+export type {
+  Tables,
+  TablesInsert,
+  TablesUpdate,
+  User,
+  Squad,
+  Session,
+  Message,
+  Notification,
+  SquadMember,
+  SessionRSVP,
+  Friendship,
+  Achievement,
+  Badge,
+  Challenge,
+  Tournament,
+  League,
+  Integration,
+  Webhook,
+} from '@/lib/supabase';

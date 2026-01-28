@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 
 // Configuration
-const BASE_URL = 'http://localhost:3000'; // Or your Vercel URL
+const BASE_URL = 'https://squad-planner-v2-rudy.vercel.app'; // Production URL
 const USER = {
   username: 'TestBot' + Date.now(),
   email: `testbot${Date.now()}@example.com`,
