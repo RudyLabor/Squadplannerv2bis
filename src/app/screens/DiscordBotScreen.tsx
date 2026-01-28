@@ -1,10 +1,11 @@
-import { ArrowLeft, Zap, Check, Copy, Terminal, MessageSquare, Users, Calendar, Webhook } from 'lucide-react';
+import { ArrowLeft, Zap, Check, Copy, Terminal, MessageSquare, Users, Calendar, Webhook, Send } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
 import { useSquads } from '../contexts/SquadsContext';
 import { supabase } from '@/lib/supabase';
+import { testWebhook } from '@/utils/discord-webhook';
 
 interface DiscordBotScreenProps {
   onNavigate: (screen: string) => void;
@@ -30,6 +31,7 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
     'rsvp_submitted',
   ]);
   const [loading, setLoading] = useState(false);
+  const [testing, setTesting] = useState(false);
   const [copiedCommand, setCopiedCommand] = useState<string | null>(null);
 
   useEffect(() => {
@@ -177,6 +179,28 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
     setTimeout(() => setCopiedCommand(null), 2000);
   };
 
+  const handleTestWebhook = async () => {
+    if (!webhookUrl) {
+      showToast('Entrez une URL de webhook', 'error');
+      return;
+    }
+
+    setTesting(true);
+    try {
+      const success = await testWebhook(webhookUrl);
+      if (success) {
+        showToast('Message de test envoyé ! Vérifiez Discord.', 'success');
+      } else {
+        showToast('Échec de l\'envoi - vérifiez l\'URL', 'error');
+      }
+    } catch (error) {
+      console.error('[Discord Bot] Test webhook error:', error);
+      showToast('Erreur lors du test', 'error');
+    } finally {
+      setTesting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen pb-24 pt-safe">
       <div className="px-4 py-8 max-w-2xl mx-auto">
@@ -311,15 +335,26 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
               </div>
             </div>
 
-            <Button
-              variant="primary"
-              onClick={handleSaveWebhook}
-              disabled={loading || !webhookUrl}
-              className="w-full h-12 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-xl font-semibold shadow-md disabled:opacity-50"
-            >
-              <Webhook className="w-5 h-5" strokeWidth={2} />
-              {loading ? 'Configuration...' : 'Configurer le Webhook'}
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                variant="primary"
+                onClick={handleSaveWebhook}
+                disabled={loading || !webhookUrl}
+                className="flex-1 h-12 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-xl font-semibold shadow-md disabled:opacity-50"
+              >
+                <Webhook className="w-5 h-5" strokeWidth={2} />
+                {loading ? 'Configuration...' : 'Configurer'}
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={handleTestWebhook}
+                disabled={testing || !webhookUrl}
+                className="h-12 px-6 rounded-xl font-semibold disabled:opacity-50"
+              >
+                <Send className="w-5 h-5" strokeWidth={2} />
+                {testing ? 'Test...' : 'Tester'}
+              </Button>
+            </div>
 
             <div className="mt-4 p-4 bg-[var(--bg-muted)] rounded-xl">
               <p className="text-xs text-[var(--fg-tertiary)] leading-relaxed">

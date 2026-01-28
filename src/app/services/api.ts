@@ -1,4 +1,12 @@
 import { supabase } from '@/utils/supabase/client';
+import {
+  triggerSessionCreated,
+  triggerSessionUpdated,
+  triggerSessionCancelled,
+  triggerRSVPSubmitted,
+  triggerMemberJoined,
+  triggerMemberLeft,
+} from '@/utils/discord-webhook';
 
 // ============================================================================
 // USERS API
@@ -190,7 +198,7 @@ export const squadsAPI = {
     // 1. Find squad
     const { data: squad, error: squadError } = await supabase
       .from('squads')
-      .select('id, max_members, total_members')
+      .select('id, name, max_members, total_members')
       .eq('invite_code', inviteCode)
       .single();
 
@@ -214,14 +222,33 @@ export const squadsAPI = {
         if (joinError.code === '23505') throw new Error('Already a member');
         throw joinError;
     }
-    
-    // 4. Return new squad details
+
+    // 4. Trigger Discord webhook for new member (non-blocking)
+    const { data: userProfile } = await supabase
+      .from('profiles')
+      .select('username, display_name')
+      .eq('id', user.id)
+      .single();
+
+    triggerMemberJoined(squad.id, {
+      user_name: userProfile?.display_name || userProfile?.username || 'Nouveau membre',
+      squad_name: squad.name,
+      role: 'member',
+    }).catch(err => console.error('[API] Discord webhook error:', err));
+
+    // 5. Return new squad details
     return squadsAPI.getById(squad.id);
   },
 
   leave: async (squadId: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Not authenticated');
+
+    // Get user and squad info before deleting
+    const [userResult, squadResult] = await Promise.all([
+      supabase.from('profiles').select('username, display_name').eq('id', user.id).single(),
+      supabase.from('squads').select('name').eq('id', squadId).single(),
+    ]);
 
     const { error } = await supabase
       .from('squad_members')
@@ -230,6 +257,15 @@ export const squadsAPI = {
       .eq('user_id', user.id);
 
     if (error) throw error;
+
+    // Trigger Discord webhook for member left (non-blocking)
+    if (squadResult.data) {
+      triggerMemberLeft(squadId, {
+        user_name: userResult.data?.display_name || userResult.data?.username || 'Un membre',
+        squad_name: squadResult.data.name,
+      }).catch(err => console.error('[API] Discord webhook error:', err));
+    }
+
     return { success: true };
   },
 
@@ -320,6 +356,20 @@ export const sessionsAPI = {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Not authenticated');
 
+    // Get user profile for creator name
+    const { data: userProfile } = await supabase
+      .from('profiles')
+      .select('username, display_name')
+      .eq('id', user.id)
+      .single();
+
+    // Get squad info
+    const { data: squad } = await supabase
+      .from('squads')
+      .select('name, game')
+      .eq('id', data.squadId)
+      .single();
+
     const { data: session, error } = await supabase
       .from('sessions')
       .insert({
@@ -337,8 +387,23 @@ export const sessionsAPI = {
       .single();
 
     if (error) throw error;
-    
-    // Notifications trigger should handle notifying members
+
+    // Trigger Discord webhook (non-blocking)
+    triggerSessionCreated(data.squadId, {
+      id: session.id,
+      title: data.title,
+      description: data.description,
+      game: squad?.game,
+      scheduled_date: data.scheduledDate,
+      scheduled_time: data.scheduledTime,
+      duration: data.duration ? parseInt(data.duration) : undefined,
+      squad_id: data.squadId,
+      squad_name: squad?.name,
+      creator_name: userProfile?.display_name || userProfile?.username,
+      max_players: data.requiredPlayers || 5,
+      confirmed_count: 0,
+    }).catch(err => console.error('[API] Discord webhook error:', err));
+
     return { session };
   },
 
@@ -351,6 +416,29 @@ export const sessionsAPI = {
       .single();
 
     if (error) throw error;
+
+    // Trigger Discord webhook for update (non-blocking)
+    if (session) {
+      // Get squad info for webhook
+      const { data: squad } = await supabase
+        .from('squads')
+        .select('name, game')
+        .eq('id', session.squad_id)
+        .single();
+
+      triggerSessionUpdated(session.squad_id, {
+        id: session.id,
+        title: session.title,
+        description: session.description,
+        game: squad?.game,
+        scheduled_date: session.scheduled_date,
+        scheduled_time: session.scheduled_time,
+        duration: session.duration,
+        squad_id: session.squad_id,
+        squad_name: squad?.name,
+      }).catch(err => console.error('[API] Discord webhook error:', err));
+    }
+
     return { session };
   },
 
@@ -372,7 +460,605 @@ export const sessionsAPI = {
       .single();
 
     if (error) throw error;
+
+    // Trigger Discord webhook for RSVP (non-blocking)
+    // Get session and user info for the webhook
+    const [sessionResult, userResult] = await Promise.all([
+      supabase.from('sessions').select('title, squad_id').eq('id', sessionId).single(),
+      supabase.from('profiles').select('username, display_name').eq('id', user.id).single(),
+    ]);
+
+    if (sessionResult.data) {
+      triggerRSVPSubmitted(sessionResult.data.squad_id, {
+        user_name: userResult.data?.display_name || userResult.data?.username || 'Un membre',
+        response,
+        session_title: sessionResult.data.title,
+      }).catch(err => console.error('[API] Discord webhook error:', err));
+    }
+
     return { rsvp: data };
+  },
+
+  // ========== CHECK-IN SYSTEM ==========
+
+  checkIn: async (sessionId: string, status: 'confirmed' | 'on_my_way' | 'running_late' | 'cancelled', notes?: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('session_check_ins')
+      .upsert({
+        session_id: sessionId,
+        user_id: user.id,
+        status,
+        notes,
+        checked_in_at: new Date().toISOString()
+      }, {
+        onConflict: 'session_id,user_id'
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { checkIn: data };
+  },
+
+  getCheckIns: async (sessionId: string) => {
+    const { data, error } = await supabase
+      .from('session_check_ins')
+      .select(`
+        *,
+        user:users(id, username, display_name, avatar_url, reliability_score)
+      `)
+      .eq('session_id', sessionId)
+      .order('checked_in_at', { ascending: false });
+
+    if (error) throw error;
+    return { checkIns: data || [] };
+  },
+
+  updateCheckIn: async (checkInId: string, status: 'confirmed' | 'on_my_way' | 'running_late' | 'cancelled', notes?: string) => {
+    const { data, error } = await supabase
+      .from('session_check_ins')
+      .update({
+        status,
+        notes,
+        checked_in_at: new Date().toISOString()
+      })
+      .eq('id', checkInId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { checkIn: data };
+  },
+
+  // ========== DELETE/CANCEL SESSION ==========
+
+  delete: async (sessionId: string) => {
+    const { error } = await supabase
+      .from('sessions')
+      .delete()
+      .eq('id', sessionId);
+
+    if (error) throw error;
+    return { success: true };
+  },
+
+  cancel: async (sessionId: string, reason?: string) => {
+    const { data, error } = await supabase
+      .from('sessions')
+      .update({
+        status: 'cancelled',
+        cancelled_at: new Date().toISOString(),
+        cancellation_reason: reason
+      })
+      .eq('id', sessionId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // Trigger Discord webhook for cancellation (non-blocking)
+    if (data) {
+      const { data: squad } = await supabase
+        .from('squads')
+        .select('name, game')
+        .eq('id', data.squad_id)
+        .single();
+
+      triggerSessionCancelled(data.squad_id, {
+        id: data.id,
+        title: data.title,
+        description: data.description,
+        game: squad?.game,
+        scheduled_date: data.scheduled_date,
+        scheduled_time: data.scheduled_time,
+        squad_id: data.squad_id,
+        squad_name: squad?.name,
+      }).catch(err => console.error('[API] Discord webhook error:', err));
+    }
+
+    return { session: data };
+  },
+};
+
+// ============================================================================
+// BADGES API (Gamification System)
+// ============================================================================
+
+export const badgesAPI = {
+  getAll: async () => {
+    const { data, error } = await supabase
+      .from('badges')
+      .select('*')
+      .eq('is_active', true)
+      .order('display_order');
+
+    if (error) throw error;
+    return { badges: data || [] };
+  },
+
+  getUserBadges: async (userId?: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    const targetUserId = userId || user?.id;
+    if (!targetUserId) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('user_badges')
+      .select(`
+        *,
+        badge:badges(*)
+      `)
+      .eq('user_id', targetUserId)
+      .order('unlocked_at', { ascending: false });
+
+    if (error) throw error;
+    return { badges: data || [] };
+  },
+
+  getEquipped: async (userId?: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    const targetUserId = userId || user?.id;
+    if (!targetUserId) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('user_badges')
+      .select(`
+        *,
+        badge:badges(*)
+      `)
+      .eq('user_id', targetUserId)
+      .eq('is_equipped', true)
+      .order('equipped_at', { ascending: false })
+      .limit(3);
+
+    if (error) throw error;
+    return { badges: data || [] };
+  },
+
+  equipBadge: async (userBadgeId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    // Check if user already has 3 badges equipped
+    const { count } = await supabase
+      .from('user_badges')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('is_equipped', true);
+
+    if (count && count >= 3) {
+      throw new Error('Maximum 3 badges can be equipped');
+    }
+
+    const { data, error } = await supabase
+      .from('user_badges')
+      .update({
+        is_equipped: true,
+        equipped_at: new Date().toISOString()
+      })
+      .eq('id', userBadgeId)
+      .eq('user_id', user.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { badge: data };
+  },
+
+  unequipBadge: async (userBadgeId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('user_badges')
+      .update({
+        is_equipped: false,
+        equipped_at: null
+      })
+      .eq('id', userBadgeId)
+      .eq('user_id', user.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { badge: data };
+  },
+
+  checkAndAward: async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    // Call the SQL function to check and award badges
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase.rpc as any)('award_badges_to_user', {
+      user_uuid: user.id
+    });
+
+    if (error) throw error;
+    return { result: data };
+  },
+};
+
+// ============================================================================
+// ROLES & PERMISSIONS API
+// ============================================================================
+
+export const rolesAPI = {
+  getUserRole: async (squadId: string, userId?: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    const targetUserId = userId || user?.id;
+    if (!targetUserId) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('squad_members')
+      .select('role')
+      .eq('squad_id', squadId)
+      .eq('user_id', targetUserId)
+      .single();
+
+    if (error) throw error;
+    return { role: data?.role || null };
+  },
+
+  getSquadRoles: async (squadId: string) => {
+    const { data, error } = await supabase
+      .from('squad_members')
+      .select(`
+        id,
+        role,
+        joined_at,
+        user:users(id, username, display_name, avatar_url, reliability_score)
+      `)
+      .eq('squad_id', squadId)
+      .order('role');
+
+    if (error) throw error;
+    return { members: data || [] };
+  },
+
+  promoteMember: async (squadId: string, userId: string, newRole: 'co_leader' | 'member') => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    // Use the SQL function for safe promotion
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase.rpc as any)('promote_squad_member', {
+      promoter_uuid: user.id,
+      target_user_uuid: userId,
+      squad_uuid: squadId,
+      new_role: newRole
+    });
+
+    if (error) throw error;
+    return { success: data };
+  },
+
+  kickMember: async (squadId: string, userId: string, reason?: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    // Use the SQL function for safe kick
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase.rpc as any)('kick_squad_member', {
+      kicker_uuid: user.id,
+      target_user_uuid: userId,
+      squad_uuid: squadId,
+      reason: reason || null
+    });
+
+    if (error) throw error;
+    return { success: data };
+  },
+
+  checkPermission: async (squadId: string, permission: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase.rpc as any)('user_has_permission', {
+      user_uuid: user.id,
+      squad_uuid: squadId,
+      permission_id: permission
+    });
+
+    if (error) throw error;
+    return { hasPermission: data };
+  },
+
+  isAdmin: async (squadId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase.rpc as any)('is_squad_admin', {
+      user_uuid: user.id,
+      squad_uuid: squadId
+    });
+
+    if (error) throw error;
+    return { isAdmin: data };
+  },
+
+  isLeader: async (squadId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase.rpc as any)('is_squad_leader', {
+      user_uuid: user.id,
+      squad_uuid: squadId
+    });
+
+    if (error) throw error;
+    return { isLeader: data };
+  },
+};
+
+// ============================================================================
+// STATS & LEADERBOARD API
+// ============================================================================
+
+export const statsAPI = {
+  getLeaderboard: async (period: 'weekly' | 'monthly' | 'all_time' = 'all_time', limit: number = 50) => {
+    // Try to use the view if it exists, otherwise calculate manually
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, username, display_name, avatar_url, reliability_score, total_sessions, sessions_attended')
+      .not('reliability_score', 'is', null)
+      .order('reliability_score', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+
+    // Add rank to each entry
+    const leaderboard = (data || []).map((user, index) => ({
+      ...user,
+      rank: index + 1
+    }));
+
+    return { leaderboard };
+  },
+
+  getSquadLeaderboard: async (squadId: string, limit: number = 20) => {
+    const { data, error } = await supabase
+      .from('squad_members')
+      .select(`
+        id,
+        reliability_score,
+        sessions_attended,
+        user:users(id, username, display_name, avatar_url, reliability_score)
+      `)
+      .eq('squad_id', squadId)
+      .not('reliability_score', 'is', null)
+      .order('reliability_score', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+
+    const leaderboard = (data || []).map((member, index) => ({
+      ...member,
+      rank: index + 1
+    }));
+
+    return { leaderboard };
+  },
+
+  getUserRank: async (userId?: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    const targetUserId = userId || user?.id;
+    if (!targetUserId) throw new Error('Not authenticated');
+
+    // Get user's reliability score
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('reliability_score')
+      .eq('id', targetUserId)
+      .single();
+
+    if (userError) throw userError;
+
+    if (!userData?.reliability_score) {
+      return { rank: null, total: 0 };
+    }
+
+    // Count users with higher score
+    const { count, error: countError } = await supabase
+      .from('users')
+      .select('*', { count: 'exact', head: true })
+      .gt('reliability_score', userData.reliability_score);
+
+    if (countError) throw countError;
+
+    // Get total users with a score
+    const { count: totalCount, error: totalError } = await supabase
+      .from('users')
+      .select('*', { count: 'exact', head: true })
+      .not('reliability_score', 'is', null);
+
+    if (totalError) throw totalError;
+
+    return {
+      rank: (count || 0) + 1,
+      total: totalCount || 0,
+      score: userData.reliability_score
+    };
+  },
+
+  getReliabilityTrend: async (userId?: string, days: number = 30) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    const targetUserId = userId || user?.id;
+    if (!targetUserId) throw new Error('Not authenticated');
+
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const { data, error } = await supabase
+      .from('session_check_ins')
+      .select(`
+        status,
+        checked_in_at,
+        session:sessions(scheduled_date)
+      `)
+      .eq('user_id', targetUserId)
+      .gte('checked_in_at', startDate.toISOString())
+      .order('checked_in_at', { ascending: true });
+
+    if (error) throw error;
+
+    // Aggregate by day
+    const trend = (data || []).reduce((acc: any, checkIn: any) => {
+      const date = checkIn.session?.scheduled_date || checkIn.checked_in_at.split('T')[0];
+      if (!acc[date]) {
+        acc[date] = { attended: 0, late: 0, missed: 0 };
+      }
+      if (checkIn.status === 'confirmed') acc[date].attended++;
+      else if (checkIn.status === 'running_late') acc[date].late++;
+      else if (checkIn.status === 'cancelled') acc[date].missed++;
+      return acc;
+    }, {});
+
+    return { trend };
+  },
+};
+
+// ============================================================================
+// RECURRING SESSIONS API
+// ============================================================================
+
+export const recurringSessionsAPI = {
+  getAll: async (squadId: string) => {
+    const { data, error } = await supabase
+      .from('recurring_sessions')
+      .select(`
+        *,
+        created_by_user:users!created_by(id, username, display_name, avatar_url)
+      `)
+      .eq('squad_id', squadId)
+      .eq('is_active', true)
+      .order('day_of_week');
+
+    if (error) throw error;
+    return { recurringSessionss: data || [] };
+  },
+
+  create: async (data: {
+    squadId: string;
+    title: string;
+    description?: string;
+    dayOfWeek: number; // 0-6 (Sunday-Saturday)
+    scheduledTime: string;
+    duration?: string;
+    requiredPlayers?: number;
+  }) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { data: recurring, error } = await supabase
+      .from('recurring_sessions')
+      .insert({
+        squad_id: data.squadId,
+        title: data.title,
+        description: data.description,
+        day_of_week: data.dayOfWeek,
+        scheduled_time: data.scheduledTime,
+        duration: data.duration,
+        required_players: data.requiredPlayers || 5,
+        created_by: user.id,
+        is_active: true
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { recurringSession: recurring };
+  },
+
+  update: async (recurringId: string, data: any) => {
+    const { data: recurring, error } = await supabase
+      .from('recurring_sessions')
+      .update(data)
+      .eq('id', recurringId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { recurringSession: recurring };
+  },
+
+  delete: async (recurringId: string) => {
+    const { error } = await supabase
+      .from('recurring_sessions')
+      .update({ is_active: false })
+      .eq('id', recurringId);
+
+    if (error) throw error;
+    return { success: true };
+  },
+
+  generateNextSession: async (recurringId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    // Get the recurring session details
+    const { data: recurring, error: fetchError } = await supabase
+      .from('recurring_sessions')
+      .select('*')
+      .eq('id', recurringId)
+      .single();
+
+    if (fetchError) throw fetchError;
+    if (!recurring) throw new Error('Recurring session not found');
+
+    // Calculate next session date
+    const today = new Date();
+    const dayOfWeek = recurring.day_of_week;
+    const daysUntilNext = (dayOfWeek - today.getDay() + 7) % 7 || 7;
+    const nextDate = new Date(today);
+    nextDate.setDate(today.getDate() + daysUntilNext);
+
+    // Create the session
+    const { data: session, error: createError } = await supabase
+      .from('sessions')
+      .insert({
+        squad_id: recurring.squad_id,
+        title: recurring.title,
+        description: recurring.description,
+        scheduled_date: nextDate.toISOString().split('T')[0],
+        scheduled_time: recurring.scheduled_time,
+        duration: recurring.duration,
+        required_players: recurring.required_players,
+        proposed_by: user.id,
+        is_recurring: true,
+        recurring_session_id: recurringId,
+        status: 'pending'
+      })
+      .select()
+      .single();
+
+    if (createError) throw createError;
+    return { session };
   },
 };
 
