@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LogIn, Mail, Lock, Eye, EyeOff, ArrowRight, RefreshCw } from 'lucide-react';
+import { LogIn, Mail, Lock, Eye, EyeOff, ArrowRight, RefreshCw, Sparkles, Gamepad2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { supabase } from '@/utils/supabase/client';
@@ -9,6 +9,23 @@ interface LoginScreenProps {
   onLogin?: (email: string, isPremium: boolean) => void;
   showToast?: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08, delayChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
+  }
+};
 
 export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps) {
   const [email, setEmail] = useState('');
@@ -54,13 +71,12 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
     try {
       await signIn(email, password);
       onLogin?.(email, true);
-      showToast?.(`Bienvenue ! 🎮`, 'success');
+      showToast?.(`Bienvenue !`, 'success');
       onNavigate?.('home');
     } catch (error: any) {
       console.error('[LoginScreen] Login error:', error);
       let errorMessage = error.message || 'Erreur lors de la connexion';
 
-      // Translate common Supabase errors to French
       if (errorMessage.includes('Invalid login credentials')) {
         errorMessage = 'Email ou mot de passe incorrect';
       } else if (errorMessage.includes('Email not confirmed')) {
@@ -73,7 +89,6 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
         setShowCacheClearHint(true);
       }
 
-      // Show cache clear hint for any persistent errors
       setShowCacheClearHint(true);
       showToast?.(errorMessage, 'error');
     } finally {
@@ -82,100 +97,100 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      {/* Background inherits from body - grillage orange déjà présent */}
-      
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute -top-32 -right-32 w-96 h-96 bg-gradient-to-br from-indigo-400/30 to-purple-400/30 rounded-full blur-3xl"
+          animate={{ scale: [1, 1.1, 1], rotate: [0, 5, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute -bottom-48 -left-32 w-[500px] h-[500px] bg-gradient-to-br from-pink-400/25 to-orange-400/25 rounded-full blur-3xl"
+          animate={{ scale: [1, 1.15, 1], rotate: [0, -5, 0] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-br from-cyan-400/20 to-blue-400/20 rounded-full blur-3xl"
+          animate={{ y: [0, 30, 0], x: [0, -20, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+
       <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-md"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="w-full max-w-md relative z-10"
       >
-        {/* Logo Section - Ultra Premium 2026 */}
-        <div className="text-center mb-12">
+        {/* Logo Section */}
+        <motion.div variants={itemVariants} className="text-center mb-10">
           <motion.div
             initial={{ scale: 0, rotate: -12 }}
             animate={{ scale: 1, rotate: 0 }}
-            transition={{ 
-              delay: 0.1, 
-              type: 'spring', 
-              stiffness: 180,
-              damping: 12
-            }}
+            transition={{ delay: 0.1, type: 'spring', stiffness: 180, damping: 12 }}
             className="inline-flex items-center justify-center mb-6 relative"
           >
-            {/* Logo Container - Rounded square avec gradient */}
-            <div className="relative w-24 h-24 rounded-[22px] bg-gradient-to-br from-[var(--primary-500)] via-[var(--primary-600)] to-[var(--warning-600)] p-[3px] shadow-[0_8px_32px_rgba(245,158,11,0.24)]">
-              {/* Inner white bg */}
-              <div className="w-full h-full rounded-[20px] bg-[var(--bg-elevated)] flex items-center justify-center relative overflow-hidden">
-                {/* Subtle gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-50/80 via-orange-50/60 to-amber-50/80" />
-                
-                {/* Logo Text SP - Style ultra-moderne - CENTRÉ et NON TRONQUÉ */}
+            {/* Premium Logo Container */}
+            <div className="relative w-24 h-24 rounded-3xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[3px] shadow-2xl shadow-indigo-500/30">
+              <div className="w-full h-full rounded-[22px] bg-white flex items-center justify-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-purple-50/60 to-pink-50/80" />
                 <div className="relative flex items-center justify-center w-full h-full">
-                  <span 
-                    className="text-[38px] font-black bg-gradient-to-br from-[var(--primary-600)] via-[var(--primary-500)] to-[var(--warning-600)] bg-clip-text text-transparent"
-                    style={{ 
+                  <span
+                    className="text-[38px] font-black bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"
+                    style={{
                       fontFamily: 'Inter, system-ui, sans-serif',
                       fontWeight: 900,
                       letterSpacing: '-0.04em',
                       lineHeight: 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      paddingLeft: '2px' // Compensation optique
                     }}
                   >
                     SP
                   </span>
                 </div>
               </div>
-              
-              {/* Glow effect on hover */}
-              <div className="absolute inset-0 rounded-[22px] bg-gradient-to-br from-[var(--primary-400)] to-[var(--warning-500)] opacity-0 hover:opacity-20 transition-opacity duration-500 blur-md -z-10" />
+
+              {/* Animated ring */}
+              <motion.div
+                className="absolute -inset-2 rounded-[28px] border-2 border-indigo-300/50"
+                animate={{ scale: [1, 1.05, 1], opacity: [0.5, 0.8, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              />
             </div>
           </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
-          >
-            <h1 className="text-4xl font-semibold text-[var(--fg-primary)] mb-2 tracking-tight">
+
+          <motion.div variants={itemVariants}>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
               Squad Planner
             </h1>
-            <p className="text-[var(--fg-tertiary)] text-sm font-medium">
+            <p className="text-gray-500 text-sm font-medium flex items-center justify-center gap-2">
+              <Gamepad2 className="w-4 h-4" />
               L'infrastructure de coordination gaming
             </p>
           </motion.div>
-        </div>
+        </motion.div>
 
-        {/* Login Card - Style cohérent avec la charte */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-        >
-          {/* Card avec fond beige foncé pour contraste */}
-          <div className="bg-[var(--bg-elevated)] rounded-[24px] p-8 shadow-[0_2px_16px_rgba(120,113,108,0.08),0_0_0_0.5px_rgba(120,113,108,0.12)] border border-[var(--border-subtle)]">
-            <h2 className="text-2xl font-semibold text-[var(--fg-primary)] mb-6 tracking-tight">
+        {/* Login Card */}
+        <motion.div variants={itemVariants}>
+          <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white/50">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">
               Connexion
             </h2>
 
             <div className="space-y-5">
               {/* Email Input */}
               <div>
-                <label className="block text-sm font-medium text-[var(--fg-secondary)] mb-2">
+                <label className="block text-sm font-semibold text-gray-600 mb-2">
                   Email
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[var(--fg-tertiary)]" strokeWidth={2} />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" strokeWidth={2} />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="votre@email.com"
-                    className="w-full pl-11 pr-4 py-3.5 bg-[var(--bg-subtle)] rounded-xl text-[var(--fg-primary)] placeholder:text-[var(--fg-placeholder)] border border-[var(--border-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-500)]/30 focus:border-[var(--primary-500)] transition-all text-sm font-medium"
+                    className="w-full pl-12 pr-4 py-4 bg-gray-50/80 rounded-xl text-gray-800 placeholder:text-gray-400 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all text-sm font-medium"
                     onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                   />
                 </div>
@@ -183,76 +198,78 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
 
               {/* Password Input */}
               <div>
-                <label className="block text-sm font-medium text-[var(--fg-secondary)] mb-2">
+                <label className="block text-sm font-semibold text-gray-600 mb-2">
                   Mot de passe
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[var(--fg-tertiary)]" strokeWidth={2} />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" strokeWidth={2} />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full pl-11 pr-12 py-3.5 bg-[var(--bg-subtle)] rounded-xl text-[var(--fg-primary)] placeholder:text-[var(--fg-placeholder)] border border-[var(--border-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-500)]/30 focus:border-[var(--primary-500)] transition-all text-sm font-medium"
+                    placeholder="Votre mot de passe"
+                    className="w-full pl-12 pr-12 py-4 bg-gray-50/80 rounded-xl text-gray-800 placeholder:text-gray-400 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all text-sm font-medium"
                     onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--fg-tertiary)] hover:text-[var(--fg-primary)] transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    {showPassword ? (
-                      <EyeOff className="w-[18px] h-[18px]" strokeWidth={2} />
-                    ) : (
-                      <Eye className="w-[18px] h-[18px]" strokeWidth={2} />
-                    )}
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
               </div>
 
               {/* Login Button */}
-              <button
+              <motion.button
                 onClick={handleLogin}
                 disabled={isLoading}
-                className="w-full py-3.5 bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] text-white rounded-xl font-semibold text-sm hover:shadow-[var(--shadow-primary)] hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 shadow-sm"
+                className="w-full py-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
               >
                 {isLoading ? (
                   <>
-                    <div className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <motion.div
+                      className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    />
                     <span>Connexion...</span>
                   </>
                 ) : (
                   <>
-                    <LogIn className="w-[18px] h-[18px]" strokeWidth={2} />
+                    <LogIn className="w-5 h-5" strokeWidth={2} />
                     <span>Se connecter</span>
                   </>
                 )}
-              </button>
+              </motion.button>
 
               {/* Forgot Password */}
               <div className="text-center pt-1">
                 <button
                   onClick={handleForgotPassword}
                   disabled={isResettingPassword}
-                  className="text-sm font-medium text-[var(--fg-tertiary)] hover:text-[var(--primary-600)] transition-colors disabled:opacity-50"
+                  className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors disabled:opacity-50"
                 >
                   {isResettingPassword ? 'Envoi en cours...' : 'Mot de passe oublié ?'}
                 </button>
               </div>
 
-              {/* Cache Clear Hint - shown after errors */}
+              {/* Cache Clear Hint */}
               {showCacheClearHint && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl"
+                  className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl"
                 >
                   <p className="text-xs text-amber-800 mb-2">
                     Problème de connexion ? Essayez de vider le cache.
                   </p>
                   <button
                     onClick={clearAllCache}
-                    className="flex items-center gap-2 text-xs font-medium text-amber-700 hover:text-amber-900 transition-colors"
+                    className="flex items-center gap-2 text-xs font-semibold text-amber-700 hover:text-amber-900 transition-colors"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
                     Vider le cache et réessayer
@@ -264,39 +281,37 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
             {/* Divider */}
             <div className="relative my-7">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-[var(--border-subtle)]" />
+                <div className="w-full border-t border-gray-200" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-[var(--bg-elevated)] text-[var(--fg-quaternary)] font-medium">ou</span>
+                <span className="px-4 bg-white/80 text-gray-400 font-medium">ou</span>
               </div>
             </div>
 
             {/* Sign Up Link */}
             <div className="text-center">
-              <p className="text-[var(--fg-secondary)] text-sm mb-4 font-medium">
+              <p className="text-gray-500 text-sm mb-4 font-medium">
                 Pas encore de compte ?
               </p>
-              <button
+              <motion.button
                 onClick={() => onNavigate?.('signup')}
-                className="w-full py-3.5 bg-[var(--bg-subtle)] text-[var(--fg-primary)] border border-[var(--border-medium)] rounded-xl font-semibold text-sm hover:bg-[var(--bg-base)] hover:border-[var(--border-strong)] hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-sm group"
+                className="w-full py-4 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold text-sm hover:border-indigo-300 hover:bg-indigo-50/50 transition-all flex items-center justify-center gap-2 group"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
+                <Sparkles className="w-5 h-5 text-indigo-500" />
                 <span>Créer un compte</span>
-                <ArrowRight className="w-[18px] h-[18px] group-hover:translate-x-0.5 transition-transform" strokeWidth={2} />
-              </button>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" strokeWidth={2} />
+              </motion.button>
             </div>
           </div>
         </motion.div>
 
         {/* Footer */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.6 }}
-          className="mt-8 text-center"
-        >
-          <p className="text-sm text-[var(--text-tertiary)]">
+        <motion.div variants={itemVariants} className="mt-8 text-center">
+          <p className="text-sm text-gray-400">
             En continuant, vous acceptez nos{' '}
-            <button className="text-[var(--primary-500)] hover:text-[var(--primary-400)] font-medium transition-colors">
+            <button className="text-indigo-500 hover:text-indigo-600 font-medium transition-colors">
               Conditions d'utilisation
             </button>
           </p>

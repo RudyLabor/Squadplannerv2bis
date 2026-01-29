@@ -1,4 +1,9 @@
-import { ArrowLeft, Trophy, Lock, Check, Target, Flame, Zap, Award, Star, Crown, Shield } from 'lucide-react';
+/**
+ * ACHIEVEMENTS SCREEN - Premium UI v2.0
+ * Framer Motion + Glassmorphism + Gradients
+ */
+
+import { ArrowLeft, Trophy, Lock, Check, Target, Flame, Zap, Award, Star, Crown, Shield, Share2, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 
@@ -22,15 +27,32 @@ interface Achievement {
   unlockedAt?: string;
 }
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
+  }
+};
+
+const rarityConfig = {
+  common: { gradient: 'from-gray-400 to-gray-500', bg: 'bg-gray-100', text: 'text-gray-600' },
+  rare: { gradient: 'from-blue-500 to-cyan-500', bg: 'bg-blue-100', text: 'text-blue-600' },
+  epic: { gradient: 'from-purple-500 to-pink-500', bg: 'bg-purple-100', text: 'text-purple-600' },
+  legendary: { gradient: 'from-amber-500 to-orange-500', bg: 'bg-amber-100', text: 'text-amber-600' },
+};
+
 export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreenProps) {
   const [activeCategory, setActiveCategory] = useState<AchievementCategory>('all');
-
-  const rarityColors = {
-    common: { bg: 'bg-gray-100', text: 'text-gray-600', border: 'border-gray-200' },
-    rare: { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200' },
-    epic: { bg: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-200' },
-    legendary: { bg: 'bg-[var(--primary-50)]', text: 'text-[var(--primary-600)]', border: 'border-[var(--primary-200)]' },
-  };
 
   const achievements: Achievement[] = [
     {
@@ -133,174 +155,233 @@ export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreen
   };
 
   return (
-    <div className="min-h-screen pb-24 pt-safe">
-      <div className="px-4 py-8 max-w-2xl mx-auto">
-        
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
-          <button
-            onClick={() => onNavigate('profile')}
-            className="w-12 h-12 rounded-2xl bg-white border-[0.5px] border-[var(--border-medium)] flex items-center justify-center hover:border-[var(--border-strong)] shadow-sm transition-all"
-          >
-            <ArrowLeft className="w-5 h-5 text-[var(--fg-primary)]" strokeWidth={2} />
-          </button>
-          <div>
-            <h1 className="text-2xl font-semibold text-[var(--fg-primary)] tracking-tight">
-              Trophées
-            </h1>
-            <p className="text-sm text-[var(--fg-tertiary)] font-medium mt-1">
-              {unlockedCount}/{achievements.length} débloqués ({progressPercent}%)
-            </p>
-          </div>
-        </div>
-
-        {/* Progress Card */}
+    <div className="min-h-screen pb-24 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-[var(--primary-500)] to-[var(--secondary-500)] rounded-2xl p-6 mb-8 shadow-lg"
+          className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full blur-3xl"
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl"
+          animate={{ scale: [1, 1.15, 1] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+
+      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
         >
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <div className="text-white/90 text-sm font-medium mb-1">
-                Progression globale
-              </div>
-              <div className="text-3xl font-bold text-white">
-                {progressPercent}%
-              </div>
-            </div>
-            <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <Trophy className="w-8 h-8 text-white" strokeWidth={2} />
-            </div>
-          </div>
-          
-          {/* Progress Bar */}
-          <div className="h-2 bg-white/20 rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-white rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${progressPercent}%` }}
-              transition={{ duration: 1, ease: 'easeOut' }}
-            />
-          </div>
-        </motion.div>
-
-        {/* Category Tabs */}
-        <div className="flex gap-2 mb-6 overflow-x-auto no-scrollbar">
-          {categories.map((cat) => (
-            <button
-              key={cat.key}
-              onClick={() => setActiveCategory(cat.key)}
-              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
-                activeCategory === cat.key
-                  ? 'bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] text-white shadow-lg shadow-[var(--primary-500)]/20'
-                  : 'bg-white text-[var(--fg-secondary)] border-[0.5px] border-[var(--border-subtle)] hover:border-[var(--border-medium)]'
-              }`}
+          {/* Header */}
+          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
+            <motion.button
+              onClick={() => onNavigate('profile')}
+              className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              {cat.label} ({cat.count})
-            </button>
-          ))}
-        </div>
+              <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
+            </motion.button>
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                Trophées
+              </h1>
+              <p className="text-sm text-gray-500 mt-0.5 font-medium">
+                {unlockedCount}/{achievements.length} débloqués ({progressPercent}%)
+              </p>
+            </div>
+            <motion.div
+              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg"
+              whileHover={{ scale: 1.05, rotate: 5 }}
+            >
+              <Trophy className="w-6 h-6 text-white" strokeWidth={2} />
+            </motion.div>
+          </motion.div>
 
-        {/* Achievements Grid */}
-        <div className="grid grid-cols-1 gap-4">
-          {achievements.map((achievement, index) => {
-            const Icon = achievement.icon;
-            const colors = rarityColors[achievement.rarity];
-            // Vérification de sécurité pour éviter NaN
-            const progressPercent = (achievement.total && achievement.total > 0) 
-              ? Math.round((achievement.progress / achievement.total) * 100)
-              : 0;
-            
-            return (
+          {/* Progress Card */}
+          <motion.div
+            variants={itemVariants}
+            className="relative overflow-hidden rounded-3xl p-6 mb-8"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500 via-orange-500 to-red-500" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-white/10" />
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
+            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+
+            <div className="relative z-10 flex items-center justify-between mb-4">
+              <div>
+                <div className="text-white/90 text-sm font-medium mb-1">
+                  Progression globale
+                </div>
+                <div className="text-4xl font-bold text-white">
+                  {progressPercent}%
+                </div>
+              </div>
               <motion.div
-                key={achievement.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className={`bg-white rounded-2xl p-5 border-[0.5px] shadow-sm hover:shadow-md transition-all duration-200 ${
-                  achievement.unlocked ? colors.border : 'border-[var(--border-subtle)]'
-                }`}
+                className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center"
+                animate={{ y: [0, -5, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               >
-                <div className="flex items-start gap-4">
-                  {/* Icon */}
-                  <div className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 relative ${
-                    achievement.unlocked ? colors.bg : 'bg-gray-100'
-                  }`}>
-                    {achievement.unlocked ? (
-                      <>
-                        <Icon className={`w-7 h-7 ${colors.text}`} strokeWidth={2} />
-                        <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[var(--success-500)] flex items-center justify-center">
-                          <Check className="w-3 h-3 text-white" strokeWidth={3} />
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <Icon className="w-7 h-7 text-gray-400" strokeWidth={2} />
-                        <Lock className="absolute w-4 h-4 text-gray-400" strokeWidth={2} />
-                      </>
-                    )}
-                  </div>
+                <Trophy className="w-8 h-8 text-white" strokeWidth={2} />
+              </motion.div>
+            </div>
 
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <div>
-                        <div className={`text-sm font-semibold mb-1 ${
-                          achievement.unlocked ? 'text-[var(--fg-primary)]' : 'text-[var(--fg-tertiary)]'
-                        }`}>
-                          {achievement.name}
-                        </div>
-                        <div className="text-xs text-[var(--fg-tertiary)] font-medium">
-                          {achievement.description}
-                        </div>
+            {/* Progress Bar */}
+            <div className="h-3 bg-white/20 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-white rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${progressPercent}%` }}
+                transition={{ duration: 1, ease: 'easeOut', delay: 0.3 }}
+              />
+            </div>
+          </motion.div>
+
+          {/* Category Tabs */}
+          <motion.div variants={itemVariants} className="flex gap-2 mb-6 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+            {categories.map((cat) => (
+              <motion.button
+                key={cat.key}
+                onClick={() => setActiveCategory(cat.key)}
+                className={`px-5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ${
+                  activeCategory === cat.key
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30'
+                    : 'bg-white/80 backdrop-blur-sm text-gray-600 border border-white/50'
+                }`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                {cat.label} ({cat.count})
+              </motion.button>
+            ))}
+          </motion.div>
+
+          {/* Achievements Grid */}
+          <motion.div
+            variants={containerVariants}
+            className="space-y-4"
+          >
+            {achievements.map((achievement, index) => {
+              const Icon = achievement.icon;
+              const config = rarityConfig[achievement.rarity];
+              const achProgressPercent = (achievement.total && achievement.total > 0)
+                ? Math.round((achievement.progress / achievement.total) * 100)
+                : 0;
+
+              return (
+                <motion.div
+                  key={achievement.id}
+                  variants={itemVariants}
+                  custom={index}
+                  className={`relative overflow-hidden rounded-2xl p-5 transition-all ${
+                    achievement.unlocked
+                      ? 'bg-white/90 backdrop-blur-sm border border-white/50 shadow-lg'
+                      : 'bg-white/60 backdrop-blur-sm border border-white/30 shadow-md'
+                  }`}
+                  whileHover={{ scale: 1.01, y: -2 }}
+                >
+                  {/* Unlocked indicator line */}
+                  {achievement.unlocked && (
+                    <div className={`absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b ${config.gradient}`} />
+                  )}
+
+                  <div className="flex items-start gap-4">
+                    {/* Icon */}
+                    <div className="relative flex-shrink-0">
+                      <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${
+                        achievement.unlocked
+                          ? `bg-gradient-to-br ${config.gradient} shadow-md`
+                          : 'bg-gray-100'
+                      }`}>
+                        <Icon className={`w-7 h-7 ${achievement.unlocked ? 'text-white' : 'text-gray-400'}`} strokeWidth={2} />
                       </div>
-                      {/* Rarity Badge */}
-                      <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${colors.bg} ${colors.text}`}>
-                        {achievement.rarity}
-                      </span>
+                      {achievement.unlocked && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: 0.2 + index * 0.05, type: "spring" }}
+                          className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shadow-md"
+                        >
+                          <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                        </motion.div>
+                      )}
+                      {!achievement.unlocked && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Lock className="w-4 h-4 text-gray-400" strokeWidth={2} />
+                        </div>
+                      )}
                     </div>
 
-                    {/* Progress or Unlocked Date */}
-                    {achievement.unlocked ? (
-                      <div className="flex items-center justify-between mt-3">
-                        <div className="text-xs text-[var(--success-500)] font-semibold">
-                          ✓ Débloqué {achievement.unlockedAt}
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div>
+                          <div className={`text-sm font-semibold mb-1 ${
+                            achievement.unlocked ? 'text-gray-800' : 'text-gray-400'
+                          }`}>
+                            {achievement.name}
+                          </div>
+                          <div className="text-xs text-gray-500 font-medium">
+                            {achievement.description}
+                          </div>
                         </div>
-                        <button
-                          onClick={() => handleShare(achievement)}
-                          className="px-3 py-1.5 rounded-lg bg-[var(--primary-50)] text-[var(--primary-500)] text-xs font-semibold hover:bg-[var(--primary-100)] transition-all"
-                        >
-                          Partager
-                        </button>
+                        {/* Rarity Badge */}
+                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${config.bg} ${config.text}`}>
+                          {achievement.rarity}
+                        </span>
                       </div>
-                    ) : (
-                      <div className="mt-3">
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-xs text-[var(--fg-secondary)] font-semibold">
-                            {achievement.progress}/{achievement.total}
-                          </span>
-                          <span className="text-xs text-[var(--fg-tertiary)] font-medium">
-                            {progressPercent}%
-                          </span>
-                        </div>
-                        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-[var(--primary-500)] to-[var(--secondary-500)] rounded-full"
-                            style={{ width: `${progressPercent}%` }}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
 
+                      {/* Progress or Unlocked Date */}
+                      {achievement.unlocked ? (
+                        <div className="flex items-center justify-between mt-3">
+                          <div className="text-xs text-emerald-500 font-semibold flex items-center gap-1">
+                            <Sparkles className="w-3.5 h-3.5" />
+                            Débloqué {achievement.unlockedAt}
+                          </div>
+                          <motion.button
+                            onClick={() => handleShare(achievement)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 ${config.bg} ${config.text}`}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            <Share2 className="w-3.5 h-3.5" />
+                            Partager
+                          </motion.button>
+                        </div>
+                      ) : (
+                        <div className="mt-3">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-xs text-gray-600 font-semibold">
+                              {achievement.progress}/{achievement.total}
+                            </span>
+                            <span className="text-xs text-gray-400 font-medium">
+                              {achProgressPercent}%
+                            </span>
+                          </div>
+                          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <motion.div
+                              className={`h-full rounded-full bg-gradient-to-r ${config.gradient}`}
+                              initial={{ width: 0 }}
+                              animate={{ width: `${achProgressPercent}%` }}
+                              transition={{ duration: 0.5, delay: 0.2 + index * 0.05 }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   );
 }
+
 export default AchievementsScreen;
