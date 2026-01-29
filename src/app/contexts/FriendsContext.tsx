@@ -156,7 +156,7 @@ export function FriendsProvider({ children }: { children: ReactNode }) {
         .eq('status', 'accepted');
 
       if (friendsError) throw friendsError;
-      setFriends(friendsData || []);
+      setFriends((friendsData || []) as unknown as Friend[]);
 
       // Fetch pending requests (received)
       const { data: requestsData, error: requestsError } = await supabase
@@ -166,7 +166,7 @@ export function FriendsProvider({ children }: { children: ReactNode }) {
         .eq('status', 'pending');
 
       if (requestsError) throw requestsError;
-      setRequests(requestsData || []);
+      setRequests((requestsData || []) as unknown as FriendRequest[]);
     } catch (err: any) {
       console.error('Error fetching friends:', err);
       setError(err.message);

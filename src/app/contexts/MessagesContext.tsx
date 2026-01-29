@@ -52,7 +52,7 @@ export function MessagesProvider({ children }: { children: ReactNode }) {
       const response = await squadsAPI.getMessages(squadId, limit);
       // Assuming response structure matches user expectation or adapting if needed.
       // User code: const { messages: data } = ...
-      setMessages(response.messages || []); // Adaptive check
+      setMessages((response.messages || []) as unknown as Message[]); // Adaptive check
     } catch (error) {
       console.error('Error loading messages:', error);
     } finally {

@@ -119,7 +119,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
     setError(null);
     try {
       const { sessions: data } = await squadsAPI.getSessions(squadId, status);
-      setSessions(data);
+      setSessions(data as unknown as Session[]);
     } catch (err: any) {
       console.error('Error fetching sessions:', err);
       setError(err.message);
@@ -131,8 +131,9 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
   const createSession = async (data: any) => {
     try {
       const { session } = await sessionsAPI.create(data);
-      setSessions(prev => [session, ...prev]);
-      return session;
+      const typedSession = session as unknown as Session;
+      setSessions(prev => [typedSession, ...prev]);
+      return typedSession;
     } catch (err: any) {
       console.error('Error creating session:', err);
       throw err;
@@ -142,11 +143,12 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
   const updateSession = async (sessionId: string, data: any) => {
     try {
       const { session } = await sessionsAPI.update(sessionId, data);
-      setSessions(prev => prev.map(s => s.id === sessionId ? session : s));
+      const typedSession = session as unknown as Session;
+      setSessions(prev => prev.map(s => s.id === sessionId ? typedSession : s));
       if (currentSession?.id === sessionId) {
-        setCurrentSession(session);
+        setCurrentSession(typedSession);
       }
-      return session;
+      return typedSession;
     } catch (err: any) {
       console.error('Error updating session:', err);
       throw err;
@@ -158,9 +160,10 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
       await sessionsAPI.rsvp(sessionId, response, notes);
       // Rafraîchir la session pour obtenir les RSVPs mis à jour
       const { session } = await sessionsAPI.getById(sessionId);
-      setSessions(prev => prev.map(s => s.id === sessionId ? session : s));
+      const typedSession = session as unknown as Session;
+      setSessions(prev => prev.map(s => s.id === sessionId ? typedSession : s));
       if (currentSession?.id === sessionId) {
-        setCurrentSession(session);
+        setCurrentSession(typedSession);
       }
     } catch (err: any) {
       console.error('Error responding to session:', err);
@@ -171,8 +174,9 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
   const getSessionById = async (sessionId: string) => {
     try {
       const { session } = await sessionsAPI.getById(sessionId);
-      setCurrentSession(session);
-      return session;
+      const typedSession = session as unknown as Session;
+      setCurrentSession(typedSession);
+      return typedSession;
     } catch (err: any) {
       console.error('Error fetching session:', err);
       throw err;

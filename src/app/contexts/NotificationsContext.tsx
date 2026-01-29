@@ -61,7 +61,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       // api-real.ts: notifications: { getNotifications: async () => [] },
       // It seems the user wants me to implement the Context *assuming* the API exists or will be updated.
       // I will implement the Context as requested.
-      setNotifications(response.notifications || []); 
+      setNotifications((response.notifications || []) as unknown as Notification[]); 
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {

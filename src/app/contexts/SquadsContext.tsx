@@ -101,12 +101,12 @@ export function SquadsProvider({ children }: { children: ReactNode }) {
 
   const refreshSquads = async () => {
     if (!user) return;
-    
+
     setLoading(true);
     setError(null);
     try {
       const { squads: data } = await squadsAPI.getAll();
-      setSquads(data);
+      setSquads(data as unknown as Squad[]);
     } catch (err: any) {
       console.error('Error fetching squads:', err);
       setError(err.message);
@@ -118,8 +118,9 @@ export function SquadsProvider({ children }: { children: ReactNode }) {
   const createSquad = async (data: any) => {
     try {
       const { squad } = await squadsAPI.create(data);
-      setSquads(prev => [squad, ...prev]);
-      return squad;
+      const typedSquad = squad as unknown as Squad;
+      setSquads(prev => [typedSquad, ...prev]);
+      return typedSquad;
     } catch (err: any) {
       console.error('Error creating squad:', err);
       throw err;
@@ -129,8 +130,9 @@ export function SquadsProvider({ children }: { children: ReactNode }) {
   const joinSquad = async (inviteCode: string) => {
     try {
       const { squad } = await squadsAPI.join(inviteCode);
-      setSquads(prev => [squad, ...prev]);
-      return squad;
+      const typedSquad = squad as unknown as Squad;
+      setSquads(prev => [typedSquad, ...prev]);
+      return typedSquad;
     } catch (err: any) {
       console.error('Error joining squad:', err);
       throw err;
@@ -153,11 +155,12 @@ export function SquadsProvider({ children }: { children: ReactNode }) {
   const updateSquad = async (squadId: string, data: any) => {
     try {
       const { squad } = await squadsAPI.update(squadId, data);
-      setSquads(prev => prev.map(s => s.id === squadId ? squad : s));
+      const typedSquad = squad as unknown as Squad;
+      setSquads(prev => prev.map(s => s.id === squadId ? typedSquad : s));
       if (currentSquad?.id === squadId) {
-        setCurrentSquad(squad);
+        setCurrentSquad(typedSquad);
       }
-      return squad;
+      return typedSquad;
     } catch (err: any) {
       console.error('Error updating squad:', err);
       throw err;
@@ -167,8 +170,9 @@ export function SquadsProvider({ children }: { children: ReactNode }) {
   const getSquadById = async (squadId: string) => {
     try {
       const { squad } = await squadsAPI.getById(squadId);
-      setCurrentSquad(squad);
-      return squad;
+      const typedSquad = squad as unknown as Squad;
+      setCurrentSquad(typedSquad);
+      return typedSquad;
     } catch (err: any) {
       console.error('Error fetching squad:', err);
       throw err;
