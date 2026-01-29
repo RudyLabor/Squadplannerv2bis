@@ -6,8 +6,8 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
-// TEMPORARY: Bypass auth for development - set to false to re-enable auth
-const BYPASS_AUTH = true;
+// Login screen re-enabled
+const BYPASS_AUTH = false;
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth();

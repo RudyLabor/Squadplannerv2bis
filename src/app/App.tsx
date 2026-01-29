@@ -123,8 +123,8 @@ function ScreenLoader() {
   );
 }
 
-// TEMPORARY: Bypass auth for development - must match AuthContext and ProtectedRoute
-const BYPASS_AUTH = true;
+// Login screen re-enabled - must match AuthContext and ProtectedRoute
+const BYPASS_AUTH = false;
 
 function AppContent() {
   const navigate = useNavigate();

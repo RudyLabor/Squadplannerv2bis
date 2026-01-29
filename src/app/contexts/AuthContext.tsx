@@ -28,8 +28,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// TEMPORARY: Bypass auth for development - set to false to re-enable auth
-const BYPASS_AUTH = true;
+// Login screen re-enabled
+const BYPASS_AUTH = false;
 
 // Mock user for development when auth is bypassed
 const MOCK_USER: User = {

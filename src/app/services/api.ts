@@ -1249,7 +1249,7 @@ export const achievementsAPI = {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user && !userId) throw new Error('Not authenticated');
 
-    const targetUserId = userId || user.id;
+    const targetUserId = userId || user!.id;
 
     const { data, error } = await supabase
       .from('user_achievements')
@@ -1265,7 +1265,7 @@ export const achievementsAPI = {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user && !userId) throw new Error('Not authenticated');
 
-    const targetUserId = userId || user.id;
+    const targetUserId = userId || user!.id;
 
     const { data, error } = await supabase
       .from('user_achievements')
@@ -1512,7 +1512,7 @@ export const analyticsAPI = {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user && !userId) throw new Error('Not authenticated');
 
-    const targetUserId = userId || user.id;
+    const targetUserId = userId || user!.id;
 
     const { data, error } = await supabase
       .from('analytics_user')
@@ -1544,7 +1544,7 @@ export const analyticsAPI = {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user && !userId) throw new Error('Not authenticated');
 
-    const targetUserId = userId || user.id;
+    const targetUserId = userId || user!.id;
 
     const { data, error } = await supabase
       .from('analytics_user')

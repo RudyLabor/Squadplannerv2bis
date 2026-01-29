@@ -37,7 +37,7 @@ export async function getSmartSuggestions(
 ): Promise<TimeSlotSuggestion[]> {
   try {
     // Récupérer toutes les sessions passées du squad
-    const { data: sessions, error } = await supabase
+    const { data, error } = await supabase
       .from('sessions')
       .select(`
         id,
@@ -53,9 +53,19 @@ export async function getSmartSuggestions(
       .limit(50); // Analyser les 50 dernières sessions
 
     if (error) throw error;
-    if (!sessions || sessions.length === 0) {
+    if (!data || data.length === 0) {
       return getDefaultSuggestions();
     }
+
+    // Type assertion for proper typing
+    const sessions = data as unknown as Array<{
+      id: string;
+      scheduled_date: string;
+      scheduled_time: string;
+      required_players: number;
+      rsvps: Array<{ response: string }>;
+      check_ins: Array<{ status: string }>;
+    }>;
 
     // Créer une heatmap des créneaux
     const heatmap: AvailabilityHeatmap = {};
@@ -171,7 +181,7 @@ export async function generateAvailabilityHeatmap(
   squadId: string
 ): Promise<AvailabilityHeatmap> {
   try {
-    const { data: sessions, error } = await supabase
+    const { data, error } = await supabase
       .from('sessions')
       .select(`
         scheduled_date,
@@ -185,6 +195,14 @@ export async function generateAvailabilityHeatmap(
       .limit(100);
 
     if (error) throw error;
+
+    // Type assertion
+    const sessions = data as unknown as Array<{
+      scheduled_date: string;
+      scheduled_time: string;
+      required_players: number;
+      check_ins: Array<{ status: string }>;
+    }> | null;
 
     const heatmap: AvailabilityHeatmap = {};
 
@@ -274,7 +292,7 @@ export async function analyzeMemberAvailability(
   consistency: number;
 }> {
   try {
-    const { data: checkIns, error } = await supabase
+    const { data, error } = await supabase
       .from('session_check_ins')
       .select(`
         checked_in_at,
@@ -287,6 +305,13 @@ export async function analyzeMemberAvailability(
       .limit(50);
 
     if (error) throw error;
+
+    // Type assertion
+    const checkIns = data as unknown as Array<{
+      checked_in_at: string;
+      status: string;
+      session: { scheduled_date: string; scheduled_time: string } | null;
+    }> | null;
 
     const dayCount: { [day: number]: number } = {};
     const hourCount: { [hour: number]: number } = {};

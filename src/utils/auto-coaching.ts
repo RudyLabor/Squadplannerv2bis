@@ -58,7 +58,7 @@ export async function generateSquadInsights(squadId: string): Promise<CoachingIn
  * 1. Analyser le taux de présence
  */
 async function analyzeAttendanceRate(squadId: string): Promise<CoachingInsight | null> {
-  const { data: sessions } = await supabase
+  const { data } = await supabase
     .from('sessions')
     .select(`
       id,
@@ -68,6 +68,12 @@ async function analyzeAttendanceRate(squadId: string): Promise<CoachingInsight |
     .eq('squad_id', squadId)
     .lte('scheduled_date', new Date().toISOString().split('T')[0])
     .limit(10);
+
+  const sessions = data as unknown as Array<{
+    id: string;
+    required_players: number;
+    check_ins: Array<{ status: string }>;
+  }> | null;
 
   if (!sessions || sessions.length < 3) return null;
 
@@ -159,7 +165,7 @@ async function analyzeSessionFrequency(squadId: string): Promise<CoachingInsight
  * 3. Analyser le meilleur créneau
  */
 async function analyzeBestTiming(squadId: string): Promise<CoachingInsight | null> {
-  const { data: sessions } = await supabase
+  const { data } = await supabase
     .from('sessions')
     .select(`
       scheduled_date,
@@ -170,6 +176,13 @@ async function analyzeBestTiming(squadId: string): Promise<CoachingInsight | nul
     .eq('squad_id', squadId)
     .lte('scheduled_date', new Date().toISOString().split('T')[0])
     .limit(20);
+
+  const sessions = data as unknown as Array<{
+    scheduled_date: string;
+    scheduled_time: string;
+    required_players: number;
+    check_ins: Array<{ status: string }>;
+  }> | null;
 
   if (!sessions || sessions.length < 5) return null;
 
@@ -223,12 +236,16 @@ async function analyzeBestTiming(squadId: string): Promise<CoachingInsight | nul
  * 4. Analyser membres peu fiables
  */
 async function analyzeMemberReliability(squadId: string): Promise<CoachingInsight | null> {
-  const { data: members } = await supabase
+  const { data } = await supabase
     .from('squad_members')
     .select(`
-      user:users(id, display_name, reliability_score)
+      user:profiles(id, display_name, reliability_score)
     `)
     .eq('squad_id', squadId);
+
+  const members = data as unknown as Array<{
+    user: { id: string; display_name: string; reliability_score: number } | null;
+  }> | null;
 
   if (!members || members.length === 0) return null;
 
@@ -329,11 +346,18 @@ export async function generateUserInsights(userId: string): Promise<CoachingInsi
   const insights: CoachingInsight[] = [];
 
   try {
-    const { data: user } = await supabase
-      .from('users')
+    const { data } = await supabase
+      .from('profiles')
       .select('reliability_score, total_sessions, sessions_attended, sessions_no_show')
       .eq('id', userId)
       .single();
+
+    const user = data as {
+      reliability_score: number;
+      total_sessions: number;
+      sessions_attended: number;
+      sessions_no_show: number;
+    } | null;
 
     if (!user) return [];
 
