@@ -1,10 +1,16 @@
 -- ============================================================================
 -- SYSTÈME DE RÔLES & PERMISSIONS - Phase 1
 -- Gestion hiérarchique des squads (Leader, Co-leader, Membre)
+-- Version corrigée: vérifie existence des types et utilise profiles
 -- ============================================================================
 
--- Créer type enum pour les rôles
-CREATE TYPE squad_role AS ENUM ('leader', 'co_leader', 'member');
+-- Créer type enum pour les rôles (si n'existe pas)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'squad_role') THEN
+    CREATE TYPE squad_role AS ENUM ('leader', 'co_leader', 'member');
+  END IF;
+END $$;
 
 -- Mettre à jour la table squad_members si la colonne n'existe pas déjà
 DO $$
@@ -14,7 +20,7 @@ BEGIN
     WHERE table_name = 'squad_members' AND column_name = 'role'
   ) THEN
     ALTER TABLE squad_members
-    ADD COLUMN role squad_role DEFAULT 'member';
+    ADD COLUMN role TEXT DEFAULT 'member';
   END IF;
 END $$;
 
@@ -59,16 +65,17 @@ BEGIN
     SELECT 1 FROM squad_members
     WHERE user_id = user_uuid
       AND squad_id = squad_uuid
-      AND role IN ('leader', 'co_leader')
+      AND role IN ('leader', 'co_leader', 'owner')
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Fonction: Obtenir le rôle d'un user dans un squad
+DROP FUNCTION IF EXISTS get_user_squad_role(UUID, UUID);
 CREATE OR REPLACE FUNCTION get_user_squad_role(user_uuid UUID, squad_uuid UUID)
-RETURNS squad_role AS $$
+RETURNS TEXT AS $$
 DECLARE
-  user_role squad_role;
+  user_role TEXT;
 BEGIN
   SELECT role INTO user_role
   FROM squad_members
@@ -87,7 +94,7 @@ CREATE TABLE IF NOT EXISTS squad_permissions (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT,
-  requires_role squad_role NOT NULL,
+  requires_role TEXT NOT NULL,
   category TEXT DEFAULT 'general'
 );
 
@@ -116,8 +123,8 @@ CREATE OR REPLACE FUNCTION user_has_permission(
 )
 RETURNS BOOLEAN AS $$
 DECLARE
-  user_role squad_role;
-  required_role squad_role;
+  user_role TEXT;
+  required_role TEXT;
 BEGIN
   -- Obtenir rôle user
   user_role := get_user_squad_role(user_uuid, squad_uuid);
@@ -135,9 +142,9 @@ BEGIN
     RETURN FALSE;
   END IF;
 
-  -- Hiérarchie: leader > co_leader > member
+  -- Hiérarchie: leader/owner > co_leader > member
   RETURN CASE
-    WHEN user_role = 'leader' THEN TRUE
+    WHEN user_role IN ('leader', 'owner') THEN TRUE
     WHEN user_role = 'co_leader' THEN required_role IN ('co_leader', 'member')
     WHEN user_role = 'member' THEN required_role = 'member'
     ELSE FALSE
@@ -150,11 +157,13 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- ============================================================================
 
 -- Promouvoir un membre (seulement leader)
+DROP FUNCTION IF EXISTS promote_squad_member(UUID, UUID, UUID, squad_role);
+DROP FUNCTION IF EXISTS promote_squad_member(UUID, UUID, UUID, TEXT);
 CREATE OR REPLACE FUNCTION promote_squad_member(
   promoter_uuid UUID,
   target_user_uuid UUID,
   squad_uuid UUID,
-  new_role squad_role
+  new_role TEXT
 )
 RETURNS BOOLEAN AS $$
 BEGIN
@@ -200,7 +209,7 @@ CREATE OR REPLACE FUNCTION kick_squad_member(
 )
 RETURNS BOOLEAN AS $$
 DECLARE
-  target_role squad_role;
+  target_role TEXT;
 BEGIN
   -- Vérifier permissions (leader ou co-leader)
   IF NOT is_squad_admin(kicker_uuid, squad_uuid) THEN
@@ -213,7 +222,7 @@ BEGIN
   WHERE user_id = target_user_uuid AND squad_id = squad_uuid;
 
   -- Empêcher kick du leader
-  IF target_role = 'leader' THEN
+  IF target_role IN ('leader', 'owner') THEN
     RAISE EXCEPTION 'Cannot kick squad leader';
   END IF;
 
@@ -252,7 +261,7 @@ CREATE POLICY "Squad admins can update squad" ON squads
     is_squad_admin(auth.uid(), id)
   );
 
--- Policy: Seuls leaders/co-leaders peuvent créer sessions
+-- Policy: Seuls membres peuvent créer sessions
 DROP POLICY IF EXISTS "Squad members can create sessions" ON sessions;
 CREATE POLICY "Squad members can create sessions" ON sessions
   FOR INSERT
@@ -283,24 +292,26 @@ CREATE POLICY "Squad admins can delete sessions" ON sessions
 -- ============================================================================
 -- VIEW: Squad avec rôles des membres
 -- ============================================================================
-CREATE OR REPLACE VIEW squad_members_with_roles AS
+DROP VIEW IF EXISTS squad_members_with_roles;
+CREATE VIEW squad_members_with_roles AS
 SELECT
   sm.id,
   sm.squad_id,
   sm.user_id,
   sm.role,
   sm.joined_at,
-  u.display_name,
-  u.username,
-  u.avatar_url,
-  u.reliability_score,
+  COALESCE(p.display_name, p.username, 'Joueur') AS display_name,
+  p.username,
+  p.avatar_url,
+  p.reliability_score,
   CASE sm.role
     WHEN 'leader' THEN 3
+    WHEN 'owner' THEN 3
     WHEN 'co_leader' THEN 2
     ELSE 1
   END as role_priority
 FROM squad_members sm
-INNER JOIN users u ON u.id = sm.user_id
+LEFT JOIN profiles p ON p.id = sm.user_id
 ORDER BY role_priority DESC, sm.joined_at ASC;
 
 -- ============================================================================
@@ -309,7 +320,7 @@ ORDER BY role_priority DESC, sm.joined_at ASC;
 DO $$
 BEGIN
   RAISE NOTICE '✅ Système de rôles & permissions créé';
-  RAISE NOTICE '   - Type enum: squad_role (leader, co_leader, member)';
+  RAISE NOTICE '   - Type TEXT pour rôles (compatible)';
   RAISE NOTICE '   - 11 permissions définies';
   RAISE NOTICE '   - Fonctions: is_squad_leader, is_squad_admin, user_has_permission';
   RAISE NOTICE '   - Actions: promote_squad_member, kick_squad_member';

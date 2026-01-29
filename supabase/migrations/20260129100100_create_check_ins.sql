@@ -1,13 +1,14 @@
 -- ============================================================================
 -- CHECK-IN OBLIGATOIRE - Squad Planner v2.0
 -- Feature signature: Confirmation 1h avant session + "Je suis en route"
+-- Version corrigée: utilise 'profiles' au lieu de 'users'
 -- ============================================================================
 
 -- Table session_check_ins
 CREATE TABLE IF NOT EXISTS session_check_ins (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   session_id UUID NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
 
   -- Statuts check-in
   status TEXT NOT NULL CHECK (status IN ('confirmed', 'on_my_way', 'running_late', 'cancelled')),
@@ -20,11 +21,7 @@ CREATE TABLE IF NOT EXISTS session_check_ins (
   updated_at TIMESTAMPTZ DEFAULT NOW(),
 
   -- Constraints
-  UNIQUE(session_id, user_id),
-
-  -- Index pour performance
-  CONSTRAINT session_check_ins_session_id_idx FOREIGN KEY (session_id) REFERENCES sessions(id),
-  CONSTRAINT session_check_ins_user_id_idx FOREIGN KEY (user_id) REFERENCES users(id)
+  UNIQUE(session_id, user_id)
 );
 
 -- Index pour requêtes rapides
@@ -38,6 +35,12 @@ CREATE INDEX IF NOT EXISTS idx_check_ins_status ON session_check_ins(status);
 
 -- Enable RLS
 ALTER TABLE session_check_ins ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if any
+DROP POLICY IF EXISTS "View check-ins for squad sessions" ON session_check_ins;
+DROP POLICY IF EXISTS "Create own check-in" ON session_check_ins;
+DROP POLICY IF EXISTS "Update own check-in" ON session_check_ins;
+DROP POLICY IF EXISTS "Delete own check-in" ON session_check_ins;
 
 -- Policy: View check-ins for sessions you're part of
 CREATE POLICY "View check-ins for squad sessions" ON session_check_ins
@@ -74,6 +77,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Drop trigger if exists
+DROP TRIGGER IF EXISTS update_session_check_ins_timestamp ON session_check_ins;
+
 -- Trigger: Auto-update timestamp
 CREATE TRIGGER update_session_check_ins_timestamp
   BEFORE UPDATE ON session_check_ins
@@ -90,7 +96,7 @@ BEGIN
     sm.user_id,
     'check_in_update',
     'Mise à jour check-in',
-    (SELECT u.display_name FROM users u WHERE u.id = NEW.user_id) ||
+    (SELECT p.display_name FROM profiles p WHERE p.id = NEW.user_id) ||
     CASE NEW.status
       WHEN 'confirmed' THEN ' est confirmé'
       WHEN 'on_my_way' THEN ' est en route'
@@ -111,6 +117,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Drop trigger if exists
+DROP TRIGGER IF EXISTS notify_on_check_in_change ON session_check_ins;
+
 -- Trigger: Notify on check-in update
 CREATE TRIGGER notify_on_check_in_change
   AFTER INSERT OR UPDATE ON session_check_ins
@@ -118,10 +127,8 @@ CREATE TRIGGER notify_on_check_in_change
   EXECUTE FUNCTION notify_check_in_status_change();
 
 -- ============================================================================
--- INITIAL DATA (Example statuses)
+-- SUCCESS MESSAGE
 -- ============================================================================
-
--- Success message
 DO $$
 BEGIN
   RAISE NOTICE '✅ Check-in system created successfully';
