@@ -1,12 +1,64 @@
-import { ArrowLeft, Mail, Smartphone, Save, Bell, BellOff, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Mail, Smartphone, Save, Bell, BellOff, AlertCircle, Sparkles, Zap, Clock, Users } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { Button } from '@/app/components/ui/button';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '@/app/contexts/UserContext';
 import { pushNotifications } from '@/utils/push-notifications';
 
 interface NotificationSettingsScreenProps {
   onNavigate: (screen: string) => void;
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
+}
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
+  }
+};
+
+interface ToggleSwitchProps {
+  enabled: boolean;
+  onToggle: () => void;
+}
+
+function PremiumToggleSwitch({ enabled, onToggle }: ToggleSwitchProps) {
+  return (
+    <motion.button
+      onClick={onToggle}
+      className={`relative w-14 h-8 rounded-full transition-all duration-300 flex-shrink-0 ${
+        enabled
+          ? 'bg-gradient-to-r from-indigo-500 to-purple-500 shadow-lg shadow-indigo-500/30'
+          : 'bg-gray-300'
+      }`}
+      whileTap={{ scale: 0.95 }}
+    >
+      <motion.div
+        className="absolute top-1 w-6 h-6 bg-white rounded-full shadow-md flex items-center justify-center"
+        animate={{ x: enabled ? 28 : 4 }}
+        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+      >
+        {enabled && (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.1 }}
+          >
+            <Sparkles className="w-3 h-3 text-indigo-500" />
+          </motion.div>
+        )}
+      </motion.div>
+    </motion.button>
+  );
 }
 
 export function NotificationSettingsScreen({ onNavigate, showToast }: NotificationSettingsScreenProps) {
@@ -87,7 +139,6 @@ export function NotificationSettingsScreen({ onNavigate, showToast }: Notificati
 
   const handleSave = async () => {
     try {
-      // Save directly to user profile in Supabase via Context
       await updateUserProfile({
         notificationSettings: settings
       });
@@ -99,198 +150,276 @@ export function NotificationSettingsScreen({ onNavigate, showToast }: Notificati
   };
 
   return (
-    <div className="min-h-screen pb-24 pt-safe bg-[var(--bg-base)]">
-      <div className="px-4 py-8 max-w-2xl mx-auto">
-        
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
-          <button
-            onClick={() => onNavigate('profile')}
-            className="w-12 h-12 rounded-2xl bg-white border-[0.5px] border-[var(--border-medium)] flex items-center justify-center hover:border-[var(--border-strong)] shadow-sm transition-all"
-          >
-            <ArrowLeft className="w-5 h-5 text-[var(--fg-primary)]" strokeWidth={2} />
-          </button>
-          <div>
-            <h1 className="text-2xl font-semibold text-[var(--fg-primary)] tracking-tight">
-              Notifications
-            </h1>
-            <p className="text-sm text-[var(--fg-tertiary)] font-medium mt-1">
-              Gérez vos rappels et alertes
-            </p>
-          </div>
-        </div>
+    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl"
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl"
+          animate={{ scale: [1, 1.15, 1] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
 
-        {/* Content */}
-        <div className="space-y-6">
+      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* Header */}
+          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
+            <motion.button
+              onClick={() => onNavigate('profile')}
+              className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
+            </motion.button>
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                Notifications
+              </h1>
+              <p className="text-sm text-gray-500 font-medium">
+                Gérez vos rappels et alertes
+              </p>
+            </div>
+            <motion.div
+              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg"
+              whileHover={{ scale: 1.05, rotate: 5 }}
+            >
+              <Bell className="w-6 h-6 text-white" strokeWidth={2} />
+            </motion.div>
+          </motion.div>
 
           {/* Web Push Status Section */}
-          {pushSupported ? (
-            <section className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-6 border border-blue-200">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${pushEnabled ? 'bg-green-100' : 'bg-gray-100'}`}>
-                    {pushEnabled ? (
-                      <Bell className="w-5 h-5 text-green-600" strokeWidth={2} />
-                    ) : (
-                      <BellOff className="w-5 h-5 text-gray-500" strokeWidth={2} />
-                    )}
+          <AnimatePresence mode="wait">
+            {pushSupported ? (
+              <motion.div
+                key="push-supported"
+                variants={itemVariants}
+                className={`rounded-2xl p-6 mb-6 border shadow-lg ${
+                  pushEnabled
+                    ? 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200/50'
+                    : 'bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200/50'
+                }`}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <motion.div
+                      className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-md ${
+                        pushEnabled
+                          ? 'bg-gradient-to-br from-emerald-500 to-teal-500'
+                          : 'bg-gradient-to-br from-indigo-500 to-purple-500'
+                      }`}
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                    >
+                      {pushEnabled ? (
+                        <Bell className="w-6 h-6 text-white" strokeWidth={2} />
+                      ) : (
+                        <BellOff className="w-6 h-6 text-white" strokeWidth={2} />
+                      )}
+                    </motion.div>
+                    <div>
+                      <h3 className="text-base font-bold text-gray-800">
+                        {pushEnabled ? 'Notifications Push Activées' : 'Notifications Push'}
+                      </h3>
+                      <p className="text-sm text-gray-500 font-medium">
+                        {checkingPush ? 'Vérification...' : pushEnabled ? 'Vous recevrez des notifications' : 'Activez pour recevoir des alertes'}
+                      </p>
+                    </div>
+                  </div>
+                  {pushEnabled && (
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="px-3 py-1 bg-emerald-500 text-white text-xs font-bold rounded-full"
+                    >
+                      Actif
+                    </motion.span>
+                  )}
+                </div>
+
+                <div className="flex gap-2">
+                  {pushEnabled ? (
+                    <>
+                      <motion.button
+                        onClick={handleTestPush}
+                        className="flex-1 py-3 rounded-xl bg-white border border-gray-200 text-gray-700 font-semibold text-sm shadow-sm hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <Bell className="w-4 h-4" />
+                        Test
+                      </motion.button>
+                      <motion.button
+                        onClick={handleDisablePush}
+                        className="flex-1 py-3 rounded-xl bg-white border border-red-200 text-red-600 font-semibold text-sm shadow-sm hover:bg-red-50 transition-all flex items-center justify-center gap-2"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <BellOff className="w-4 h-4" />
+                        Désactiver
+                      </motion.button>
+                    </>
+                  ) : (
+                    <motion.button
+                      onClick={handleEnablePush}
+                      disabled={checkingPush}
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2 disabled:opacity-50"
+                      whileHover={{ scale: 1.02, y: -1 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Bell className="w-4 h-4" />
+                      {checkingPush ? 'Vérification...' : 'Activer les Notifications Push'}
+                    </motion.button>
+                  )}
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="push-not-supported"
+                variants={itemVariants}
+                className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 mb-6 border border-amber-200/50 shadow-lg"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center flex-shrink-0">
+                    <AlertCircle className="w-5 h-5 text-white" strokeWidth={2} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-[var(--fg-primary)]">
-                      {pushEnabled ? 'Notifications Push Activées' : 'Notifications Push'}
+                    <h3 className="text-base font-bold text-amber-900 mb-1">
+                      Notifications Push non disponibles
                     </h3>
-                    <p className="text-xs text-[var(--fg-tertiary)] mt-0.5">
-                      {checkingPush ? 'Vérification...' : pushEnabled ? 'Vous recevrez des notifications' : 'Activez pour recevoir des alertes'}
+                    <p className="text-sm text-amber-700 font-medium">
+                      Votre navigateur ne supporte pas les notifications push ou elles sont désactivées dans les paramètres système.
                     </p>
                   </div>
                 </div>
-                {pushEnabled && (
-                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
-                    Actif
-                  </span>
-                )}
-              </div>
-
-              <div className="flex gap-2">
-                {pushEnabled ? (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleTestPush}
-                      className="flex-1"
-                    >
-                      <Bell className="w-4 h-4 mr-2" />
-                      Test
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleDisablePush}
-                      className="flex-1"
-                    >
-                      <BellOff className="w-4 h-4 mr-2" />
-                      Désactiver
-                    </Button>
-                  </>
-                ) : (
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={handleEnablePush}
-                    className="w-full"
-                    disabled={checkingPush}
-                  >
-                    <Bell className="w-4 h-4 mr-2" />
-                    {checkingPush ? 'Vérification...' : 'Activer les Notifications Push'}
-                  </Button>
-                )}
-              </div>
-            </section>
-          ) : (
-            <section className="bg-yellow-50 rounded-2xl p-6 border border-yellow-200">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" strokeWidth={2} />
-                <div>
-                  <h3 className="text-sm font-semibold text-yellow-900 mb-1">
-                    Notifications Push non disponibles
-                  </h3>
-                  <p className="text-xs text-yellow-700">
-                    Votre navigateur ne supporte pas les notifications push ou elles sont désactivées dans les paramètres système.
-                  </p>
-                </div>
-              </div>
-            </section>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Push Section */}
-          <section className="bg-white rounded-2xl p-6 border-[0.5px] border-[var(--border-subtle)] shadow-sm">
+          <motion.div
+            variants={itemVariants}
+            className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-white/50 shadow-lg"
+          >
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-10 h-10 rounded-full bg-[var(--primary-100)] flex items-center justify-center">
-                <Smartphone className="w-5 h-5 text-[var(--primary-600)]" strokeWidth={2} />
-              </div>
-              <h2 className="text-lg font-semibold text-[var(--fg-primary)]">Notifications Push</h2>
+              <motion.div
+                className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-md"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+              >
+                <Smartphone className="w-6 h-6 text-white" strokeWidth={2} />
+              </motion.div>
+              <h2 className="text-lg font-bold text-gray-800">Notifications Push</h2>
             </div>
 
             <div className="space-y-5">
+              {/* 24h Reminder */}
               <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-semibold text-[var(--fg-primary)]">Rappel J-1 (24h)</div>
-                  <div className="text-xs text-[var(--fg-tertiary)]">Recevoir une alerte la veille de la session</div>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-amber-600" strokeWidth={2} />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-gray-800">Rappel J-1 (24h)</div>
+                    <div className="text-xs text-gray-500 font-medium">Recevoir une alerte la veille</div>
+                  </div>
                 </div>
-                <div 
-                  onClick={() => handleToggle('pushReminder24h')}
-                  className={`w-12 h-7 rounded-full transition-colors cursor-pointer relative ${settings.pushReminder24h ? 'bg-[var(--primary-500)]' : 'bg-gray-200'}`}
-                >
-                  <div className={`w-5 h-5 bg-white rounded-full shadow-sm absolute top-1 transition-transform ${settings.pushReminder24h ? 'left-6' : 'left-1'}`} />
-                </div>
+                <PremiumToggleSwitch
+                  enabled={settings.pushReminder24h}
+                  onToggle={() => handleToggle('pushReminder24h')}
+                />
               </div>
 
+              {/* 1h Reminder */}
               <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-semibold text-[var(--fg-primary)]">Rappel H-1 (1h)</div>
-                  <div className="text-xs text-[var(--fg-tertiary)]">Dernier rappel avant le début</div>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center">
+                    <Zap className="w-5 h-5 text-red-600" strokeWidth={2} />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-gray-800">Rappel H-1 (1h)</div>
+                    <div className="text-xs text-gray-500 font-medium">Dernier rappel avant le début</div>
+                  </div>
                 </div>
-                <div 
-                  onClick={() => handleToggle('pushReminder1h')}
-                  className={`w-12 h-7 rounded-full transition-colors cursor-pointer relative ${settings.pushReminder1h ? 'bg-[var(--primary-500)]' : 'bg-gray-200'}`}
-                >
-                  <div className={`w-5 h-5 bg-white rounded-full shadow-sm absolute top-1 transition-transform ${settings.pushReminder1h ? 'left-6' : 'left-1'}`} />
-                </div>
+                <PremiumToggleSwitch
+                  enabled={settings.pushReminder1h}
+                  onToggle={() => handleToggle('pushReminder1h')}
+                />
               </div>
 
-               <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-semibold text-[var(--fg-primary)]">Smart Nudges</div>
-                  <div className="text-xs text-[var(--fg-tertiary)]">Alertes "Il manque un joueur !"</div>
+              {/* Smart Nudges */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
+                    <Users className="w-5 h-5 text-indigo-600" strokeWidth={2} />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-gray-800">Smart Nudges</div>
+                    <div className="text-xs text-gray-500 font-medium">Alertes "Il manque un joueur !"</div>
+                  </div>
                 </div>
-                <div 
-                  onClick={() => handleToggle('smartNudges')}
-                  className={`w-12 h-7 rounded-full transition-colors cursor-pointer relative ${settings.smartNudges ? 'bg-[var(--primary-500)]' : 'bg-gray-200'}`}
-                >
-                  <div className={`w-5 h-5 bg-white rounded-full shadow-sm absolute top-1 transition-transform ${settings.smartNudges ? 'left-6' : 'left-1'}`} />
-                </div>
+                <PremiumToggleSwitch
+                  enabled={settings.smartNudges}
+                  onToggle={() => handleToggle('smartNudges')}
+                />
               </div>
             </div>
-          </section>
+          </motion.div>
 
           {/* Email Section */}
-          <section className="bg-white rounded-2xl p-6 border-[0.5px] border-[var(--border-subtle)] shadow-sm">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-10 h-10 rounded-full bg-[var(--secondary-100)] flex items-center justify-center">
-                <Mail className="w-5 h-5 text-[var(--secondary-600)]" strokeWidth={2} />
-              </div>
-              <h2 className="text-lg font-semibold text-[var(--fg-primary)]">Email</h2>
-            </div>
-
-            <div className="space-y-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-semibold text-[var(--fg-primary)]">Récapitulatif Session</div>
-                  <div className="text-xs text-[var(--fg-tertiary)]">Détails envoyés 24h avant</div>
-                </div>
-                <div 
-                  onClick={() => handleToggle('emailReminder24h')}
-                  className={`w-12 h-7 rounded-full transition-colors cursor-pointer relative ${settings.emailReminder24h ? 'bg-[var(--primary-500)]' : 'bg-gray-200'}`}
-                >
-                  <div className={`w-5 h-5 bg-white rounded-full shadow-sm absolute top-1 transition-transform ${settings.emailReminder24h ? 'left-6' : 'left-1'}`} />
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <Button 
-            variant="default" 
-            onClick={handleSave}
-            className="w-full h-12 text-base font-semibold shadow-lg"
+          <motion.div
+            variants={itemVariants}
+            className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-white/50 shadow-lg"
           >
-            <Save className="w-5 h-5 mr-2" />
-            Enregistrer les préférences
-          </Button>
+            <div className="flex items-center gap-4 mb-6">
+              <motion.div
+                className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center shadow-md"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+              >
+                <Mail className="w-6 h-6 text-white" strokeWidth={2} />
+              </motion.div>
+              <h2 className="text-lg font-bold text-gray-800">Email</h2>
+            </div>
 
-        </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
+                  <Mail className="w-5 h-5 text-blue-600" strokeWidth={2} />
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-gray-800">Récapitulatif Session</div>
+                  <div className="text-xs text-gray-500 font-medium">Détails envoyés 24h avant</div>
+                </div>
+              </div>
+              <PremiumToggleSwitch
+                enabled={settings.emailReminder24h}
+                onToggle={() => handleToggle('emailReminder24h')}
+              />
+            </div>
+          </motion.div>
+
+          {/* Save Button */}
+          <motion.button
+            variants={itemVariants}
+            onClick={handleSave}
+            className="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold shadow-xl shadow-indigo-500/30 flex items-center justify-center gap-2"
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Save className="w-5 h-5" strokeWidth={2} />
+            Enregistrer les préférences
+          </motion.button>
+        </motion.div>
       </div>
     </div>
   );
 }
+
 export default NotificationSettingsScreen;

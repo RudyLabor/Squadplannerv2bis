@@ -1,9 +1,8 @@
-import { ArrowLeft, Link2, MessageSquare, Calendar, Trophy, Target, XCircle, CheckCircle2, Sparkles, ChevronRight, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ArrowLeft, Link2, MessageSquare, Calendar, Trophy, Target, XCircle, CheckCircle2, Sparkles, ChevronRight, Loader2, Zap, Shield } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { integrationsAPI, type Integrations } from '@/utils/integrationsAPI';
-import { projectId } from '@/utils/supabase/info';
 import { oauthHelper, type OAuthProvider } from '@/utils/oauth';
 
 interface IntegrationsScreenProps {
@@ -12,15 +11,104 @@ interface IntegrationsScreenProps {
   useMockData?: boolean;
 }
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
+  }
+};
+
+interface IntegrationCardProps {
+  name: string;
+  description: string;
+  icon: React.ReactNode;
+  bgColor: string;
+  connected: boolean;
+  username?: string;
+  onConnect: () => void;
+  onDisconnect: () => void;
+  isLoading: boolean;
+  index: number;
+}
+
+function IntegrationCard({ name, description, icon, bgColor, connected, username, onConnect, onDisconnect, isLoading, index }: IntegrationCardProps) {
+  return (
+    <motion.div
+      variants={itemVariants}
+      custom={index}
+      className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-lg"
+      whileHover={{ y: -2 }}
+    >
+      <div className="flex items-center gap-4">
+        <motion.div
+          className={`w-14 h-14 rounded-xl ${bgColor} flex items-center justify-center flex-shrink-0 shadow-lg`}
+          whileHover={{ rotate: 5, scale: 1.05 }}
+        >
+          {icon}
+        </motion.div>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-bold text-gray-800 mb-0.5">
+            {name}
+          </div>
+          <div className="text-xs text-gray-500 font-medium">
+            {connected
+              ? <span className="text-emerald-600">✓ Connecté{username ? ` • ${username}` : ''}</span>
+              : description}
+          </div>
+        </div>
+        {connected ? (
+          <motion.button
+            onClick={onDisconnect}
+            disabled={isLoading}
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-red-50 text-red-500 text-xs font-semibold hover:bg-red-100 transition-colors disabled:opacity-50"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
+            ) : (
+              <XCircle className="w-4 h-4" strokeWidth={2} />
+            )}
+            Déconnecter
+          </motion.button>
+        ) : (
+          <motion.button
+            onClick={onConnect}
+            disabled={isLoading}
+            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl ${bgColor} text-white text-xs font-semibold hover:opacity-90 transition-all disabled:opacity-50 shadow-md`}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
+            ) : (
+              <Link2 className="w-4 h-4" strokeWidth={2} />
+            )}
+            Connecter
+          </motion.button>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
 export function IntegrationsScreen({ onNavigate, showToast, useMockData = false }: IntegrationsScreenProps) {
   const { getAccessToken } = useAuth();
   const [integrations, setIntegrations] = useState<Integrations | null>(null);
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState<string | null>(null);
 
-  // Load integrations from backend
   useEffect(() => {
-    // If useMockData is true, use mock data instead
     if (useMockData) {
       setIntegrations({
         discord: { connected: true, username: 'GamerPro#1234' },
@@ -33,7 +121,7 @@ export function IntegrationsScreen({ onNavigate, showToast, useMockData = false 
       setLoading(false);
       return;
     }
-    
+
     loadIntegrations();
   }, [useMockData]);
 
@@ -49,8 +137,6 @@ export function IntegrationsScreen({ onNavigate, showToast, useMockData = false 
       setIntegrations(data);
     } catch (error: any) {
       console.error('Error loading integrations:', error);
-      showToast('Erreur lors du chargement des intégrations', 'error');
-      // Set defaults on error
       setIntegrations({
         discord: { connected: false, username: '' },
         googleCalendar: { connected: false, email: '' },
@@ -64,7 +150,6 @@ export function IntegrationsScreen({ onNavigate, showToast, useMockData = false 
     }
   };
 
-  // Handle integration connection
   const handleIntegrationConnect = async (platform: string, displayName: string) => {
     const accessToken = await getAccessToken();
     if (!accessToken || !integrations) return;
@@ -72,19 +157,13 @@ export function IntegrationsScreen({ onNavigate, showToast, useMockData = false 
     setConnecting(platform);
 
     try {
-      // OAuth providers that support real OAuth flow
       const oauthProviders: OAuthProvider[] = ['discord', 'google', 'twitch', 'steam', 'riot', 'battlenet'];
 
       if (oauthProviders.includes(platform as OAuthProvider)) {
         showToast(`Redirection vers ${displayName}...`, 'info');
-
-        // Use our new OAuth helper to start the flow
         oauthHelper.startFlow(platform as OAuthProvider);
-
-        // The OAuth flow will redirect the user, so no need to continue
         return;
       } else {
-        // Fallback for platforms without OAuth configured yet
         showToast(`Connexion à ${displayName} en cours...`, 'info');
         await new Promise(resolve => setTimeout(resolve, 1500));
 
@@ -105,7 +184,6 @@ export function IntegrationsScreen({ onNavigate, showToast, useMockData = false 
     }
   };
 
-  // Handle integration disconnection
   const handleIntegrationDisconnect = async (platform: string, displayName: string) => {
     const accessToken = await getAccessToken();
     if (!accessToken || !integrations) return;
@@ -128,441 +206,271 @@ export function IntegrationsScreen({ onNavigate, showToast, useMockData = false 
     }
   };
 
+  const connectedCount = integrations
+    ? Object.values(integrations).filter((i: any) => i.connected).length
+    : 0;
+
   if (loading) {
     return (
-      <div className="min-h-screen pb-24 pt-safe flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 text-[var(--primary-500)] animate-spin mx-auto mb-4" strokeWidth={2} />
-          <p className="text-sm text-[var(--fg-tertiary)] font-medium">Chargement des intégrations...</p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
+        <motion.div
+          className="text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <motion.div
+            className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center mx-auto mb-4 shadow-lg"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          >
+            <Link2 className="w-8 h-8 text-white" />
+          </motion.div>
+          <p className="text-gray-500 font-medium">Chargement des intégrations...</p>
+        </motion.div>
       </div>
     );
   }
 
   if (!integrations) {
     return (
-      <div className="min-h-screen pb-24 pt-safe flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-sm text-[var(--fg-tertiary)] font-medium">Erreur de chargement</p>
+          <p className="text-gray-500 font-medium">Erreur de chargement</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pb-24 pt-safe">
-      <div className="px-4 py-8 max-w-2xl mx-auto">
-        
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-10">
-          <button
-            onClick={() => onNavigate('profile')}
-            className="w-12 h-12 rounded-2xl bg-white border-[0.5px] border-[var(--border-medium)] flex items-center justify-center hover:border-[var(--border-strong)] shadow-sm transition-all"
-          >
-            <ArrowLeft className="w-5 h-5 text-[var(--fg-primary)]" strokeWidth={2} />
-          </button>
-          <div>
-            <h1 className="text-2xl font-semibold text-[var(--fg-primary)] tracking-tight">
-              Intégrations
-            </h1>
-            <p className="text-sm text-[var(--fg-tertiary)] font-medium mt-1">
-              Connecte tes plateformes favorites
-            </p>
-          </div>
-        </div>
+    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl"
+          animate={{ scale: [1, 1.1, 1], rotate: [0, 5, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl"
+          animate={{ scale: [1, 1.15, 1] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
 
-        {/* Gaming Platforms Section */}
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold text-[var(--fg-primary)] mb-4 tracking-tight">
-            🎮 Plateformes Gaming
-          </h2>
-          
-          <div className="space-y-3">
-            {/* Discord Integration */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl p-4 border-[0.5px] border-[var(--border-subtle)] shadow-sm"
-              whileHover={{ y: -2 }}
+      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* Header */}
+          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
+            <motion.button
+              onClick={() => onNavigate('profile')}
+              className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 flex items-center justify-center shadow-lg"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#5865F2] flex items-center justify-center flex-shrink-0">
-                  <MessageSquare className="w-6 h-6 text-white" strokeWidth={2} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-bold text-[var(--fg-primary)] mb-0.5">
-                    Discord
-                  </div>
-                  <div className="text-xs text-[var(--fg-tertiary)] font-medium">
-                    {integrations.discord.connected 
-                      ? `✓ Connecté • ${integrations.discord.username}` 
-                      : 'Synchronise tes serveurs et notifications'}
-                  </div>
-                </div>
-                {integrations.discord.connected ? (
-                  <button
-                    onClick={() => handleIntegrationDisconnect('discord', 'Discord')}
-                    disabled={connecting === 'discord'}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--error-50)] text-[var(--error-500)] text-xs font-semibold hover:bg-[var(--error-100)] transition-colors disabled:opacity-50"
-                  >
-                    {connecting === 'discord' ? (
-                      <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
-                    ) : (
-                      <XCircle className="w-4 h-4" strokeWidth={2} />
-                    )}
-                    Déconnecter
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleIntegrationConnect('discord', 'Discord')}
-                    disabled={connecting === 'discord'}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#5865F2] text-white text-xs font-semibold hover:bg-[#4752C4] transition-colors disabled:opacity-50"
-                  >
-                    {connecting === 'discord' ? (
-                      <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
-                    ) : (
-                      <Link2 className="w-4 h-4" strokeWidth={2} />
-                    )}
-                    Connecter
-                  </button>
-                )}
-              </div>
+              <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
+            </motion.button>
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                Intégrations
+              </h1>
+              <p className="text-sm text-indigo-500 font-medium mt-0.5">
+                {connectedCount} plateforme{connectedCount > 1 ? 's' : ''} connectée{connectedCount > 1 ? 's' : ''}
+              </p>
+            </div>
+            <motion.div
+              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg"
+              whileHover={{ scale: 1.05, rotate: 5 }}
+            >
+              <Link2 className="w-6 h-6 text-white" strokeWidth={2} />
             </motion.div>
+          </motion.div>
 
-            {/* Twitch Integration */}
+          {/* Stats Banner */}
+          <motion.div
+            variants={itemVariants}
+            className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-5 mb-6 shadow-xl relative overflow-hidden"
+          >
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.05 }}
-              className="bg-white rounded-2xl p-4 border-[0.5px] border-[var(--border-subtle)] shadow-sm"
-              whileHover={{ y: -2 }}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#9146FF] flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+              className="absolute top-2 right-2 w-24 h-24 bg-white/10 rounded-full blur-2xl"
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 3, repeat: Infinity }}
+            />
+            <div className="flex items-center gap-4 relative z-10">
+              <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <Zap className="w-7 h-7 text-white" />
+              </div>
+              <div className="flex-1">
+                <div className="text-white/90 text-sm font-semibold">Synchronise tes comptes</div>
+                <div className="text-white/70 text-xs mt-0.5">
+                  Connecte tes plateformes pour une expérience unifiée
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-white">{connectedCount}</div>
+                <div className="text-xs text-white/70">connectées</div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Gaming Platforms Section */}
+          <motion.div variants={itemVariants} className="mb-6">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+                <span className="text-sm">🎮</span>
+              </div>
+              <h2 className="text-lg font-bold text-gray-800">Plateformes Gaming</h2>
+            </div>
+
+            <div className="space-y-3">
+              <IntegrationCard
+                name="Discord"
+                description="Synchronise tes serveurs et notifications"
+                icon={<MessageSquare className="w-7 h-7 text-white" strokeWidth={2} />}
+                bgColor="bg-[#5865F2]"
+                connected={integrations.discord.connected}
+                username={integrations.discord.username}
+                onConnect={() => handleIntegrationConnect('discord', 'Discord')}
+                onDisconnect={() => handleIntegrationDisconnect('discord', 'Discord')}
+                isLoading={connecting === 'discord'}
+                index={0}
+              />
+
+              <IntegrationCard
+                name="Twitch"
+                description="Partage tes sessions en live"
+                icon={
+                  <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>
                   </svg>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-bold text-[var(--fg-primary)] mb-0.5">
-                    Twitch
-                  </div>
-                  <div className="text-xs text-[var(--fg-tertiary)] font-medium">
-                    {integrations.twitch.connected 
-                      ? `✓ Connecté • ${integrations.twitch.username}` 
-                      : 'Partage tes sessions en live'}
-                  </div>
-                </div>
-                {integrations.twitch.connected ? (
-                  <button
-                    onClick={() => handleIntegrationDisconnect('twitch', 'Twitch')}
-                    disabled={connecting === 'twitch'}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--error-50)] text-[var(--error-500)] text-xs font-semibold hover:bg-[var(--error-100)] transition-colors disabled:opacity-50"
-                  >
-                    {connecting === 'twitch' ? (
-                      <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
-                    ) : (
-                      <XCircle className="w-4 h-4" strokeWidth={2} />
-                    )}
-                    Déconnecter
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleIntegrationConnect('twitch', 'Twitch')}
-                    disabled={connecting === 'twitch'}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#9146FF] text-white text-xs font-semibold hover:bg-[#7D3ACF] transition-colors disabled:opacity-50"
-                  >
-                    {connecting === 'twitch' ? (
-                      <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
-                    ) : (
-                      <Link2 className="w-4 h-4" strokeWidth={2} />
-                    )}
-                    Connecter
-                  </button>
-                )}
-              </div>
-            </motion.div>
+                }
+                bgColor="bg-[#9146FF]"
+                connected={integrations.twitch.connected}
+                username={integrations.twitch.username}
+                onConnect={() => handleIntegrationConnect('twitch', 'Twitch')}
+                onDisconnect={() => handleIntegrationDisconnect('twitch', 'Twitch')}
+                isLoading={connecting === 'twitch'}
+                index={1}
+              />
 
-            {/* Steam Integration */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="bg-white rounded-2xl p-4 border-[0.5px] border-[var(--border-subtle)] shadow-sm"
-              whileHover={{ y: -2 }}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#171A21] flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25 1.297.539 2.793-.076 3.332-1.375.263-.63.264-1.319.005-1.949s-.75-1.121-1.377-1.383c-.624-.26-1.29-.249-1.878-.03l1.523.63c.956.4 1.409 1.5 1.009 2.455-.397.957-1.497 1.41-2.454 1.012H7.54zm11.415-9.303c0-1.662-1.353-3.015-3.015-3.015-1.665 0-3.015 1.353-3.015 3.015 0 1.665 1.35 3.015 3.015 3.015 1.663 0 3.015-1.35 3.015-3.015zm-5.273-.005c0-1.252 1.013-2.266 2.265-2.266 1.249 0 2.266 1.014 2.266 2.266 0 1.251-1.017 2.265-2.266 2.265-1.253 0-2.265-1.014-2.265-2.265z"/>
+              <IntegrationCard
+                name="Steam"
+                description="Importe ta bibliothèque de jeux"
+                icon={
+                  <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0z"/>
                   </svg>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-bold text-[var(--fg-primary)] mb-0.5">
-                    Steam
-                  </div>
-                  <div className="text-xs text-[var(--fg-tertiary)] font-medium">
-                    {integrations.steam.connected 
-                      ? `✓ Connecté • ${integrations.steam.username}` 
-                      : 'Importe ta bibliothèque de jeux'}
-                  </div>
-                </div>
-                {integrations.steam.connected ? (
-                  <button
-                    onClick={() => handleIntegrationDisconnect('steam', 'Steam')}
-                    disabled={connecting === 'steam'}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--error-50)] text-[var(--error-500)] text-xs font-semibold hover:bg-[var(--error-100)] transition-colors disabled:opacity-50"
-                  >
-                    {connecting === 'steam' ? (
-                      <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
-                    ) : (
-                      <XCircle className="w-4 h-4" strokeWidth={2} />
-                    )}
-                    Déconnecter
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleIntegrationConnect('steam', 'Steam')}
-                    disabled={connecting === 'steam'}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#171A21] text-white text-xs font-semibold hover:bg-[#0E1013] transition-colors disabled:opacity-50"
-                  >
-                    {connecting === 'steam' ? (
-                      <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
-                    ) : (
-                      <Link2 className="w-4 h-4" strokeWidth={2} />
-                    )}
-                    Connecter
-                  </button>
-                )}
-              </div>
-            </motion.div>
+                }
+                bgColor="bg-[#171A21]"
+                connected={integrations.steam.connected}
+                username={integrations.steam.username}
+                onConnect={() => handleIntegrationConnect('steam', 'Steam')}
+                onDisconnect={() => handleIntegrationDisconnect('steam', 'Steam')}
+                isLoading={connecting === 'steam'}
+                index={2}
+              />
 
-            {/* Riot Games Integration */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              className="bg-white rounded-2xl p-4 border-[0.5px] border-[var(--border-subtle)] shadow-sm"
-              whileHover={{ y: -2 }}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#D13639] flex items-center justify-center flex-shrink-0">
-                  <Trophy className="w-6 h-6 text-white" strokeWidth={2} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-bold text-[var(--fg-primary)] mb-0.5">
-                    Riot Games
-                  </div>
-                  <div className="text-xs text-[var(--fg-tertiary)] font-medium">
-                    {integrations.riot.connected 
-                      ? `✓ Connecté • ${integrations.riot.username}` 
-                      : 'Valorant, LoL, TFT stats'}
-                  </div>
-                </div>
-                {integrations.riot.connected ? (
-                  <button
-                    onClick={() => handleIntegrationDisconnect('riot', 'Riot Games')}
-                    disabled={connecting === 'riot'}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--error-50)] text-[var(--error-500)] text-xs font-semibold hover:bg-[var(--error-100)] transition-colors disabled:opacity-50"
-                  >
-                    {connecting === 'riot' ? (
-                      <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
-                    ) : (
-                      <XCircle className="w-4 h-4" strokeWidth={2} />
-                    )}
-                    Déconnecter
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleIntegrationConnect('riot', 'Riot Games')}
-                    disabled={connecting === 'riot'}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#D13639] text-white text-xs font-semibold hover:bg-[#B82D30] transition-colors disabled:opacity-50"
-                  >
-                    {connecting === 'riot' ? (
-                      <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
-                    ) : (
-                      <Link2 className="w-4 h-4" strokeWidth={2} />
-                    )}
-                    Connecter
-                  </button>
-                )}
-              </div>
-            </motion.div>
+              <IntegrationCard
+                name="Riot Games"
+                description="Valorant, LoL, TFT stats"
+                icon={<Trophy className="w-7 h-7 text-white" strokeWidth={2} />}
+                bgColor="bg-[#D13639]"
+                connected={integrations.riot.connected}
+                username={integrations.riot.username}
+                onConnect={() => handleIntegrationConnect('riot', 'Riot Games')}
+                onDisconnect={() => handleIntegrationDisconnect('riot', 'Riot Games')}
+                isLoading={connecting === 'riot'}
+                index={3}
+              />
 
-            {/* Battle.net Integration */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl p-4 border-[0.5px] border-[var(--border-subtle)] shadow-sm"
-              whileHover={{ y: -2 }}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#148EFF] flex items-center justify-center flex-shrink-0">
-                  <Target className="w-6 h-6 text-white" strokeWidth={2} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-bold text-[var(--fg-primary)] mb-0.5">
-                    Battle.net
-                  </div>
-                  <div className="text-xs text-[var(--fg-tertiary)] font-medium">
-                    {integrations.battlenet.connected 
-                      ? `✓ Connecté • ${integrations.battlenet.username}` 
-                      : 'Overwatch, Call of Duty, WoW'}
-                  </div>
-                </div>
-                {integrations.battlenet.connected ? (
-                  <button
-                    onClick={() => handleIntegrationDisconnect('battlenet', 'Battle.net')}
-                    disabled={connecting === 'battlenet'}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--error-50)] text-[var(--error-500)] text-xs font-semibold hover:bg-[var(--error-100)] transition-colors disabled:opacity-50"
-                  >
-                    {connecting === 'battlenet' ? (
-                      <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
-                    ) : (
-                      <XCircle className="w-4 h-4" strokeWidth={2} />
-                    )}
-                    Déconnecter
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleIntegrationConnect('battlenet', 'Battle.net')}
-                    disabled={connecting === 'battlenet'}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#148EFF] text-white text-xs font-semibold hover:bg-[#1178D6] transition-colors disabled:opacity-50"
-                  >
-                    {connecting === 'battlenet' ? (
-                      <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
-                    ) : (
-                      <Link2 className="w-4 h-4" strokeWidth={2} />
-                    )}
-                    Connecter
-                  </button>
-                )}
-              </div>
-            </motion.div>
-          </div>
-        </div>
+              <IntegrationCard
+                name="Battle.net"
+                description="Overwatch, Call of Duty, WoW"
+                icon={<Target className="w-7 h-7 text-white" strokeWidth={2} />}
+                bgColor="bg-[#148EFF]"
+                connected={integrations.battlenet.connected}
+                username={integrations.battlenet.username}
+                onConnect={() => handleIntegrationConnect('battlenet', 'Battle.net')}
+                onDisconnect={() => handleIntegrationDisconnect('battlenet', 'Battle.net')}
+                isLoading={connecting === 'battlenet'}
+                index={4}
+              />
+            </div>
+          </motion.div>
 
-        {/* Productivity Section */}
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold text-[var(--fg-primary)] mb-4 tracking-tight">
-            📅 Productivité
-          </h2>
-          
-          <div className="space-y-3">
-            {/* Google Calendar Integration */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-              className="bg-white rounded-2xl p-4 border-[0.5px] border-[var(--border-subtle)] shadow-sm"
-              whileHover={{ y: -2 }}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#4285F4] flex items-center justify-center flex-shrink-0">
-                  <Calendar className="w-6 h-6 text-white" strokeWidth={2} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-bold text-[var(--fg-primary)] mb-0.5">
-                    Google Calendar
-                  </div>
-                  <div className="text-xs text-[var(--fg-tertiary)] font-medium">
-                    {integrations.googleCalendar.connected 
-                      ? `✓ Connecté • ${integrations.googleCalendar.email || integrations.googleCalendar.username}` 
-                      : 'Synchronise tes sessions automatiquement'}
-                  </div>
-                </div>
-                {integrations.googleCalendar.connected ? (
-                  <button
-                    onClick={() => handleIntegrationDisconnect('googleCalendar', 'Google Calendar')}
-                    disabled={connecting === 'googleCalendar'}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--error-50)] text-[var(--error-500)] text-xs font-semibold hover:bg-[var(--error-100)] transition-colors disabled:opacity-50"
-                  >
-                    {connecting === 'googleCalendar' ? (
-                      <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
-                    ) : (
-                      <XCircle className="w-4 h-4" strokeWidth={2} />
-                    )}
-                    Déconnecter
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleIntegrationConnect('googleCalendar', 'Google Calendar')}
-                    disabled={connecting === 'googleCalendar'}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#4285F4] text-white text-xs font-semibold hover:bg-[#357AE8] transition-colors disabled:opacity-50"
-                  >
-                    {connecting === 'googleCalendar' ? (
-                      <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
-                    ) : (
-                      <Link2 className="w-4 h-4" strokeWidth={2} />
-                    )}
-                    Connecter
-                  </button>
-                )}
+          {/* Productivity Section */}
+          <motion.div variants={itemVariants} className="mb-6">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                <span className="text-sm">📅</span>
               </div>
-            </motion.div>
-          </div>
-        </div>
+              <h2 className="text-lg font-bold text-gray-800">Productivité</h2>
+            </div>
 
-        {/* Advanced Section */}
-        <div>
-          <h2 className="text-lg font-semibold text-[var(--fg-primary)] mb-4 tracking-tight">
-            ⚡ Avancé
-          </h2>
-          
-          <div className="space-y-3">
-            {/* API & Webhooks */}
-            <motion.button
-              onClick={() => onNavigate('api-docs')}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="w-full bg-white rounded-2xl p-4 flex items-center gap-4 text-left border-[0.5px] border-[var(--border-subtle)] shadow-sm hover:shadow-md transition-all duration-200"
-              whileHover={{ y: -2 }}
-            >
-              <div className="w-12 h-12 rounded-xl bg-[var(--primary-50)] flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-[var(--primary-500)]" strokeWidth={2} />
-              </div>
-              <div className="flex-1">
-                <div className="text-sm font-bold text-[var(--fg-primary)] mb-0.5">
-                  API & Webhooks
-                </div>
-                <div className="text-xs text-[var(--fg-tertiary)] font-medium">
-                  Documentation développeur & accès API
-                </div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-[var(--fg-tertiary)]" strokeWidth={2} />
-            </motion.button>
+            <IntegrationCard
+              name="Google Calendar"
+              description="Synchronise tes sessions automatiquement"
+              icon={<Calendar className="w-7 h-7 text-white" strokeWidth={2} />}
+              bgColor="bg-[#4285F4]"
+              connected={integrations.googleCalendar.connected}
+              username={integrations.googleCalendar.email || integrations.googleCalendar.username}
+              onConnect={() => handleIntegrationConnect('google', 'Google Calendar')}
+              onDisconnect={() => handleIntegrationDisconnect('googleCalendar', 'Google Calendar')}
+              isLoading={connecting === 'google' || connecting === 'googleCalendar'}
+              index={5}
+            />
+          </motion.div>
 
-            {/* Plugins */}
-            <motion.button
-              onClick={() => onNavigate('plugins')}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35 }}
-              className="w-full bg-white rounded-2xl p-4 flex items-center gap-4 text-left border-[0.5px] border-[var(--border-subtle)] shadow-sm hover:shadow-md transition-all duration-200"
-              whileHover={{ y: -2 }}
-            >
-              <div className="w-12 h-12 rounded-xl bg-[var(--secondary-50)] flex items-center justify-center">
-                <svg className="w-6 h-6 text-[var(--secondary-500)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
-                </svg>
+          {/* Advanced Section */}
+          <motion.div variants={itemVariants}>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+                <span className="text-sm">⚡</span>
               </div>
-              <div className="flex-1">
-                <div className="text-sm font-bold text-[var(--fg-primary)] mb-0.5">
-                  Plugins & Extensions
-                </div>
-                <div className="text-xs text-[var(--fg-tertiary)] font-medium">
-                  Étends les fonctionnalités de l'app
-                </div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-[var(--fg-tertiary)]" strokeWidth={2} />
-            </motion.button>
-          </div>
-        </div>
+              <h2 className="text-lg font-bold text-gray-800">Avancé</h2>
+            </div>
 
+            <div className="space-y-3">
+              <motion.button
+                onClick={() => onNavigate('api-docs')}
+                className="w-full bg-white/80 backdrop-blur-sm rounded-2xl p-4 flex items-center gap-4 text-left border border-white/50 shadow-lg"
+                whileHover={{ scale: 1.01, y: -2 }}
+                whileTap={{ scale: 0.99 }}
+              >
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg">
+                  <Sparkles className="w-7 h-7 text-white" strokeWidth={2} />
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-bold text-gray-800 mb-0.5">API & Webhooks</div>
+                  <div className="text-xs text-gray-500 font-medium">Documentation développeur & accès API</div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-gray-400" strokeWidth={2} />
+              </motion.button>
+
+              <motion.button
+                onClick={() => onNavigate('plugins')}
+                className="w-full bg-white/80 backdrop-blur-sm rounded-2xl p-4 flex items-center gap-4 text-left border border-white/50 shadow-lg"
+                whileHover={{ scale: 1.01, y: -2 }}
+                whileTap={{ scale: 0.99 }}
+              >
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg">
+                  <Shield className="w-7 h-7 text-white" strokeWidth={2} />
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-bold text-gray-800 mb-0.5">Plugins & Extensions</div>
+                  <div className="text-xs text-gray-500 font-medium">Étends les fonctionnalités de l'app</div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-gray-400" strokeWidth={2} />
+              </motion.button>
+            </div>
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   );
 }
+
 export default IntegrationsScreen;
