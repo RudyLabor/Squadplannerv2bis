@@ -138,16 +138,8 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
     <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-[#5865F2]/30 to-[#7289DA]/30 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.15, 1] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
+        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-[#5865F2]/30 to-[#7289DA]/30 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl" />
       </div>
 
       <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
@@ -239,17 +231,9 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
             variants={itemVariants}
             className="bg-[#5865F2] rounded-3xl p-8 text-center text-white mb-6 shadow-2xl shadow-[#5865F2]/30 relative overflow-hidden"
           >
-            {/* Animated background circles */}
-            <motion.div
-              className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"
-              animate={{ scale: [1, 1.2, 1], x: [0, 20, 0] }}
-              transition={{ duration: 6, repeat: Infinity }}
-            />
-            <motion.div
-              className="absolute bottom-0 left-0 w-40 h-40 bg-white/10 rounded-full blur-2xl"
-              animate={{ scale: [1, 1.3, 1], y: [0, -20, 0] }}
-              transition={{ duration: 8, repeat: Infinity }}
-            />
+            {/* Static background circles */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
 
             <div className="relative">
               <motion.div

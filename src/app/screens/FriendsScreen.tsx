@@ -3,9 +3,10 @@
  * Framer Motion + Glassmorphism + Gradients
  */
 
-import { ArrowLeft, UserPlus, Users, Clock, Check, X, Search, MoreVertical, Sparkles } from 'lucide-react';
+import { ArrowLeft, UserPlus, Users, Clock, Check, X, Search, MoreVertical } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
+import { Card, Badge } from '@/design-system';
 
 interface FriendsScreenProps {
   onNavigate: (screen: string) => void;
@@ -71,19 +72,19 @@ export function FriendsScreen({ onNavigate, showToast }: FriendsScreenProps) {
   ];
 
   const handleAcceptInvite = (inviteId: string) => {
-    showToast('Invitation acceptée !', 'success');
+    showToast('Invitation acceptee !', 'success');
   };
 
   const handleRejectInvite = (inviteId: string) => {
-    showToast('Invitation refusée', 'info');
+    showToast('Invitation refusee', 'info');
   };
 
   const handleSendInvite = (friendId: string) => {
-    showToast('Invitation envoyée !', 'success');
+    showToast('Invitation envoyee !', 'success');
   };
 
   const handleRemoveFriend = (friendId: string) => {
-    showToast('Ami retiré', 'info');
+    showToast('Ami retire', 'info');
   };
 
   const tabs: { key: FriendTab; label: string; count: number }[] = [
@@ -95,19 +96,16 @@ export function FriendsScreen({ onNavigate, showToast }: FriendsScreenProps) {
   const onlineCount = friends.filter(f => f.isOnline).length;
 
   return (
-    <div className="min-h-screen pb-24 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
+    <motion.div
+      initial={{ opacity: 0, y: 15, filter: "blur(5px)" }}
+      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      transition={{ duration: 0.35 }}
+      className="min-h-screen pb-24 bg-[var(--bg-base)] relative overflow-hidden"
+    >
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.15, 1] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
+        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-[var(--color-primary-400)]/20 to-purple-400/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl" />
       </div>
 
       <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
@@ -120,23 +118,23 @@ export function FriendsScreen({ onNavigate, showToast }: FriendsScreenProps) {
           <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
             <motion.button
               onClick={() => onNavigate('profile')}
-              className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+              className="w-12 h-12 rounded-2xl bg-[var(--bg-elevated)] backdrop-blur-sm border border-[var(--border-subtle)] flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
+              <ArrowLeft className="w-5 h-5 text-[var(--fg-secondary)]" strokeWidth={2} />
             </motion.button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-[var(--color-primary-600)] to-purple-600 bg-clip-text text-transparent">
                 Mes Amis
               </h1>
-              <p className="text-sm text-gray-500 mt-0.5 font-medium">
-                {friends.length} amis · <span className="text-emerald-500">{onlineCount} en ligne</span>
+              <p className="text-sm text-[var(--fg-secondary)] mt-0.5 font-medium">
+                {friends.length} amis · <span className="text-[var(--color-success-500)]">{onlineCount} en ligne</span>
               </p>
             </div>
             <motion.button
               onClick={() => showToast('Recherche d\'amis', 'info')}
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30"
+              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--color-primary-500)] to-purple-600 text-white flex items-center justify-center shadow-lg shadow-[var(--color-primary-500)]/30"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -147,13 +145,13 @@ export function FriendsScreen({ onNavigate, showToast }: FriendsScreenProps) {
           {/* Search Bar */}
           <motion.div variants={itemVariants} className="mb-6">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" strokeWidth={2} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--fg-tertiary)]" strokeWidth={2} />
               <input
                 type="text"
                 placeholder="Rechercher un ami..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-14 pl-12 pr-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 shadow-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                className="w-full h-14 pl-12 pr-4 rounded-2xl bg-[var(--bg-elevated)] backdrop-blur-sm border border-[var(--border-subtle)] shadow-lg text-sm text-[var(--fg-primary)] placeholder-[var(--fg-tertiary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]/50 transition-all"
               />
             </div>
           </motion.div>
@@ -166,21 +164,21 @@ export function FriendsScreen({ onNavigate, showToast }: FriendsScreenProps) {
                 onClick={() => setActiveTab(tab.key)}
                 className={`px-5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all flex items-center gap-2 ${
                   activeTab === tab.key
-                    ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg shadow-indigo-500/30'
-                    : 'bg-white/80 backdrop-blur-sm text-gray-600 border border-white/50'
+                    ? 'bg-gradient-to-r from-[var(--color-primary-500)] to-purple-500 text-white shadow-lg shadow-[var(--color-primary-500)]/30'
+                    : 'bg-[var(--bg-elevated)] backdrop-blur-sm text-[var(--fg-secondary)] border border-[var(--border-subtle)]'
                 }`}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 {tab.label}
                 {tab.count > 0 && (
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                    activeTab === tab.key
-                      ? 'bg-white/20'
-                      : 'bg-indigo-100 text-indigo-600'
-                  }`}>
+                  <Badge
+                    variant={activeTab === tab.key ? "default" : "primary"}
+                    size="sm"
+                    className={activeTab === tab.key ? 'bg-white/20 text-white' : ''}
+                  >
                     {tab.count}
-                  </span>
+                  </Badge>
                 )}
               </motion.button>
             ))}
@@ -203,64 +201,65 @@ export function FriendsScreen({ onNavigate, showToast }: FriendsScreenProps) {
                     key={friend.id}
                     variants={itemVariants}
                     custom={index}
-                    className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-md hover:shadow-lg transition-all"
-                    whileHover={{ scale: 1.01, x: 4 }}
+                    whileHover={{ scale: 1.02 }}
                   >
-                    <div className="flex items-center gap-4">
-                      {/* Avatar */}
-                      <div className="relative flex-shrink-0">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                          {friend.name[0]}
-                        </div>
-                        {friend.isOnline && (
-                          <motion.div
-                            className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white"
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                          />
-                        )}
-                      </div>
-
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-gray-800 mb-1">
-                          {friend.name}
-                        </div>
-                        <div className="flex items-center gap-3 text-xs">
-                          {friend.isOnline ? (
-                            <span className="text-emerald-500 font-semibold">En ligne</span>
-                          ) : (
-                            <span className="text-gray-500 font-medium">{friend.lastSeen}</span>
+                    <Card className="p-4 hover:shadow-lg transition-all" interactive>
+                      <div className="flex items-center gap-4">
+                        {/* Avatar */}
+                        <div className="relative flex-shrink-0">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-primary-500)] to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                            {friend.name[0]}
+                          </div>
+                          {friend.isOnline && (
+                            <motion.div
+                              className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-[var(--color-success-500)] rounded-full border-2 border-[var(--bg-elevated)]"
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                            />
                           )}
-                          <span className="text-gray-400">•</span>
-                          <span className="text-gray-500 font-medium">
-                            {friend.commonSquads} squad{friend.commonSquads > 1 ? 's' : ''}
-                          </span>
                         </div>
-                      </div>
 
-                      {/* Score & Actions */}
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        <div className="text-right">
-                          <div className={`text-sm font-bold ${
-                            friend.reliabilityScore >= 90 ? 'text-emerald-500' :
-                            friend.reliabilityScore >= 75 ? 'text-indigo-500' :
-                            'text-gray-500'
-                          }`}>
-                            {friend.reliabilityScore}%
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-semibold tracking-tight text-[var(--fg-primary)] mb-1">
+                            {friend.name}
                           </div>
-                          <div className="text-[10px] text-gray-400 font-medium">
-                            fiabilité
+                          <div className="flex items-center gap-3 text-sm">
+                            {friend.isOnline ? (
+                              <span className="text-[var(--color-success-500)] font-semibold">En ligne</span>
+                            ) : (
+                              <span className="text-[var(--fg-secondary)] font-medium">{friend.lastSeen}</span>
+                            )}
+                            <span className="text-[var(--fg-tertiary)]">•</span>
+                            <span className="text-[var(--fg-secondary)] font-medium">
+                              {friend.commonSquads} squad{friend.commonSquads > 1 ? 's' : ''}
+                            </span>
                           </div>
                         </div>
-                        <button
-                          onClick={() => handleRemoveFriend(friend.id)}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all"
-                        >
-                          <MoreVertical className="w-4 h-4" strokeWidth={2} />
-                        </button>
+
+                        {/* Score & Actions */}
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          <div className="text-right">
+                            <div className={`text-sm font-bold ${
+                              friend.reliabilityScore >= 90 ? 'text-[var(--color-success-500)]' :
+                              friend.reliabilityScore >= 75 ? 'text-[var(--color-primary-500)]' :
+                              'text-[var(--fg-secondary)]'
+                            }`}>
+                              {friend.reliabilityScore}%
+                            </div>
+                            <div className="text-sm text-[var(--fg-tertiary)] font-medium">
+                              fiabilite
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleRemoveFriend(friend.id)}
+                            className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--fg-tertiary)] hover:bg-[var(--color-error-50)] hover:text-[var(--color-error-500)] transition-all"
+                          >
+                            <MoreVertical className="w-4 h-4" strokeWidth={2} />
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    </Card>
                   </motion.div>
                 ))}
               </motion.div>
@@ -281,50 +280,52 @@ export function FriendsScreen({ onNavigate, showToast }: FriendsScreenProps) {
                     key={invite.id}
                     variants={itemVariants}
                     custom={index}
-                    className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-md"
+                    whileHover={{ scale: 1.02 }}
                   >
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-md flex-shrink-0">
-                        {invite.name[0]}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-gray-800 mb-1">
-                          {invite.name}
+                    <Card className="p-4">
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-primary-500)] to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-md flex-shrink-0">
+                          {invite.name[0]}
                         </div>
-                        <div className="text-xs text-gray-500 font-medium">
-                          {invite.mutualFriends} ami{invite.mutualFriends > 1 ? 's' : ''} en commun · {invite.sentAt}
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-semibold tracking-tight text-[var(--fg-primary)] mb-1">
+                            {invite.name}
+                          </div>
+                          <div className="text-sm text-[var(--fg-secondary)] font-medium">
+                            {invite.mutualFriends} ami{invite.mutualFriends > 1 ? 's' : ''} en commun · {invite.sentAt}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <motion.button
-                        onClick={() => handleAcceptInvite(invite.id)}
-                        className="flex-1 h-11 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-md"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <Check className="w-4 h-4" strokeWidth={2.5} />
-                        Accepter
-                      </motion.button>
-                      <motion.button
-                        onClick={() => handleRejectInvite(invite.id)}
-                        className="flex-1 h-11 rounded-xl bg-white border border-gray-200 text-gray-600 font-semibold text-sm flex items-center justify-center gap-2"
-                        whileHover={{ scale: 1.02, borderColor: '#ef4444', color: '#ef4444' }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <X className="w-4 h-4" strokeWidth={2.5} />
-                        Refuser
-                      </motion.button>
-                    </div>
+                      <div className="flex gap-2">
+                        <motion.button
+                          onClick={() => handleAcceptInvite(invite.id)}
+                          className="flex-1 h-11 rounded-xl bg-gradient-to-r from-[var(--color-success-500)] to-teal-500 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-md"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <Check className="w-4 h-4" strokeWidth={2.5} />
+                          Accepter
+                        </motion.button>
+                        <motion.button
+                          onClick={() => handleRejectInvite(invite.id)}
+                          className="flex-1 h-11 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--fg-secondary)] font-semibold text-sm flex items-center justify-center gap-2"
+                          whileHover={{ scale: 1.02, borderColor: 'var(--color-error-500)', color: 'var(--color-error-500)' }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <X className="w-4 h-4" strokeWidth={2.5} />
+                          Refuser
+                        </motion.button>
+                      </div>
+                    </Card>
                   </motion.div>
                 ))}
 
                 {pendingInvites.length === 0 && (
                   <motion.div variants={itemVariants} className="text-center py-12">
-                    <div className="w-16 h-16 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 shadow-md flex items-center justify-center mx-auto mb-4">
-                      <Clock className="w-8 h-8 text-gray-300" />
+                    <div className="w-16 h-16 rounded-2xl bg-[var(--bg-elevated)] backdrop-blur-sm border border-[var(--border-subtle)] shadow-md flex items-center justify-center mx-auto mb-4">
+                      <Clock className="w-8 h-8 text-[var(--fg-tertiary)]" />
                     </div>
-                    <p className="text-gray-500 font-medium">Aucune invitation en attente</p>
+                    <p className="text-sm text-[var(--fg-secondary)] font-medium">Aucune invitation en attente</p>
                   </motion.div>
                 )}
               </motion.div>
@@ -345,37 +346,39 @@ export function FriendsScreen({ onNavigate, showToast }: FriendsScreenProps) {
                     key={suggestion.id}
                     variants={itemVariants}
                     custom={index}
-                    className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-md"
+                    whileHover={{ scale: 1.02 }}
                   >
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-md flex-shrink-0">
-                        {suggestion.name[0]}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-gray-800 mb-1">
-                          {suggestion.name}
+                    <Card className="p-4">
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-primary-500)] to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-md flex-shrink-0">
+                          {suggestion.name[0]}
                         </div>
-                        <div className="text-xs text-gray-500 font-medium">
-                          {suggestion.commonSquads} squad{suggestion.commonSquads > 1 ? 's' : ''} en commun
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-semibold tracking-tight text-[var(--fg-primary)] mb-1">
+                            {suggestion.name}
+                          </div>
+                          <div className="text-sm text-[var(--fg-secondary)] font-medium">
+                            {suggestion.commonSquads} squad{suggestion.commonSquads > 1 ? 's' : ''} en commun
+                          </div>
+                        </div>
+                        <div className={`text-sm font-bold ${
+                          suggestion.reliabilityScore >= 90 ? 'text-[var(--color-success-500)]' :
+                          suggestion.reliabilityScore >= 75 ? 'text-[var(--color-primary-500)]' :
+                          'text-[var(--fg-secondary)]'
+                        }`}>
+                          {suggestion.reliabilityScore}%
                         </div>
                       </div>
-                      <div className={`text-sm font-bold ${
-                        suggestion.reliabilityScore >= 90 ? 'text-emerald-500' :
-                        suggestion.reliabilityScore >= 75 ? 'text-indigo-500' :
-                        'text-gray-500'
-                      }`}>
-                        {suggestion.reliabilityScore}%
-                      </div>
-                    </div>
-                    <motion.button
-                      onClick={() => handleSendInvite(suggestion.id)}
-                      className="w-full h-11 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-md shadow-indigo-500/20"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <UserPlus className="w-4 h-4" strokeWidth={2} />
-                      Ajouter en ami
-                    </motion.button>
+                      <motion.button
+                        onClick={() => handleSendInvite(suggestion.id)}
+                        className="w-full h-11 rounded-xl bg-gradient-to-r from-[var(--color-primary-500)] to-purple-600 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-md shadow-[var(--color-primary-500)]/20"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <UserPlus className="w-4 h-4" strokeWidth={2} />
+                        Ajouter en ami
+                      </motion.button>
+                    </Card>
                   </motion.div>
                 ))}
               </motion.div>
@@ -383,7 +386,7 @@ export function FriendsScreen({ onNavigate, showToast }: FriendsScreenProps) {
           </AnimatePresence>
         </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

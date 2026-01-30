@@ -1,6 +1,14 @@
-import { useState } from "react";
+/**
+ * CREATE SQUAD SCREEN - LINEAR DESIGN SYSTEM
+ * Premium, Dark, Minimal - Squad creation flow
+ *
+ * SYSTÈME UNIFIÉ: La liste GAMES est la source de vérité unique
+ * utilisée dans toute l'app (création squad, sessions, filtres, stats)
+ */
+
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Gamepad2, Users, Sparkles, Check, Clock, Calendar } from "lucide-react";
+import { ArrowLeft, Gamepad2, Users, Check, Clock, Calendar, X, Search, Star, Sparkles } from "lucide-react";
 import { useSquads } from "@/app/contexts/SquadsContext";
 
 interface CreateSquadScreenProps {
@@ -8,15 +16,34 @@ interface CreateSquadScreenProps {
   showToast: (message: string, type?: "success" | "error" | "info") => void;
 }
 
-const GAMES = [
-  { id: "valorant", name: "Valorant", icon: "🎯", color: "from-red-500 to-rose-600" },
-  { id: "lol", name: "League of Legends", icon: "⚔️", color: "from-blue-500 to-indigo-600" },
-  { id: "cs2", name: "CS2", icon: "🔫", color: "from-orange-500 to-amber-600" },
-  { id: "apex", name: "Apex Legends", icon: "🦊", color: "from-red-500 to-orange-600" },
-  { id: "overwatch", name: "Overwatch 2", icon: "🎮", color: "from-orange-400 to-yellow-500" },
-  { id: "fortnite", name: "Fortnite", icon: "🏗️", color: "from-purple-500 to-pink-600" },
-  { id: "rocket-league", name: "Rocket League", icon: "🚀", color: "from-blue-400 to-cyan-500" },
-  { id: "other", name: "Autre", icon: "🎲", color: "from-gray-500 to-slate-600" },
+/**
+ * SOURCE DE VÉRITÉ UNIQUE - LISTE DES JEUX
+ * À importer depuis un fichier partagé dans une version production
+ * Ne JAMAIS dupliquer cette liste ailleurs dans l'app
+ */
+export const GAMES = [
+  // Populaires 2026
+  { id: "valorant", name: "Valorant", icon: "🎯", popular: true, recent: true },
+  { id: "lol", name: "League of Legends", icon: "⚔️", popular: true, recent: false },
+  { id: "fortnite", name: "Fortnite", icon: "🏗️", popular: true, recent: true },
+  { id: "cod-warzone", name: "Call of Duty: Warzone", icon: "🪖", popular: true, recent: true },
+  { id: "cs2", name: "CS2", icon: "🔫", popular: true, recent: true },
+  { id: "apex", name: "Apex Legends", icon: "🦊", popular: true, recent: false },
+  { id: "rocket-league", name: "Rocket League", icon: "🚀", popular: true, recent: false },
+  { id: "gta-online", name: "GTA Online", icon: "🚗", popular: true, recent: false },
+  { id: "fc25", name: "EA Sports FC 25", icon: "⚽", popular: true, recent: true },
+  { id: "nba2k25", name: "NBA 2K25", icon: "🏀", popular: false, recent: true },
+  { id: "minecraft", name: "Minecraft", icon: "⛏️", popular: true, recent: false },
+  { id: "overwatch", name: "Overwatch 2", icon: "🎮", popular: true, recent: false },
+  { id: "r6", name: "Rainbow Six Siege", icon: "🛡️", popular: true, recent: false },
+  { id: "dota2", name: "Dota 2", icon: "🗡️", popular: true, recent: false },
+  // Autres jeux
+  { id: "destiny2", name: "Destiny 2", icon: "🌌", popular: false, recent: false },
+  { id: "pubg", name: "PUBG", icon: "🪂", popular: false, recent: false },
+  { id: "warframe", name: "Warframe", icon: "⚙️", popular: false, recent: false },
+  { id: "elden-ring", name: "Elden Ring", icon: "🗡️", popular: false, recent: false },
+  { id: "diablo4", name: "Diablo IV", icon: "😈", popular: false, recent: true },
+  { id: "other", name: "Autre jeu", icon: "🎲", popular: false, recent: false },
 ];
 
 const DAYS = [
@@ -30,41 +57,27 @@ const DAYS = [
 ];
 
 const DURATIONS = [
-  { value: "1h", label: "1h", desc: "Quick game" },
-  { value: "2h", label: "2h", desc: "Classique" },
-  { value: "3h", label: "3h", desc: "Session longue" },
+  { value: "1h", label: "1h", desc: "Quick" },
+  { value: "2h", label: "2h", desc: "Standard", default: true },
+  { value: "3h", label: "3h", desc: "Long" },
   { value: "4h", label: "4h+", desc: "Marathon" },
 ];
 
-// Animation variants
+// Linear-style animations
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 }
+    transition: { staggerChildren: 0.06, delayChildren: 0.1 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
-  }
-};
-
-const modalVariants = {
-  hidden: { opacity: 0, y: 100 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 30 }
-  },
-  exit: {
-    opacity: 0,
-    y: 100,
-    transition: { duration: 0.2 }
+    transition: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }
   }
 };
 
@@ -75,7 +88,23 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [duration, setDuration] = useState("2h");
   const [showGamePicker, setShowGamePicker] = useState(false);
+  const [gameSearch, setGameSearch] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+
+  // Filtrer les jeux par recherche
+  const filteredGames = useMemo(() => {
+    if (!gameSearch.trim()) return GAMES;
+    const search = gameSearch.toLowerCase();
+    return GAMES.filter(game =>
+      game.name.toLowerCase().includes(search)
+    );
+  }, [gameSearch]);
+
+  // Séparer populaires et autres
+  const popularGames = useMemo(() =>
+    filteredGames.filter(g => g.popular), [filteredGames]);
+  const otherGames = useMemo(() =>
+    filteredGames.filter(g => !g.popular), [filteredGames]);
 
   const toggleDay = (day: string) => {
     setSelectedDays((prev) =>
@@ -100,7 +129,7 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
         name: name.trim(),
         game: game?.name || selectedGame,
       });
-      showToast("Squad créée avec succès !", "success");
+      showToast("Squad créée avec succès", "success");
       onNavigate("squads");
     } catch (error) {
       showToast("Erreur lors de la création", "error");
@@ -110,279 +139,242 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
   };
 
   const selectedGameData = GAMES.find((g) => g.id === selectedGame);
-  const progress = [name.trim(), selectedGame].filter(Boolean).length;
+  const isValid = name.trim().length >= 2 && selectedGame;
+  const requiredFieldsCount = (name.trim().length >= 2 ? 1 : 0) + (selectedGame ? 1 : 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50/30 pb-32">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-amber-400/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 -left-20 w-60 h-60 bg-orange-400/10 rounded-full blur-3xl" />
-      </div>
+    <div className="min-h-screen bg-[#0e0f11] pb-32">
+      {/* Subtle background gradient */}
+      <div className="fixed inset-0 bg-gradient-to-b from-[#5e6ad2]/[0.02] via-transparent to-transparent pointer-events-none" />
 
       <motion.div
-        className="relative px-4 py-6"
+        className="px-4 py-6 max-w-lg mx-auto relative"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        {/* Header with glassmorphism */}
-        <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
+        {/* Header */}
+        <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
             onClick={() => onNavigate("squads")}
-            className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 shadow-lg shadow-black/5 flex items-center justify-center group transition-all hover:shadow-xl"
+            className="w-10 h-10 rounded-xl bg-[#141518] border border-[#1e2024] flex items-center justify-center text-[#8b8d93] hover:text-[#ececed] hover:bg-[#1a1b1f] transition-all"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <ArrowLeft className="w-5 h-5 text-gray-600 group-hover:text-gray-900 transition-colors" />
+            <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
           </motion.button>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">
-              Créer une Squad
+            <h1 className="text-[20px] font-semibold text-[#ececed] tracking-tight">
+              Nouvelle Squad
             </h1>
-            <p className="text-sm text-gray-500 mt-0.5">
-              Rassemble ton équipe de choc
+            <p className="text-[13px] text-[#6f7177] mt-0.5">
+              Crée ton équipe
             </p>
           </div>
-          <motion.div
-            className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-amber-100/80 backdrop-blur-sm"
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <Sparkles className="w-4 h-4 text-amber-600" />
-            <span className="text-xs font-semibold text-amber-700">{progress}/2</span>
-          </motion.div>
         </motion.div>
 
-        {/* Progress bar */}
+        {/* Progress indicator - compact */}
         <motion.div variants={itemVariants} className="mb-8">
-          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-1.5">
+              <div className={`w-2 h-2 rounded-full transition-colors duration-200 ${name.trim().length >= 2 ? 'bg-[#4ade80]' : 'bg-[#26282d]'}`} />
+              <div className={`w-2 h-2 rounded-full transition-colors duration-200 ${selectedGame ? 'bg-[#4ade80]' : 'bg-[#26282d]'}`} />
+            </div>
+            <span className="text-[12px] text-[#6f7177] ml-auto">
+              {isValid ? (
+                <span className="text-[#4ade80]">Prêt à créer</span>
+              ) : (
+                `${2 - requiredFieldsCount} champ${2 - requiredFieldsCount > 1 ? 's' : ''} requis`
+              )}
+            </span>
+          </div>
+          <div className="h-1 bg-[#1e2024] rounded-full overflow-hidden">
             <motion.div
-              className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full"
+              className="h-full bg-gradient-to-r from-[#5e6ad2] to-[#4ade80] rounded-full"
               initial={{ width: 0 }}
-              animate={{ width: `${(progress / 2) * 100}%` }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              animate={{ width: `${requiredFieldsCount * 50}%` }}
+              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
             />
           </div>
         </motion.div>
 
-        {/* Squad Name - Hero input */}
-        <motion.div variants={itemVariants} className="mb-8">
-          <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
-            <Users className="w-4 h-4" />
+        {/* Squad Name */}
+        <motion.div variants={itemVariants} className="mb-6">
+          <label className="flex items-center gap-2 text-[12px] font-medium text-[#8b8d93] mb-3 uppercase tracking-wide">
+            <Users className="w-4 h-4" strokeWidth={1.5} />
             Nom de la Squad
           </label>
           <div className="relative">
-            <motion.input
+            <input
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Les Légendes"
-              maxLength={30}
-              className="w-full h-16 px-5 bg-white/80 backdrop-blur-sm rounded-2xl border-2 border-transparent text-xl font-semibold text-gray-900 placeholder:text-gray-300 focus:outline-none focus:border-amber-400 shadow-lg shadow-black/5 transition-all"
-              whileFocus={{ scale: 1.01 }}
+              onChange={(e) => setName(e.target.value.slice(0, 30))}
+              placeholder="Ex : Les Légendes"
+              className="w-full h-14 px-4 bg-[#111214] border border-[#1e2024] rounded-xl text-[16px] font-medium text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6ad2] focus:bg-[#141518] focus:outline-none transition-all duration-150"
             />
             <AnimatePresence>
-              {name.trim() && (
+              {name.trim().length >= 2 && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0 }}
+                  initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0 }}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center"
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#4ade80] rounded-full flex items-center justify-center"
                 >
-                  <Check className="w-5 h-5 text-white" />
+                  <Check className="w-4 h-4 text-[#0e0f11]" strokeWidth={2} />
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
           <div className="flex justify-between mt-2 px-1">
-            <p className="text-xs text-gray-400">Choisis un nom mémorable</p>
-            <p className={`text-xs font-medium ${name.length > 25 ? 'text-amber-500' : 'text-gray-400'}`}>
+            <span className="text-[11px] text-[#4a4b50]">Un nom mémorable</span>
+            <span className={`text-[11px] transition-colors ${name.length > 25 ? 'text-[#f5a623]' : 'text-[#4a4b50]'}`}>
               {name.length}/30
-            </p>
+            </span>
           </div>
         </motion.div>
 
-        {/* Game Picker - Interactive card */}
-        <motion.div variants={itemVariants} className="mb-8">
-          <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
-            <Gamepad2 className="w-4 h-4" />
+        {/* Game Picker Button */}
+        <motion.div variants={itemVariants} className="mb-6">
+          <label className="flex items-center gap-2 text-[12px] font-medium text-[#8b8d93] mb-3 uppercase tracking-wide">
+            <Gamepad2 className="w-4 h-4" strokeWidth={1.5} />
             Jeu Principal
           </label>
           <motion.button
             onClick={() => setShowGamePicker(true)}
-            className={`w-full h-28 rounded-2xl flex items-center justify-center overflow-hidden transition-all shadow-lg ${
+            className={`w-full h-20 rounded-xl flex items-center px-5 transition-all duration-150 ${
               selectedGameData
-                ? `bg-gradient-to-br ${selectedGameData.color} shadow-lg`
-                : 'bg-white/80 backdrop-blur-sm border-2 border-dashed border-gray-200 hover:border-amber-300'
+                ? 'bg-[#141518] border border-[#5e6ad2]'
+                : 'bg-[#111214] border border-[#1e2024] border-dashed hover:border-[#26282d] hover:bg-[#131416]'
             }`}
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
           >
             {selectedGameData ? (
-              <div className="flex flex-col items-center text-white">
-                <motion.span
-                  className="text-5xl mb-2"
-                  animate={{ rotate: [0, -5, 5, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                >
-                  {selectedGameData.icon}
-                </motion.span>
-                <span className="text-lg font-bold tracking-wide">
-                  {selectedGameData.name}
-                </span>
-                <span className="text-xs text-white/70 mt-1">Tap pour changer</span>
+              <div className="flex items-center gap-4 w-full">
+                <span className="text-4xl">{selectedGameData.icon}</span>
+                <div className="flex-1 text-left">
+                  <span className="text-[15px] font-medium text-[#ececed] block">
+                    {selectedGameData.name}
+                  </span>
+                  <span className="text-[12px] text-[#6f7177]">Cliquer pour changer</span>
+                </div>
+                <Check className="w-5 h-5 text-[#5e6ad2]" strokeWidth={2} />
               </div>
             ) : (
-              <div className="flex flex-col items-center">
-                <motion.div
-                  animate={{ y: [0, -4, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <Gamepad2 className="w-10 h-10 text-gray-300 mb-2" />
-                </motion.div>
-                <span className="text-gray-500 font-medium">Choisir un jeu</span>
-                <span className="text-xs text-gray-400 mt-1">8 jeux disponibles</span>
+              <div className="flex items-center gap-4 w-full">
+                <div className="w-12 h-12 rounded-xl bg-[#1e2024] flex items-center justify-center">
+                  <Gamepad2 className="w-6 h-6 text-[#4a4b50]" strokeWidth={1.5} />
+                </div>
+                <div className="flex-1 text-left">
+                  <span className="text-[14px] text-[#6f7177] block">Sélectionner un jeu</span>
+                  <span className="text-[11px] text-[#4a4b50]">Requis</span>
+                </div>
               </div>
             )}
           </motion.button>
         </motion.div>
 
-        {/* Preferred Days - Pill selector */}
-        <motion.div variants={itemVariants} className="mb-8">
-          <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
-            <Calendar className="w-4 h-4" />
-            Jours de jeu préférés
-            <span className="text-xs font-normal text-gray-400 ml-1">(optionnel)</span>
+        {/* Preferred Days */}
+        <motion.div variants={itemVariants} className="mb-6">
+          <label className="flex items-center gap-2 text-[12px] font-medium text-[#8b8d93] mb-3 uppercase tracking-wide">
+            <Calendar className="w-4 h-4" strokeWidth={1.5} />
+            Jours préférés
+            <span className="text-[#4a4b50] font-normal lowercase">(optionnel)</span>
           </label>
           <div className="flex gap-2">
-            {DAYS.map((day, index) => (
-              <motion.button
-                key={day.id}
-                onClick={() => toggleDay(day.id)}
-                className={`flex-1 h-14 rounded-xl text-sm font-bold transition-all relative overflow-hidden ${
-                  selectedDays.includes(day.id)
-                    ? "bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg shadow-amber-500/30"
-                    : "bg-white/80 backdrop-blur-sm text-gray-500 border border-gray-100 hover:border-amber-200"
-                }`}
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                {selectedDays.includes(day.id) && (
-                  <motion.div
-                    layoutId="dayHighlight"
-                    className="absolute inset-0 bg-gradient-to-br from-amber-400 to-orange-500"
-                    initial={false}
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-                <span className="relative z-10">{day.label}</span>
-              </motion.button>
-            ))}
+            {DAYS.map((day) => {
+              const isSelected = selectedDays.includes(day.id);
+              return (
+                <motion.button
+                  key={day.id}
+                  onClick={() => toggleDay(day.id)}
+                  className={`flex-1 h-12 rounded-lg text-[13px] font-semibold transition-all duration-150 ${
+                    isSelected
+                      ? "bg-[#5e6ad2] text-white shadow-lg shadow-[#5e6ad2]/20"
+                      : "bg-[#111214] border border-[#1e2024] text-[#6f7177] hover:border-[#26282d] hover:text-[#8b8d93]"
+                  }`}
+                  whileHover={{ y: -2, scale: 1.02 }}
+                  whileTap={{ scale: 0.92 }}
+                  animate={isSelected ? {
+                    boxShadow: ['0 4px 15px rgba(94, 106, 210, 0.2)', '0 4px 20px rgba(94, 106, 210, 0.35)', '0 4px 15px rgba(94, 106, 210, 0.2)']
+                  } : {}}
+                  transition={isSelected ? {
+                    boxShadow: { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
+                  } : {}}
+                >
+                  {day.label}
+                </motion.button>
+              );
+            })}
           </div>
-          {selectedDays.length > 0 && (
-            <motion.p
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-xs text-amber-600 mt-2 px-1"
-            >
-              {selectedDays.length} jour{selectedDays.length > 1 ? 's' : ''} sélectionné{selectedDays.length > 1 ? 's' : ''}
-            </motion.p>
-          )}
         </motion.div>
 
-        {/* Session Duration - Visual cards */}
+        {/* Session Duration */}
         <motion.div variants={itemVariants} className="mb-10">
-          <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
-            <Clock className="w-4 h-4" />
-            Durée typique des sessions
+          <label className="flex items-center gap-2 text-[12px] font-medium text-[#8b8d93] mb-3 uppercase tracking-wide">
+            <Clock className="w-4 h-4" strokeWidth={1.5} />
+            Durée typique
           </label>
-          <div className="grid grid-cols-4 gap-3">
-            {DURATIONS.map((d, index) => (
+          <div className="grid grid-cols-4 gap-2">
+            {DURATIONS.map((d) => (
               <motion.button
                 key={d.value}
                 onClick={() => setDuration(d.value)}
-                className={`relative p-4 rounded-2xl text-center transition-all overflow-hidden ${
+                className={`relative p-3 rounded-xl text-center transition-all duration-150 ${
                   duration === d.value
-                    ? "bg-gradient-to-br from-gray-900 to-gray-800 text-white shadow-xl"
-                    : "bg-white/80 backdrop-blur-sm text-gray-600 border border-gray-100 hover:border-gray-200"
+                    ? "bg-[#141518] border border-[#5e6ad2]"
+                    : "bg-[#111214] border border-[#1e2024] hover:border-[#26282d]"
                 }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.05 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <span className="block text-xl font-bold">{d.label}</span>
-                <span className={`block text-[10px] mt-1 ${
-                  duration === d.value ? 'text-gray-300' : 'text-gray-400'
-                }`}>
+                <span className={`block text-[16px] font-bold ${duration === d.value ? 'text-[#ececed]' : 'text-[#8b8d93]'}`}>
+                  {d.label}
+                </span>
+                <span className={`block text-[10px] mt-0.5 ${duration === d.value ? 'text-[#5e6ad2]' : 'text-[#4a4b50]'}`}>
                   {d.desc}
                 </span>
-                {duration === d.value && (
-                  <motion.div
-                    layoutId="durationCheck"
-                    className="absolute top-2 right-2 w-4 h-4 bg-white rounded-full flex items-center justify-center"
-                  >
-                    <Check className="w-3 h-3 text-gray-900" />
-                  </motion.div>
+                {d.default && duration !== d.value && (
+                  <span className="absolute -top-1 -right-1 text-[8px] bg-[#5e6ad2]/20 text-[#5e6ad2] px-1.5 py-0.5 rounded-full font-medium">
+                    Défaut
+                  </span>
                 )}
               </motion.button>
             ))}
           </div>
         </motion.div>
 
-        {/* Create Button - Premium CTA */}
+        {/* Create Button */}
         <motion.div variants={itemVariants}>
           <motion.button
             onClick={handleCreate}
-            disabled={isCreating || !name.trim() || !selectedGame}
-            className={`w-full h-16 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all shadow-xl ${
-              name.trim() && selectedGame
-                ? "bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 text-white shadow-amber-500/30 hover:shadow-2xl hover:shadow-amber-500/40"
-                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+            disabled={isCreating || !isValid}
+            className={`w-full h-14 flex items-center justify-center gap-2.5 rounded-xl text-[14px] font-semibold transition-all duration-150 ${
+              isValid
+                ? "bg-[#5e6ad2] text-white hover:bg-[#6872d9] shadow-lg shadow-[#5e6ad2]/20"
+                : "bg-[#1e2024] text-[#4a4b50] cursor-not-allowed"
             }`}
-            whileHover={name.trim() && selectedGame ? { scale: 1.02, y: -2 } : {}}
-            whileTap={name.trim() && selectedGame ? { scale: 0.98 } : {}}
-            animate={name.trim() && selectedGame ? {
-              backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"]
-            } : {}}
-            transition={{ duration: 3, repeat: Infinity }}
-            style={{ backgroundSize: "200% 200%" }}
+            whileHover={isValid ? { y: -2 } : {}}
+            whileTap={isValid ? { scale: 0.98 } : {}}
           >
             {isCreating ? (
-              <>
-                <motion.div
-                  className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                />
-                Création en cours...
-              </>
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
               <>
-                <Users className="w-5 h-5" />
+                <Users className="w-5 h-5" strokeWidth={1.5} />
                 Créer la Squad
-                <Sparkles className="w-5 h-5" />
               </>
             )}
           </motion.button>
-          {(!name.trim() || !selectedGame) && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center text-xs text-gray-400 mt-3"
-            >
-              Remplis le nom et choisis un jeu pour continuer
-            </motion.p>
+          {!isValid && (
+            <p className="text-center text-[12px] text-[#4a4b50] mt-3">
+              Remplis le nom et choisis un jeu
+            </p>
           )}
         </motion.div>
       </motion.div>
 
-      {/* Game Picker Modal - Premium bottom sheet */}
+      {/* Game Picker Modal - Bottom Sheet */}
       <AnimatePresence>
         {showGamePicker && (
           <>
@@ -391,84 +383,172 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowGamePicker(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
             />
             <motion.div
-              variants={modalVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[2rem] z-50 max-h-[80vh] overflow-hidden shadow-2xl"
+              initial={{ opacity: 0, y: "100%" }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: "100%" }}
+              transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+              className="fixed bottom-0 left-0 right-0 bg-[#141518] border-t border-[#1e2024] rounded-t-2xl z-50 max-h-[85vh] flex flex-col"
             >
-              {/* Handle bar */}
-              <div className="flex justify-center py-3">
-                <div className="w-12 h-1.5 bg-gray-200 rounded-full" />
+              {/* Handle */}
+              <div className="flex justify-center py-3 flex-shrink-0">
+                <div className="w-10 h-1 bg-[#26282d] rounded-full" />
               </div>
 
               {/* Header */}
-              <div className="px-6 pb-4 flex items-center justify-between border-b border-gray-100">
+              <div className="px-5 pb-4 flex items-center justify-between flex-shrink-0">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Choisir un jeu</h2>
-                  <p className="text-sm text-gray-500">Quel est ton jeu principal ?</p>
+                  <h2 className="text-[18px] font-semibold text-[#ececed]">Choisir un jeu</h2>
+                  <p className="text-[13px] text-[#6f7177]">Quel est ton jeu principal ?</p>
                 </div>
                 <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
                   onClick={() => setShowGamePicker(false)}
-                  className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors"
+                  className="w-10 h-10 rounded-xl bg-[#1e2024] flex items-center justify-center text-[#6f7177] hover:text-[#ececed] transition-colors"
+                  whileTap={{ scale: 0.95 }}
                 >
-                  ✕
+                  <X className="w-5 h-5" strokeWidth={1.5} />
                 </motion.button>
               </div>
 
-              {/* Games grid */}
-              <div className="p-4 pb-8 overflow-y-auto max-h-[60vh]">
-                <div className="grid grid-cols-2 gap-4">
-                  {GAMES.map((game, index) => (
-                    <motion.button
-                      key={game.id}
-                      onClick={() => {
-                        setSelectedGame(game.id);
-                        setShowGamePicker(false);
-                      }}
-                      className={`relative p-5 rounded-2xl text-center transition-all overflow-hidden ${
-                        selectedGame === game.id
-                          ? `bg-gradient-to-br ${game.color} shadow-lg`
-                          : "bg-gray-50 hover:bg-gray-100"
-                      }`}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      whileHover={{ scale: 1.03, y: -2 }}
-                      whileTap={{ scale: 0.97 }}
-                    >
-                      <motion.span
-                        className="text-4xl block mb-3"
-                        animate={selectedGame === game.id ? {
-                          scale: [1, 1.2, 1],
-                          rotate: [0, -10, 10, 0]
-                        } : {}}
-                        transition={{ duration: 0.5 }}
-                      >
-                        {game.icon}
-                      </motion.span>
-                      <span className={`text-sm font-bold block ${
-                        selectedGame === game.id ? 'text-white' : 'text-gray-900'
-                      }`}>
-                        {game.name}
-                      </span>
-                      {selectedGame === game.id && (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          className="absolute top-3 right-3 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md"
-                        >
-                          <Check className="w-4 h-4 text-green-500" />
-                        </motion.div>
-                      )}
-                    </motion.button>
-                  ))}
+              {/* Search */}
+              <div className="px-4 pb-4 flex-shrink-0">
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4a4b50]" strokeWidth={1.5} />
+                  <input
+                    type="text"
+                    value={gameSearch}
+                    onChange={(e) => setGameSearch(e.target.value)}
+                    placeholder="Rechercher un jeu..."
+                    className="w-full h-11 pl-11 pr-4 bg-[#111214] border border-[#1e2024] rounded-xl text-[14px] text-[#ececed] placeholder:text-[#4a4b50] focus:border-[#5e6ad2] focus:outline-none transition-all"
+                    autoFocus
+                  />
                 </div>
+              </div>
+
+              {/* Games list - scrollable */}
+              <div className="flex-1 overflow-y-auto px-4 pb-8">
+                {/* Popular games */}
+                {popularGames.length > 0 && (
+                  <div className="mb-6">
+                    <div className="flex items-center gap-2 mb-3 px-1">
+                      <Star className="w-3.5 h-3.5 text-[#f5a623]" strokeWidth={2} />
+                      <span className="text-[11px] font-semibold text-[#8b8d93] uppercase tracking-wide">
+                        Populaires
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {popularGames.map((game, index) => (
+                        <motion.button
+                          key={game.id}
+                          onClick={() => {
+                            setSelectedGame(game.id);
+                            setShowGamePicker(false);
+                            setGameSearch("");
+                          }}
+                          className={`relative p-4 rounded-xl text-left transition-all duration-150 ${
+                            selectedGame === game.id
+                              ? "bg-[#1a1b1f] border border-[#5e6ad2]"
+                              : "bg-[#111214] border border-[#1e2024] hover:border-[#26282d] hover:bg-[#131416]"
+                          }`}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.02 }}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{game.icon}</span>
+                            <div className="flex-1 min-w-0">
+                              <span className={`text-[13px] font-medium block truncate ${
+                                selectedGame === game.id ? 'text-[#ececed]' : 'text-[#8b8d93]'
+                              }`}>
+                                {game.name}
+                              </span>
+                              {game.recent && (
+                                <div className="flex items-center gap-1 mt-0.5">
+                                  <Sparkles className="w-3 h-3 text-[#4ade80]" />
+                                  <span className="text-[10px] text-[#4ade80] font-medium">2026</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          {selectedGame === game.id && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="absolute top-2 right-2 w-5 h-5 bg-[#5e6ad2] rounded-full flex items-center justify-center"
+                            >
+                              <Check className="w-3 h-3 text-white" strokeWidth={2} />
+                            </motion.div>
+                          )}
+                        </motion.button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Other games */}
+                {otherGames.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3 px-1">
+                      <Gamepad2 className="w-3.5 h-3.5 text-[#6f7177]" strokeWidth={2} />
+                      <span className="text-[11px] font-semibold text-[#8b8d93] uppercase tracking-wide">
+                        Autres jeux
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {otherGames.map((game, index) => (
+                        <motion.button
+                          key={game.id}
+                          onClick={() => {
+                            setSelectedGame(game.id);
+                            setShowGamePicker(false);
+                            setGameSearch("");
+                          }}
+                          className={`relative p-4 rounded-xl text-left transition-all duration-150 ${
+                            selectedGame === game.id
+                              ? "bg-[#1a1b1f] border border-[#5e6ad2]"
+                              : "bg-[#111214] border border-[#1e2024] hover:border-[#26282d] hover:bg-[#131416]"
+                          }`}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: (popularGames.length + index) * 0.02 }}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{game.icon}</span>
+                            <span className={`text-[13px] font-medium truncate ${
+                              selectedGame === game.id ? 'text-[#ececed]' : 'text-[#8b8d93]'
+                            }`}>
+                              {game.name}
+                            </span>
+                          </div>
+                          {selectedGame === game.id && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="absolute top-2 right-2 w-5 h-5 bg-[#5e6ad2] rounded-full flex items-center justify-center"
+                            >
+                              <Check className="w-3 h-3 text-white" strokeWidth={2} />
+                            </motion.div>
+                          )}
+                        </motion.button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* No results */}
+                {filteredGames.length === 0 && (
+                  <div className="text-center py-12">
+                    <Gamepad2 className="w-10 h-10 text-[#26282d] mx-auto mb-3" strokeWidth={1.5} />
+                    <p className="text-[14px] text-[#6f7177]">Aucun jeu trouvé</p>
+                    <p className="text-[12px] text-[#4a4b50] mt-1">Essaie "Autre jeu"</p>
+                  </div>
+                )}
               </div>
             </motion.div>
           </>

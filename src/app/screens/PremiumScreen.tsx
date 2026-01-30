@@ -5,6 +5,9 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/app/contexts/AuthContext";
+import { useSubscription } from "@/app/contexts/SubscriptionContext";
+import { upgradeToPremium, openCustomerPortal } from "@/utils/stripe";
 import {
   ArrowLeft,
   Crown,
@@ -22,6 +25,7 @@ import {
   Shield,
   Gift,
 } from "lucide-react";
+import { IconButton, SkeletonPage } from "@/design-system";
 
 interface PremiumScreenProps {
   onNavigate: (screen: string, data?: any) => void;
@@ -56,8 +60,13 @@ const featureVariants = {
 };
 
 export function PremiumScreen({ onNavigate, showToast }: PremiumScreenProps) {
+  const { user } = useAuth();
+  const { subscription, isPremium, isPro, isEnterprise, loading: subLoading } = useSubscription();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const isSubscribed = isPremium || isPro || isEnterprise;
 
   const price = billingCycle === "yearly" ? "2,99" : "4,99";
   const yearlyPrice = "35,88";
@@ -124,38 +133,63 @@ export function PremiumScreen({ onNavigate, showToast }: PremiumScreenProps) {
     },
   ];
 
-  const handleSubscribe = () => {
+  const handleSubscribe = async () => {
+    if (!user?.id) {
+      showToast("Veuillez vous connecter pour continuer", "error");
+      onNavigate("login");
+      return;
+    }
+
+    setIsProcessing(true);
     showToast("Redirection vers le paiement...", "info");
+
+    try {
+      await upgradeToPremium(user.id, billingCycle);
+      // Stripe will redirect to checkout page
+    } catch (error: any) {
+      console.error("[Premium] Checkout error:", error);
+      showToast("Erreur lors du paiement. Réessayez.", "error");
+      setIsProcessing(false);
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    setIsProcessing(true);
+    showToast("Ouverture du portail de gestion...", "info");
+
+    try {
+      await openCustomerPortal();
+    } catch (error: any) {
+      console.error("[Premium] Portal error:", error);
+      showToast("Erreur d'ouverture du portail. Réessayez.", "error");
+      setIsProcessing(false);
+    }
+  };
+
+  // Format subscription tier for display
+  const getTierLabel = () => {
+    if (isEnterprise) return "Enterprise";
+    if (isPro) return "Pro";
+    if (isPremium) return "Premium";
+    return "Free";
+  };
+
+  const getNextBillingDate = () => {
+    if (!subscription?.current_period_end) return null;
+    return new Date(subscription.current_period_end).toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pb-32 overflow-hidden">
-      {/* Animated background elements */}
+      {/* Background elements - Static for performance */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute top-20 -right-20 w-80 h-80 bg-amber-500/20 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.2, 0.3, 0.2],
-          }}
-          transition={{ duration: 4, repeat: Infinity }}
-        />
-        <motion.div
-          className="absolute bottom-40 -left-20 w-60 h-60 bg-purple-500/20 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.2, 0.4, 0.2],
-          }}
-          transition={{ duration: 5, repeat: Infinity, delay: 1 }}
-        />
-        <motion.div
-          className="absolute top-1/2 right-1/4 w-40 h-40 bg-pink-500/10 rounded-full blur-2xl"
-          animate={{
-            y: [0, -30, 0],
-            opacity: [0.1, 0.2, 0.1],
-          }}
-          transition={{ duration: 6, repeat: Infinity }}
-        />
+        <div className="absolute top-20 -right-20 w-80 h-80 bg-amber-500/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-40 -left-20 w-60 h-60 bg-purple-500/20 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 right-1/4 w-40 h-40 bg-pink-500/10 rounded-full blur-2xl" />
       </div>
 
       <motion.div
@@ -166,23 +200,17 @@ export function PremiumScreen({ onNavigate, showToast }: PremiumScreenProps) {
       >
         {/* Header */}
         <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <IconButton
+            icon={<ArrowLeft className="w-5 h-5 text-white/70" />}
             onClick={() => onNavigate("profile")}
-            className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center group"
-          >
-            <ArrowLeft className="w-5 h-5 text-white/70 group-hover:text-white transition-colors" />
-          </motion.button>
+            variant="ghost"
+            aria-label="Retour au profil"
+            className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20"
+          />
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <motion.div
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-              >
-                <Crown className="w-6 h-6 text-amber-400" />
-              </motion.div>
-              <h1 className="text-xl font-bold text-white">
+              <Crown className="w-6 h-6 text-amber-400" />
+              <h1 className="text-xl font-bold tracking-tight text-white">
                 Squad Planner
               </h1>
             </div>
@@ -190,167 +218,238 @@ export function PremiumScreen({ onNavigate, showToast }: PremiumScreenProps) {
           </div>
         </motion.div>
 
-        {/* Hero Card with glassmorphism */}
-        <motion.div
-          variants={itemVariants}
-          className="relative rounded-3xl p-6 mb-8 overflow-hidden"
-        >
-          {/* Glass background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-pink-500/20 backdrop-blur-xl rounded-3xl border border-white/10" />
-
-          {/* Animated glow */}
+        {/* Loading state */}
+        {subLoading && (
           <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-amber-400/0 via-amber-400/20 to-amber-400/0"
-            animate={{ x: ["-100%", "100%"] }}
-            transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
-          />
+            variants={itemVariants}
+            className="py-8"
+          >
+            <SkeletonPage />
+          </motion.div>
+        )}
 
-          <div className="relative z-10">
-            {/* Premium badge */}
-            <motion.div
-              className="flex justify-center mb-4"
-              animate={{ y: [0, -5, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              <div className="px-4 py-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-xs font-bold text-white flex items-center gap-1">
-                <Sparkles className="w-3 h-3" />
-                PREMIUM
-                <Sparkles className="w-3 h-3" />
+        {/* Already Subscribed Card */}
+        {isSubscribed && !subLoading && (
+          <motion.div
+            variants={itemVariants}
+            className="relative rounded-3xl p-6 mb-8 overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 via-teal-500/10 to-cyan-500/20 backdrop-blur-xl rounded-3xl border border-emerald-500/30" />
+
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
+                    <Crown className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold tracking-tight text-white">Abonnement {getTierLabel()}</h3>
+                    <p className="text-sm text-emerald-400">Actif</p>
+                  </div>
+                </div>
+                <div className="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30">
+                  <Check className="w-5 h-5 text-emerald-400" />
+                </div>
               </div>
-            </motion.div>
 
-            {/* Crown icon */}
-            <motion.div
-              className="flex justify-center mb-4"
-              animate={{ scale: [1, 1.05, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-amber-400 via-orange-500 to-pink-500 flex items-center justify-center shadow-2xl shadow-amber-500/30">
-                <Crown className="w-10 h-10 text-white" />
-              </div>
-            </motion.div>
-
-            <h2 className="text-2xl font-bold text-white text-center mb-2">
-              Débloquez votre potentiel
-            </h2>
-            <p className="text-sm text-white/60 text-center max-w-xs mx-auto">
-              Intelligence artificielle, stats avancées, automatisation complète.
-              Tout pour organiser vos sessions comme des pros.
-            </p>
-          </div>
-        </motion.div>
-
-        {/* Billing Toggle - Premium style */}
-        <motion.div variants={itemVariants} className="flex justify-center mb-6">
-          <div className="inline-flex items-center gap-1 p-1 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10">
-            <motion.button
-              onClick={() => setBillingCycle("monthly")}
-              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                billingCycle === "monthly"
-                  ? "bg-white/10 text-white"
-                  : "text-white/50 hover:text-white/70"
-              }`}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              Mensuel
-            </motion.button>
-            <motion.button
-              onClick={() => setBillingCycle("yearly")}
-              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all relative ${
-                billingCycle === "yearly"
-                  ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30"
-                  : "text-white/50 hover:text-white/70"
-              }`}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              Annuel
-              {billingCycle === "yearly" && (
-                <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full bg-emerald-500 text-[10px] font-bold text-white"
-                >
-                  -{discount}
-                </motion.span>
-              )}
-            </motion.button>
-          </div>
-        </motion.div>
-
-        {/* Price - Big and bold */}
-        <motion.div variants={itemVariants} className="text-center mb-8">
-          <div className="flex items-baseline justify-center gap-1">
-            <motion.span
-              key={price}
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-6xl font-black text-white"
-            >
-              {price}
-            </motion.span>
-            <span className="text-2xl text-white/50 font-medium">€</span>
-            <span className="text-lg text-white/40">/mois</span>
-          </div>
-          <AnimatePresence mode="wait">
-            {billingCycle === "yearly" && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mt-2"
-              >
-                <p className="text-sm text-white/40">
-                  Facturé {yearlyPrice}€/an
-                  <span className="ml-2 line-through text-white/30">{originalYearlyPrice}€</span>
+              {getNextBillingDate() && (
+                <p className="text-sm text-white/60 mb-4">
+                  Prochain renouvellement : {getNextBillingDate()}
                 </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
+              )}
 
-        {/* CTA Button - Super premium */}
-        <motion.div variants={itemVariants} className="mb-8">
-          <motion.button
-            onClick={handleSubscribe}
-            className="w-full h-16 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 text-white shadow-2xl shadow-amber-500/30 relative overflow-hidden"
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            {/* Shine effect */}
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-              animate={{ x: ["-100%", "100%"] }}
-              transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
-            />
-            <span className="relative z-10 flex items-center gap-2">
-              <Zap className="w-5 h-5" />
-              Commencer l'essai gratuit
-              <Gift className="w-5 h-5" />
-            </span>
-          </motion.button>
-          <motion.div
-            className="flex items-center justify-center gap-4 mt-3"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            <div className="flex items-center gap-1.5 text-white/40 text-xs">
-              <Shield className="w-3.5 h-3.5" />
-              <span>7 jours gratuits</span>
-            </div>
-            <div className="w-1 h-1 rounded-full bg-white/20" />
-            <div className="flex items-center gap-1.5 text-white/40 text-xs">
-              <Check className="w-3.5 h-3.5" />
-              <span>Annulation facile</span>
+              <motion.button
+                onClick={handleManageSubscription}
+                disabled={isProcessing}
+                className="w-full py-3 rounded-xl bg-white/10 border border-white/20 text-white font-medium flex items-center justify-center gap-2 hover:bg-white/20 transition-colors"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                {isProcessing ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                  />
+                ) : (
+                  <>
+                    <Shield className="w-4 h-4" />
+                    Gérer mon abonnement
+                  </>
+                )}
+              </motion.button>
             </div>
           </motion.div>
-        </motion.div>
+        )}
+
+        {/* Hero Card with glassmorphism - Only show if not subscribed */}
+        {!isSubscribed && !subLoading && (
+          <motion.div
+            variants={itemVariants}
+            className="relative rounded-3xl p-6 mb-8 overflow-hidden"
+          >
+            {/* Glass background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-pink-500/20 backdrop-blur-xl rounded-3xl border border-white/10" />
+
+            {/* Subtle glow - static for performance */}
+            <div className="absolute inset-0 bg-gradient-to-r from-amber-400/0 via-amber-400/10 to-amber-400/0" />
+
+            <div className="relative z-10">
+              {/* Premium badge */}
+              <div className="flex justify-center mb-4">
+                <div className="px-4 py-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-xs font-bold text-white flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" />
+                  PREMIUM
+                  <Sparkles className="w-3 h-3" />
+                </div>
+              </div>
+
+              {/* Crown icon */}
+              <div className="flex justify-center mb-4">
+                <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-amber-400 via-orange-500 to-pink-500 flex items-center justify-center shadow-2xl shadow-amber-500/30">
+                  <Crown className="w-10 h-10 text-white" />
+                </div>
+              </div>
+
+              <h2 className="text-2xl font-bold tracking-tight text-white text-center mb-2">
+                Débloquez votre potentiel
+              </h2>
+              <p className="text-sm text-white/60 text-center max-w-xs mx-auto">
+                Intelligence artificielle, stats avancées, automatisation complète.
+                Tout pour organiser vos sessions comme des pros.
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Billing Toggle - Premium style - Only show if not subscribed */}
+        {!isSubscribed && !subLoading && (
+          <motion.div variants={itemVariants} className="flex justify-center mb-6">
+            <div className="inline-flex items-center gap-1 p-1 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10">
+              <motion.button
+                onClick={() => setBillingCycle("monthly")}
+                className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                  billingCycle === "monthly"
+                    ? "bg-white/10 text-white"
+                    : "text-white/50 hover:text-white/70"
+                }`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Mensuel
+              </motion.button>
+              <motion.button
+                onClick={() => setBillingCycle("yearly")}
+                className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all relative ${
+                  billingCycle === "yearly"
+                    ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30"
+                    : "text-white/50 hover:text-white/70"
+                }`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Annuel
+                {billingCycle === "yearly" && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full bg-emerald-500 text-[10px] font-bold text-white"
+                  >
+                    -{discount}
+                  </motion.span>
+                )}
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Price - Big and bold - Only show if not subscribed */}
+        {!isSubscribed && !subLoading && (
+          <motion.div variants={itemVariants} className="text-center mb-8">
+            <div className="flex items-baseline justify-center gap-1">
+              <motion.span
+                key={price}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-6xl font-black text-white"
+              >
+                {price}
+              </motion.span>
+              <span className="text-2xl text-white/50 font-medium">€</span>
+              <span className="text-lg text-white/40">/mois</span>
+            </div>
+            <AnimatePresence mode="wait">
+              {billingCycle === "yearly" && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-2"
+                >
+                  <p className="text-sm text-white/40">
+                    Facturé {yearlyPrice}€/an
+                    <span className="ml-2 line-through text-white/30">{originalYearlyPrice}€</span>
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+
+        {/* CTA Button - Super premium - Only show if not subscribed */}
+        {!isSubscribed && !subLoading && (
+          <motion.div variants={itemVariants} className="mb-8">
+            <motion.button
+              onClick={handleSubscribe}
+              disabled={isProcessing}
+              className={`w-full h-16 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 text-white shadow-2xl shadow-amber-500/30 relative overflow-hidden ${isProcessing ? 'opacity-80 cursor-wait' : ''}`}
+              whileHover={!isProcessing ? { scale: 1.02, y: -2 } : {}}
+              whileTap={!isProcessing ? { scale: 0.98 } : {}}
+            >
+              {/* Subtle shine - static for performance */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+              <span className="relative z-10 flex items-center gap-2">
+                {isProcessing ? (
+                  <>
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    >
+                      <Zap className="w-5 h-5" />
+                    </motion.div>
+                    Redirection en cours...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-5 h-5" />
+                    Commencer l'essai gratuit
+                    <Gift className="w-5 h-5" />
+                  </>
+                )}
+              </span>
+            </motion.button>
+            <motion.div
+              className="flex items-center justify-center gap-4 mt-3"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              <div className="flex items-center gap-1.5 text-white/40 text-xs">
+                <Shield className="w-3.5 h-3.5" />
+                <span>7 jours gratuits</span>
+              </div>
+              <div className="w-1 h-1 rounded-full bg-white/20" />
+              <div className="flex items-center gap-1.5 text-white/40 text-xs">
+                <Check className="w-3.5 h-3.5" />
+                <span>Annulation facile</span>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
 
         {/* Features - Animated list */}
         <motion.div variants={itemVariants}>
-          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <h3 className="text-lg font-bold tracking-tight text-white mb-4 flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-amber-400" />
             Tout ce qui est inclus
           </h3>
@@ -406,7 +505,7 @@ export function PremiumScreen({ onNavigate, showToast }: PremiumScreenProps) {
 
         {/* Premium Tools - Quick access */}
         <motion.div variants={itemVariants} className="mt-8">
-          <h3 className="text-lg font-bold text-white mb-4">
+          <h3 className="text-lg font-bold tracking-tight text-white mb-4">
             Outils Premium
           </h3>
           <div className="grid grid-cols-3 gap-3">
@@ -439,7 +538,7 @@ export function PremiumScreen({ onNavigate, showToast }: PremiumScreenProps) {
 
         {/* Testimonials - Glowing cards */}
         <motion.div variants={itemVariants} className="mt-8">
-          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <h3 className="text-lg font-bold tracking-tight text-white mb-4 flex items-center gap-2">
             <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
             Témoignages
           </h3>
@@ -485,13 +584,9 @@ export function PremiumScreen({ onNavigate, showToast }: PremiumScreenProps) {
           variants={itemVariants}
           className="mt-10 text-center"
         >
-          <motion.p
-            className="text-white/40 text-sm"
-            animate={{ opacity: [0.4, 0.7, 0.4] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
+          <p className="text-white/50 text-sm">
             Rejoins +10,000 gamers Premium
-          </motion.p>
+          </p>
         </motion.div>
       </motion.div>
     </div>

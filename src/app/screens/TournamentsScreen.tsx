@@ -136,21 +136,9 @@ export function TournamentsScreen({ onNavigate, showToast }: TournamentsScreenPr
     <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.15, 1] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute top-1/3 right-1/4 w-64 h-64 bg-gradient-to-br from-pink-400/15 to-red-400/15 rounded-full blur-3xl"
-          animate={{ y: [0, 30, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        />
+        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-gradient-to-br from-pink-400/15 to-red-400/15 rounded-full blur-3xl" />
       </div>
 
       <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
@@ -191,12 +179,6 @@ export function TournamentsScreen({ onNavigate, showToast }: TournamentsScreenPr
             className="relative overflow-hidden rounded-3xl mb-6"
           >
             <div className="bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 p-6 shadow-xl">
-              {/* Shine effect */}
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
-                animate={{ x: ['-100%', '200%'] }}
-                transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
-              />
 
               <div className="relative">
                 <div className="flex items-start justify-between mb-4">
@@ -407,13 +389,11 @@ export function TournamentsScreen({ onNavigate, showToast }: TournamentsScreenPr
                 exit={{ opacity: 0, y: -20 }}
                 className="text-center py-16"
               >
-                <motion.div
+                <div
                   className="w-20 h-20 rounded-3xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-orange-500/30"
-                  animate={{ y: [0, -8, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 >
                   <Trophy className="w-10 h-10 text-white" strokeWidth={1.5} />
-                </motion.div>
+                </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-2">
                   Aucun tournoi
                 </h3>

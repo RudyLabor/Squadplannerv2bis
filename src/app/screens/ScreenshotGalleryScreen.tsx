@@ -1,10 +1,7 @@
-import React, { useState, useRef, Suspense } from 'react';
+import { useState, useRef, Suspense } from 'react';
 import { motion } from 'framer-motion';
-import { Download, ChevronLeft, ChevronRight, Grid3x3, X } from 'lucide-react';
+import { Download, ChevronLeft, ChevronRight, Grid3x3, Camera, Sparkles, Image } from 'lucide-react';
 import * as domtoimage from 'dom-to-image-more';
-import { Button } from '@/app/components/ui/button';
-import { Card } from '@/app/components/ui/card';
-import { SplashScreen } from '@/app/components/SplashScreen';
 import { ScreenWrapper } from '@/app/components/ScreenWrapper';
 
 // Import all screens
@@ -73,33 +70,53 @@ interface ScreenshotGalleryScreenProps {
   showToast?: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
+  }
+};
+
 // Static version of SplashScreen for screenshots (no animations, no auto-hide)
 function SplashScreenStatic() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--bg-base)] relative">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative">
       {/* Background gradient */}
-      <div className="gradient-mesh opacity-40" style={{ position: 'absolute', inset: 0 }} />
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl" />
+      </div>
 
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center gap-8">
         {/* Logo minimaliste */}
-        <div className="w-12 h-12 rounded-full bg-[var(--primary-500)]" />
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-xl shadow-indigo-500/30" />
 
         {/* Brand name */}
         <div className="text-center">
-          <h1 className="text-3xl font-normal text-[var(--fg-primary)] mb-2">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
             Squad Planner
           </h1>
-          <p className="text-sm text-[var(--fg-tertiary)]">
+          <p className="text-sm text-gray-500 font-medium">
             Organize • Play • Win
           </p>
         </div>
 
         {/* Progress bar at 60% */}
         <div className="w-48">
-          <div className="h-1 rounded-full bg-white/5 overflow-hidden">
+          <div className="h-1.5 rounded-full bg-gray-200 overflow-hidden">
             <div
-              className="h-full rounded-full bg-[var(--primary-500)]"
+              className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-600"
               style={{ width: '60%' }}
             />
           </div>
@@ -109,16 +126,16 @@ function SplashScreenStatic() {
   );
 }
 
-export default function ScreenshotGalleryScreen({ onNavigate, showToast }: ScreenshotGalleryScreenProps) {
+export default function ScreenshotGalleryScreen({ showToast }: ScreenshotGalleryScreenProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [viewMode, setViewMode] = useState<'single' | 'grid'>('grid');
   const [isCapturing, setIsCapturing] = useState(false);
   const screenRef = useRef<HTMLDivElement>(null);
 
-  // All screens organized by categories (same as DesignDocScreen)
+  // All screens organized by categories
   const screensByCategory = [
     {
-      name: '🔐 Authentification',
+      name: 'Authentification',
       color: 'from-blue-500 to-blue-600',
       screens: [
         { name: 'Splash', route: '/', component: SplashScreenStatic },
@@ -127,7 +144,7 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
       ]
     },
     {
-      name: '🏠 Navigation principale',
+      name: 'Navigation principale',
       color: 'from-amber-500 to-amber-600',
       screens: [
         { name: 'Home', route: '/home', component: HomeScreen },
@@ -137,7 +154,7 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
       ]
     },
     {
-      name: '👥 Gestion des Squads',
+      name: 'Gestion des Squads',
       color: 'from-purple-500 to-purple-600',
       screens: [
         { name: 'Create Squad', route: '/create-squad', component: CreateSquadScreen },
@@ -150,7 +167,7 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
       ]
     },
     {
-      name: '📅 Sessions',
+      name: 'Sessions',
       color: 'from-teal-500 to-teal-600',
       screens: [
         { name: 'Propose Session', route: '/propose-session', component: ProposeSessionScreen },
@@ -160,7 +177,7 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
       ]
     },
     {
-      name: '👤 Profil & Stats',
+      name: 'Profil & Stats',
       color: 'from-pink-500 to-pink-600',
       screens: [
         { name: 'Edit Profile', route: '/profile/edit', component: EditProfileScreen },
@@ -172,7 +189,7 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
       ]
     },
     {
-      name: '🤝 Social',
+      name: 'Social',
       color: 'from-green-500 to-green-600',
       screens: [
         { name: 'Friends', route: '/friends', component: FriendsScreen },
@@ -183,7 +200,7 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
       ]
     },
     {
-      name: '🏆 Compétition',
+      name: 'Compétition',
       color: 'from-yellow-500 to-yellow-600',
       screens: [
         { name: 'Leaderboard', route: '/leaderboard', component: LeaderboardScreen },
@@ -195,7 +212,7 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
       ]
     },
     {
-      name: '🎓 Académie & Coaching',
+      name: 'Académie & Coaching',
       color: 'from-indigo-500 to-indigo-600',
       screens: [
         { name: 'Academy', route: '/academy', component: AcademyScreen },
@@ -205,7 +222,7 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
       ]
     },
     {
-      name: '🔗 Intégrations',
+      name: 'Intégrations',
       color: 'from-cyan-500 to-cyan-600',
       screens: [
         { name: 'Integrations', route: '/integrations', component: IntegrationsScreen },
@@ -215,7 +232,7 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
       ]
     },
     {
-      name: '🤖 Intelligence & IA',
+      name: 'Intelligence & IA',
       color: 'from-violet-500 to-violet-600',
       screens: [
         { name: 'Intelligence', route: '/intelligence', component: IntelligenceScreen },
@@ -224,7 +241,7 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
       ]
     },
     {
-      name: '🏢 Pro & Business',
+      name: 'Pro & Business',
       color: 'from-slate-500 to-slate-600',
       screens: [
         { name: 'Esport Team', route: '/esport-team', component: EsportTeamScreen },
@@ -233,7 +250,7 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
       ]
     },
     {
-      name: '⚙️ Paramètres & Préférences',
+      name: 'Paramètres & Préférences',
       color: 'from-gray-500 to-gray-600',
       screens: [
         { name: 'Preferences', route: '/preferences', component: PreferencesScreen },
@@ -243,7 +260,7 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
       ]
     },
     {
-      name: '🔧 Développeurs & Avancé',
+      name: 'Développeurs & Avancé',
       color: 'from-orange-500 to-orange-600',
       screens: [
         { name: 'API Docs', route: '/api-docs', component: ApiDocsScreen },
@@ -253,7 +270,7 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
       ]
     },
     {
-      name: '✨ Autres',
+      name: 'Autres',
       color: 'from-rose-500 to-rose-600',
       screens: [
         { name: 'Premium', route: '/premium', component: PremiumScreen },
@@ -277,10 +294,8 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
       const node = screenRef.current;
       if (!node) return;
 
-      // Wait for rendering to complete - shorter delay since we removed animated Splash
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Hide scrollbars during capture
       const styleSheet = document.createElement('style');
       styleSheet.id = 'screenshot-hide-scrollbars';
       styleSheet.textContent = `
@@ -298,27 +313,25 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
       `;
       document.head.appendChild(styleSheet);
 
-      // Get all scrollable elements and store their scroll positions
       const scrollableElements = node.querySelectorAll('*');
-      const scrollStates: Array<{ 
-        element: Element; 
-        scrollTop: number; 
-        scrollLeft: number; 
+      const scrollStates: Array<{
+        element: Element;
+        scrollTop: number;
+        scrollLeft: number;
         overflow: string;
         overflowX: string;
         overflowY: string;
         height: string;
         maxHeight: string;
       }> = [];
-      
-      // Remove overflow and scroll to capture full content
+
       scrollableElements.forEach((el) => {
         const element = el as HTMLElement;
         const computedStyle = window.getComputedStyle(element);
-        const hasScrollY = computedStyle.overflowY === 'auto' || 
+        const hasScrollY = computedStyle.overflowY === 'auto' ||
                           computedStyle.overflowY === 'scroll' ||
                           element.scrollHeight > element.clientHeight;
-        
+
         if (hasScrollY || element.scrollTop > 0) {
           scrollStates.push({
             element: element,
@@ -330,10 +343,9 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
             height: element.style.height,
             maxHeight: element.style.maxHeight,
           });
-          
-          // Temporarily disable overflow-y and expand to full height
+
           element.style.overflowY = 'visible';
-          element.style.overflowX = 'hidden'; // Keep horizontal overflow hidden
+          element.style.overflowX = 'hidden';
           element.style.maxHeight = 'none';
           if (element.scrollHeight > element.clientHeight) {
             element.style.height = `${element.scrollHeight}px`;
@@ -341,7 +353,6 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
         }
       });
 
-      // Get the actual content height (but keep width at 390px)
       const contentHeight = Math.max(node.scrollHeight, 844);
 
       const dataUrl = await domtoimage.toPng(node, {
@@ -355,7 +366,6 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
         },
       });
 
-      // Restore original scroll states
       scrollStates.forEach(({ element, scrollTop, scrollLeft, overflow, overflowX, overflowY, height, maxHeight }) => {
         (element as HTMLElement).style.overflow = overflow;
         (element as HTMLElement).style.overflowX = overflowX;
@@ -366,13 +376,11 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
         element.scrollLeft = scrollLeft;
       });
 
-      // Remove the scrollbar hiding stylesheet
       const hiddenStyleSheet = document.getElementById('screenshot-hide-scrollbars');
       if (hiddenStyleSheet) {
         hiddenStyleSheet.remove();
       }
 
-      // Convert to blob and download
       const blob = await fetch(dataUrl).then(res => res.blob());
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -399,45 +407,79 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F3F0] pb-20">
-      {/* Header */}
-      <div className="bg-gradient-to-br from-[#F59E0B] to-[#14B8A6] text-white py-8 px-4 relative z-50">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold mb-2">Galerie Screenshots</h1>
-          <p className="text-white/90">
-            {allScreens.length} écrans • Mode {viewMode === 'grid' ? 'Grille' : 'Capture'}
-          </p>
-        </div>
+    <div className="min-h-screen pb-20 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-teal-400/20 to-cyan-400/20 rounded-full blur-3xl" />
       </div>
 
+      {/* Header */}
+      <motion.div
+        className="relative z-20 bg-gradient-to-br from-emerald-500 to-teal-600 text-white py-8 px-4 shadow-xl"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="max-w-7xl mx-auto flex items-center gap-4">
+          <motion.div
+            className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg"
+            whileHover={{ scale: 1.05, rotate: 5 }}
+          >
+            <Camera className="w-8 h-8 text-white" strokeWidth={2} />
+          </motion.div>
+          <div>
+            <h1 className="text-3xl font-bold">Galerie Screenshots</h1>
+            <p className="text-white/90 font-medium">
+              {allScreens.length} écrans • Mode {viewMode === 'grid' ? 'Grille' : 'Capture'}
+            </p>
+          </div>
+        </div>
+      </motion.div>
+
       {/* Controls */}
-      <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-[rgba(120,113,108,0.1)] py-3 px-4 shadow-sm">
+      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-white/50 py-3 px-4 shadow-lg">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           {/* Left side */}
           <div className="flex items-center gap-2 min-w-[100px]">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'outline'}
-              size="sm"
+            <motion.button
               onClick={() => setViewMode('grid')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                viewMode === 'grid'
+                  ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30'
+                  : 'bg-white border border-gray-200 text-gray-700 hover:border-gray-300'
+              }`}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              <Grid3x3 className="w-4 h-4 mr-2" />
+              <Grid3x3 className="w-4 h-4" />
               Grille
-            </Button>
+            </motion.button>
           </div>
 
           {/* Center - Navigation (only in single mode) */}
           <div className="flex items-center gap-2 min-w-[180px] justify-center">
             {viewMode === 'single' && (
               <>
-                <Button variant="outline" size="sm" onClick={goToPrevious}>
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                <span className="text-sm font-medium px-4 whitespace-nowrap">
+                <motion.button
+                  onClick={goToPrevious}
+                  className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center shadow-sm hover:shadow-md transition-all"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <ChevronLeft className="w-5 h-5 text-gray-600" />
+                </motion.button>
+                <span className="text-sm font-bold text-gray-700 px-4 whitespace-nowrap">
                   {currentIndex + 1} / {allScreens.length}
                 </span>
-                <Button variant="outline" size="sm" onClick={goToNext}>
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
+                <motion.button
+                  onClick={goToNext}
+                  className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center shadow-sm hover:shadow-md transition-all"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <ChevronRight className="w-5 h-5 text-gray-600" />
+                </motion.button>
               </>
             )}
           </div>
@@ -445,15 +487,16 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
           {/* Right side - Download button (only in single mode) */}
           <div className="flex items-center gap-2 min-w-[180px] justify-end">
             {viewMode === 'single' && (
-              <Button
+              <motion.button
                 onClick={handleDownload}
                 disabled={isCapturing}
-                size="sm"
-                className="bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-white"
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-br from-amber-500 to-orange-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-amber-500/30 hover:shadow-xl transition-all disabled:opacity-50"
+                whileHover={{ scale: isCapturing ? 1 : 1.02 }}
+                whileTap={{ scale: isCapturing ? 1 : 0.98 }}
               >
-                <Download className="w-4 h-4 mr-2" />
+                <Download className="w-4 h-4" />
                 {isCapturing ? 'Capture...' : 'Télécharger PNG'}
-              </Button>
+              </motion.button>
             )}
           </div>
         </div>
@@ -463,11 +506,16 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
       <div className="max-w-7xl mx-auto px-4 py-8 relative z-10">
         {viewMode === 'grid' ? (
           /* Grid View with Categories */
-          <div className="space-y-12">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-12"
+          >
             {screensByCategory.map((category, categoryIndex) => (
-              <div key={categoryIndex}>
+              <motion.div key={categoryIndex} variants={itemVariants}>
                 {/* Category Header */}
-                <div className={`inline-flex items-center gap-2 bg-gradient-to-r ${category.color} text-white px-4 py-2 rounded-full text-sm font-bold mb-6`}>
+                <div className={`inline-flex items-center gap-2 bg-gradient-to-r ${category.color} text-white px-4 py-2 rounded-full text-sm font-bold mb-6 shadow-lg`}>
                   {category.name}
                   <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">
                     {category.screens.length}
@@ -479,26 +527,28 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
                   {category.screens.map((screen) => {
                     const globalIndex = allScreens.findIndex(s => s.route === screen.route);
                     return (
-                      <Card
+                      <motion.div
                         key={screen.route}
-                        className="p-4 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1"
+                        className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-lg hover:shadow-xl transition-all cursor-pointer"
                         onClick={() => {
                           setCurrentIndex(globalIndex);
                           setViewMode('single');
                         }}
+                        whileHover={{ scale: 1.02, y: -4 }}
+                        whileTap={{ scale: 0.98 }}
                       >
-                        <div className="aspect-[9/16] bg-[#F5F3F0] rounded-lg mb-3 border border-[rgba(120,113,108,0.1)] flex items-center justify-center text-[rgba(28,25,23,0.3)] text-xs">
-                          {screen.name}
+                        <div className="aspect-[9/16] bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl mb-3 border border-gray-200 flex items-center justify-center">
+                          <Image className="w-8 h-8 text-gray-400" strokeWidth={1.5} />
                         </div>
-                        <h3 className="font-medium text-sm truncate">{screen.name}</h3>
-                        <p className="text-xs text-[rgba(28,25,23,0.5)] truncate">{screen.route}</p>
-                      </Card>
+                        <h3 className="font-bold text-sm text-gray-800 truncate">{screen.name}</h3>
+                        <p className="text-xs text-gray-500 truncate font-medium">{screen.route}</p>
+                      </motion.div>
                     );
                   })}
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         ) : (
           /* Single Screen View */
           <motion.div
@@ -508,26 +558,42 @@ export default function ScreenshotGalleryScreen({ onNavigate, showToast }: Scree
             transition={{ duration: 0.3 }}
             className="max-w-md mx-auto"
           >
-            <Card className="p-6 mb-6">
-              <h2 className="text-2xl font-bold mb-2">{currentScreen.name}</h2>
-              <p className="text-[rgba(28,25,23,0.6)] text-sm">{currentScreen.route}</p>
-            </Card>
+            <motion.div
+              className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-white/50 shadow-lg"
+              variants={itemVariants}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md">
+                  <Sparkles className="w-6 h-6 text-white" strokeWidth={2} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-800">{currentScreen.name}</h2>
+                  <p className="text-sm text-gray-500 font-medium">{currentScreen.route}</p>
+                </div>
+              </div>
+            </motion.div>
 
             {/* Screen Preview */}
             <div className="relative">
               {/* Visual mockup frame - not captured */}
-              <div className="w-[406px] h-[860px] mx-auto bg-black rounded-3xl shadow-2xl p-2">
+              <div className="w-[406px] h-[860px] mx-auto bg-gradient-to-br from-gray-900 to-gray-800 rounded-[3rem] shadow-2xl p-2">
                 {/* Actual screen content - this is what gets captured at 390x844 */}
                 <div
                   ref={screenRef}
-                  className="w-[390px] h-[844px] bg-[#F5F3F0] rounded-2xl overflow-hidden"
+                  className="w-[390px] h-[844px] bg-gray-100 rounded-[2.5rem] overflow-hidden"
                 >
                   <Suspense
                     fallback={
-                      <div className="w-full h-full flex items-center justify-center">
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
                         <div className="text-center">
-                          <div className="w-12 h-12 border-4 border-[#F59E0B] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                          <p className="text-[rgba(28,25,23,0.6)]">Chargement...</p>
+                          <motion.div
+                            className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 mx-auto mb-4 flex items-center justify-center shadow-lg"
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                          >
+                            <Sparkles className="w-8 h-8 text-white" strokeWidth={2} />
+                          </motion.div>
+                          <p className="text-gray-500 font-medium">Chargement...</p>
                         </div>
                       </div>
                     }

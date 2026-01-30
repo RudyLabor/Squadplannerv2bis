@@ -6,6 +6,7 @@ import { useHaptic } from '@/app/hooks/useHaptic';
 import { useUser } from '@/app/contexts/UserContext';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { uploadService } from '@/app/services/upload';
+import { Button, Card, IconButton, Input, Textarea } from '@/design-system';
 
 interface EditProfileScreenProps {
   onNavigate: (screen: string, data?: any) => void;
@@ -133,57 +134,34 @@ export function EditProfileScreen({ onNavigate, showToast }: EditProfileScreenPr
   };
 
   return (
-    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
+    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-[var(--color-primary-50)] via-purple-50 to-pink-50 relative overflow-hidden">
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.15, 1] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
+        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-[var(--color-primary-400)]/20 to-purple-400/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl" />
       </div>
 
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-white/70 backdrop-blur-xl border-b border-white/50">
+      <div className="sticky top-0 z-20 bg-[var(--bg-elevated)]/70 backdrop-blur-xl border-b border-[var(--border-subtle)]">
         <div className="px-4 h-16 flex items-center justify-between max-w-2xl mx-auto">
-          <motion.button
+          <IconButton
+            aria-label="Retour"
+            icon={<ArrowLeft className="w-5 h-5" strokeWidth={2} />}
+            variant="secondary"
             onClick={() => onNavigate('profile')}
-            className="w-11 h-11 rounded-xl bg-white/80 backdrop-blur-sm border border-white/50 flex items-center justify-center shadow-md"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
-          </motion.button>
+          />
 
-          <h1 className="text-lg font-bold text-gray-800">Modifier le profil</h1>
+          <h1 className="text-lg font-bold text-[var(--fg-primary)] tracking-tight">Modifier le profil</h1>
 
-          <motion.button
+          <Button
             onClick={handleSave}
             disabled={!hasChanges || isSaving}
-            className={`h-11 px-5 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all ${
-              hasChanges && !isSaving
-                ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg shadow-indigo-500/30'
-                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            }`}
-            whileHover={hasChanges && !isSaving ? { scale: 1.02 } : {}}
-            whileTap={hasChanges && !isSaving ? { scale: 0.98 } : {}}
+            loading={isSaving}
+            icon={!isSaving ? <Save className="w-4 h-4" strokeWidth={2} /> : undefined}
+            size="sm"
           >
-            {isSaving ? (
-              <motion.div
-                className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              />
-            ) : (
-              <Save className="w-4 h-4" strokeWidth={2} />
-            )}
             {isSaving ? 'Envoi...' : 'Sauver'}
-          </motion.button>
+          </Button>
         </div>
       </div>
 
@@ -204,224 +182,187 @@ export function EditProfileScreen({ onNavigate, showToast }: EditProfileScreenPr
           className="space-y-6"
         >
           {/* Avatar Section */}
-          <motion.div
-            variants={itemVariants}
-            className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/50 shadow-lg"
-          >
-            <h2 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <Camera className="w-5 h-5 text-indigo-500" />
-              Photo de profil
-            </h2>
-            <div className="flex items-center gap-6">
-              <div className="relative">
-                <motion.div
-                  className="w-24 h-24 rounded-2xl overflow-hidden ring-4 ring-indigo-100 shadow-lg"
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <ImageWithFallback
-                    src={avatarUrl}
-                    alt="Avatar"
-                    className="w-full h-full object-cover"
-                  />
-                </motion.div>
-                <motion.button
-                  onClick={handleChangeAvatar}
-                  className="absolute -bottom-2 -right-2 w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-white flex items-center justify-center shadow-lg"
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <Camera className="w-5 h-5" strokeWidth={2} />
-                </motion.button>
+          <motion.div variants={itemVariants}>
+            <Card variant="elevated" padding="lg" className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm border-[var(--border-subtle)]">
+              <h2 className="text-base font-bold text-[var(--fg-primary)] mb-4 flex items-center gap-2 tracking-tight">
+                <Camera className="w-5 h-5 text-[var(--color-primary-500)]" />
+                Photo de profil
+              </h2>
+              <div className="flex items-center gap-6">
+                <div className="relative">
+                  <motion.div
+                    className="w-24 h-24 rounded-2xl overflow-hidden ring-4 ring-[var(--color-primary-100)] shadow-lg"
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    <ImageWithFallback
+                      src={avatarUrl}
+                      alt="Avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  </motion.div>
+                  <motion.button
+                    onClick={handleChangeAvatar}
+                    className="absolute -bottom-2 -right-2 w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary-500)] to-purple-500 text-white flex items-center justify-center shadow-lg"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <Camera className="w-5 h-5" strokeWidth={2} />
+                  </motion.button>
+                </div>
+                <div>
+                  <p className="text-sm text-[var(--fg-secondary)] font-medium mb-1">Photo de profil publique</p>
+                  <p className="text-xs text-[var(--fg-tertiary)]">JPG, PNG ou GIF. Max 5MB.</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-600 font-medium mb-1">Photo de profil publique</p>
-                <p className="text-xs text-gray-400">JPG, PNG ou GIF. Max 5MB.</p>
-              </div>
-            </div>
+            </Card>
           </motion.div>
 
           {/* Basic Info */}
-          <motion.div
-            variants={itemVariants}
-            className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/50 shadow-lg"
-          >
-            <h2 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <User className="w-5 h-5 text-indigo-500" />
-              Informations de base
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-2">
-                  Nom d'affichage
-                </label>
-                <input
+          <motion.div variants={itemVariants}>
+            <Card variant="elevated" padding="lg" className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm border-[var(--border-subtle)]">
+              <h2 className="text-base font-bold text-[var(--fg-primary)] mb-4 flex items-center gap-2 tracking-tight">
+                <User className="w-5 h-5 text-[var(--color-primary-500)]" />
+                Informations de base
+              </h2>
+              <div className="space-y-4">
+                <Input
+                  label="Nom d'affichage"
                   value={formData.displayName}
                   onChange={(e) => handleChange('displayName', e.target.value)}
                   placeholder="Votre nom"
-                  className="w-full h-12 px-4 bg-white/80 backdrop-blur-sm rounded-xl border border-white/50 text-gray-800 placeholder:text-gray-400 font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                  icon={<User className="w-5 h-5" />}
+                  size="lg"
                 />
-              </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-2">
-                  Nom d'utilisateur
-                </label>
-                <div className="relative">
-                  <AtSign className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    value={formData.username}
-                    onChange={(e) => handleChange('username', e.target.value)}
-                    placeholder="username"
-                    className="w-full h-12 pl-12 pr-4 bg-white/80 backdrop-blur-sm rounded-xl border border-white/50 text-gray-800 placeholder:text-gray-400 font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                <Input
+                  label="Nom d'utilisateur"
+                  value={formData.username}
+                  onChange={(e) => handleChange('username', e.target.value)}
+                  placeholder="username"
+                  icon={<AtSign className="w-5 h-5" />}
+                  size="lg"
+                />
+
+                <Input
+                  label="Email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleChange('email', e.target.value)}
+                  placeholder="votre@email.com"
+                  icon={<Mail className="w-5 h-5" />}
+                  size="lg"
+                />
+
+                <div>
+                  <Textarea
+                    label="Bio"
+                    value={formData.bio}
+                    onChange={(e) => handleChange('bio', e.target.value)}
+                    placeholder="Parlez de vous..."
+                    rows={3}
                   />
+                  <p className="text-xs text-[var(--fg-tertiary)] mt-1.5">{formData.bio?.length || 0}/200 caractères</p>
                 </div>
               </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-2">
-                  Email
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleChange('email', e.target.value)}
-                    placeholder="votre@email.com"
-                    className="w-full h-12 pl-12 pr-4 bg-white/80 backdrop-blur-sm rounded-xl border border-white/50 text-gray-800 placeholder:text-gray-400 font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-2">
-                  Bio
-                </label>
-                <textarea
-                  value={formData.bio}
-                  onChange={(e) => handleChange('bio', e.target.value)}
-                  placeholder="Parlez de vous..."
-                  rows={3}
-                  className="w-full p-4 bg-white/80 backdrop-blur-sm rounded-xl border border-white/50 text-gray-800 placeholder:text-gray-400 font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 resize-none"
-                />
-                <p className="text-xs text-gray-400 mt-1.5">{formData.bio?.length || 0}/200 caractères</p>
-              </div>
-            </div>
+            </Card>
           </motion.div>
 
           {/* Personal Info */}
-          <motion.div
-            variants={itemVariants}
-            className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/50 shadow-lg"
-          >
-            <h2 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <Shield className="w-5 h-5 text-indigo-500" />
-              Informations personnelles
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-2">
-                  Localisation
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    value={formData.location}
-                    onChange={(e) => handleChange('location', e.target.value)}
-                    placeholder="Ville, Pays"
-                    className="w-full h-12 pl-12 pr-4 bg-white/80 backdrop-blur-sm rounded-xl border border-white/50 text-gray-800 placeholder:text-gray-400 font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
-                  />
-                </div>
-              </div>
+          <motion.div variants={itemVariants}>
+            <Card variant="elevated" padding="lg" className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm border-[var(--border-subtle)]">
+              <h2 className="text-base font-bold text-[var(--fg-primary)] mb-4 flex items-center gap-2 tracking-tight">
+                <Shield className="w-5 h-5 text-[var(--color-primary-500)]" />
+                Informations personnelles
+              </h2>
+              <div className="space-y-4">
+                <Input
+                  label="Localisation"
+                  value={formData.location}
+                  onChange={(e) => handleChange('location', e.target.value)}
+                  placeholder="Ville, Pays"
+                  icon={<MapPin className="w-5 h-5" />}
+                  size="lg"
+                />
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-2">
-                  Date de naissance
-                </label>
-                <div className="relative">
-                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="date"
-                    value={formData.birthday}
-                    onChange={(e) => handleChange('birthday', e.target.value)}
-                    className="w-full h-12 pl-12 pr-4 bg-white/80 backdrop-blur-sm rounded-xl border border-white/50 text-gray-800 font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
-                  />
-                </div>
+                <Input
+                  label="Date de naissance"
+                  type="date"
+                  value={formData.birthday}
+                  onChange={(e) => handleChange('birthday', e.target.value)}
+                  icon={<Calendar className="w-5 h-5" />}
+                  size="lg"
+                />
               </div>
-            </div>
+            </Card>
           </motion.div>
 
           {/* Gaming Preferences */}
-          <motion.div
-            variants={itemVariants}
-            className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/50 shadow-lg"
-          >
-            <h2 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <Gamepad2 className="w-5 h-5 text-indigo-500" />
-              Préférences de jeu
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-2">
-                  Jeu favori
-                </label>
-                <div className="relative">
-                  <Trophy className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <motion.div variants={itemVariants}>
+            <Card variant="elevated" padding="lg" className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm border-[var(--border-subtle)]">
+              <h2 className="text-base font-bold text-[var(--fg-primary)] mb-4 flex items-center gap-2 tracking-tight">
+                <Gamepad2 className="w-5 h-5 text-[var(--color-primary-500)]" />
+                Préférences de jeu
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-[var(--fg-secondary)] mb-2">
+                    Jeu favori
+                  </label>
+                  <div className="relative">
+                    <Trophy className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--fg-tertiary)] z-10" />
+                    <select
+                      value={formData.favoriteGame}
+                      onChange={(e) => handleChange('favoriteGame', e.target.value)}
+                      className="w-full h-12 pl-12 pr-4 bg-[var(--bg-elevated)] rounded-xl border border-[var(--border-subtle)] text-[var(--fg-primary)] text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]/30 appearance-none"
+                    >
+                      <option value="Valorant">Valorant</option>
+                      <option value="CS2">Counter-Strike 2</option>
+                      <option value="League of Legends">League of Legends</option>
+                      <option value="Apex Legends">Apex Legends</option>
+                      <option value="Overwatch 2">Overwatch 2</option>
+                      <option value="Fortnite">Fortnite</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-[var(--fg-secondary)] mb-2">
+                    Style de jeu
+                  </label>
                   <select
-                    value={formData.favoriteGame}
-                    onChange={(e) => handleChange('favoriteGame', e.target.value)}
-                    className="w-full h-12 pl-12 pr-4 bg-white/80 backdrop-blur-sm rounded-xl border border-white/50 text-gray-800 font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 appearance-none"
+                    value={formData.playStyle}
+                    onChange={(e) => handleChange('playStyle', e.target.value)}
+                    className="w-full h-12 px-4 bg-[var(--bg-elevated)] rounded-xl border border-[var(--border-subtle)] text-[var(--fg-primary)] text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]/30 appearance-none"
                   >
-                    <option value="Valorant">Valorant</option>
-                    <option value="CS2">Counter-Strike 2</option>
-                    <option value="League of Legends">League of Legends</option>
-                    <option value="Apex Legends">Apex Legends</option>
-                    <option value="Overwatch 2">Overwatch 2</option>
-                    <option value="Fortnite">Fortnite</option>
+                    <option value="Aggressive">Agressif</option>
+                    <option value="Defensive">Défensif</option>
+                    <option value="Balanced">Équilibré</option>
+                    <option value="Support">Support</option>
+                    <option value="Strategic">Stratégique</option>
                   </select>
                 </div>
               </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-2">
-                  Style de jeu
-                </label>
-                <select
-                  value={formData.playStyle}
-                  onChange={(e) => handleChange('playStyle', e.target.value)}
-                  className="w-full h-12 px-4 bg-white/80 backdrop-blur-sm rounded-xl border border-white/50 text-gray-800 font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 appearance-none"
-                >
-                  <option value="Aggressive">Agressif</option>
-                  <option value="Defensive">Défensif</option>
-                  <option value="Balanced">Équilibré</option>
-                  <option value="Support">Support</option>
-                  <option value="Strategic">Stratégique</option>
-                </select>
-              </div>
-            </div>
+            </Card>
           </motion.div>
 
           {/* Danger Zone */}
-          <motion.div
-            variants={itemVariants}
-            className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl p-6 border border-red-200/50 shadow-lg"
-          >
-            <h2 className="text-base font-bold text-red-700 mb-2 flex items-center gap-2">
-              <Trash2 className="w-5 h-5" strokeWidth={2} />
-              Zone dangereuse
-            </h2>
-            <p className="text-sm text-red-600 mb-4">
-              La suppression de votre compte est irréversible. Toutes vos données seront perdues.
-            </p>
-            <motion.button
-              onClick={handleDeleteAccount}
-              className="h-11 px-5 rounded-xl text-sm font-semibold bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg shadow-red-500/20 flex items-center gap-2"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Trash2 className="w-4 h-4" strokeWidth={2} />
-              Supprimer le compte
-            </motion.button>
+          <motion.div variants={itemVariants}>
+            <Card variant="elevated" padding="lg" className="bg-gradient-to-br from-[var(--color-error-50)] to-orange-50 border-[var(--color-error-200)]/50">
+              <h2 className="text-base font-bold text-[var(--color-error-700)] mb-2 flex items-center gap-2 tracking-tight">
+                <Trash2 className="w-5 h-5" strokeWidth={2} />
+                Zone dangereuse
+              </h2>
+              <p className="text-sm text-[var(--color-error-600)] mb-4">
+                La suppression de votre compte est irréversible. Toutes vos données seront perdues.
+              </p>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteAccount}
+                icon={<Trash2 className="w-4 h-4" strokeWidth={2} />}
+              >
+                Supprimer le compte
+              </Button>
+            </Card>
           </motion.div>
         </motion.div>
       </div>
@@ -430,13 +371,13 @@ export function EditProfileScreen({ onNavigate, showToast }: EditProfileScreenPr
       <AnimatePresence>
         {hasChanges && (
           <motion.div
-            className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-2xl px-6 py-3 border border-white/50 shadow-xl z-50"
+            className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-[var(--bg-elevated)]/90 backdrop-blur-sm rounded-2xl px-6 py-3 border border-[var(--border-subtle)] shadow-xl z-50"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
           >
-            <p className="text-sm text-gray-600 font-medium flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-indigo-500" />
+            <p className="text-sm text-[var(--fg-secondary)] font-medium flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[var(--color-primary-500)]" />
               Modifications non sauvegardées
             </p>
           </motion.div>

@@ -1,5 +1,9 @@
+/**
+ * DESKTOP HEADER - LINEAR DESIGN SYSTEM
+ * Minimal, functional, precise
+ */
+
 import { Bell, Search, Command } from 'lucide-react';
-import { LanguageSwitcher } from '@/app/components/LanguageSwitcher';
 
 interface DesktopHeaderProps {
   onCommandOpen: () => void;
@@ -7,42 +11,33 @@ interface DesktopHeaderProps {
 
 export function DesktopHeader({ onCommandOpen }: DesktopHeaderProps) {
   return (
-    <div className="fixed top-0 left-72 right-0 h-16 z-30 bg-white/80 backdrop-blur-md border-b border-[var(--border-subtle)]">
-      <div className="h-full px-8 flex items-center justify-between">
-        {/* Page Title - Optional, can be dynamic later */}
-        <div className="flex items-center gap-3">
-          <h1 className="text-lg font-semibold text-[var(--fg-primary)] tracking-tight">
-            Tableau de bord
-          </h1>
-        </div>
+    <div className="fixed top-0 left-[260px] right-0 h-14 z-30 bg-[#0e0f11]/90 backdrop-blur-md border-b border-[#1e2024]">
+      <div className="h-full px-6 flex items-center justify-end">
 
         {/* Actions */}
-        <div className="flex items-center gap-3">
-          {/* Command Palette Trigger */}
+        <div className="flex items-center gap-2">
+          {/* Command Palette Trigger - Linear style */}
           <button
             onClick={onCommandOpen}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--bg-subtle)] hover:bg-[var(--bg-secondary)] text-[var(--fg-secondary)] hover:text-[var(--fg-primary)] transition-all duration-200 border border-[var(--border-subtle)]"
+            className="flex items-center gap-2 h-8 px-3 rounded-lg bg-[#141518] hover:bg-[#1a1b1f] border border-[#26282d] hover:border-[#36383d] transition-all duration-100"
           >
-            <Search className="w-4 h-4" strokeWidth={1.5} />
-            <span className="text-sm font-medium">Rechercher</span>
-            <div className="flex items-center gap-0.5 ml-1 px-2 py-0.5 rounded-md bg-white text-xs text-[var(--fg-tertiary)] font-mono border border-[var(--border-subtle)]">
-              <Command className="w-3 h-3" />
+            <Search className="w-3.5 h-3.5 text-[#6f7177]" strokeWidth={1.5} />
+            <span className="text-[13px] text-[#6f7177]">Rechercher...</span>
+            <div className="flex items-center gap-0.5 ml-2 px-1.5 py-0.5 rounded bg-[#1e2024] text-[11px] text-[#6f7177] font-mono">
+              <Command className="w-2.5 h-2.5" />
               <span>K</span>
             </div>
           </button>
 
           {/* Notifications */}
           <button
-            className="relative w-10 h-10 rounded-xl flex items-center justify-center text-[var(--fg-secondary)] hover:text-[var(--fg-primary)] hover:bg-[var(--bg-subtle)] transition-all duration-200"
+            className="relative w-8 h-8 rounded-lg flex items-center justify-center text-[#6f7177] hover:text-[#ececed] hover:bg-[#1a1b1f] transition-all duration-100"
           >
-            <Bell className="w-5 h-5" strokeWidth={1.5} />
-            
-            {/* Notification badge */}
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[var(--primary-500)] border-2 border-white"></span>
-          </button>
+            <Bell className="w-4 h-4" strokeWidth={1.5} />
 
-          {/* Language Switcher */}
-          <LanguageSwitcher />
+            {/* Notification dot */}
+            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#5e6ad2]" />
+          </button>
         </div>
       </div>
     </div>

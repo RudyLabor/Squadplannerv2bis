@@ -71,15 +71,7 @@ function PremiumChallengeCard({ challenge, index, onClaim }: PremiumChallengeCar
       } shadow-lg transition-all duration-300`}
       whileHover={{ scale: 1.01, y: -2 }}
     >
-      {/* Completed overlay shine */}
-      {challenge.completed && (
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
-          initial={{ x: '-100%' }}
-          animate={{ x: '200%' }}
-          transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-        />
-      )}
+      {/* Removed shine animation for performance */}
 
       <div className="relative p-5">
         {/* Header */}
@@ -269,21 +261,9 @@ export function ChallengesScreen({ onNavigate, showToast }: ChallengesScreenProp
     <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.15, 1] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute top-1/3 right-1/4 w-64 h-64 bg-gradient-to-br from-emerald-400/15 to-teal-400/15 rounded-full blur-3xl"
-          animate={{ y: [0, 30, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        />
+        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-gradient-to-br from-emerald-400/15 to-teal-400/15 rounded-full blur-3xl" />
       </div>
 
       <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
@@ -342,12 +322,7 @@ export function ChallengesScreen({ onNavigate, showToast }: ChallengesScreenProp
             variants={itemVariants}
             className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-6 mb-6 shadow-xl shadow-indigo-500/20 relative overflow-hidden"
           >
-            {/* Shine effect */}
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-              animate={{ x: ['-100%', '200%'] }}
-              transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
-            />
+            {/* Removed shine animation for performance */}
 
             <div className="relative flex items-center justify-between mb-4">
               <div>
@@ -358,13 +333,9 @@ export function ChallengesScreen({ onNavigate, showToast }: ChallengesScreenProp
                   {completedCount}/{challenges.length}
                 </div>
               </div>
-              <motion.div
-                className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center"
-                animate={{ rotate: [0, 5, -5, 0] }}
-                transition={{ duration: 4, repeat: Infinity }}
-              >
+              <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
                 <Trophy className="w-8 h-8 text-white" strokeWidth={2} />
-              </motion.div>
+              </div>
             </div>
 
             {/* Progress Bar */}
@@ -417,13 +388,9 @@ export function ChallengesScreen({ onNavigate, showToast }: ChallengesScreenProp
             className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-white/50 mt-8 shadow-lg"
           >
             <div className="flex items-start gap-4">
-              <motion.div
-                className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0"
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 4, repeat: Infinity }}
-              >
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0">
                 <TrendingUp className="w-6 h-6 text-white" strokeWidth={2} />
-              </motion.div>
+              </div>
               <div>
                 <h3 className="text-base font-bold text-gray-800 mb-1">
                   De nouveaux défis chaque semaine

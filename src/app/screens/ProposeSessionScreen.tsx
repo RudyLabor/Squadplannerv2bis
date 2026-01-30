@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { sessionsAPI, squadsAPI } from "@/utils/api";
 import { TimePicker } from "@/app/components/TimePicker";
 import { DatePicker } from "@/app/components/DatePicker";
+import { Button, IconButton } from "@/design-system";
 
 interface ProposeSessionScreenProps {
   onNavigate: (screen: string, data?: any) => void;
@@ -68,18 +69,11 @@ export function ProposeSessionScreen({
     loadSquads();
   }, []);
 
-  const calculateEndTime = (start: string, durationStr: string) => {
-    const startDate = new Date(start);
-    const hours = parseInt(durationStr.replace('h', ''));
-    startDate.setHours(startDate.getHours() + hours);
-    return startDate.toISOString();
-  };
-
   const loadSquads = async () => {
     try {
-      const response = await squadsAPI.getSquads();
-      const loadedSquads = response.squads || [];
-      setSquads(loadedSquads);
+      // squadsAPI.getSquads() returns an array directly, not { squads: [] }
+      const loadedSquads = await squadsAPI.getSquads();
+      setSquads(Array.isArray(loadedSquads) ? loadedSquads : []);
 
       if (data?.squadId) {
         setSelectedSquad(data.squadId);
@@ -109,16 +103,20 @@ export function ProposeSessionScreen({
     setIsCreating(true);
     try {
       const game = GAMES.find((g) => g.id === selectedGame);
+      // API expects: scheduled_date (YYYY-MM-DD), scheduled_time (HH:MM), duration, game, description
       await sessionsAPI.createSession(selectedSquad, {
         title: title.trim(),
         game: game?.name || selectedGame || "Non spécifié",
-        start_time: `${date}T${time}:00`,
-        end_time: calculateEndTime(`${date}T${time}:00`, duration),
+        scheduled_date: date,
+        scheduled_time: time,
+        duration: duration,
         description: comment,
+        required_players: playerCount,
       });
       showToast("Session créée avec succès !", "success");
       onNavigate("sessions");
     } catch (error) {
+      console.error("Session creation error:", error);
       showToast("Erreur lors de la création", "error");
     } finally {
       setIsCreating(false);
@@ -128,64 +126,61 @@ export function ProposeSessionScreen({
   const selectedGameData = GAMES.find((g) => g.id === selectedGame);
 
   return (
-    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
-      {/* Background decorations */}
+    <div className="min-h-screen pb-24 pt-safe bg-[var(--bg-base)] relative overflow-hidden">
+      {/* Background decorations - Static for performance */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.15, 1] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
+        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-[var(--color-primary-400)]/20 to-purple-400/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl" />
       </div>
 
       <div className="relative z-10 px-4 py-6 max-w-2xl mx-auto">
         <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
+          initial={{ opacity: 0, y: 15, filter: "blur(5px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 0.35 }}
         >
-          {/* Header */}
-          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
-            <motion.button
-              onClick={() => onNavigate("sessions")}
-              className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 flex items-center justify-center shadow-lg"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-700" />
-            </motion.button>
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                Proposer une session
-              </h1>
-              <p className="text-sm text-indigo-500 font-medium mt-0.5">
-                Organise ta prochaine partie
-              </p>
-            </div>
-            <motion.div
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg"
-              whileHover={{ scale: 1.05, rotate: 5 }}
-            >
-              <Calendar className="w-6 h-6 text-white" strokeWidth={2} />
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {/* Header */}
+            <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
+              <IconButton
+                aria-label="Retour"
+                icon={<ArrowLeft className="w-5 h-5" />}
+                variant="secondary"
+                size="lg"
+                onClick={() => onNavigate("sessions")}
+                className="rounded-2xl bg-[var(--bg-elevated)]/80 backdrop-blur-sm border-[var(--border-subtle)]/50 shadow-lg"
+              />
+              <div className="flex-1">
+                <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-[var(--color-primary-600)] to-purple-600 bg-clip-text text-transparent">
+                  Proposer une session
+                </h1>
+                <p className="text-sm text-[var(--color-primary-500)] font-medium mt-0.5">
+                  Organise ta prochaine partie
+                </p>
+              </div>
+              <motion.div
+                className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--color-primary-500)] to-purple-600 flex items-center justify-center shadow-lg shadow-[var(--color-primary-500)]/30"
+                whileHover={{ scale: 1.05, rotate: 5 }}
+              >
+                <Calendar className="w-6 h-6 text-white" strokeWidth={2} />
+              </motion.div>
             </motion.div>
-          </motion.div>
 
           {/* Mode Toggle */}
           <motion.div
             variants={itemVariants}
-            className="bg-white/60 backdrop-blur-sm rounded-2xl p-1.5 flex mb-6 border border-white/50"
+            className="bg-[var(--bg-elevated)]/60 backdrop-blur-sm rounded-2xl p-1.5 flex mb-6 border border-[var(--border-subtle)]/50"
           >
             <motion.button
               onClick={() => setMode("single")}
               className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all ${
                 mode === "single"
-                  ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md"
-                  : "text-gray-500"
+                  ? "bg-gradient-to-r from-[var(--color-primary-500)] to-purple-500 text-white shadow-md"
+                  : "text-[var(--fg-secondary)]"
               }`}
               whileTap={{ scale: 0.98 }}
             >
@@ -195,8 +190,8 @@ export function ProposeSessionScreen({
               onClick={() => setMode("multi")}
               className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all ${
                 mode === "multi"
-                  ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md"
-                  : "text-gray-500"
+                  ? "bg-gradient-to-r from-[var(--color-primary-500)] to-purple-500 text-white shadow-md"
+                  : "text-[var(--fg-secondary)]"
               }`}
               whileTap={{ scale: 0.98 }}
             >
@@ -207,14 +202,14 @@ export function ProposeSessionScreen({
           {/* Squad Selector */}
           {squads.length > 0 && (
             <motion.div variants={itemVariants} className="mb-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-[var(--fg-primary)] mb-2">
                 Squad
               </label>
               <div className="relative">
                 <select
                   value={selectedSquad || ""}
                   onChange={(e) => setSelectedSquad(e.target.value)}
-                  className="w-full h-14 px-4 bg-white/80 backdrop-blur-sm rounded-2xl border border-white/50 text-gray-800 font-medium appearance-none shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                  className="w-full h-14 px-4 bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)]/50 text-[var(--fg-primary)] font-medium appearance-none shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]/30"
                 >
                   {squads.map((squad) => (
                     <option key={squad.id} value={squad.id}>
@@ -222,14 +217,14 @@ export function ProposeSessionScreen({
                     </option>
                   ))}
                 </select>
-                <Users className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                <Users className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--fg-tertiary)] pointer-events-none" />
               </div>
             </motion.div>
           )}
 
           {/* Title */}
           <motion.div variants={itemVariants} className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-[var(--fg-primary)] mb-2">
               Titre de la session
             </label>
             <input
@@ -237,21 +232,21 @@ export function ProposeSessionScreen({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ex: Ranked Valorant"
-              className="w-full h-14 px-4 bg-white/80 backdrop-blur-sm rounded-2xl border border-white/50 text-gray-800 placeholder:text-gray-400 font-medium shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+              className="w-full h-14 px-4 bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)]/50 text-[var(--fg-primary)] placeholder:text-[var(--fg-tertiary)] font-medium shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]/30"
             />
           </motion.div>
 
           {/* Game Picker */}
           <motion.div variants={itemVariants} className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-[var(--fg-primary)] mb-2">
               Jeu
             </label>
             <motion.button
               onClick={() => setShowGamePicker(true)}
-              className={`w-full h-20 bg-white/80 backdrop-blur-sm rounded-2xl border border-white/50 flex flex-col items-center justify-center shadow-lg ${
+              className={`w-full h-20 bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)]/50 flex flex-col items-center justify-center shadow-lg ${
                 selectedGameData ? '' : 'border-dashed'
               }`}
-              whileHover={{ scale: 1.01 }}
+              whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.99 }}
             >
               {selectedGameData ? (
@@ -259,12 +254,12 @@ export function ProposeSessionScreen({
                   <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${selectedGameData.gradient} flex items-center justify-center shadow-md`}>
                     <span className="text-2xl">{selectedGameData.icon}</span>
                   </div>
-                  <span className="font-semibold text-gray-800">{selectedGameData.name}</span>
+                  <span className="font-semibold text-[var(--fg-primary)]">{selectedGameData.name}</span>
                 </div>
               ) : (
                 <>
-                  <Gamepad2 className="w-6 h-6 text-gray-400 mb-1" />
-                  <span className="text-sm text-gray-500 font-medium">Choisir un jeu</span>
+                  <Gamepad2 className="w-6 h-6 text-[var(--fg-tertiary)] mb-1" />
+                  <span className="text-sm text-[var(--fg-secondary)] font-medium">Choisir un jeu</span>
                 </>
               )}
             </motion.button>
@@ -272,7 +267,7 @@ export function ProposeSessionScreen({
 
           {/* Player Count */}
           <motion.div variants={itemVariants} className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-[var(--fg-primary)] mb-2">
               Joueurs requis
             </label>
             <div className="flex gap-2">
@@ -282,8 +277,8 @@ export function ProposeSessionScreen({
                   onClick={() => setPlayerCount(count)}
                   className={`flex-1 h-14 rounded-xl flex flex-col items-center justify-center transition-all shadow-md ${
                     playerCount === count
-                      ? "bg-gradient-to-br from-emerald-500 to-teal-500 text-white"
-                      : "bg-white/80 backdrop-blur-sm text-gray-600 border border-white/50"
+                      ? "bg-gradient-to-br from-[var(--color-success-500)] to-teal-500 text-white"
+                      : "bg-[var(--bg-elevated)]/80 backdrop-blur-sm text-[var(--fg-secondary)] border border-[var(--border-subtle)]/50"
                   }`}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -297,23 +292,23 @@ export function ProposeSessionScreen({
 
           {/* Date & Time */}
           <motion.div variants={itemVariants} className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-[var(--fg-primary)] mb-2">
               Date et heure
             </label>
             <div className="grid grid-cols-2 gap-3 mb-3">
               <motion.button
                 type="button"
                 onClick={() => setShowDatePicker(true)}
-                className="h-14 bg-white/80 backdrop-blur-sm rounded-2xl border border-white/50 text-left px-4 flex items-center gap-3 shadow-lg"
-                whileHover={{ scale: 1.01 }}
+                className="h-14 bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)]/50 text-left px-4 flex items-center gap-3 shadow-lg"
+                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.99 }}
               >
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary-500)] to-purple-500 flex items-center justify-center">
                   <Calendar className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <span className="text-xs text-gray-400 font-medium block">DATE</span>
-                  <span className={date ? 'text-gray-800 font-semibold' : 'text-gray-400'}>
+                  <span className="text-xs text-[var(--fg-tertiary)] font-medium block">DATE</span>
+                  <span className={date ? 'text-[var(--fg-primary)] font-semibold' : 'text-[var(--fg-tertiary)]'}>
                     {date ? new Date(date + 'T00:00:00').toLocaleDateString('fr-FR', {
                       day: 'numeric',
                       month: 'short'
@@ -324,23 +319,23 @@ export function ProposeSessionScreen({
               <motion.button
                 type="button"
                 onClick={() => setShowTimePicker(true)}
-                className="h-14 bg-white/80 backdrop-blur-sm rounded-2xl border border-white/50 text-left px-4 flex items-center gap-3 shadow-lg"
-                whileHover={{ scale: 1.01 }}
+                className="h-14 bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)]/50 text-left px-4 flex items-center gap-3 shadow-lg"
+                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.99 }}
               >
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-warning-500)] to-orange-500 flex items-center justify-center">
                   <Clock className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <span className="text-xs text-gray-400 font-medium block">HEURE</span>
-                  <span className={time ? 'text-gray-800 font-semibold' : 'text-gray-400'}>
+                  <span className="text-xs text-[var(--fg-tertiary)] font-medium block">HEURE</span>
+                  <span className={time ? 'text-[var(--fg-primary)] font-semibold' : 'text-[var(--fg-tertiary)]'}>
                     {time ? `${time.split(':')[0]}h${time.split(':')[1]}` : 'Choisir'}
                   </span>
                 </div>
               </motion.button>
             </div>
             <div>
-              <span className="text-xs text-gray-400 font-medium block mb-2">DURÉE</span>
+              <span className="text-xs text-[var(--fg-tertiary)] font-medium block mb-2">DUREE</span>
               <div className="flex gap-2">
                 {DURATIONS.map((d) => (
                   <motion.button
@@ -348,8 +343,8 @@ export function ProposeSessionScreen({
                     onClick={() => setDuration(d)}
                     className={`flex-1 h-12 rounded-xl text-sm font-semibold transition-all shadow-md ${
                       duration === d
-                        ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white"
-                        : "bg-white/80 backdrop-blur-sm text-gray-600 border border-white/50"
+                        ? "bg-gradient-to-r from-[var(--color-primary-500)] to-purple-500 text-white"
+                        : "bg-[var(--bg-elevated)]/80 backdrop-blur-sm text-[var(--fg-secondary)] border border-[var(--border-subtle)]/50"
                     }`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -363,43 +358,31 @@ export function ProposeSessionScreen({
 
           {/* Comment */}
           <motion.div variants={itemVariants} className="mb-8">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-[var(--fg-primary)] mb-2">
               Commentaire (optionnel)
             </label>
             <textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder="Stratégie, rôles, objectifs..."
+              placeholder="Strategie, roles, objectifs..."
               rows={3}
-              className="w-full p-4 bg-white/80 backdrop-blur-sm rounded-2xl border border-white/50 text-gray-800 placeholder:text-gray-400 font-medium shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/30 resize-none"
+              className="w-full p-4 bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)]/50 text-[var(--fg-primary)] placeholder:text-[var(--fg-tertiary)] font-medium shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]/30 resize-none"
             />
           </motion.div>
 
           {/* Create Button */}
-          <motion.button
-            variants={itemVariants}
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth
             onClick={handleCreate}
             disabled={isCreating}
-            className="w-full py-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white rounded-2xl font-semibold flex items-center justify-center gap-3 shadow-lg shadow-indigo-500/30 disabled:opacity-50"
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
+            icon={isCreating ? undefined : <Sparkles className="w-5 h-5" />}
+            className="shadow-lg shadow-[var(--color-primary-500)]/30"
           >
-            {isCreating ? (
-              <>
-                <motion.div
-                  className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                />
-                Création...
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-5 h-5" />
-                Créer la session
-              </>
-            )}
-          </motion.button>
+            {isCreating ? "Creation..." : "Creer la session"}
+          </Button>
+          </motion.div>
         </motion.div>
       </div>
 
@@ -414,23 +397,23 @@ export function ProposeSessionScreen({
             onClick={() => setShowGamePicker(false)}
           >
             <motion.div
-              className="bg-white rounded-t-3xl w-full"
+              className="bg-[var(--bg-elevated)] rounded-t-3xl w-full"
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-3" />
-              <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-                <h2 className="font-bold text-gray-900 text-lg">Choisir un jeu</h2>
+              <div className="w-12 h-1.5 bg-[var(--border-subtle)] rounded-full mx-auto my-3" />
+              <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
+                <h2 className="font-bold tracking-tight text-[var(--fg-primary)] text-lg">Choisir un jeu</h2>
                 <motion.button
                   onClick={() => setShowGamePicker(false)}
-                  className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"
+                  className="w-8 h-8 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                 >
-                  <X className="w-4 h-4 text-gray-500" />
+                  <X className="w-4 h-4 text-[var(--fg-secondary)]" />
                 </motion.button>
               </div>
               <div className="p-4 grid grid-cols-2 gap-3 pb-8">
@@ -441,10 +424,10 @@ export function ProposeSessionScreen({
                       setSelectedGame(game.id);
                       setShowGamePicker(false);
                     }}
-                    className={`p-4 rounded-2xl text-center transition-all ${
+                    className={`p-4 rounded-2xl text-center transition-all relative ${
                       selectedGame === game.id
                         ? `bg-gradient-to-br ${game.gradient} text-white shadow-lg`
-                        : "bg-gray-50 hover:bg-gray-100"
+                        : "bg-[var(--bg-subtle)] hover:bg-[var(--bg-subtle)]/80"
                     }`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -454,7 +437,7 @@ export function ProposeSessionScreen({
                   >
                     <span className="text-3xl block mb-2">{game.icon}</span>
                     <span className={`text-sm font-semibold ${
-                      selectedGame === game.id ? 'text-white' : 'text-gray-800'
+                      selectedGame === game.id ? 'text-white' : 'text-[var(--fg-primary)]'
                     }`}>
                       {game.name}
                     </span>

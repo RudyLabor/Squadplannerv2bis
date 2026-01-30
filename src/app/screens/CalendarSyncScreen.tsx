@@ -181,16 +181,8 @@ export function CalendarSyncScreen({ onNavigate, showToast }: CalendarSyncScreen
       <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
         {/* Background decorations */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <motion.div
-            className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full blur-3xl"
-            animate={{ scale: [1, 1.1, 1] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.div
-            className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl"
-            animate={{ scale: [1, 1.15, 1] }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          />
+          <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full blur-3xl" />
+          <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl" />
         </div>
 
         <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
@@ -230,20 +222,12 @@ export function CalendarSyncScreen({ onNavigate, showToast }: CalendarSyncScreen
               variants={itemVariants}
               className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-3xl p-8 text-white text-center mb-6 shadow-2xl shadow-indigo-500/30 relative overflow-hidden"
             >
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
-                animate={{ x: ['-100%', '200%'] }}
-                transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
-              />
+              {/* Removed shine animation for performance */}
 
               <div className="relative">
-                <motion.div
-                  className="w-20 h-20 rounded-3xl bg-white/20 backdrop-blur-sm mx-auto mb-6 flex items-center justify-center"
-                  animate={{ y: [0, -5, 0] }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                >
+                <div className="w-20 h-20 rounded-3xl bg-white/20 backdrop-blur-sm mx-auto mb-6 flex items-center justify-center">
                   <Crown className="w-10 h-10" strokeWidth={2} />
-                </motion.div>
+                </div>
                 <h2 className="text-3xl font-black mb-3">Fonctionnalité Premium</h2>
                 <p className="text-white/80 mb-8 max-w-sm mx-auto leading-relaxed font-medium">
                   Synchronisez vos sessions automatiquement avec Google Calendar, Apple Calendar ou Outlook.
@@ -302,16 +286,8 @@ export function CalendarSyncScreen({ onNavigate, showToast }: CalendarSyncScreen
     <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-cyan-400/20 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.15, 1] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
+        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-cyan-400/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl" />
       </div>
 
       <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">

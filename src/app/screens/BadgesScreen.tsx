@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { mockBadges } from '@/data/mockData';
 import { statsAPI } from '@/utils/api';
 import { useUser } from '@/app/contexts/UserContext';
+import { Card, Badge, SkeletonPage } from '@/design-system';
 
 interface BadgesScreenProps {
   onNavigate: (screen: string) => void;
@@ -14,7 +15,7 @@ interface BadgesScreenProps {
 
 type BadgeRarity = 'common' | 'rare' | 'epic' | 'legendary';
 
-interface Badge {
+interface BadgeItem {
   id: string;
   name: string;
   description: string;
@@ -73,7 +74,7 @@ const rarityConfig: Record<BadgeRarity, { gradient: string; icon: React.ElementT
 };
 
 interface PremiumBadgeCardProps {
-  badge: Badge;
+  badge: BadgeItem;
   isEquipped: boolean;
   onToggleEquip: () => void;
   index: number;
@@ -91,26 +92,22 @@ function PremiumBadgeCard({ badge, isEquipped, onToggleEquip, index }: PremiumBa
       className={`relative overflow-hidden rounded-2xl p-4 text-left transition-all duration-300 ${
         badge.unlocked
           ? isEquipped
-            ? 'bg-white/95 border-2 border-indigo-500 shadow-lg shadow-indigo-500/20'
-            : 'bg-white/80 border border-white/50 hover:bg-white/90'
-          : 'bg-white/40 border border-white/30 opacity-60'
+            ? 'bg-[var(--bg-elevated)] border-2 border-[var(--color-primary-500)] shadow-lg shadow-[var(--color-primary-500)]/20'
+            : 'bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:bg-[var(--bg-elevated)]/90'
+          : 'bg-[var(--bg-elevated)]/40 border border-[var(--border-subtle)] opacity-60'
       } backdrop-blur-sm`}
       whileHover={badge.unlocked ? { scale: 1.02, y: -2 } : {}}
       whileTap={badge.unlocked ? { scale: 0.98 } : {}}
     >
-      {/* Rarity Glow Effect */}
+      {/* Rarity Glow Effect - static for performance */}
       {badge.unlocked && (
-        <motion.div
-          className={`absolute -top-10 -right-10 w-24 h-24 bg-gradient-to-br ${config.gradient} rounded-full blur-2xl opacity-20`}
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 3, repeat: Infinity }}
-        />
+        <div className={`absolute -top-10 -right-10 w-24 h-24 bg-gradient-to-br ${config.gradient} rounded-full blur-2xl opacity-20`} />
       )}
 
       {/* Equipped Indicator */}
       {isEquipped && badge.unlocked && (
         <motion.div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center shadow-md"
+          className="absolute top-2 right-2 w-6 h-6 rounded-full bg-gradient-to-r from-[var(--color-primary-500)] to-purple-500 flex items-center justify-center shadow-md"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 500 }}
@@ -124,33 +121,35 @@ function PremiumBadgeCard({ badge, isEquipped, onToggleEquip, index }: PremiumBa
         className={`w-14 h-14 rounded-xl flex items-center justify-center mb-3 ${
           badge.unlocked
             ? `bg-gradient-to-br ${config.gradient} shadow-lg`
-            : 'bg-gray-200'
+            : 'bg-[var(--bg-base)]'
         }`}
         whileHover={badge.unlocked ? { rotate: 5, scale: 1.1 } : {}}
       >
-        <Icon className={`w-7 h-7 ${badge.unlocked ? 'text-white' : 'text-gray-400'}`} strokeWidth={2} />
+        <Icon className={`w-7 h-7 ${badge.unlocked ? 'text-white' : 'text-[var(--fg-tertiary)]'}`} strokeWidth={2} />
       </motion.div>
 
       {/* Content */}
       <div className="relative z-10">
-        <div className={`text-sm font-bold mb-1 ${badge.unlocked ? 'text-gray-800' : 'text-gray-400'}`}>
+        <div className={`text-sm font-bold tracking-tight mb-1 ${badge.unlocked ? 'text-[var(--fg-primary)]' : 'text-[var(--fg-tertiary)]'}`}>
           {badge.name}
         </div>
-        <div className={`text-xs mb-3 leading-relaxed ${badge.unlocked ? 'text-gray-500' : 'text-gray-400'}`}>
+        <div className={`text-sm mb-3 leading-relaxed ${badge.unlocked ? 'text-[var(--fg-secondary)]' : 'text-[var(--fg-tertiary)]'}`}>
           {badge.description}
         </div>
 
         {/* Rarity Tag */}
-        <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${
-          badge.unlocked ? `${config.bgColor} ${config.color}` : 'bg-gray-100 text-gray-400'
-        }`}>
+        <Badge
+          variant={badge.unlocked ? "default" : "secondary"}
+          size="sm"
+          className={badge.unlocked ? `${config.bgColor} ${config.color}` : ''}
+        >
           {badge.rarity}
-        </div>
+        </Badge>
       </div>
 
       {/* Lock Overlay */}
       {!badge.unlocked && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[1px] rounded-2xl">
+        <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg-base)]/40 backdrop-blur-[1px] rounded-2xl">
           <div className="text-2xl">🔒</div>
         </div>
       )}
@@ -161,12 +160,12 @@ function PremiumBadgeCard({ badge, isEquipped, onToggleEquip, index }: PremiumBa
 export function BadgesScreen({ onNavigate, showToast, useMockData = false }: BadgesScreenProps) {
   const { userProfile: user } = useUser();
   const [equippedBadges, setEquippedBadges] = useState<string[]>(['1', '2', '3']);
-  const [badges, setBadges] = useState<Badge[]>([]);
+  const [badges, setBadges] = useState<BadgeItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (useMockData) {
-      setBadges(mockBadges as unknown as Badge[]);
+      setBadges(mockBadges as unknown as BadgeItem[]);
       setEquippedBadges(mockBadges.filter(b => b.equipped).map(b => b.id));
       setLoading(false);
     } else {
@@ -181,7 +180,7 @@ export function BadgesScreen({ onNavigate, showToast, useMockData = false }: Bad
     }
 
     try {
-      const response = await statsAPI.getUserStats(user.id);
+      const response = await statsAPI.getUserStats();
       const backendBadges = response.stats?.badges || [];
 
       const mappedBadges = backendBadges.map((badge: any) => ({
@@ -205,7 +204,7 @@ export function BadgesScreen({ onNavigate, showToast, useMockData = false }: Bad
 
   const handleToggleEquip = (badgeId: string) => {
     if (!badges.find(b => b.id === badgeId)?.unlocked) {
-      showToast('Badge non débloqué', 'error');
+      showToast('Badge non debloque', 'error');
       return;
     }
 
@@ -214,13 +213,13 @@ export function BadgesScreen({ onNavigate, showToast, useMockData = false }: Bad
         return prev.filter(id => id !== badgeId);
       } else {
         if (prev.length >= 3) {
-          showToast('Maximum 3 badges équipés', 'error');
+          showToast('Maximum 3 badges equipes', 'error');
           return prev;
         }
         return [...prev, badgeId];
       }
     });
-    showToast('Badge équipé mis à jour', 'success');
+    showToast('Badge equipe mis a jour', 'success');
   };
 
   const unlockedCount = badges.filter(b => b.unlocked).length;
@@ -228,25 +227,22 @@ export function BadgesScreen({ onNavigate, showToast, useMockData = false }: Bad
     ? Math.round((unlockedCount / badges.length) * 100)
     : 0;
 
+  if (loading) {
+    return <SkeletonPage />;
+  }
+
   return (
-    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-amber-50 via-orange-50 to-pink-50 relative overflow-hidden">
-      {/* Background decorations */}
+    <motion.div
+      initial={{ opacity: 0, y: 15, filter: "blur(5px)" }}
+      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      transition={{ duration: 0.35 }}
+      className="min-h-screen pb-24 pt-safe bg-[var(--bg-base)] relative overflow-hidden"
+    >
+      {/* Background decorations - static for performance */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.1, 1], rotate: [0, 5, 0] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.15, 1] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute top-1/3 left-1/2 w-64 h-64 bg-gradient-to-br from-blue-400/15 to-cyan-400/15 rounded-full blur-3xl"
-          animate={{ y: [0, 30, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        />
+        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 left-1/2 w-64 h-64 bg-gradient-to-br from-blue-400/15 to-cyan-400/15 rounded-full blur-3xl" />
       </div>
 
       <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
@@ -259,18 +255,18 @@ export function BadgesScreen({ onNavigate, showToast, useMockData = false }: Bad
           <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
             <motion.button
               onClick={() => onNavigate('profile')}
-              className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+              className="w-12 h-12 rounded-2xl bg-[var(--bg-elevated)] backdrop-blur-sm border border-[var(--border-subtle)] flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
+              <ArrowLeft className="w-5 h-5 text-[var(--fg-secondary)]" strokeWidth={2} />
             </motion.button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
                 Collection de Badges
               </h1>
               <p className="text-sm text-amber-600/80 font-medium mt-0.5">
-                {unlockedCount}/{badges.length} débloqués · {equippedBadges.length}/3 équipés
+                {unlockedCount}/{badges.length} debloques · {equippedBadges.length}/3 equipes
               </p>
             </div>
             <motion.div
@@ -284,137 +280,108 @@ export function BadgesScreen({ onNavigate, showToast, useMockData = false }: Bad
           {/* Equipped Badges Preview */}
           <motion.div
             variants={itemVariants}
-            className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-3xl p-6 mb-6 shadow-xl shadow-indigo-500/20 relative overflow-hidden"
+            whileHover={{ scale: 1.02 }}
           >
-            {/* Animated particles */}
-            <motion.div
-              className="absolute top-4 right-4 w-2 h-2 bg-white/40 rounded-full"
-              animate={{ y: [-10, 10, -10], opacity: [0.4, 1, 0.4] }}
-              transition={{ duration: 3, repeat: Infinity }}
-            />
-            <motion.div
-              className="absolute bottom-6 left-1/4 w-1.5 h-1.5 bg-white/30 rounded-full"
-              animate={{ y: [10, -10, 10], opacity: [0.3, 0.8, 0.3] }}
-              transition={{ duration: 2.5, repeat: Infinity, delay: 0.5 }}
-            />
+            <Card className="p-6 mb-6 bg-gradient-to-r from-[var(--color-primary-500)] via-purple-500 to-pink-500 border-0 shadow-xl shadow-[var(--color-primary-500)]/20 relative overflow-hidden">
+              {/* Static particles - no animation for performance */}
+              <div className="absolute top-4 right-4 w-2 h-2 bg-white/40 rounded-full" />
+              <div className="absolute bottom-6 left-1/4 w-1.5 h-1.5 bg-white/30 rounded-full" />
 
-            <div className="flex items-center gap-2 text-white/90 text-sm font-semibold mb-4">
-              <Shield className="w-4 h-4" />
-              Badges affichés sur ton profil
-            </div>
-            <div className="flex gap-3">
-              {[0, 1, 2].map((index) => {
-                const equippedBadge = badges.find(b => b.id === equippedBadges[index]);
-                const config = equippedBadge ? rarityConfig[equippedBadge.rarity] : null;
-                const Icon = config?.icon || Award;
+              <div className="flex items-center gap-2 text-white/90 text-sm font-semibold mb-4">
+                <Shield className="w-4 h-4" />
+                Badges affiches sur ton profil
+              </div>
+              <div className="flex gap-3">
+                {[0, 1, 2].map((index) => {
+                  const equippedBadge = badges.find(b => b.id === equippedBadges[index]);
+                  const config = equippedBadge ? rarityConfig[equippedBadge.rarity] : null;
+                  const Icon = config?.icon || Award;
 
-                return (
-                  <motion.div
-                    key={index}
-                    className="flex-1"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.2 + index * 0.1, type: "spring" }}
-                  >
-                    {equippedBadge ? (
-                      <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20">
-                        <motion.div
-                          className="w-12 h-12 rounded-xl bg-white/25 backdrop-blur-sm flex items-center justify-center mx-auto mb-2"
-                          whileHover={{ rotate: 10, scale: 1.1 }}
-                        >
-                          <Icon className="w-6 h-6 text-white" strokeWidth={2} />
-                        </motion.div>
-                        <div className="text-xs text-white font-semibold truncate">
-                          {equippedBadge.name}
+                  return (
+                    <motion.div
+                      key={index}
+                      className="flex-1"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.2 + index * 0.1, type: "spring" }}
+                    >
+                      {equippedBadge ? (
+                        <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20">
+                          <motion.div
+                            className="w-12 h-12 rounded-xl bg-white/25 backdrop-blur-sm flex items-center justify-center mx-auto mb-2"
+                            whileHover={{ rotate: 10, scale: 1.1 }}
+                          >
+                            <Icon className="w-6 h-6 text-white" strokeWidth={2} />
+                          </motion.div>
+                          <div className="text-sm text-white font-semibold truncate">
+                            {equippedBadge.name}
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center border-2 border-dashed border-white/20">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2">
-                          <div className="w-8 h-8 rounded-lg bg-white/10" />
+                      ) : (
+                        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center border-2 border-dashed border-white/20">
+                          <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2">
+                            <div className="w-8 h-8 rounded-lg bg-white/10" />
+                          </div>
+                          <div className="text-sm text-white/60 font-medium">
+                            Slot {index + 1}
+                          </div>
                         </div>
-                        <div className="text-xs text-white/60 font-medium">
-                          Slot {index + 1}
-                        </div>
-                      </div>
-                    )}
-                  </motion.div>
-                );
-              })}
-            </div>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </Card>
           </motion.div>
 
           {/* Progress Card */}
-          <motion.div
-            variants={itemVariants}
-            className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 mb-6 border border-white/50 shadow-lg"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-amber-500" />
-                <span className="text-sm font-semibold text-gray-800">Progression globale</span>
+          <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }}>
+            <Card className="p-5 mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-amber-500" />
+                  <span className="text-sm font-semibold tracking-tight text-[var(--fg-primary)]">Progression globale</span>
+                </div>
+                <div className="text-2xl font-bold tracking-tight bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
+                  {progressPercent}%
+                </div>
               </div>
-              <div className="text-2xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
-                {progressPercent}%
+              <div className="h-3 bg-[var(--bg-base)] rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-pink-500 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progressPercent}%` }}
+                  transition={{ duration: 1.5, ease: "easeOut", delay: 0.3 }}
+                />
               </div>
-            </div>
-            <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-              <motion.div
-                className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-pink-500 rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${progressPercent}%` }}
-                transition={{ duration: 1.5, ease: "easeOut", delay: 0.3 }}
-              />
-            </div>
+            </Card>
           </motion.div>
 
           {/* Info Banner */}
-          <motion.div
-            variants={itemVariants}
-            className="bg-gradient-to-r from-amber-100/80 to-orange-100/80 backdrop-blur-sm rounded-2xl p-4 mb-6 border border-amber-200/50"
-          >
-            <div className="flex items-center gap-3 text-sm text-amber-800 font-medium">
-              <span className="text-xl">💡</span>
-              Équipe jusqu'à 3 badges sur ton profil pour montrer tes accomplissements
-            </div>
+          <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }}>
+            <Card className="p-4 mb-6 bg-gradient-to-r from-amber-100/80 to-orange-100/80 border-amber-200/50">
+              <div className="flex items-center gap-3 text-sm text-amber-800 font-medium">
+                <span className="text-xl">💡</span>
+                Equipe jusqu'a 3 badges sur ton profil pour montrer tes accomplissements
+              </div>
+            </Card>
           </motion.div>
 
-          {/* Loading State */}
+          {/* Badges Grid */}
           <AnimatePresence mode="wait">
-            {loading ? (
-              <motion.div
-                key="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="text-center py-16"
-              >
-                <motion.div
-                  className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-4 shadow-lg"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                >
-                  <Trophy className="w-8 h-8 text-white" />
-                </motion.div>
-                <p className="text-gray-500 font-medium">Chargement des badges...</p>
-              </motion.div>
-            ) : badges.length === 0 ? (
+            {badges.length === 0 ? (
               <motion.div
                 key="empty"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-center py-16"
               >
-                <motion.div
-                  className="w-24 h-24 rounded-3xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-6 shadow-xl"
-                  animate={{ y: [0, -8, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
+                <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-6 shadow-xl">
                   <Trophy className="w-12 h-12 text-white" strokeWidth={1.5} />
-                </motion.div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">Aucun badge</h3>
-                <p className="text-gray-500 text-sm max-w-xs mx-auto">
-                  Participe à des sessions pour débloquer tes premiers badges
+                </div>
+                <h3 className="text-xl font-bold tracking-tight text-[var(--fg-primary)] mb-2">Aucun badge</h3>
+                <p className="text-sm text-[var(--fg-secondary)] max-w-xs mx-auto">
+                  Participe a des sessions pour debloquer tes premiers badges
                 </p>
               </motion.div>
             ) : (
@@ -439,7 +406,7 @@ export function BadgesScreen({ onNavigate, showToast, useMockData = false }: Bad
           </AnimatePresence>
         </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

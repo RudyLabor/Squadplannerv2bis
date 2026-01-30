@@ -1,6 +1,7 @@
-import { ArrowLeft, Webhook, Plus, Trash2, Edit3, Check, X, Zap, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Webhook, Plus, Trash2, Edit3, Check, X, Zap, AlertCircle, Sparkles, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
+import { IconButton, Card, Badge } from '@/design-system';
 
 interface WebhooksScreenProps {
   onNavigate?: (screen: string, params?: Record<string, unknown>) => void;
@@ -15,6 +16,23 @@ interface WebhookConfig {
   active: boolean;
   lastTriggered?: string;
 }
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
+  }
+};
 
 export function WebhooksScreen({ onNavigate, showToast }: WebhooksScreenProps) {
   const [webhooks, setWebhooks] = useState<WebhookConfig[]>([
@@ -100,157 +118,208 @@ export function WebhooksScreen({ onNavigate, showToast }: WebhooksScreenProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)] pb-20">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-[var(--background)]/95 backdrop-blur-sm border-b border-[var(--border-subtle)]">
-        <div className="flex items-center justify-between px-4 py-4">
-          <button
-            onClick={() => onNavigate?.('api-docs')}
-            className="p-2 hover:bg-[var(--background-elevated)] rounded-xl transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-[var(--text-primary)]" strokeWidth={2} />
-          </button>
-          <h1 className="text-lg font-semibold text-[var(--text-primary)]">Webhooks</h1>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="p-2 hover:bg-[var(--background-elevated)] rounded-xl transition-colors"
-          >
-            <Plus className="w-5 h-5 text-[var(--primary-600)]" strokeWidth={2} />
-          </button>
-        </div>
+    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
+      {/* Background decorations - static for performance */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 right-0 w-64 h-64 bg-gradient-to-br from-emerald-400/15 to-teal-400/15 rounded-full blur-3xl" />
       </div>
 
-      <div className="px-4 py-6 space-y-6">
-        {/* Hero */}
+      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center py-8"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
         >
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] mb-4 shadow-lg">
-            <Webhook className="w-10 h-10 text-white" strokeWidth={2} />
-          </div>
-          <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
-            Webhooks
-          </h2>
-          <p className="text-[var(--text-secondary)] text-sm max-w-md mx-auto">
-            Recevez des notifications en temps réel pour les événements
-          </p>
-        </motion.div>
-
-        {/* Info */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-gradient-to-br from-[var(--warning-50)] to-[var(--warning-100)] rounded-2xl p-4 border-[0.5px] border-[var(--warning-200)]"
-        >
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-[var(--warning-600)] flex-shrink-0 mt-0.5" strokeWidth={2} />
-            <div>
-              <h4 className="text-sm font-semibold text-[var(--warning-900)] mb-1">
-                Webhooks HTTP POST
-              </h4>
-              <p className="text-xs text-[var(--warning-700)]">
-                Les webhooks envoient des requêtes POST à vos endpoints. Assurez-vous qu'ils sont accessibles publiquement.
+          {/* Header */}
+          <motion.div variants={itemVariants} className="flex items-center gap-3 mb-8">
+            <IconButton
+              icon={<ArrowLeft className="w-5 h-5" strokeWidth={2} />}
+              onClick={() => onNavigate?.('api-docs')}
+              variant="ghost"
+              aria-label="Retour a la documentation API"
+              className="w-12 h-12 rounded-2xl bg-[var(--bg-elevated)]/80 backdrop-blur-sm border border-[var(--border-subtle)] shadow-lg hover:shadow-xl transition-all"
+            />
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                Webhooks
+              </h1>
+              <p className="text-sm text-[var(--fg-secondary)] font-medium">
+                Notifications temps réel
               </p>
             </div>
-          </div>
-        </motion.div>
-
-        {/* Webhooks List */}
-        {webhooks.length > 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="space-y-3"
-          >
-            {webhooks.map((webhook, index) => (
-              <motion.div
-                key={webhook.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + index * 0.05 }}
-                className="bg-white rounded-2xl p-5 border-[0.5px] border-[var(--border-medium)] shadow-sm"
-              >
-                <div className="flex items-start gap-4 mb-4">
-                  <div className={`flex-shrink-0 w-12 h-12 rounded-xl ${webhook.active ? 'bg-gradient-to-br from-[var(--success-500)] to-[var(--success-600)]' : 'bg-[var(--background)]'} flex items-center justify-center shadow-sm`}>
-                    <Zap className={`w-6 h-6 ${webhook.active ? 'text-white' : 'text-[var(--text-tertiary)]'}`} strokeWidth={2} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-semibold text-[var(--text-primary)]">
-                        {webhook.name}
-                      </h4>
-                      <span className={`px-2 py-0.5 text-xs font-medium rounded-lg ${webhook.active ? 'bg-[var(--success-50)] text-[var(--success-700)]' : 'bg-[var(--background)] text-[var(--text-tertiary)]'}`}>
-                        {webhook.active ? 'Actif' : 'Inactif'}
-                      </span>
-                    </div>
-                    <code className="text-xs text-[var(--text-secondary)] font-mono block mb-2 truncate">
-                      {webhook.url}
-                    </code>
-                    <div className="flex flex-wrap gap-1.5 mb-3">
-                      {webhook.events.map(event => (
-                        <span
-                          key={event}
-                          className="px-2 py-1 bg-[var(--primary-50)] text-[var(--primary-700)] text-xs rounded-lg"
-                        >
-                          {availableEvents.find(e => e.id === event)?.label || event}
-                        </span>
-                      ))}
-                    </div>
-                    {webhook.lastTriggered && (
-                      <p className="text-xs text-[var(--text-tertiary)]">
-                        Dernier déclenchement : {webhook.lastTriggered}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 pt-3 border-t border-[var(--border-subtle)]">
-                  <button
-                    onClick={() => toggleWebhook(webhook.id)}
-                    className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${webhook.active ? 'bg-[var(--background)] text-[var(--text-primary)] hover:bg-[var(--background-elevated)]' : 'bg-[var(--success-500)] text-white hover:bg-[var(--success-600)]'}`}
-                  >
-                    {webhook.active ? 'Désactiver' : 'Activer'}
-                  </button>
-                  <button
-                    onClick={() => showToast?.('Fonctionnalité bientôt disponible', 'info')}
-                    className="p-2 hover:bg-[var(--background)] rounded-xl transition-colors"
-                  >
-                    <Edit3 className="w-4 h-4 text-[var(--text-tertiary)]" strokeWidth={2} />
-                  </button>
-                  <button
-                    onClick={() => deleteWebhook(webhook.id)}
-                    className="p-2 hover:bg-[var(--error-50)] rounded-xl transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4 text-[var(--error-500)]" strokeWidth={2} />
-                  </button>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-12"
-          >
-            <div className="w-20 h-20 rounded-full bg-[var(--background)] flex items-center justify-center mx-auto mb-4">
-              <Webhook className="w-10 h-10 text-[var(--text-tertiary)]" strokeWidth={2} />
-            </div>
-            <p className="text-[var(--text-secondary)] text-sm mb-4">
-              Aucun webhook configuré
-            </p>
-            <button
+            <IconButton
+              icon={<Plus className="w-6 h-6 text-white" strokeWidth={2} />}
               onClick={() => setShowAddModal(true)}
-              className="px-5 py-2.5 bg-[var(--primary-600)] text-white rounded-xl text-sm font-medium hover:bg-[var(--primary-700)] transition-colors"
-            >
-              Créer un webhook
-            </button>
+              variant="primary"
+              aria-label="Ajouter un webhook"
+              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30"
+            />
           </motion.div>
-        )}
+
+          {/* Hero Section */}
+          <motion.div variants={itemVariants} className="text-center py-6 mb-6">
+            <motion.div
+              className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-500 to-purple-600 mb-4 shadow-xl shadow-indigo-500/30"
+              animate={{ y: [0, -5, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <Webhook className="w-10 h-10 text-white" strokeWidth={1.5} />
+            </motion.div>
+            <h2 className="text-2xl font-bold tracking-tight text-[var(--fg-primary)] mb-2">Webhooks</h2>
+            <p className="text-gray-500 text-sm max-w-md mx-auto">
+              Recevez des notifications en temps réel pour les événements
+            </p>
+          </motion.div>
+
+          {/* Info Banner */}
+          <motion.div
+            variants={itemVariants}
+            className="bg-gradient-to-br from-amber-100/80 to-orange-100/80 backdrop-blur-sm rounded-2xl p-4 mb-6 border border-amber-200/50"
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-md flex-shrink-0">
+                <AlertCircle className="w-5 h-5 text-white" strokeWidth={2} />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold tracking-tight text-amber-800 mb-1">
+                  Webhooks HTTP POST
+                </h4>
+                <p className="text-xs text-amber-700 font-medium">
+                  Les webhooks envoient des requêtes POST à vos endpoints. Assurez-vous qu'ils sont accessibles publiquement.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Webhooks List */}
+          {webhooks.length > 0 ? (
+            <motion.div variants={itemVariants}>
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-5 h-5 text-indigo-500" />
+                <h3 className="text-sm font-bold tracking-tight text-[var(--fg-secondary)]">
+                  Webhooks configurés ({webhooks.length})
+                </h3>
+              </div>
+              <div className="space-y-3">
+                {webhooks.map((webhook) => (
+                  <motion.div
+                    key={webhook.id}
+                    variants={itemVariants}
+                    className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-white/50 shadow-lg hover:shadow-xl transition-all"
+                    whileHover={{ scale: 1.01, y: -2 }}
+                  >
+                    <div className="flex items-start gap-4 mb-4">
+                      <motion.div
+                        className={`flex-shrink-0 w-12 h-12 rounded-xl ${webhook.active ? 'bg-gradient-to-br from-emerald-500 to-teal-500' : 'bg-gray-200'} flex items-center justify-center shadow-md`}
+                        whileHover={{ scale: 1.1, rotate: 5 }}
+                      >
+                        <Zap className={`w-6 h-6 ${webhook.active ? 'text-white' : 'text-gray-400'}`} strokeWidth={2} />
+                      </motion.div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-bold tracking-tight text-[var(--fg-primary)]">
+                            {webhook.name}
+                          </h4>
+                          <span className={`px-2 py-0.5 text-xs font-bold rounded-lg ${webhook.active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
+                            {webhook.active ? 'Actif' : 'Inactif'}
+                          </span>
+                        </div>
+                        <code className="text-xs text-gray-500 font-mono block mb-2 truncate">
+                          {webhook.url}
+                        </code>
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                          {webhook.events.map(event => (
+                            <span
+                              key={event}
+                              className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded-lg"
+                            >
+                              {availableEvents.find(e => e.id === event)?.label || event}
+                            </span>
+                          ))}
+                        </div>
+                        {webhook.lastTriggered && (
+                          <p className="text-xs text-gray-400 font-medium">
+                            Dernier déclenchement : {webhook.lastTriggered}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
+                      <motion.button
+                        onClick={() => toggleWebhook(webhook.id)}
+                        className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${webhook.active ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md'}`}
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
+                      >
+                        {webhook.active ? 'Désactiver' : 'Activer'}
+                      </motion.button>
+                      <motion.button
+                        onClick={() => showToast?.('Fonctionnalité bientôt disponible', 'info')}
+                        className="p-2.5 hover:bg-gray-100 rounded-xl transition-colors"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        <Edit3 className="w-4 h-4 text-gray-400" strokeWidth={2} />
+                      </motion.button>
+                      <motion.button
+                        onClick={() => deleteWebhook(webhook.id)}
+                        className="p-2.5 hover:bg-red-50 rounded-xl transition-colors"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        <Trash2 className="w-4 h-4 text-red-500" strokeWidth={2} />
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              variants={itemVariants}
+              className="text-center py-12"
+            >
+              <div className="w-20 h-20 rounded-3xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                <Webhook className="w-10 h-10 text-gray-400" strokeWidth={2} />
+              </div>
+              <p className="text-gray-500 text-sm mb-4 font-medium">
+                Aucun webhook configuré
+              </p>
+              <motion.button
+                onClick={() => setShowAddModal(true)}
+                className="px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-500/30"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Créer un webhook
+              </motion.button>
+            </motion.div>
+          )}
+
+          {/* Pro Tip */}
+          <motion.div
+            variants={itemVariants}
+            className="mt-6 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-4 shadow-xl shadow-indigo-500/30 relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+            <div className="relative z-10 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <Star className="w-5 h-5 text-white" strokeWidth={2} />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs font-bold text-white">
+                  Astuce Pro
+                </p>
+                <p className="text-[10px] text-white/80 mt-0.5">
+                  Utilisez ngrok pour tester vos webhooks en local
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
       </div>
 
       {/* Add Webhook Modal */}
@@ -262,21 +331,21 @@ export function WebhooksScreen({ onNavigate, showToast }: WebhooksScreenProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowAddModal(false)}
-              className="fixed inset-0 bg-black/50 z-40"
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
             />
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              className="fixed inset-x-4 top-20 z-50 bg-white rounded-3xl p-6 shadow-2xl max-h-[80vh] overflow-y-auto"
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 50, scale: 0.95 }}
+              className="fixed inset-x-4 top-20 z-50 bg-white/95 backdrop-blur-xl rounded-3xl p-6 shadow-2xl max-h-[80vh] overflow-y-auto border border-white/50"
             >
-              <h3 className="text-xl font-bold text-[var(--text-primary)] mb-4">
+              <h3 className="text-xl font-bold tracking-tight text-[var(--fg-primary)] mb-4">
                 Nouveau webhook
               </h3>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
                     Nom
                   </label>
                   <input
@@ -284,12 +353,12 @@ export function WebhooksScreen({ onNavigate, showToast }: WebhooksScreenProps) {
                     value={newWebhook.name}
                     onChange={e => setNewWebhook({ ...newWebhook, name: e.target.value })}
                     placeholder="Discord Notifications"
-                    className="w-full px-4 py-3 bg-[var(--background)] rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-500)]"
+                    className="w-full px-4 py-3 bg-gray-50 rounded-xl text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
                     URL
                   </label>
                   <input
@@ -297,49 +366,55 @@ export function WebhooksScreen({ onNavigate, showToast }: WebhooksScreenProps) {
                     value={newWebhook.url}
                     onChange={e => setNewWebhook({ ...newWebhook, url: e.target.value })}
                     placeholder="https://example.com/webhook"
-                    className="w-full px-4 py-3 bg-[var(--background)] rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-500)]"
+                    className="w-full px-4 py-3 bg-gray-50 rounded-xl text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
                     Événements ({newWebhook.events.length})
                   </label>
                   <div className="space-y-2 max-h-60 overflow-y-auto">
                     {availableEvents.map(event => (
-                      <button
+                      <motion.button
                         key={event.id}
                         onClick={() => toggleEvent(event.id)}
-                        className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${newWebhook.events.includes(event.id) ? 'bg-[var(--primary-50)] border-2 border-[var(--primary-500)]' : 'bg-[var(--background)] border-2 border-transparent'}`}
+                        className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${newWebhook.events.includes(event.id) ? 'bg-indigo-50 border-2 border-indigo-500' : 'bg-gray-50 border-2 border-transparent'}`}
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
                       >
                         <div className="flex items-center gap-2">
                           <span className="text-lg">{event.icon}</span>
-                          <span className="text-sm font-medium text-[var(--text-primary)]">
+                          <span className="text-sm font-medium text-gray-800">
                             {event.label}
                           </span>
                         </div>
                         {newWebhook.events.includes(event.id) && (
-                          <Check className="w-5 h-5 text-[var(--primary-600)]" strokeWidth={2.5} />
+                          <Check className="w-5 h-5 text-indigo-600" strokeWidth={2.5} />
                         )}
-                      </button>
+                      </motion.button>
                     ))}
                   </div>
                 </div>
               </div>
 
               <div className="flex gap-3 mt-6">
-                <button
+                <motion.button
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 py-3 bg-[var(--background)] text-[var(--text-primary)] rounded-xl font-medium hover:bg-[var(--background-elevated)] transition-colors"
+                  className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
                 >
                   Annuler
-                </button>
-                <button
+                </motion.button>
+                <motion.button
                   onClick={addWebhook}
-                  className="flex-1 py-3 bg-[var(--primary-600)] text-white rounded-xl font-medium hover:bg-[var(--primary-700)] transition-colors"
+                  className="flex-1 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-bold shadow-lg shadow-indigo-500/30"
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
                 >
                   Créer
-                </button>
+                </motion.button>
               </div>
             </motion.div>
           </>

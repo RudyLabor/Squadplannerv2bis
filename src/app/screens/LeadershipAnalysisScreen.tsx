@@ -1,191 +1,345 @@
-import { ArrowLeft, Crown, TrendingUp, Users, Target, Star, Award } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, Crown, TrendingUp, Users, Award, Star, Sparkles, Target, Loader2, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useSquads } from '@/app/contexts/SquadsContext';
+import { teamIntelligenceAPI, type LeaderCandidate } from '@/utils/team-intelligence';
 
 interface LeadershipAnalysisScreenProps {
   onNavigate?: (screen: string, params?: Record<string, unknown>) => void;
   showToast?: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
-export function LeadershipAnalysisScreen({ onNavigate, showToast }: LeadershipAnalysisScreenProps) {
-  const leaders = [
-    {
-      name: 'MaxGamer',
-      avatar: '👑',
-      leadershipScore: 96,
-      qualities: ['Organisateur', 'Motivateur', 'Décideur'],
-      stats: {
-        sessionsOrganized: 45,
-        participationRate: 98,
-        teamSatisfaction: 94,
-      },
-      trend: '+12%',
-    },
-    {
-      name: 'SaraPlays',
-      avatar: '🎮',
-      leadershipScore: 88,
-      qualities: ['Support', 'Médiateur', 'Communicateur'],
-      stats: {
-        sessionsOrganized: 28,
-        participationRate: 95,
-        teamSatisfaction: 91,
-      },
-      trend: '+8%',
-    },
-  ];
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
+  }
+};
 
-  const potentialLeaders = [
-    { name: 'ProGamer42', avatar: '⚡', score: 72, potential: 'Élevé', reason: 'Forte implication récente' },
-    { name: 'SkillMaster', avatar: '🔥', score: 68, potential: 'Moyen', reason: 'Bonne communication' },
-  ];
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
+  }
+};
+
+export function LeadershipAnalysisScreen({ onNavigate, showToast }: LeadershipAnalysisScreenProps) {
+  const { squads } = useSquads();
+  const [isLoading, setIsLoading] = useState(true);
+  const [leaders, setLeaders] = useState<LeaderCandidate[]>([]);
+  const [selectedSquadId, setSelectedSquadId] = useState<string | null>(null);
+
+  // Initialize squad selection
+  useEffect(() => {
+    if (squads && squads.length > 0 && !selectedSquadId) {
+      setSelectedSquadId(squads[0].id);
+    }
+  }, [squads]);
+
+  // Load leaders when squad changes
+  useEffect(() => {
+    if (selectedSquadId) {
+      loadLeaders();
+    }
+  }, [selectedSquadId]);
+
+  const loadLeaders = async () => {
+    if (!selectedSquadId) return;
+
+    setIsLoading(true);
+    try {
+      const candidates = await teamIntelligenceAPI.detectLeaders(selectedSquadId);
+      setLeaders(candidates);
+    } catch (error) {
+      console.error('Error loading leaders:', error);
+      showToast?.('Erreur lors de l\'analyse', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Separate current leaders from potential leaders
+  const currentLeaders = leaders.filter(l => l.currentRole === 'leader' || l.currentRole === 'co_leader');
+  const potentialLeaders = leaders.filter(l => l.currentRole === 'member' && l.leadershipScore >= 50);
 
   return (
-    <div className="min-h-screen bg-[var(--background)] pb-20">
-      <div className="sticky top-0 z-10 bg-[var(--background)]/95 backdrop-blur-sm border-b border-[var(--border-subtle)]">
-        <div className="flex items-center justify-between px-4 py-4">
-          <button
-            onClick={() => onNavigate?.('intelligence')}
-            className="p-2 hover:bg-[var(--background-elevated)] rounded-xl transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-[var(--text-primary)]" strokeWidth={2} />
-          </button>
-          <h1 className="text-lg font-semibold text-[var(--text-primary)]">Analyse Leadership</h1>
-          <div className="w-9" />
-        </div>
+    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-yellow-400/20 to-amber-400/20 rounded-full blur-3xl" />
       </div>
 
-      <div className="px-4 py-6 space-y-6">
+      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center py-8"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
         >
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-[var(--warning-500)] to-[var(--warning-600)] mb-4 shadow-lg">
-            <Crown className="w-10 h-10 text-white" strokeWidth={2} />
-          </div>
-          <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
-            Leaders Naturels
-          </h2>
-          <p className="text-[var(--text-secondary)] text-sm max-w-md mx-auto">
-            IA détection des profils de leadership dans votre squad
-          </p>
-        </motion.div>
+          {/* Header */}
+          <motion.div variants={itemVariants} className="flex items-center gap-3 mb-8">
+            <motion.button
+              onClick={() => onNavigate?.('intelligence')}
+              className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
+            </motion.button>
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                Analyse Leadership
+              </h1>
+              <p className="text-sm text-gray-500 font-medium">
+                Détection IA des profils
+              </p>
+            </div>
+            <motion.button
+              onClick={loadLeaders}
+              disabled={isLoading}
+              className="w-10 h-10 rounded-xl bg-white/80 backdrop-blur-sm border border-white/50 flex items-center justify-center shadow-lg"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <RefreshCw className={`w-4 h-4 text-gray-500 ${isLoading ? 'animate-spin' : ''}`} />
+            </motion.button>
+            <motion.div
+              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/30"
+              whileHover={{ scale: 1.05, rotate: 5 }}
+            >
+              <Crown className="w-6 h-6 text-white" strokeWidth={2} />
+            </motion.div>
+          </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <h3 className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-3 px-1">
-            Leaders actifs ({leaders.length})
-          </h3>
-          <div className="space-y-4">
-            {leaders.map((leader, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 + index * 0.05 }}
-                className="bg-gradient-to-br from-[var(--warning-50)] to-[var(--warning-100)] rounded-2xl p-5 border-[0.5px] border-[var(--warning-200)] shadow-sm"
+          {/* Squad Selector */}
+          {squads && squads.length > 1 && (
+            <motion.div variants={itemVariants} className="mb-6">
+              <select
+                value={selectedSquadId || ''}
+                onChange={(e) => setSelectedSquadId(e.target.value)}
+                className="w-full h-14 px-4 bg-white/80 backdrop-blur-sm rounded-2xl border border-white/50 text-gray-900 font-semibold shadow-lg focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               >
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[var(--warning-500)] to-[var(--warning-600)] flex items-center justify-center text-2xl shadow-md">
-                    {leader.avatar}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-bold text-[var(--text-primary)]">{leader.name}</h4>
-                      <span className="px-2 py-1 bg-white text-[var(--warning-700)] text-xs font-bold rounded-lg">
-                        {leader.leadershipScore}/100
-                      </span>
-                      <span className="text-xs text-[var(--success-600)] font-semibold flex items-center gap-1">
-                        <TrendingUp className="w-3 h-3" />
-                        {leader.trend}
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5 mb-3">
-                      {leader.qualities.map((quality, idx) => (
-                        <span key={idx} className="px-2 py-1 bg-white text-[var(--warning-700)] text-xs font-medium rounded-lg">
-                          {quality}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                {squads.map((squad: any) => (
+                  <option key={squad.id} value={squad.id}>
+                    {squad.name}
+                  </option>
+                ))}
+              </select>
+            </motion.div>
+          )}
 
-                <div className="grid grid-cols-3 gap-3 bg-white/60 rounded-xl p-3">
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-[var(--warning-700)]">{leader.stats.sessionsOrganized}</div>
-                    <div className="text-xs text-[var(--text-tertiary)]">Sessions</div>
+          {/* Loading State */}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="text-center">
+                <Loader2 className="w-10 h-10 text-amber-500 animate-spin mx-auto mb-4" />
+                <p className="text-gray-500 font-medium">Analyse en cours...</p>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Hero Section */}
+              <motion.div variants={itemVariants} className="text-center py-6 mb-6">
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-amber-500 to-orange-600 mb-4 shadow-xl shadow-amber-500/30">
+                  <Crown className="w-10 h-10 text-white" strokeWidth={1.5} />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                  Leaders Naturels
+                </h2>
+                <p className="text-gray-500 text-sm max-w-md mx-auto">
+                  {leaders.length > 0
+                    ? `${leaders.length} profils de leadership détectés dans votre squad`
+                    : 'Aucun profil de leadership détecté pour le moment'
+                  }
+                </p>
+              </motion.div>
+
+              {/* Leaders actifs */}
+              {currentLeaders.length > 0 && (
+                <motion.div variants={itemVariants} className="mb-8">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Star className="w-5 h-5 text-amber-500" fill="currentColor" />
+                    <h3 className="text-sm font-bold text-gray-700">
+                      Leaders actifs ({currentLeaders.length})
+                    </h3>
                   </div>
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-[var(--warning-700)]">{leader.stats.participationRate}%</div>
-                    <div className="text-xs text-[var(--text-tertiary)]">Présence</div>
+                  <div className="space-y-4">
+                    {currentLeaders.map((leader) => (
+                      <motion.div
+                        key={leader.userId}
+                        variants={itemVariants}
+                        className="bg-gradient-to-br from-amber-100/80 to-orange-100/80 backdrop-blur-sm rounded-2xl p-5 border border-amber-200/50 shadow-lg"
+                        whileHover={{ scale: 1.01, y: -2 }}
+                      >
+                        <div className="flex items-start gap-4 mb-4">
+                          <motion.div
+                            className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/30 overflow-hidden"
+                            whileHover={{ scale: 1.1, rotate: 5 }}
+                          >
+                            {leader.avatarUrl ? (
+                              <img src={leader.avatarUrl} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <Crown className="w-7 h-7 text-white" />
+                            )}
+                          </motion.div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h4 className="font-bold text-gray-800">{leader.username}</h4>
+                              <span className="px-2.5 py-1 bg-white text-amber-700 text-xs font-bold rounded-lg shadow-sm">
+                                {leader.leadershipScore}/100
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {leader.qualities.slice(0, 4).map((quality, idx) => (
+                                <span key={idx} className="px-2 py-1 bg-white text-amber-700 text-xs font-medium rounded-lg shadow-sm flex items-center gap-1">
+                                  <span>{quality.icon}</span>
+                                  {quality.name}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4">
+                          <p className="text-sm text-gray-600 font-medium">
+                            {leader.recommendation}
+                          </p>
+                        </div>
+                      </motion.div>
+                    ))}
                   </div>
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-[var(--warning-700)]">{leader.stats.teamSatisfaction}%</div>
-                    <div className="text-xs text-[var(--text-tertiary)]">Satisfaction</div>
+                </motion.div>
+              )}
+
+              {/* Potentiels leaders */}
+              {potentialLeaders.length > 0 && (
+                <motion.div variants={itemVariants} className="mb-8">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Target className="w-5 h-5 text-indigo-500" />
+                    <h3 className="text-sm font-bold text-gray-700">
+                      Potentiels leaders ({potentialLeaders.length})
+                    </h3>
                   </div>
+                  <div className="space-y-3">
+                    {potentialLeaders.map((player) => (
+                      <motion.div
+                        key={player.userId}
+                        variants={itemVariants}
+                        className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-lg hover:shadow-xl transition-all"
+                        whileHover={{ scale: 1.01, y: -2 }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <motion.div
+                            className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md overflow-hidden"
+                            whileHover={{ scale: 1.1, rotate: 5 }}
+                          >
+                            {player.avatarUrl ? (
+                              <img src={player.avatarUrl} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <Users className="w-5 h-5 text-white" />
+                            )}
+                          </motion.div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-bold text-gray-800 text-sm">{player.username}</h4>
+                              <span className={`px-2 py-0.5 text-xs font-bold rounded-lg ${
+                                player.leadershipScore >= 70
+                                  ? 'bg-emerald-100 text-emerald-700'
+                                  : 'bg-amber-100 text-amber-700'
+                              }`}>
+                                {player.leadershipScore >= 70 ? 'Potentiel élevé' : 'Potentiel moyen'}
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-500 font-medium mb-1">{player.recommendation}</p>
+                            <div className="flex flex-wrap gap-1">
+                              {player.qualities.slice(0, 3).map((quality, idx) => (
+                                <span key={idx} className="text-xs text-indigo-600 font-medium">
+                                  {quality.icon} {quality.name}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-lg font-bold text-indigo-600">{player.leadershipScore}</div>
+                            <div className="text-xs text-gray-400">Score</div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Empty State */}
+              {leaders.length === 0 && (
+                <motion.div variants={itemVariants} className="text-center py-10">
+                  <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                    <Users className="w-10 h-10 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-600 mb-2">Pas encore de données</h3>
+                  <p className="text-sm text-gray-500 max-w-xs mx-auto">
+                    L'analyse de leadership nécessite plus de données de sessions et de participation.
+                  </p>
+                </motion.div>
+              )}
+
+              {/* CTA Card */}
+              <motion.div
+                variants={itemVariants}
+                className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 text-center shadow-xl shadow-indigo-500/30 relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+
+                <div className="relative z-10">
+                  <motion.div
+                    className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm mx-auto mb-4 flex items-center justify-center"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
+                    <Award className="w-7 h-7 text-white" strokeWidth={2} />
+                  </motion.div>
+                  <h3 className="font-bold text-white text-lg mb-2">Développez vos leaders</h3>
+                  <p className="text-sm text-white/90 mb-5 max-w-sm mx-auto">
+                    Accédez à des outils de coaching pour développer les compétences de leadership
+                  </p>
+                  <motion.button
+                    onClick={() => onNavigate?.('coaching-tools')}
+                    className="px-6 py-3 bg-white text-indigo-600 rounded-xl text-sm font-bold shadow-lg hover:shadow-xl transition-all"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Voir les outils de coaching
+                  </motion.button>
                 </div>
               </motion.div>
-            ))}
-          </div>
-        </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <h3 className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-3 px-1">
-            Potentiels leaders
-          </h3>
-          <div className="space-y-3">
-            {potentialLeaders.map((player, index) => (
+              {/* Info Banner */}
               <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + index * 0.05 }}
-                className="bg-white rounded-xl p-4 border-[0.5px] border-[var(--border-medium)] shadow-sm"
+                variants={itemVariants}
+                className="mt-6 bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-lg"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--primary-500)] to-[var(--secondary-500)] flex items-center justify-center text-xl">
-                    {player.avatar}
-                  </div>
+                  <motion.div
+                    className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-md"
+                    whileHover={{ scale: 1.1 }}
+                  >
+                    <Sparkles className="w-5 h-5 text-white" strokeWidth={2} />
+                  </motion.div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-semibold text-[var(--text-primary)] text-sm">{player.name}</h4>
-                      <span className="px-2 py-0.5 bg-[var(--secondary-50)] text-[var(--secondary-700)] text-xs font-medium rounded-lg">
-                        {player.potential}
-                      </span>
-                    </div>
-                    <p className="text-xs text-[var(--text-secondary)] mb-1">{player.reason}</p>
-                    <div className="text-xs text-[var(--text-tertiary)]">Score: {player.score}/100</div>
+                    <p className="text-sm font-bold text-gray-800">
+                      Analyse IA en temps réel
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Basée sur les sessions, check-ins et messages des 3 derniers mois
+                    </p>
                   </div>
                 </div>
               </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-          className="bg-gradient-to-br from-[var(--primary-50)] to-[var(--secondary-50)] rounded-2xl p-5 text-center"
-        >
-          <Award className="w-10 h-10 text-[var(--primary-600)] mx-auto mb-3" strokeWidth={2} />
-          <h3 className="font-semibold text-[var(--text-primary)] mb-2">Développez vos leaders</h3>
-          <p className="text-sm text-[var(--text-secondary)] mb-4">
-            Accédez à des outils de coaching pour développer les compétences de leadership
-          </p>
-          <button
-            onClick={() => onNavigate?.('coaching-tools')}
-            className="px-5 py-2.5 bg-[var(--primary-600)] text-white rounded-xl text-sm font-medium hover:bg-[var(--primary-700)] transition-colors"
-          >
-            Voir les outils de coaching
-          </button>
+            </>
+          )}
         </motion.div>
       </div>
     </div>
