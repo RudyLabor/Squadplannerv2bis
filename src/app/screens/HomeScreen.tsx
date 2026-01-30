@@ -751,13 +751,39 @@ export function HomeScreen({ onNavigate, onCommandOpen }: HomeScreenProps) {
   const totalPlayers = transformedSquads.reduce((acc, s) => acc + (s.membersCount || 0), 0);
 
   return (
-    <div className="min-h-screen bg-[#08090a] pb-28 md:pb-10">
-      <motion.div
-        className="max-w-4xl mx-auto px-5 md:px-8 py-8 md:py-10"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
+    <div className="min-h-screen pb-28 md:pb-10 relative overflow-hidden" style={{ backgroundColor: '#F5F3F0' }}>
+      {/* Lumière ambiante orange top-left */}
+      <div
+        className="fixed pointer-events-none"
+        style={{
+          top: '-20%',
+          left: '-10%',
+          width: '60%',
+          height: '60%',
+          background: 'radial-gradient(circle at center, rgba(239, 156, 30, 0.15) 0%, rgba(239, 156, 30, 0.08) 30%, rgba(239, 156, 30, 0.03) 50%, transparent 70%)',
+          filter: 'blur(60px)',
+          zIndex: 0,
+        }}
+      />
+
+      {/* Quadrillage orange subtil */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          backgroundImage: 'linear-gradient(rgba(239, 156, 30, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(239, 156, 30, 0.03) 1px, transparent 1px)',
+          backgroundSize: '20px 20px',
+          zIndex: 1,
+        }}
+      />
+
+      {/* Contenu principal */}
+      <div className="relative z-10">
+        <motion.div
+          className="max-w-4xl mx-auto px-5 md:px-8 py-8 md:py-10"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
         {/* ============================================ */}
         {/* HERO HEADER - Per analysis: 56px title, subtle subtitle */}
         {/* ============================================ */}
@@ -956,6 +982,7 @@ export function HomeScreen({ onNavigate, onCommandOpen }: HomeScreenProps) {
           )}
         </motion.div>
       </motion.div>
+      </div>{/* Fin du contenu z-10 */}
     </div>
   );
 }
