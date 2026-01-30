@@ -487,6 +487,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const currentUser = await fetchUserProfile(data.user.id, true);
         if (currentUser) {
           setUser(currentUser);
+        } else {
+          // Créer un utilisateur minimal à partir des données de session
+          setUser({
+            id: data.user.id,
+            email: data.user.email || '',
+            username: data.user.email?.split('@')[0] || 'user',
+            display_name: data.user.user_metadata?.name,
+          });
         }
       }
     } catch (error) {

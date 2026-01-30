@@ -11,26 +11,12 @@ import { projectId, publicAnonKey } from '@/utils/supabase/info';
 
 const supabaseUrl = `https://${projectId}.supabase.co`;
 
-// Create typed Supabase client - FIX CRITIQUE pour Web Locks deadlock
+// Create typed Supabase client - Configuration minimale et standard
 export const supabase = createClient<Database>(supabaseUrl, publicAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: false,
-    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-    flowType: 'implicit', // Évite le flow PKCE qui cause des problèmes
-    // @ts-ignore - Désactive Web Locks API qui cause le deadlock sur F5
-    lock: { enabled: false },
-  },
-  realtime: {
-    params: {
-      eventsPerSecond: 10,
-    },
-  },
-  global: {
-    headers: {
-      'x-application-name': 'squad-planner',
-    },
+    detectSessionInUrl: true,
   },
 });
 

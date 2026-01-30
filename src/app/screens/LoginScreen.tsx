@@ -76,7 +76,9 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
       await signIn(email, password);
       onLogin?.(email, true);
       showToast?.('Bienvenue !', 'success');
-      onNavigate?.('home');
+      // NOTE: Ne pas naviguer ici - laisser le useEffect dans AppContent
+      // gérer la redirection automatiquement quand isAuthenticated devient true.
+      // Cela évite une race condition entre setUser() et navigate().
     } catch (error: any) {
       let errorMessage = error.message || 'Erreur lors de la connexion';
 
@@ -97,9 +99,9 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-[#0e0f11]">
+    <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-[#08090a]">
       {/* Subtle background gradient */}
-      <div className="fixed inset-0 bg-gradient-to-b from-[#5e6ad2]/[0.02] via-transparent to-transparent pointer-events-none" />
+      <div className="fixed inset-0 bg-gradient-to-b from-[#5e6dd2]/[0.02] via-transparent to-transparent pointer-events-none" />
 
       <motion.div
         variants={containerVariants}
@@ -114,49 +116,49 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
 
         {/* Login Form Card */}
         <motion.div variants={itemVariants}>
-          <div className="p-6 md:p-8 rounded-2xl bg-gradient-to-b from-[#161719] to-[#131416] border border-[#1e2024] shadow-xl shadow-black/20">
-            <h2 className="text-[18px] md:text-[20px] font-semibold text-[#ececed] mb-6">
+          <div className="p-6 md:p-8 rounded-2xl bg-gradient-to-b from-[#18191b] to-[#101012] border border-[#27282b] shadow-xl shadow-black/20">
+            <h2 className="text-[18px] md:text-[20px] font-semibold text-[#f7f8f8] mb-6">
               Connexion
             </h2>
 
             <div className="space-y-5">
               {/* Email Input */}
               <div>
-                <label className="block text-[12px] font-medium text-[#8b8d93] mb-2.5 uppercase tracking-wide">
+                <label className="block text-[12px] font-medium text-[#8b8d90] mb-2.5 uppercase tracking-wide">
                   Email
                 </label>
                 <div className="relative group">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#4a4b50] group-focus-within:text-[#6f7177] transition-colors" strokeWidth={1.5} />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#5e6063] group-focus-within:text-[#8b8d90] transition-colors" strokeWidth={1.5} />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="votre@email.com"
                     onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                    className="w-full h-12 pl-12 pr-4 rounded-xl bg-[#111214] border border-[#1e2024] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6ad2] focus:bg-[#141518] focus:outline-none transition-all duration-150"
+                    className="w-full h-12 pl-12 pr-4 rounded-xl bg-[#101012] border border-[#27282b] text-[14px] text-[#f7f8f8] placeholder:text-[#5e6063] focus:border-[#5e6dd2] focus:bg-[#18191b] focus:outline-none transition-all duration-150"
                   />
                 </div>
               </div>
 
               {/* Password Input */}
               <div>
-                <label className="block text-[12px] font-medium text-[#8b8d93] mb-2.5 uppercase tracking-wide">
+                <label className="block text-[12px] font-medium text-[#8b8d90] mb-2.5 uppercase tracking-wide">
                   Mot de passe
                 </label>
                 <div className="relative group">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#4a4b50] group-focus-within:text-[#6f7177] transition-colors" strokeWidth={1.5} />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#5e6063] group-focus-within:text-[#8b8d90] transition-colors" strokeWidth={1.5} />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                    className="w-full h-12 pl-12 pr-12 rounded-xl bg-[#111214] border border-[#1e2024] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6ad2] focus:bg-[#141518] focus:outline-none transition-all duration-150"
+                    className="w-full h-12 pl-12 pr-12 rounded-xl bg-[#101012] border border-[#27282b] text-[14px] text-[#f7f8f8] placeholder:text-[#5e6063] focus:border-[#5e6dd2] focus:bg-[#18191b] focus:outline-none transition-all duration-150"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#4a4b50] hover:text-[#6f7177] transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#5e6063] hover:text-[#8b8d90] transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-[18px] h-[18px]" strokeWidth={1.5} /> : <Eye className="w-[18px] h-[18px]" strokeWidth={1.5} />}
                   </button>
@@ -167,7 +169,7 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
               <motion.button
                 onClick={handleLogin}
                 disabled={isLoading}
-                className="w-full h-12 flex items-center justify-center gap-2.5 rounded-xl bg-[#5e6ad2] text-white text-[14px] font-semibold hover:bg-[#6872d9] disabled:opacity-50 shadow-lg shadow-[#5e6ad2]/20 transition-colors"
+                className="w-full h-12 flex items-center justify-center gap-2.5 rounded-xl bg-[#5e6dd2] text-white text-[14px] font-semibold hover:bg-[#6a79db] disabled:opacity-50 shadow-lg shadow-[#5e6dd2]/20 transition-colors"
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -182,7 +184,7 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
               <motion.button
                 onClick={handleForgotPassword}
                 disabled={isResettingPassword}
-                className="w-full text-center text-[13px] text-[#6f7177] hover:text-[#8b8d93] transition-colors disabled:opacity-50 py-1"
+                className="w-full text-center text-[13px] text-[#8b8d90] hover:text-[#8b8d90] transition-colors disabled:opacity-50 py-1"
                 whileHover={{ x: 2 }}
               >
                 {isResettingPassword ? 'Envoi en cours...' : 'Mot de passe oublié ?'}
@@ -213,19 +215,19 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
 
             {/* Divider */}
             <div className="my-6 flex items-center gap-4">
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#26282d] to-transparent" />
-              <span className="text-[11px] text-[#4a4b50] uppercase tracking-wider">ou</span>
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#26282d] to-transparent" />
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#27282b] to-transparent" />
+              <span className="text-[11px] text-[#5e6063] uppercase tracking-wider">ou</span>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#27282b] to-transparent" />
             </div>
 
             {/* Sign Up */}
             <div className="text-center">
-              <p className="text-[13px] text-[#6f7177] mb-4">
+              <p className="text-[13px] text-[#8b8d90] mb-4">
                 Pas encore de compte ?
               </p>
               <motion.button
                 onClick={() => onNavigate?.('signup')}
-                className="w-full h-12 flex items-center justify-center gap-2.5 rounded-xl bg-[#111214] text-[#ececed] text-[14px] font-medium border border-[#1e2024] hover:bg-[#1a1b1f] hover:border-[#26282d] transition-all duration-150"
+                className="w-full h-12 flex items-center justify-center gap-2.5 rounded-xl bg-[#101012] text-[#f7f8f8] text-[14px] font-medium border border-[#27282b] hover:bg-[#1f2023] hover:border-[#27282b] transition-all duration-150"
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -238,9 +240,9 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
 
         {/* Footer */}
         <motion.div variants={itemVariants} className="mt-8 text-center">
-          <p className="text-[12px] text-[#4a4b50] leading-relaxed">
+          <p className="text-[12px] text-[#5e6063] leading-relaxed">
             En continuant, vous acceptez nos{' '}
-            <button className="text-[#6f7177] hover:text-[#8b8d93] transition-colors underline-offset-2 hover:underline">
+            <button className="text-[#8b8d90] hover:text-[#8b8d90] transition-colors underline-offset-2 hover:underline">
               Conditions d'utilisation
             </button>
           </p>
