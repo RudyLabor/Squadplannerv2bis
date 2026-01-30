@@ -2,6 +2,13 @@
 
 > **IMPORTANT**: Copier ce fichier au début de chaque nouvelle conversation avec Claude pour maintenir le contexte.
 
+## Consignes pour Claude
+
+**Après chaque correction de bug ou modification de code :**
+1. **Toujours commiter** les changements avec un message descriptif (format conventionnel : `fix:`, `feat:`, `perf:`, etc.)
+2. **Toujours pousser** vers `origin/main` pour déployer sur Vercel
+3. **Toujours mettre à jour** ce fichier CLAUDE_PROGRESS.md avec les changements effectués
+
 ---
 
 ## CREDENTIALS (A GARDER CONFIDENTIEL)
