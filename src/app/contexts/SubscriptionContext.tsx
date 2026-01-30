@@ -76,6 +76,32 @@ interface SubscriptionContextType {
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
 
+// Helper: Retry automatique pour les erreurs 503 (Supabase temporairement surchargé)
+async function fetchWithRetry<T>(
+  fn: () => Promise<{ data: T | null; error: any }>,
+  retries = 3,
+  initialDelay = 1000
+): Promise<{ data: T | null; error: any }> {
+  for (let i = 0; i < retries; i++) {
+    const result = await fn();
+
+    // Si succès ou erreur autre que 503, retourner
+    if (!result.error || !result.error.message?.includes('503')) {
+      return result;
+    }
+
+    // Erreur 503 - attendre avec backoff exponentiel avant retry
+    if (i < retries - 1) {
+      const delay = initialDelay * Math.pow(2, i);
+      console.warn(`[Subscription] 503 error, retry ${i + 1}/${retries} après ${delay}ms...`);
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+
+  // Toutes les tentatives ont échoué
+  return fn();
+}
+
 // Default limits for free tier
 const FREE_LIMITS: FeatureLimits = {
   tier: 'free',
@@ -120,11 +146,13 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
       // Fetch subscription - graceful handling if table doesn't exist
       let subData = null;
       try {
-        const { data, error: subError } = await supabase
-          .from('subscriptions')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
+        const { data, error: subError } = await fetchWithRetry(() =>
+          supabase
+            .from('subscriptions')
+            .select('*')
+            .eq('user_id', user.id)
+            .single()
+        );
 
         // Gestion gracieuse des erreurs 406/PGRST116 (table non accessible ou vide)
         if (subError) {
@@ -148,11 +176,13 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
       const tier = subData?.tier || 'free';
       let limitsData = null;
       try {
-        const { data, error: limitsError } = await supabase
-          .from('feature_limits')
-          .select('*')
-          .eq('tier', tier)
-          .single();
+        const { data, error: limitsError } = await fetchWithRetry(() =>
+          supabase
+            .from('feature_limits')
+            .select('*')
+            .eq('tier', tier)
+            .single()
+        );
 
         if (limitsError) {
           // Table peut ne pas exister - utiliser les limites par défaut
@@ -173,12 +203,14 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
       // Fetch current month usage - with fallback
       try {
         const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
-        const { data: usageData, error: usageError } = await supabase
-          .from('usage_tracking')
-          .select('squads_created, sessions_created, recurring_sessions_created')
-          .eq('user_id', user.id)
-          .eq('period_start', currentMonth)
-          .single();
+        const { data: usageData, error: usageError } = await fetchWithRetry(() =>
+          supabase
+            .from('usage_tracking')
+            .select('squads_created, sessions_created, recurring_sessions_created')
+            .eq('user_id', user.id)
+            .eq('period_start', currentMonth)
+            .single()
+        );
 
         if (usageError) {
           // Table peut ne pas exister

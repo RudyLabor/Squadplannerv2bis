@@ -312,16 +312,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           session = result.data?.session;
           sessionError = result.error;
         } catch (raceError: any) {
-          // Timeout sur getSession - tenter un refresh
-          console.warn('[Auth] ⚠️ Timeout sur getSession, tentative refresh...');
-          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-
-          if (refreshError || !refreshData.session) {
-            throw new Error('Session timeout et refresh échoué');
+          // Ignorer AbortError (causé par React StrictMode double-mount/unmount)
+          if (raceError?.name === 'AbortError' || raceError?.message?.includes('aborted')) {
+            console.log('[Auth] ℹ️ Request aborted (StrictMode) - ignoré');
+            if (!isMounted) return;
+            // Tenter quand même un refresh silencieux
           }
 
-          session = refreshData.session;
-          sessionError = null;
+          // Timeout sur getSession - tenter un refresh
+          console.warn('[Auth] ⚠️ Timeout/erreur sur getSession, tentative refresh...');
+          try {
+            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+
+            if (refreshError || !refreshData.session) {
+              // Si pas de session, l'utilisateur n'est pas connecté
+              if (!isMounted) return;
+              console.log('[Auth] ℹ️ Pas de session après refresh - utilisateur non connecté');
+              setUser(null);
+              setLoading(false);
+              return;
+            }
+
+            session = refreshData.session;
+            sessionError = null;
+          } catch (refreshErr: any) {
+            // Ignorer AbortError sur le refresh aussi
+            if (refreshErr?.name === 'AbortError' || refreshErr?.message?.includes('aborted')) {
+              console.log('[Auth] ℹ️ Refresh aborted - ignoré');
+              if (!isMounted) return;
+            }
+            throw new Error('Session timeout et refresh échoué');
+          }
         }
 
         if (!isMounted) return;
@@ -366,6 +387,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setAuthError(null); // Clear any previous error
         }
       } catch (error: any) {
+        // Ignorer AbortError silencieusement (React StrictMode)
+        if (error?.name === 'AbortError' || error?.message?.includes('aborted')) {
+          console.log('[Auth] ℹ️ Init aborted (StrictMode cleanup) - ignoré');
+          return; // Ne pas modifier l'état si le composant est démonté
+        }
+
         console.error('[Auth] ❌ Erreur initAuth:', error);
         if (isMounted) {
           // Tenter une dernière récupération silencieuse
@@ -381,7 +408,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 return;
               }
             }
-          } catch (e) {
+          } catch (e: any) {
+            // Ignorer AbortError sur la récupération aussi
+            if (e?.name === 'AbortError' || e?.message?.includes('aborted')) {
+              console.log('[Auth] ℹ️ Recovery aborted - ignoré');
+              return;
+            }
             console.error('[Auth] ❌ Dernière tentative échouée:', e);
           }
 
