@@ -300,6 +300,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         console.log('[Auth] 📡 Vérification de la session Supabase...');
 
+        // D'abord, essayer de restaurer la session depuis localStorage si elle existe
+        const storageKey = 'sb-cwtoprbowdqcemdjrtir-auth-token';
+        const storedToken = localStorage.getItem(storageKey);
+        if (storedToken) {
+          try {
+            const tokenData = JSON.parse(storedToken);
+            if (tokenData.access_token && tokenData.refresh_token) {
+              console.log('[Auth] 🔄 Restauration de la session depuis localStorage...');
+              const { error: setError } = await supabase.auth.setSession({
+                access_token: tokenData.access_token,
+                refresh_token: tokenData.refresh_token
+              });
+              if (setError) {
+                console.warn('[Auth] ⚠️ Erreur setSession:', setError.message);
+              } else {
+                console.log('[Auth] ✅ Session restaurée depuis localStorage');
+              }
+            }
+          } catch (parseError) {
+            console.warn('[Auth] ⚠️ Erreur parsing token localStorage:', parseError);
+          }
+        }
+
         // Créer une promesse avec timeout pour getSession
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise<never>((_, reject) =>
