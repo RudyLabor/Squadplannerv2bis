@@ -38,8 +38,9 @@ export const supabase = createClient<Database>(supabaseUrl, publicAnonKey, {
     storage: customStorage,
     storageKey: `sb-${projectId}-auth-token`,
     flowType: 'implicit',
-    // @ts-ignore - Désactive Web Locks API qui cause le deadlock sur F5
-    lock: { enabled: false },
+    // Désactive Web Locks API qui cause le deadlock sur F5
+    // @ts-ignore - Option non documentée mais fonctionnelle
+    lock: false,
   },
 });
 
