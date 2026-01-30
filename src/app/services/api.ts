@@ -9,6 +9,41 @@ import {
 } from '@/utils/discord-webhook';
 
 // ============================================================================
+// WORKAROUND: Helper pour obtenir l'utilisateur courant sans bloquer
+// Le SDK Supabase peut bloquer sur getUser() à cause des Web Locks
+// On lit DIRECTEMENT depuis localStorage - plus rapide et sans blocage
+// ============================================================================
+const storageKey = 'sb-cwtoprbowdqcemdjrtir-auth-token';
+
+const getCurrentUser = async () => {
+  // Lire directement depuis localStorage - SANS appeler le SDK
+  const storedData = localStorage.getItem(storageKey);
+
+  if (!storedData) return null;
+
+  try {
+    const tokenData = JSON.parse(storedData);
+    const now = Math.floor(Date.now() / 1000);
+
+    // Vérifier expiration
+    if (tokenData.expires_at && tokenData.expires_at < now) {
+      console.log('[API] ⚠️ Token expiré');
+      return null;
+    }
+
+    if (!tokenData.user) {
+      console.log('[API] ⚠️ Pas de user dans le token');
+      return null;
+    }
+
+    return tokenData.user;
+  } catch (e) {
+    console.warn('[API] Erreur lecture token:', e);
+    return null;
+  }
+};
+
+// ============================================================================
 // USERS API
 // ============================================================================
 
@@ -98,15 +133,21 @@ export const usersAPI = {
 
 export const squadsAPI = {
   getAll: async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
-    // Get squads where user is a member
-    const { data: squads, error } = await supabase
+    // Get squads where user is a member - avec timeout de 10s
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Request timeout (10s)')), 10000);
+    });
+
+    const queryPromise = supabase
       .from('squads')
       .select('*, owner:users!owner_id(username, display_name, avatar_url), squad_members!inner(user_id)')
       .eq('squad_members.user_id', user.id)
       .order('created_at', { ascending: false });
+
+    const { data: squads, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
 
     if (error) throw error;
     return { squads: squads || [] };
@@ -142,7 +183,7 @@ export const squadsAPI = {
     maxMembers?: number;
     isPublic?: boolean;
   }) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     // 1. Create Squad
@@ -192,7 +233,7 @@ export const squadsAPI = {
   },
 
   join: async (inviteCode: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     // 1. Find squad
@@ -241,7 +282,7 @@ export const squadsAPI = {
   },
 
   leave: async (squadId: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     // Get user and squad info before deleting
@@ -353,7 +394,7 @@ export const sessionsAPI = {
     duration?: string;
     requiredPlayers?: number;
   }) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     // Get user profile for creator name
@@ -443,7 +484,7 @@ export const sessionsAPI = {
   },
 
   rsvp: async (sessionId: string, response: 'yes' | 'no' | 'maybe', notes?: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     const { data, error } = await supabase
@@ -482,7 +523,7 @@ export const sessionsAPI = {
   // ========== CHECK-IN SYSTEM ==========
 
   checkIn: async (sessionId: string, status: 'confirmed' | 'on_my_way' | 'running_late' | 'cancelled', notes?: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     const { data, error } = await supabase
@@ -600,7 +641,7 @@ export const badgesAPI = {
   },
 
   getUserBadges: async (userId?: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     const targetUserId = userId || user?.id;
     if (!targetUserId) throw new Error('Not authenticated');
 
@@ -618,7 +659,7 @@ export const badgesAPI = {
   },
 
   getEquipped: async (userId?: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     const targetUserId = userId || user?.id;
     if (!targetUserId) throw new Error('Not authenticated');
 
@@ -638,7 +679,7 @@ export const badgesAPI = {
   },
 
   equipBadge: async (userBadgeId: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     // Check if user already has 3 badges equipped
@@ -668,7 +709,7 @@ export const badgesAPI = {
   },
 
   unequipBadge: async (userBadgeId: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     const { data, error } = await supabase
@@ -687,7 +728,7 @@ export const badgesAPI = {
   },
 
   checkAndAward: async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     // Call the SQL function to check and award badges
@@ -707,7 +748,7 @@ export const badgesAPI = {
 
 export const rolesAPI = {
   getUserRole: async (squadId: string, userId?: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     const targetUserId = userId || user?.id;
     if (!targetUserId) throw new Error('Not authenticated');
 
@@ -739,7 +780,7 @@ export const rolesAPI = {
   },
 
   promoteMember: async (squadId: string, userId: string, newRole: 'co_leader' | 'member') => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     // Use the SQL function for safe promotion
@@ -756,7 +797,7 @@ export const rolesAPI = {
   },
 
   kickMember: async (squadId: string, userId: string, reason?: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     // Use the SQL function for safe kick
@@ -773,7 +814,7 @@ export const rolesAPI = {
   },
 
   checkPermission: async (squadId: string, permission: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -788,7 +829,7 @@ export const rolesAPI = {
   },
 
   isAdmin: async (squadId: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -802,7 +843,7 @@ export const rolesAPI = {
   },
 
   isLeader: async (squadId: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -866,7 +907,7 @@ export const statsAPI = {
   },
 
   getUserRank: async (userId?: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     const targetUserId = userId || user?.id;
     if (!targetUserId) throw new Error('Not authenticated');
 
@@ -907,7 +948,7 @@ export const statsAPI = {
   },
 
   getReliabilityTrend: async (userId?: string, days: number = 30) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     const targetUserId = userId || user?.id;
     if (!targetUserId) throw new Error('Not authenticated');
 
@@ -972,7 +1013,7 @@ export const recurringSessionsAPI = {
     duration?: string;
     requiredPlayers?: number;
   }) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     const { data: recurring, error } = await supabase
@@ -1018,7 +1059,7 @@ export const recurringSessionsAPI = {
   },
 
   generateNextSession: async (recurringId: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     // Get the recurring session details
@@ -1068,7 +1109,7 @@ export const recurringSessionsAPI = {
 
 export const notificationsAPI = {
   getAll: async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     const { data, error } = await supabase
@@ -1095,7 +1136,7 @@ export const notificationsAPI = {
   },
 
   markAllAsRead: async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     const { error } = await supabase
@@ -1119,7 +1160,7 @@ export const messagesAPI = {
     content: string;
     type?: 'text' | 'system' | 'image' | 'file';
   }) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     const { data: message, error } = await supabase
@@ -1144,7 +1185,7 @@ export const messagesAPI = {
 
 export const friendshipsAPI = {
   getAll: async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     const { data, error } = await supabase
@@ -1159,7 +1200,7 @@ export const friendshipsAPI = {
   },
 
   sendRequest: async (friendId: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     const { data, error } = await supabase
@@ -1204,7 +1245,7 @@ export const friendshipsAPI = {
   },
 
   getPending: async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     const { data, error } = await supabase
@@ -1246,7 +1287,7 @@ export const achievementsAPI = {
   },
 
   getUserProgress: async (userId?: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user && !userId) throw new Error('Not authenticated');
 
     const targetUserId = userId || user!.id;
@@ -1262,7 +1303,7 @@ export const achievementsAPI = {
   },
 
   getUnlocked: async (userId?: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user && !userId) throw new Error('Not authenticated');
 
     const targetUserId = userId || user!.id;
@@ -1299,7 +1340,7 @@ export const challengesAPI = {
   },
 
   getUserProgress: async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     const { data, error } = await supabase
@@ -1427,14 +1468,14 @@ export const availabilityAPI = {
   },
 
   getMySlots: async (startDate: string, endDate: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     return availabilityAPI.getSlots(user.id, startDate, endDate);
   },
 
   setSlot: async (date: string, startTime: string, endTime: string, isAvailable: boolean) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     const { data, error } = await supabase
@@ -1509,7 +1550,7 @@ export const analyticsAPI = {
   },
 
   getUserStats: async (userId?: string, periodType: 'daily' | 'weekly' | 'monthly' = 'weekly') => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user && !userId) throw new Error('Not authenticated');
 
     const targetUserId = userId || user!.id;
@@ -1541,7 +1582,7 @@ export const analyticsAPI = {
   },
 
   getLatestUserStats: async (userId?: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user && !userId) throw new Error('Not authenticated');
 
     const targetUserId = userId || user!.id;

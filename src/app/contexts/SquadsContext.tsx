@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { squadsAPI } from '@/app/services/api';
 import { useAuth } from './AuthContext';
-import { supabase } from '@/lib/supabase';
+import { supabase, initializeSession } from '@/lib/supabase';
 
 interface Squad {
   id: string;
@@ -111,10 +111,21 @@ export function SquadsProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     setError(null);
     try {
+      // S'assurer que la session Supabase est initialisée avant les requêtes
+      await initializeSession();
+
       const { squads: data } = await squadsAPI.getAll();
       setSquads(data as unknown as Squad[]);
     } catch (err: any) {
       console.error('Error fetching squads:', err);
+
+      // Si erreur 401 ou "Not authenticated", le token est invalide
+      // On met quand même loading à false pour éviter le timeout
+      if (err.message?.includes('401') || err.message?.includes('Not authenticated')) {
+        console.warn('[Squads] Token invalide, session expirée');
+        setSquads([]); // Retourner une liste vide
+      }
+
       setError(err.message);
     } finally {
       setLoading(false);
