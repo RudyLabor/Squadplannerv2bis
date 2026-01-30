@@ -32,7 +32,7 @@ interface SquadsContextType {
   joinSquad: (inviteCode: string) => Promise<Squad>;
   leaveSquad: (squadId: string) => Promise<void>;
   updateSquad: (squadId: string, data: any) => Promise<Squad>;
-  getSquadById: (squadId: string) => Promise<Squad>;
+  getSquadById: (squadId: string) => Promise<Squad | null>;
 }
 
 const SquadsContext = createContext<SquadsContextType | undefined>(undefined);
@@ -53,6 +53,7 @@ export function SquadsProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   // Real-time subscriptions for squads and squad members
+  // NOTE: Ne PAS inclure currentSquad dans les deps pour éviter les re-subscriptions infinies
   useEffect(() => {
     if (!user) return;
 
@@ -66,14 +67,15 @@ export function SquadsProvider({ children }: { children: ReactNode }) {
           table: 'squads',
         },
         (payload: any) => {
-          console.log('Squad updated:', payload.new);
+          console.log('[Squads] Squad updated:', payload.new.id);
           setSquads((prev) =>
             prev.map((s) => (s.id === payload.new.id ? { ...s, ...payload.new } : s))
           );
 
-          if (currentSquad?.id === payload.new.id) {
-            setCurrentSquad((prev) => (prev ? { ...prev, ...payload.new } : null));
-          }
+          // Mise à jour de currentSquad via callback pour éviter les dépendances
+          setCurrentSquad((prev) =>
+            prev?.id === payload.new.id ? { ...prev, ...payload.new } : prev
+          );
         }
       )
       .on(
@@ -84,11 +86,15 @@ export function SquadsProvider({ children }: { children: ReactNode }) {
           table: 'squad_members',
         },
         (payload: any) => {
-          console.log('Squad member changed:', payload);
-          // Refresh the affected squad to get updated member count
+          console.log('[Squads] Squad member changed:', payload.eventType);
+          // NE PAS appeler getSquadById ici pour éviter les boucles !
+          // Les membres seront mis à jour au prochain chargement explicite
           const squadId = payload.new?.squad_id || payload.old?.squad_id;
           if (squadId) {
-            getSquadById(squadId).catch(console.error);
+            // Marquer le squad comme nécessitant un rafraîchissement
+            setSquads((prev) =>
+              prev.map((s) => (s.id === squadId ? { ...s, _membersUpdated: Date.now() } : s))
+            );
           }
         }
       )
@@ -97,7 +103,7 @@ export function SquadsProvider({ children }: { children: ReactNode }) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, currentSquad?.id]);
+  }, [user]); // IMPORTANT: Ne PAS inclure currentSquad ou getSquadById
 
   const refreshSquads = async () => {
     if (!user) return;
@@ -167,15 +173,39 @@ export function SquadsProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const getSquadById = async (squadId: string) => {
+  const getSquadById = async (squadId: string): Promise<Squad | null> => {
     try {
+      // Vérifier d'abord le cache local
+      const cachedSquad = squads.find(s => s.id === squadId);
+      if (cachedSquad) {
+        console.log('[Squads] Squad trouvée dans le cache:', squadId);
+        setCurrentSquad(cachedSquad);
+        return cachedSquad;
+      }
+
+      // Appeler l'API
+      console.log('[Squads] Chargement squad depuis API:', squadId);
       const { squad } = await squadsAPI.getById(squadId);
+
+      if (!squad) {
+        console.warn('[Squads] Squad non trouvée pour ID:', squadId);
+        return null;
+      }
+
       const typedSquad = squad as unknown as Squad;
       setCurrentSquad(typedSquad);
+
+      // Ajouter au cache local si pas présent
+      setSquads(prev => {
+        const exists = prev.some(s => s.id === squadId);
+        return exists ? prev : [...prev, typedSquad];
+      });
+
       return typedSquad;
     } catch (err: any) {
-      console.error('Error fetching squad:', err);
-      throw err;
+      console.error('[Squads] Error fetching squad:', err);
+      // Retourner null au lieu de throw pour un affichage gracieux
+      return null;
     }
   };
 

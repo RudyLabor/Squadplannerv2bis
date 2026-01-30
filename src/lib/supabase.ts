@@ -14,14 +14,15 @@ const supabaseUrl = `https://${projectId}.supabase.co`;
 // Use native fetch - don't remove AbortSignal as it causes requests to hang indefinitely
 
 // Create typed Supabase client with improved error handling
+// FIX: detectSessionInUrl: false et pas de flowType PKCE pour éviter le blocage sur getSession()
+// lors des rafraîchissements de page (le SDK attendait un code PKCE dans l'URL qui n'arrivait jamais)
 export const supabase = createClient<Database>(supabaseUrl, publicAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: true,
+    detectSessionInUrl: false, // ✅ CORRIGÉ: était true, causait blocage sur F5
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-    flowType: 'pkce',
-    // Use default storage key for better compatibility
+    // ✅ SUPPRIMÉ: flowType: 'pkce' - non nécessaire pour auth email/mot de passe
   },
   realtime: {
     params: {

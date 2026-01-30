@@ -39,11 +39,11 @@ export function BottomNav({ onCommandOpen }: BottomNavProps) {
       transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
     >
       {/* Background blur layer */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0e0f11] via-[#0e0f11]/95 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#08090a] via-[#08090a]/95 to-transparent pointer-events-none" />
 
       {/* Navigation dock */}
       <div className="relative flex justify-center px-4 pb-4">
-        <nav className="w-full max-w-md bg-[#111214]/98 backdrop-blur-xl rounded-2xl border border-[#1e2024] shadow-lg shadow-black/30">
+        <nav className="w-full max-w-md bg-[#101012]/98 backdrop-blur-xl rounded-2xl border border-[#27282b] shadow-lg shadow-black/30">
           <div className="flex items-center justify-around p-1">
             {tabs.map((tab) => {
               const Icon = tab.icon;
@@ -64,7 +64,7 @@ export function BottomNav({ onCommandOpen }: BottomNavProps) {
                   {isActive && (
                     <motion.div
                       layoutId="activeTab"
-                      className="absolute inset-1 rounded-xl bg-[#1a1b1f]"
+                      className="absolute inset-1 rounded-xl bg-[#1f2023]"
                       transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
                     />
                   )}
@@ -73,8 +73,8 @@ export function BottomNav({ onCommandOpen }: BottomNavProps) {
                   <Icon
                     className={`w-[22px] h-[22px] relative z-10 transition-colors duration-150 ${
                       isActive
-                        ? 'text-[#ececed]'
-                        : 'text-[#4a4b50]'
+                        ? 'text-[#f7f8f8]'
+                        : 'text-[#5e6063]'
                     }`}
                     strokeWidth={isActive ? 1.75 : 1.5}
                   />
@@ -82,7 +82,7 @@ export function BottomNav({ onCommandOpen }: BottomNavProps) {
                   {/* Label - Readable size */}
                   <span
                     className={`text-[11px] font-medium relative z-10 transition-colors duration-150 ${
-                      isActive ? 'text-[#ececed]' : 'text-[#4a4b50]'
+                      isActive ? 'text-[#f7f8f8]' : 'text-[#5e6063]'
                     }`}
                   >
                     {t(tab.labelKey)}
@@ -93,7 +93,7 @@ export function BottomNav({ onCommandOpen }: BottomNavProps) {
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="absolute bottom-1.5 w-1 h-1 rounded-full bg-[#5e6ad2]"
+                      className="absolute bottom-1.5 w-1 h-1 rounded-full bg-[#5e6dd2]"
                       transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
                     />
                   )}

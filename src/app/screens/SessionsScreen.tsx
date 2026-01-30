@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from "react";
-import { Plus, Calendar, Clock, Users, Check, X, ChevronRight } from "lucide-react";
+import { Plus, Calendar, Clock, Users, Check, X, ChevronRight, CalendarDays, Target } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { sessionsAPI } from "@/utils/api";
 import { useAuth } from "@/app/contexts/AuthContext";
@@ -37,25 +37,38 @@ const itemVariants = {
 };
 
 // ============================================
-// STAT CARD - Visually recessed
+// STAT CARD - Linear style with colored icons
 // ============================================
-function StatCard({ value, label }: { value: string | number; label: string }) {
+function StatCard({
+  value,
+  label,
+  icon: Icon,
+  iconColor = "text-[#f5a623]"
+}: {
+  value: string | number;
+  label: string;
+  icon?: any;
+  iconColor?: string;
+}) {
   return (
     <motion.div
-      className="p-4 rounded-xl bg-[#111214] border border-[#1a1b1f] hover:border-[#26282d] hover:bg-[#141518] transition-all duration-100 group cursor-default"
+      className="p-4 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-100 group cursor-default"
       whileHover={{ y: -2 }}
       transition={{ duration: 0.1 }}
     >
-      <p className="text-[24px] md:text-[28px] font-semibold text-[#ececed] tabular-nums leading-none mb-1">
-        {value}
-      </p>
-      <span className="text-[12px] md:text-[13px] text-[#4a4b50] block">{label}</span>
+      <div className="flex items-center gap-2 mb-1">
+        {Icon && <Icon className={`w-4 h-4 ${iconColor} opacity-60`} strokeWidth={1.5} />}
+        <p className="text-[24px] md:text-[28px] font-semibold text-[#f7f8f8] tabular-nums leading-none">
+          {value}
+        </p>
+      </div>
+      <span className="text-[12px] md:text-[13px] text-[#5e6063] block">{label}</span>
     </motion.div>
   );
 }
 
 // ============================================
-// FILTER TAB
+// FILTER TAB - Linear style
 // ============================================
 function FilterTab({
   label,
@@ -69,10 +82,10 @@ function FilterTab({
   return (
     <motion.button
       onClick={onClick}
-      className={`px-4 py-2 rounded-xl text-[13px] font-medium transition-all duration-100 ${
+      className={`px-4 py-2 rounded-lg text-[13px] font-medium transition-all duration-100 ${
         active
-          ? "bg-[#5e6ad2] text-white shadow-lg shadow-[#5e6ad2]/20"
-          : "bg-[#111214] text-[#6f7177] border border-[#1a1b1f] hover:border-[#26282d] hover:text-[#ececed]"
+          ? "bg-[rgba(94,109,210,0.15)] text-[#8b93ff] border border-[rgba(94,109,210,0.3)]"
+          : "bg-[rgba(255,255,255,0.02)] text-[#8b8d90] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.1)] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.04)]"
       }`}
       whileHover={{ y: -1 }}
       whileTap={{ scale: 0.98 }}
@@ -83,7 +96,7 @@ function FilterTab({
 }
 
 // ============================================
-// SESSION CARD
+// SESSION CARD - Linear style with transparent bg
 // ============================================
 function SessionCard({
   session,
@@ -113,31 +126,31 @@ function SessionCard({
   return (
     <motion.button
       onClick={() => onOpenDetail(session.id)}
-      className="w-full p-4 md:p-5 rounded-xl bg-[#111214] border border-[#1a1b1f] hover:bg-[#141518] hover:border-[#26282d] text-left transition-all duration-100 group"
+      className="w-full p-4 md:p-5 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)] text-left transition-all duration-100 group"
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.995 }}
       transition={{ duration: 0.1 }}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1 min-w-0">
-          <h3 className="text-[15px] font-medium text-[#ececed] group-hover:text-white mb-1 truncate transition-colors">
+          <h3 className="text-[15px] font-medium text-[#f7f8f8] group-hover:text-white mb-1 truncate transition-colors">
             {session.title || session.name || "Session"}
           </h3>
-          <p className="text-[13px] text-[#4a4b50] group-hover:text-[#6f7177] truncate transition-colors">
+          <p className="text-[13px] text-[#5e6063] group-hover:text-[#8b8d90] truncate transition-colors">
             {session.squadName} • {session.game}
           </p>
         </div>
-        <ChevronRight className="w-4 h-4 text-[#26282d] group-hover:text-[#4a4b50] mt-1 flex-shrink-0 transition-colors" />
+        <ChevronRight className="w-4 h-4 text-[rgba(255,255,255,0.15)] group-hover:text-[rgba(255,255,255,0.3)] mt-1 flex-shrink-0 transition-colors" />
       </div>
 
-      {/* Date & Time */}
+      {/* Date & Time - Colored icons */}
       <div className="flex items-center gap-4 mb-3">
-        <div className="flex items-center gap-1.5 text-[13px] text-[#6f7177]">
-          <Calendar className="w-4 h-4 text-[#4a4b50]" strokeWidth={1.5} />
+        <div className="flex items-center gap-1.5 text-[13px] text-[#8b8d90]">
+          <Calendar className="w-4 h-4 text-[#f5a623]/70" strokeWidth={1.5} />
           <span>{formattedDate}</span>
         </div>
-        <div className="flex items-center gap-1.5 text-[13px] text-[#6f7177]">
-          <Clock className="w-4 h-4 text-[#4a4b50]" strokeWidth={1.5} />
+        <div className="flex items-center gap-1.5 text-[13px] text-[#8b8d90]">
+          <Clock className="w-4 h-4 text-[#60a5fa]/70" strokeWidth={1.5} />
           <span>{formattedTime}</span>
         </div>
       </div>
@@ -147,21 +160,21 @@ function SessionCard({
         {/* Participants */}
         <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[12px] font-medium ${
           isComplete
-            ? "bg-[#4ade80]/10 text-[#4ade80]"
-            : "bg-[#1a1b1f] text-[#6f7177]"
+            ? "bg-[rgba(74,222,128,0.1)] text-[#4ade80]"
+            : "bg-[rgba(255,255,255,0.04)] text-[#8b8d90]"
         }`}>
           <Users className="w-3.5 h-3.5" strokeWidth={1.5} />
           {confirmed}/{total}
         </div>
 
         {isComplete && (
-          <span className="px-2 py-1 text-[10px] font-medium rounded-lg bg-[#4ade80]/10 text-[#4ade80] uppercase">
+          <span className="px-2 py-1 text-[10px] font-medium rounded-lg bg-[rgba(74,222,128,0.1)] text-[#4ade80] uppercase">
             Complet
           </span>
         )}
 
         {userRSVP === "yes" && (
-          <span className="px-2 py-1 text-[10px] font-medium rounded-lg bg-[#4ade80]/10 text-[#4ade80] uppercase flex items-center gap-1">
+          <span className="px-2 py-1 text-[10px] font-medium rounded-lg bg-[rgba(74,222,128,0.1)] text-[#4ade80] uppercase flex items-center gap-1">
             <Check className="w-3 h-3" />
             Confirmé
           </span>
@@ -174,7 +187,7 @@ function SessionCard({
                 e.stopPropagation();
                 onRSVP(session.id, "yes");
               }}
-              className="w-8 h-8 rounded-lg bg-[#4ade80]/10 text-[#4ade80] flex items-center justify-center hover:bg-[#4ade80]/20 transition-colors"
+              className="w-8 h-8 rounded-lg bg-[rgba(74,222,128,0.1)] text-[#4ade80] flex items-center justify-center hover:bg-[rgba(74,222,128,0.2)] transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -185,7 +198,7 @@ function SessionCard({
                 e.stopPropagation();
                 onRSVP(session.id, "no");
               }}
-              className="w-8 h-8 rounded-lg bg-[#1a1b1f] text-[#6f7177] flex items-center justify-center hover:bg-[#1e2024] transition-colors"
+              className="w-8 h-8 rounded-lg bg-[rgba(255,255,255,0.04)] text-[#8b8d90] flex items-center justify-center hover:bg-[rgba(255,255,255,0.08)] transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -207,26 +220,26 @@ function EmptyState({ onNavigate }: { onNavigate: (screen: string) => void }) {
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
-      className="p-6 md:p-8 rounded-2xl bg-gradient-to-b from-[#131416] to-[#111214] border border-[#1a1b1f]"
+      className="p-6 md:p-8 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]"
     >
       <div className="text-center max-w-[320px] mx-auto">
-        {/* Icon - Neutral, professional */}
-        <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-[#1a1b1f] flex items-center justify-center mx-auto mb-5">
-          <Calendar className="w-6 h-6 md:w-7 md:h-7 text-[#3a3b40]" strokeWidth={1.5} />
+        {/* Icon - Colored */}
+        <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-[rgba(245,166,35,0.1)] flex items-center justify-center mx-auto mb-5">
+          <Calendar className="w-6 h-6 md:w-7 md:h-7 text-[#f5a623]" strokeWidth={1.5} />
         </div>
 
         {/* Micro-copy - Factual, serious */}
-        <h3 className="text-[15px] md:text-[16px] font-semibold text-[#ececed] mb-2">
+        <h3 className="text-[15px] md:text-[16px] font-semibold text-[#f7f8f8] mb-2">
           Aucune session planifiée
         </h3>
-        <p className="text-[13px] md:text-[14px] text-[#6f7177] mb-6 leading-relaxed">
+        <p className="text-[13px] md:text-[14px] text-[#8b8d90] mb-6 leading-relaxed">
           Propose une session pour créer un engagement réel.
         </p>
 
         {/* Primary CTA - Clear, prominent */}
         <motion.button
           onClick={() => onNavigate("propose-session")}
-          className="inline-flex items-center justify-center gap-2.5 w-full h-12 rounded-xl bg-[#5e6ad2] text-white text-[14px] font-semibold hover:bg-[#6872d9] shadow-lg shadow-[#5e6ad2]/20 transition-colors"
+          className="inline-flex items-center justify-center gap-2.5 w-full h-12 rounded-xl bg-[#5e6dd2] text-white text-[14px] font-semibold hover:bg-[#6a79db] shadow-lg shadow-[#5e6dd2]/20 transition-colors"
           whileHover={{ y: -1 }}
           whileTap={{ scale: 0.98 }}
         >
@@ -309,14 +322,14 @@ export function SessionsScreen({ onNavigate, showToast }: SessionsScreenProps) {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0e0f11] flex items-center justify-center">
-        <div className="w-5 h-5 border-2 border-[#5e6ad2] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#08090a] flex items-center justify-center">
+        <div className="w-5 h-5 border-2 border-[#5e6dd2] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0e0f11] pb-24 md:pb-8">
+    <div className="min-h-screen bg-[#08090a] pb-24 md:pb-8">
       {/* Session Detail Modal */}
       {selectedSessionId && (
         <SessionDetailModal
@@ -338,19 +351,19 @@ export function SessionsScreen({ onNavigate, showToast }: SessionsScreenProps) {
         {/* Header */}
         <motion.div variants={itemVariants} className="mb-6">
           <div className="flex items-center justify-between mb-1">
-            <h1 className="text-[24px] md:text-[26px] font-semibold text-[#ececed]">
+            <h1 className="text-[24px] md:text-[26px] font-semibold text-[#f7f8f8]">
               Mes Sessions
             </h1>
             <motion.button
               onClick={() => onNavigate("propose-session")}
-              className="w-11 h-11 rounded-xl bg-[#5e6ad2] text-white flex items-center justify-center hover:bg-[#6872d9] shadow-lg shadow-[#5e6ad2]/20 transition-colors"
+              className="w-11 h-11 rounded-xl bg-[#5e6dd2] text-white flex items-center justify-center hover:bg-[#6a79db] shadow-lg shadow-[#5e6dd2]/20 transition-colors"
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.95 }}
             >
               <Plus className="w-5 h-5" strokeWidth={2} />
             </motion.button>
           </div>
-          <p className="text-[13px] text-[#6f7177]">
+          <p className="text-[13px] text-[#8b8d90]">
             {sessions.length > 0
               ? `${sessions.length} session${sessions.length > 1 ? 's' : ''} à venir`
               : 'Planifie tes moments de jeu'
@@ -361,9 +374,9 @@ export function SessionsScreen({ onNavigate, showToast }: SessionsScreenProps) {
         {/* Stats */}
         <motion.div variants={itemVariants} className="mb-6">
           <div className="grid grid-cols-3 gap-3">
-            <StatCard value={sessions.length} label="Total" />
-            <StatCard value={todayCount} label="Aujourd'hui" />
-            <StatCard value={confirmedCount} label="Confirmées" />
+            <StatCard value={sessions.length} label="Total" icon={CalendarDays} iconColor="text-[#f5a623]" />
+            <StatCard value={todayCount} label="Aujourd'hui" icon={Clock} iconColor="text-[#60a5fa]" />
+            <StatCard value={confirmedCount} label="Confirmées" icon={Check} iconColor="text-[#4ade80]" />
           </div>
           <OrangeDivider className="mt-6" />
         </motion.div>
@@ -408,11 +421,11 @@ export function SessionsScreen({ onNavigate, showToast }: SessionsScreenProps) {
           >
             <motion.button
               onClick={() => onNavigate("propose-session")}
-              className="w-full flex items-center justify-center gap-2 h-12 rounded-xl bg-[#141518] text-[#8b8d93] text-[14px] font-medium hover:bg-[#1a1b1f] hover:text-[#ececed] border border-[#1e2024] hover:border-[#26282d] transition-all duration-100"
+              className="w-full flex items-center justify-center gap-2 h-12 rounded-xl bg-[rgba(255,255,255,0.03)] text-[#8b8d90] text-[14px] font-medium hover:bg-[rgba(255,255,255,0.06)] hover:text-[#f7f8f8] border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.12)] transition-all duration-100"
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.98 }}
             >
-              <Plus className="w-[18px] h-[18px]" strokeWidth={1.5} />
+              <Plus className="w-[18px] h-[18px] text-[#f5a623]" strokeWidth={1.5} />
               Proposer une nouvelle session
             </motion.button>
           </motion.div>

@@ -347,25 +347,28 @@ export function DatePicker({ isOpen, onClose, onSelect, selectedDate, minDate }:
             </div>
           </div>
 
-          {/* Footer */}
-          {tempSelectedDate && (
-            <div className="p-6 border-t border-[var(--border-subtle)] bg-gradient-to-br from-[var(--primary-50)] to-white">
-              <div className="flex gap-3">
-                <button
-                  onClick={onClose}
-                  className="flex-1 h-12 rounded-xl bg-[var(--bg-subtle)] text-[var(--fg-secondary)] text-sm font-semibold hover:bg-[var(--bg-muted)] transition-colors"
-                >
-                  Annuler
-                </button>
-                <button
-                  onClick={handleConfirm}
-                  className="flex-1 h-12 rounded-xl bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] text-white text-sm font-semibold shadow-lg shadow-[var(--primary-500)]/20 hover:shadow-xl hover:shadow-[var(--primary-500)]/30 transition-all duration-200"
-                >
-                  Confirmer
-                </button>
-              </div>
+          {/* Footer - Toujours visible */}
+          <div className="p-6 border-t border-[var(--border-subtle)] bg-gradient-to-br from-[var(--primary-50)] to-white">
+            <div className="flex gap-3">
+              <button
+                onClick={onClose}
+                className="flex-1 h-12 rounded-xl bg-[var(--bg-subtle)] text-[var(--fg-secondary)] text-sm font-semibold hover:bg-[var(--bg-muted)] transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleConfirm}
+                disabled={!tempSelectedDate}
+                className={`flex-1 h-12 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                  tempSelectedDate
+                    ? 'bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] text-white shadow-lg shadow-[var(--primary-500)]/20 hover:shadow-xl hover:shadow-[var(--primary-500)]/30'
+                    : 'bg-[var(--bg-muted)] text-[var(--fg-tertiary)] cursor-not-allowed'
+                }`}
+              >
+                Confirmer
+              </button>
             </div>
-          )}
+          </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>

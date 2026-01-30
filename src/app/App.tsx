@@ -10,9 +10,11 @@ import { SessionsProvider } from '@/app/contexts/SessionsContext';
 import { NotificationsProvider } from '@/app/contexts/NotificationsContext';
 import { MessagesProvider } from '@/app/contexts/MessagesContext';
 import { FriendsProvider } from '@/app/contexts/FriendsContext';
+import { SubscriptionProvider } from '@/app/contexts/SubscriptionContext';
 import { ToastProvider, useToast } from '@/app/components/Toast';
 import { ErrorBoundary } from '@/app/components/ErrorBoundary';
 import { ProtectedRoute } from '@/app/components/ProtectedRoute';
+import { ThemeProvider } from '@/design-system';
 
 // Debug utility
 import { debugAuth } from '@/utils/auth-debug';
@@ -66,6 +68,7 @@ const AvailabilityHeatmapScreen = lazy(() => import('@/app/screens/AvailabilityH
 const TestSetupScreen = lazy(() => import('@/app/screens/TestSetupScreen')) as any;
 const QATestsScreen = lazy(() => import('@/app/screens/QATestsScreen')) as any;
 const PremiumScreen = lazy(() => import('@/app/screens/PremiumScreen')) as any;
+const PremiumSuccessScreen = lazy(() => import('@/app/screens/PremiumSuccessScreen')) as any;
 const AdvancedStatsScreen = lazy(() => import('@/app/screens/AdvancedStatsScreen')) as any;
 const CalendarSyncScreen = lazy(() => import('@/app/screens/CalendarSyncScreen')) as any;
 const IntelligenceScreen = lazy(() => import('@/app/screens/IntelligenceScreen')) as any;
@@ -103,25 +106,34 @@ const EsportTeamScreen = lazy(() => import('@/app/screens/EsportTeamScreen')) as
 const AcademyScreen = lazy(() => import('@/app/screens/AcademyScreen')) as any;
 const StreamerDashboardScreen = lazy(() => import('@/app/screens/StreamerDashboardScreen')) as any;
 const OrganizationScreen = lazy(() => import('@/app/screens/OrganizationScreen')) as any;
-const DesignDocScreen = lazy(() => import('@/app/screens/DesignDocScreen')) as any;
 const ScreenshotGalleryScreen = lazy(() => import('@/app/screens/ScreenshotGalleryScreen')) as any;
 const OAuthCallbackScreen = lazy(() => import('@/app/screens/OAuthCallbackScreen')) as any;
 const InviteMemberScreen = lazy(() => import('@/app/screens/InviteMemberScreen')) as any;
 const RSVPScreen = lazy(() => import('@/app/screens/RSVPScreen')) as any;
 
+// Minimal loader for instant perceived performance
 function ScreenLoader() {
   return (
-    <div className="min-h-screen pb-24 px-4 pt-safe space-y-4">
-      <div className="py-6">
-        <Skeleton className="w-[200px] h-8 mb-2" />
-        <Skeleton className="w-[150px] h-5" />
-      </div>
-      <Skeleton className="w-full h-[200px]" />
-      <Skeleton className="w-full h-[150px]" />
-      <Skeleton className="w-full h-[150px]" />
+    <div className="min-h-screen flex items-center justify-center bg-[#08090a]">
+      <div className="w-6 h-6 border-2 border-[#5e6dd2]/30 border-t-[#5e6dd2] rounded-full animate-spin" />
     </div>
   );
 }
+
+// Prefetch common routes on app load for instant navigation
+const prefetchRoutes = () => {
+  // Prefetch main navigation routes
+  const routes = [
+    () => import('@/app/screens/HomeScreen'),
+    () => import('@/app/screens/SquadsScreen'),
+    () => import('@/app/screens/SessionsScreen'),
+    () => import('@/app/screens/ProfileScreen'),
+  ];
+  // Start prefetching after initial load
+  setTimeout(() => {
+    routes.forEach(route => route().catch(() => {}));
+  }, 1000);
+};
 
 // Login screen re-enabled - must match AuthContext and ProtectedRoute
 const BYPASS_AUTH = false;
@@ -129,7 +141,7 @@ const BYPASS_AUTH = false;
 function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAuthenticated, signOut, loading: authLoading } = useAuth();
+  const { user, isAuthenticated, signOut, loading: authLoading, authError, clearAllCache } = useAuth();
   const { userProfile } = useUser();
   const { showToast } = useToast();
   const isMobile = useIsMobile();
@@ -192,12 +204,102 @@ function AppContent() {
     }
   }, [isAuthenticated, user, authLoading, location.pathname, userProfile]);
 
+  // Prefetch routes on first auth complete
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      prefetchRoutes();
+    }
+  }, [authLoading, isAuthenticated]);
+
+  // État de loading pour les boutons d'erreur
+  const [retryLoading, setRetryLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+
+  const handleRetryAuth = () => {
+    setRetryLoading(true);
+    // Petit délai pour montrer le loading
+    setTimeout(() => {
+      window.location.reload();
+    }, 300);
+  };
+
+  const handleResetAuth = async () => {
+    setResetLoading(true);
+    try {
+      // Timeout de sécurité - si clearAllCache prend trop de temps, on force le redirect
+      const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Timeout')), 5000)
+      );
+
+      await Promise.race([clearAllCache(), timeout]);
+
+      // Redirect vers login après le nettoyage
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('[App] Erreur reset:', error);
+      // Même en cas d'erreur, on redirige vers login
+      window.location.href = '/login';
+    } finally {
+      // Note: Ce finally ne sera probablement jamais atteint car on fait un redirect
+      // Mais on le garde au cas où le redirect échoue
+      setResetLoading(false);
+    }
+  };
+
+  // Écran d'erreur d'authentification
+  if (authError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#08090a] p-4">
+        <div className="text-center max-w-md">
+          <Logo variant="icon" size="lg" className="mb-6 mx-auto opacity-50" />
+          <div className="bg-[#e5534b]/10 border border-[#e5534b]/30 rounded-xl p-4 mb-6">
+            <p className="text-[#f87171] text-sm">{authError}</p>
+          </div>
+          <p className="text-[#8b8d90] text-sm mb-6">
+            Cela peut arriver si votre session a expiré ou si le serveur est temporairement indisponible.
+          </p>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={handleRetryAuth}
+              disabled={retryLoading || resetLoading}
+              className="w-full px-4 py-3 bg-[#5e6dd2] hover:bg-[#6a79db] disabled:opacity-50 text-white rounded-xl font-medium transition-all duration-150 flex items-center justify-center gap-2"
+            >
+              {retryLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Chargement...
+                </>
+              ) : (
+                'Réessayer'
+              )}
+            </button>
+            <button
+              onClick={handleResetAuth}
+              disabled={retryLoading || resetLoading}
+              className="w-full px-4 py-3 bg-[#18191b] hover:bg-[#1f2023] disabled:opacity-50 text-[#8b8d90] border border-[#27282b] rounded-xl font-medium transition-all duration-150 flex items-center justify-center gap-2"
+            >
+              {resetLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-[#8b8d90]/30 border-t-[#8b8d90] rounded-full animate-spin" />
+                  Réinitialisation...
+                </>
+              ) : (
+                'Réinitialiser et se reconnecter'
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-primary)]">
-        <div className="text-center">
-          <Logo className="w-16 h-16 mx-auto mb-4" variant="full" />
-          <div className="text-[var(--fg-secondary)] text-sm">Chargement...</div>
+      <div className="min-h-screen flex items-center justify-center bg-[#08090a]">
+        <div className="text-center flex flex-col items-center">
+          <Logo variant="icon" size="lg" className="mb-4 animate-pulse" />
+          <div className="w-6 h-6 border-2 border-[#5e6dd2]/30 border-t-[#5e6dd2] rounded-full animate-spin" />
+          <p className="text-[#5e6063] text-xs mt-4">Chargement...</p>
         </div>
       </div>
     );
@@ -211,21 +313,7 @@ function AppContent() {
         )}
       </AnimatePresence>
 
-      <div className="min-h-screen text-[var(--fg-primary)] relative overflow-x-hidden bg-[var(--bg-base)]">
-        {/* FOND PREMIUM */}
-        <div 
-          className="fixed inset-0 pointer-events-none z-0"
-          style={{
-            backgroundImage: `
-              radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.12) 0px, transparent 50%),
-              radial-gradient(at 100% 100%, rgba(20, 184, 166, 0.10) 0px, transparent 50%),
-              repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(120, 113, 108, 0.04) 2px, rgba(120, 113, 108, 0.04) 4px),
-              repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(120, 113, 108, 0.04) 2px, rgba(120, 113, 108, 0.04) 4px)
-            `,
-          }}
-        />
-
-        <div className="fixed inset-0 gradient-mesh pointer-events-none opacity-30" />
+      <div className="min-h-screen text-[#f7f8f8] relative overflow-x-hidden bg-[#08090a]">
 
         {isDesktop && isAuthenticated && showMainNav && (
           <DesktopSidebar
@@ -240,42 +328,41 @@ function AppContent() {
           <DesktopHeader onCommandOpen={openCommand} />
         )}
 
-        {!(isDesktop && isAuthenticated && showMainNav) && (
+        {/* Logo only on auth pages, not on mobile authenticated screens */}
+        {!(isDesktop && isAuthenticated && showMainNav) && isAuthPage && (
           <motion.div
-            className="fixed top-6 left-4 z-[var(--z-sticky)]"
+            className="fixed top-6 left-4 z-50"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
-            <Logo variant="header" />
+            <Logo variant="header" size="sm" />
           </motion.div>
         )}
 
-        {!(isDesktop && isAuthenticated && showMainNav) && (
-          <div className="fixed top-4 right-4 z-[var(--z-sticky)]">
+        {/* Language switcher only on auth pages */}
+        {isAuthPage && (
+          <div className="fixed top-4 right-4 z-50">
             <LanguageSwitcher />
           </div>
         )}
 
         <div className={`
-          min-h-screen relative mx-auto
-          ${isDesktop && isAuthenticated && showMainNav 
-            ? 'ml-72 pt-16 max-w-5xl px-6' 
-            : 'max-w-md px-4'}
+          min-h-screen relative bg-[#08090a]
+          ${isDesktop && isAuthenticated && showMainNav
+            ? 'ml-[260px] pt-14'
+            : ''}
         `}>
-          {isMobile && <div className="h-11" />}
 
-          <div className={isDesktop && isAuthenticated && showMainNav ? 'px-6' : ''}>
+          <div>
             <Suspense fallback={<ScreenLoader />}>
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={location.pathname}
-                  initial={{ opacity: 0, y: animConfig.complexEnabled ? 4 : 0 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: animConfig.complexEnabled ? -4 : 0 }}
-                  transition={animConfig.pageTransition}
-                  style={{ willChange: 'opacity, transform' }}
-                >
-                  <Routes>
+              {/* Fast transitions - no blocking exit animations */}
+              <motion.div
+                key={location.pathname}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.15, ease: 'easeOut' }}
+              >
+                <Routes>
                     <Route path="/" element={<LoginScreen onNavigate={handleNavigate} showToast={showToast} />} />
                     <Route path="/login" element={<LoginScreen onNavigate={handleNavigate} showToast={showToast} />} />
                     <Route path="/signup" element={<SignupScreen onNavigate={handleNavigate} showToast={showToast} />} />
@@ -324,6 +411,7 @@ function AppContent() {
                     {/* Hub 4: Profile & Ecosystem - Additional Routes */}
                     <Route path="/profile/:userId" element={<ProtectedRoute><PublicProfileScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
                     <Route path="/premium" element={<ProtectedRoute><PremiumScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
+                    <Route path="/premium/success" element={<ProtectedRoute><PremiumSuccessScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
                     <Route path="/advanced-stats" element={<ProtectedRoute><AdvancedStatsScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
                     <Route path="/achievements" element={<ProtectedRoute><AchievementsScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
                     <Route path="/badges" element={<ProtectedRoute><BadgesScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
@@ -353,8 +441,7 @@ function AppContent() {
                     <Route path="/esport-integrations" element={<ProtectedRoute><EsportIntegrationsScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
                     <Route path="/intelligence" element={<ProtectedRoute><IntelligenceScreen onNavigate={handleNavigate} showToast={showToast} /></ProtectedRoute>} />
 
-                    {/* Design & Development Routes */}
-                    <Route path="/design-doc" element={<DesignDocScreen onNavigate={handleNavigate} showToast={showToast} />} />
+                    {/* Screenshots Route */}
                     <Route path="/screenshots" element={<ScreenshotGalleryScreen onNavigate={handleNavigate} showToast={showToast} />} />
 
                     {/* OAuth Callback Route */}
@@ -363,7 +450,6 @@ function AppContent() {
                     <Route path="*" element={<Navigate to="/home" replace />} />
                   </Routes>
                 </motion.div>
-              </AnimatePresence>
             </Suspense>
           </div>
 
@@ -389,27 +475,31 @@ function AppContent() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <TranslationProvider>
-        <BrowserRouter>
-          <AuthProvider>
-            <UserProvider>
-              <ToastProvider>
-                <SquadsProvider>
-                  <SessionsProvider>
-                    <NotificationsProvider>
-                      <MessagesProvider>
-                        <FriendsProvider>
-                          <AppContent />
-                        </FriendsProvider>
-                      </MessagesProvider>
-                    </NotificationsProvider>
-                  </SessionsProvider>
-                </SquadsProvider>
-              </ToastProvider>
-            </UserProvider>
-          </AuthProvider>
-        </BrowserRouter>
-      </TranslationProvider>
+      <ThemeProvider defaultTheme="system">
+        <TranslationProvider>
+          <BrowserRouter>
+            <AuthProvider>
+              <UserProvider>
+                <SubscriptionProvider>
+                  <ToastProvider>
+                    <SquadsProvider>
+                    <SessionsProvider>
+                      <NotificationsProvider>
+                        <MessagesProvider>
+                          <FriendsProvider>
+                            <AppContent />
+                          </FriendsProvider>
+                        </MessagesProvider>
+                      </NotificationsProvider>
+                    </SessionsProvider>
+                    </SquadsProvider>
+                  </ToastProvider>
+                </SubscriptionProvider>
+              </UserProvider>
+            </AuthProvider>
+          </BrowserRouter>
+        </TranslationProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

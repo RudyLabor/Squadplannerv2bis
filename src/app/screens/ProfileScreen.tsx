@@ -4,7 +4,7 @@
  * Central question: "Puis-je compter sur cette personne?"
  */
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Edit3,
   Users,
@@ -22,9 +22,15 @@ import {
   Calendar,
   RefreshCw,
   CheckCircle2,
+  Gamepad2,
+  Flame,
+  UserCheck,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/app/contexts/AuthContext";
+import { useSquads } from "@/app/contexts/SquadsContext";
+import { useSessions } from "@/app/contexts/SessionsContext";
+import { usersAPI } from "@/app/services/api";
 import { OrangeDivider } from "@/design-system";
 
 interface ProfileScreenProps {
@@ -55,59 +61,72 @@ const itemVariants = {
 };
 
 // ============================================
-// SECONDARY STAT - Smaller, recessed
+// SECONDARY STAT - Smaller with icon
 // ============================================
-function SecondaryStat({ value, label }: { value: string | number; label: string }) {
+function SecondaryStat({
+  value,
+  label,
+  icon: Icon,
+  iconColor = "text-[#5e6dd2]"
+}: {
+  value: string | number;
+  label: string;
+  icon?: any;
+  iconColor?: string;
+}) {
   return (
     <div className="text-center">
-      <p className="text-[18px] font-semibold text-[#ececed] tabular-nums leading-none mb-0.5">
+      {Icon && <Icon className={`w-4 h-4 ${iconColor} opacity-50 mx-auto mb-1`} strokeWidth={1.5} />}
+      <p className="text-[18px] font-semibold text-[#f7f8f8] tabular-nums leading-none mb-0.5">
         {value}
       </p>
-      <span className="text-[11px] text-[#4a4b50]">{label}</span>
+      <span className="text-[11px] text-[#5e6063]">{label}</span>
     </div>
   );
 }
 
 // ============================================
-// LIST ITEM - Interactive with subtle feedback
+// LIST ITEM - Interactive with colored icons
 // ============================================
 function ListItem({
   icon: Icon,
   title,
   subtitle,
   onClick,
-  danger
+  danger,
+  iconColor = "text-[#5e6dd2]"
 }: {
   icon: any;
   title: string;
   subtitle: string;
   onClick: () => void;
   danger?: boolean;
+  iconColor?: string;
 }) {
   return (
     <motion.button
       onClick={onClick}
       className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-colors duration-100 group min-h-[56px] ${
-        danger ? "hover:bg-[#f87171]/5" : "hover:bg-[#141518]"
+        danger ? "hover:bg-[rgba(248,113,113,0.05)]" : "hover:bg-[rgba(255,255,255,0.03)]"
       }`}
       whileHover={{ x: 2 }}
       whileTap={{ scale: 0.995 }}
       transition={{ duration: 0.1 }}
     >
       <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${
-        danger ? "bg-[#f87171]/10" : "bg-[#111214] group-hover:bg-[#1e2024]"
+        danger ? "bg-[rgba(248,113,113,0.1)]" : "bg-[rgba(255,255,255,0.04)] group-hover:bg-[rgba(255,255,255,0.06)]"
       }`}>
         <Icon className={`w-[18px] h-[18px] transition-colors ${
-          danger ? "text-[#f87171]" : "text-[#4a4b50] group-hover:text-[#6f7177]"
+          danger ? "text-[#f87171]" : `${iconColor} opacity-70 group-hover:opacity-100`
         }`} strokeWidth={1.5} />
       </div>
       <div className="flex-1 min-w-0 text-left">
         <span className={`text-[14px] font-medium transition-colors block ${
-          danger ? "text-[#f87171]" : "text-[#ececed] group-hover:text-white"
+          danger ? "text-[#f87171]" : "text-[#f7f8f8] group-hover:text-white"
         }`}>{title}</span>
-        <p className="text-[13px] text-[#4a4b50] group-hover:text-[#6f7177] truncate transition-colors">{subtitle}</p>
+        <p className="text-[13px] text-[#5e6063] group-hover:text-[#8b8d90] truncate transition-colors">{subtitle}</p>
       </div>
-      <ChevronRight className="w-4 h-4 text-[#26282d] group-hover:text-[#4a4b50] transition-colors" />
+      <ChevronRight className="w-4 h-4 text-[rgba(255,255,255,0.15)] group-hover:text-[rgba(255,255,255,0.3)] transition-colors" />
     </motion.button>
   );
 }
@@ -117,7 +136,7 @@ function ListItem({
 // ============================================
 function SectionHeader({ title }: { title: string }) {
   return (
-    <h3 className="text-[11px] font-semibold text-[#4a4b50] uppercase tracking-wider mb-3 px-0.5">
+    <h3 className="text-[11px] font-semibold text-[#5e6063] uppercase tracking-wider mb-3 px-0.5">
       {title}
     </h3>
   );
@@ -132,13 +151,65 @@ export function ProfileScreen({
   onLogout,
 }: ProfileScreenProps) {
   const { user, signOut, clearAllCache, loading: authLoading } = useAuth();
-  const [isLoading] = useState(false);
+  const { squads } = useSquads();
+  const { sessions } = useSessions();
+  const [isLoading, setIsLoading] = useState(false);
+  const [userStats, setUserStats] = useState<{
+    totalSessions: number;
+    sessionsAttended: number;
+    totalSquads: number;
+    achievementsUnlocked: number;
+    totalPlayTime: number;
+    currentStreak: number;
+    friendsCount: number;
+  } | null>(null);
+
+  // Charger les stats utilisateur depuis l'API
+  useEffect(() => {
+    const loadStats = async () => {
+      if (!user?.id) return;
+
+      try {
+        const { stats } = await usersAPI.getStats(user.id);
+        setUserStats({
+          totalSessions: stats.total_sessions || 0,
+          sessionsAttended: stats.sessions_attended || 0,
+          totalSquads: stats.totalSquads || 0,
+          achievementsUnlocked: stats.achievementsUnlocked || 0,
+          totalPlayTime: 0, // Calculé plus tard si disponible
+          currentStreak: 0, // Calculé plus tard si disponible
+          friendsCount: 0, // À implémenter
+        });
+      } catch (err) {
+        console.warn('[Profile] Erreur chargement stats:', err);
+        // Utiliser les données locales en fallback
+      }
+    };
+
+    loadStats();
+  }, [user?.id]);
+
+  // Stats calculées dynamiquement à partir des données locales
+  const computedStats = useMemo(() => {
+    const totalSquadsLocal = squads?.length || 0;
+    const completedSessions = sessions?.filter(s => s.status === 'completed').length || 0;
+
+    return {
+      totalSquads: userStats?.totalSquads || totalSquadsLocal,
+      totalSessions: userStats?.totalSessions || completedSessions,
+      sessionsAttended: userStats?.sessionsAttended || 0,
+      achievementsUnlocked: userStats?.achievementsUnlocked || 0,
+    };
+  }, [squads, sessions, userStats]);
 
   const displayName = user?.display_name || user?.username || user?.email?.split("@")[0] || "Joueur";
   const displayEmail = user?.email || "";
-  const reliability = user?.reliability_score || 92;
-  const sessionsCount = 156;
-  const punctuality = 89;
+  const reliability = user?.reliability_score || 100;
+  const sessionsCount = computedStats.totalSessions;
+  // Calculer la ponctualité basée sur le ratio sessions attendues/total
+  const punctuality = computedStats.totalSessions > 0
+    ? Math.round((computedStats.sessionsAttended / computedStats.totalSessions) * 100)
+    : 100;
 
   const handleLogout = async () => {
     try {
@@ -161,14 +232,14 @@ export function ProfileScreen({
   // Loading state
   if (authLoading || isLoading) {
     return (
-      <div className="min-h-screen bg-[#0e0f11] flex items-center justify-center">
-        <div className="w-5 h-5 border-2 border-[#5e6ad2] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#08090a] flex items-center justify-center">
+        <div className="w-5 h-5 border-2 border-[#5e6dd2] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0e0f11] pb-24 md:pb-8">
+    <div className="min-h-screen bg-[#08090a] pb-24 md:pb-8">
       <motion.div
         className="max-w-3xl mx-auto px-4 md:px-6 py-6"
         variants={containerVariants}
@@ -177,10 +248,10 @@ export function ProfileScreen({
       >
         {/* Header */}
         <motion.div variants={itemVariants} className="flex items-center justify-between mb-6">
-          <h1 className="text-[24px] md:text-[26px] font-semibold text-[#ececed]">Mon Profil</h1>
+          <h1 className="text-[24px] md:text-[26px] font-semibold text-[#f7f8f8]">Mon Profil</h1>
           <motion.button
             onClick={() => onNavigate("edit-profile")}
-            className="flex items-center gap-2 h-10 px-4 rounded-xl bg-[#141518] text-[#ececed] text-[13px] font-medium hover:bg-[#1a1b1f] border border-[#1e2024] hover:border-[#26282d] transition-all duration-100"
+            className="flex items-center gap-2 h-10 px-4 rounded-xl bg-[#18191b] text-[#f7f8f8] text-[13px] font-medium hover:bg-[#1f2023] border border-[#27282b] hover:border-[#27282b] transition-all duration-100"
             whileHover={{ y: -1 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -196,11 +267,11 @@ export function ProfileScreen({
           <div className="flex items-center gap-4">
             {/* Avatar */}
             <div className="relative flex-shrink-0">
-              <div className="w-16 h-16 md:w-18 md:h-18 rounded-xl bg-[#1a1b1f] overflow-hidden border border-[#26282d]">
+              <div className="w-16 h-16 md:w-18 md:h-18 rounded-xl bg-[#1f2023] overflow-hidden border border-[#27282b]">
                 {user?.avatar_url ? (
                   <img src={user.avatar_url} alt={displayName} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-2xl font-semibold text-[#6f7177]">
+                  <div className="w-full h-full flex items-center justify-center text-2xl font-semibold text-[#8b8d90]">
                     {displayName.charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -208,9 +279,9 @@ export function ProfileScreen({
             </div>
 
             <div className="flex-1 min-w-0">
-              <h2 className="text-[18px] md:text-[20px] font-semibold text-[#ececed] mb-1">{displayName}</h2>
-              <p className="text-[13px] text-[#4a4b50] truncate">{displayEmail}</p>
-              <p className="text-[12px] text-[#6f7177] mt-1 flex items-center gap-1.5">
+              <h2 className="text-[18px] md:text-[20px] font-semibold text-[#f7f8f8] mb-1">{displayName}</h2>
+              <p className="text-[13px] text-[#5e6063] truncate">{displayEmail}</p>
+              <p className="text-[12px] text-[#8b8d90] mt-1 flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5" strokeWidth={1.5} />
                 Membre depuis Janvier 2024
               </p>
@@ -224,10 +295,10 @@ export function ProfileScreen({
         {/* FIABILITÉ HERO BLOCK - Central focus */}
         {/* ============================================ */}
         <motion.div variants={itemVariants} className="mb-6">
-          <div className="p-5 md:p-6 rounded-2xl bg-[#111214] border border-[#1a1b1f]">
+          <div className="p-5 md:p-6 rounded-2xl bg-[rgba(74,222,128,0.03)] border border-[rgba(74,222,128,0.1)]">
             <div className="flex items-center gap-2 mb-4">
               <CheckCircle2 className="w-5 h-5 text-[#4ade80]" strokeWidth={1.5} />
-              <span className="text-[13px] font-medium text-[#6f7177] uppercase tracking-wide">Score de Fiabilité</span>
+              <span className="text-[13px] font-medium text-[#8b8d90] uppercase tracking-wide">Score de Fiabilité</span>
             </div>
 
             {/* Big reliability score */}
@@ -240,15 +311,15 @@ export function ProfileScreen({
 
             {/* Supporting metrics */}
             <div className="flex items-center gap-6 text-[13px]">
-              <div className="flex items-center gap-1.5 text-[#6f7177]">
-                <Trophy className="w-4 h-4 text-[#4a4b50]" strokeWidth={1.5} />
+              <div className="flex items-center gap-1.5 text-[#8b8d90]">
+                <Trophy className="w-4 h-4 text-[#f5a623]/70" strokeWidth={1.5} />
                 <span className="tabular-nums">{sessionsCount}</span>
-                <span className="text-[#4a4b50]">sessions</span>
+                <span className="text-[#5e6063]">sessions</span>
               </div>
-              <div className="flex items-center gap-1.5 text-[#6f7177]">
-                <Clock className="w-4 h-4 text-[#4a4b50]" strokeWidth={1.5} />
+              <div className="flex items-center gap-1.5 text-[#8b8d90]">
+                <Clock className="w-4 h-4 text-[#60a5fa]/70" strokeWidth={1.5} />
                 <span className="tabular-nums">{punctuality}%</span>
-                <span className="text-[#4a4b50]">ponctualité</span>
+                <span className="text-[#5e6063]">ponctualité</span>
               </div>
             </div>
           </div>
@@ -258,12 +329,32 @@ export function ProfileScreen({
         {/* SECONDARY STATS - Smaller grid */}
         {/* ============================================ */}
         <motion.div variants={itemVariants} className="mb-6">
-          <div className="p-4 md:p-5 rounded-xl bg-[#111214] border border-[#1a1b1f]">
+          <div className="p-4 md:p-5 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]">
             <div className="grid grid-cols-4 gap-4">
-              <SecondaryStat value="384h" label="Temps joué" />
-              <SecondaryStat value="12j" label="Streak" />
-              <SecondaryStat value="3" label="Squads" />
-              <SecondaryStat value="47" label="Amis" />
+              <SecondaryStat
+                value={userStats?.totalPlayTime ? `${Math.round(userStats.totalPlayTime / 60)}h` : `${sessionsCount * 2}h`}
+                label="Temps joué"
+                icon={Clock}
+                iconColor="text-[#60a5fa]"
+              />
+              <SecondaryStat
+                value={`${userStats?.currentStreak || 0}j`}
+                label="Streak"
+                icon={Flame}
+                iconColor="text-[#f5a623]"
+              />
+              <SecondaryStat
+                value={computedStats.totalSquads}
+                label="Squads"
+                icon={Gamepad2}
+                iconColor="text-[#5e6dd2]"
+              />
+              <SecondaryStat
+                value={userStats?.friendsCount || 0}
+                label="Amis"
+                icon={Users}
+                iconColor="text-[#8b93ff]"
+              />
             </div>
           </div>
         </motion.div>
@@ -272,13 +363,13 @@ export function ProfileScreen({
         {/* ÉVOLUTION CHART */}
         {/* ============================================ */}
         <motion.div variants={itemVariants} className="mb-6">
-          <div className="p-5 rounded-xl bg-[#111214] border border-[#1a1b1f]">
+          <div className="p-5 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[13px] font-medium text-[#6f7177] flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-[#4a4b50]" strokeWidth={1.5} />
+              <h3 className="text-[13px] font-medium text-[#8b8d90] flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-[#4ade80]/70" strokeWidth={1.5} />
                 Évolution sur 7 semaines
               </h3>
-              <span className="text-[11px] text-[#4ade80] font-medium">+5%</span>
+              <span className="text-[11px] text-[#4ade80] font-medium px-2 py-0.5 rounded bg-[rgba(74,222,128,0.1)]">+5%</span>
             </div>
             <div className="flex items-end gap-1.5 h-14">
               {[75, 82, 78, 85, 88, 91, reliability].map((val, i) => (
@@ -292,7 +383,7 @@ export function ProfileScreen({
                 />
               ))}
             </div>
-            <div className="flex justify-between mt-2 text-[10px] text-[#3a3b40] font-medium">
+            <div className="flex justify-between mt-2 text-[10px] text-[#5e6063] font-medium">
               <span>S-6</span><span>S-5</span><span>S-4</span><span>S-3</span><span>S-2</span><span>S-1</span><span>Actuel</span>
             </div>
           </div>
@@ -302,12 +393,12 @@ export function ProfileScreen({
         {/* BADGES - Compact, subtle */}
         {/* ============================================ */}
         <motion.div variants={itemVariants} className="mb-6">
-          <div className="p-4 rounded-xl bg-[#111214] border border-[#1a1b1f]">
+          <div className="p-4 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[12px] font-medium text-[#4a4b50] uppercase tracking-wide">Badges</span>
+              <span className="text-[12px] font-medium text-[#5e6063] uppercase tracking-wide">Badges</span>
               <motion.button
                 onClick={() => onNavigate("badges")}
-                className="text-[12px] text-[#5e6ad2] hover:text-[#7c85e0] transition-colors font-medium flex items-center gap-0.5"
+                className="text-[12px] text-[#5e6dd2] hover:text-[#8b93ff] transition-colors font-medium flex items-center gap-0.5"
                 whileHover={{ x: 2 }}
               >
                 18/45
@@ -324,13 +415,13 @@ export function ProfileScreen({
               ].map((badge, index) => (
                 <div
                   key={index}
-                  className="w-9 h-9 rounded-lg bg-[#1a1b1f] flex items-center justify-center cursor-default"
+                  className="w-9 h-9 rounded-lg bg-[rgba(255,255,255,0.04)] flex items-center justify-center cursor-default hover:bg-[rgba(255,255,255,0.06)] transition-colors"
                   title={badge.name}
                 >
                   <span className="text-base">{badge.icon}</span>
                 </div>
               ))}
-              <div className="w-9 h-9 rounded-lg bg-[#1a1b1f] flex items-center justify-center text-[11px] text-[#4a4b50] font-medium">
+              <div className="w-9 h-9 rounded-lg bg-[rgba(255,255,255,0.04)] flex items-center justify-center text-[11px] text-[#5e6063] font-medium">
                 +13
               </div>
             </div>
@@ -346,27 +437,27 @@ export function ProfileScreen({
           <div className="grid grid-cols-2 gap-3">
             <motion.button
               onClick={() => onNavigate("advanced-stats")}
-              className="p-4 rounded-xl bg-[#111214] border border-[#1a1b1f] hover:bg-[#141518] hover:border-[#26282d] text-left transition-all duration-100 group"
+              className="p-4 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)] text-left transition-all duration-100 group"
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
-              <div className="w-9 h-9 rounded-lg bg-[#1a1b1f] group-hover:bg-[#1e2024] flex items-center justify-center mb-2.5 transition-colors">
-                <BarChart3 className="w-4.5 h-4.5 text-[#4a4b50] group-hover:text-[#6f7177] transition-colors" strokeWidth={1.5} />
+              <div className="w-9 h-9 rounded-lg bg-[rgba(96,165,250,0.1)] group-hover:bg-[rgba(96,165,250,0.15)] flex items-center justify-center mb-2.5 transition-colors">
+                <BarChart3 className="w-4.5 h-4.5 text-[#60a5fa] group-hover:text-[#93c5fd] transition-colors" strokeWidth={1.5} />
               </div>
-              <div className="text-[14px] font-medium text-[#ececed] group-hover:text-white transition-colors">Statistiques</div>
-              <div className="text-[12px] text-[#4a4b50]">Analyses avancées</div>
+              <div className="text-[14px] font-medium text-[#f7f8f8] group-hover:text-white transition-colors">Statistiques</div>
+              <div className="text-[12px] text-[#5e6063]">Analyses avancées</div>
             </motion.button>
             <motion.button
               onClick={() => onNavigate("friends")}
-              className="p-4 rounded-xl bg-[#111214] border border-[#1a1b1f] hover:bg-[#141518] hover:border-[#26282d] text-left transition-all duration-100 group"
+              className="p-4 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)] text-left transition-all duration-100 group"
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
-              <div className="w-9 h-9 rounded-lg bg-[#1a1b1f] group-hover:bg-[#1e2024] flex items-center justify-center mb-2.5 transition-colors">
-                <Users className="w-4.5 h-4.5 text-[#4a4b50] group-hover:text-[#6f7177] transition-colors" strokeWidth={1.5} />
+              <div className="w-9 h-9 rounded-lg bg-[rgba(139,147,255,0.1)] group-hover:bg-[rgba(139,147,255,0.15)] flex items-center justify-center mb-2.5 transition-colors">
+                <Users className="w-4.5 h-4.5 text-[#8b93ff] group-hover:text-[#a5abff] transition-colors" strokeWidth={1.5} />
               </div>
-              <div className="text-[14px] font-medium text-[#ececed] group-hover:text-white transition-colors">Amis</div>
-              <div className="text-[12px] text-[#4a4b50]">47 contacts</div>
+              <div className="text-[14px] font-medium text-[#f7f8f8] group-hover:text-white transition-colors">Amis</div>
+              <div className="text-[12px] text-[#5e6063]">{userStats?.friendsCount || 0} contact{(userStats?.friendsCount || 0) !== 1 ? 's' : ''}</div>
             </motion.button>
           </div>
         </motion.div>
@@ -376,30 +467,34 @@ export function ProfileScreen({
         {/* ============================================ */}
         <motion.div variants={itemVariants} className="mb-6">
           <SectionHeader title="Paramètres" />
-          <div className="rounded-xl bg-[#111214] border border-[#1a1b1f] overflow-hidden divide-y divide-[#1a1b1f]">
+          <div className="rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] overflow-hidden divide-y divide-[rgba(255,255,255,0.06)]">
             <ListItem
               icon={Link2}
               title="Intégrations"
               subtitle="Discord, Calendar, API"
               onClick={() => onNavigate("integrations")}
+              iconColor="text-[#5e6dd2]"
             />
             <ListItem
               icon={Bell}
               title="Notifications"
               subtitle="Alertes & rappels"
               onClick={() => onNavigate("notification-settings")}
+              iconColor="text-[#f5a623]"
             />
             <ListItem
               icon={Shield}
               title="Confidentialité"
               subtitle="Sécurité & données"
               onClick={() => onNavigate("privacy")}
+              iconColor="text-[#4ade80]"
             />
             <ListItem
               icon={Settings}
               title="Préférences"
               subtitle="Personnalisation"
               onClick={() => onNavigate("preferences")}
+              iconColor="text-[#8b8d90]"
             />
           </div>
         </motion.div>
@@ -411,7 +506,7 @@ export function ProfileScreen({
           <div className="flex gap-3">
             <motion.button
               onClick={handleClearCache}
-              className="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl bg-[#111214] border border-[#1a1b1f] text-[13px] font-medium text-[#f5a623] hover:bg-[#141518] hover:border-[#26282d] transition-all duration-100"
+              className="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl bg-[rgba(245,166,35,0.05)] border border-[rgba(245,166,35,0.15)] text-[13px] font-medium text-[#f5a623] hover:bg-[rgba(245,166,35,0.1)] hover:border-[rgba(245,166,35,0.25)] transition-all duration-100"
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -420,7 +515,7 @@ export function ProfileScreen({
             </motion.button>
             <motion.button
               onClick={handleLogout}
-              className="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl bg-[#111214] border border-[#1a1b1f] text-[13px] font-medium text-[#f87171] hover:bg-[#f87171]/5 hover:border-[#f87171]/20 transition-all duration-100"
+              className="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl bg-[rgba(248,113,113,0.05)] border border-[rgba(248,113,113,0.15)] text-[13px] font-medium text-[#f87171] hover:bg-[rgba(248,113,113,0.1)] hover:border-[rgba(248,113,113,0.25)] transition-all duration-100"
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.98 }}
             >

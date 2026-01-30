@@ -54,11 +54,11 @@ export function DesktopSidebar({
   ];
 
   return (
-    <div className="fixed left-0 top-0 bottom-0 w-[260px] flex flex-col z-40 bg-[#0e0f11] border-r border-[#1a1b1f]">
+    <div className="fixed left-0 top-0 bottom-0 w-[260px] flex flex-col z-40 bg-[#08090a] border-r border-[#1f2023]">
       {/* ============================================ */}
       {/* LOGO HEADER */}
       {/* ============================================ */}
-      <div className="h-16 px-5 flex items-center border-b border-[#1a1b1f]/50">
+      <div className="h-16 px-5 flex items-center border-b border-[#1f2023]/50">
         <Logo variant="sidebar" size="md" animated />
       </div>
 
@@ -68,18 +68,18 @@ export function DesktopSidebar({
       <div className="px-3 pt-4 pb-2">
         <button
           onClick={() => navigate('/profile')}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#141518] transition-colors duration-150 group"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#18191b] transition-colors duration-150 group"
         >
-          <div className="w-9 h-9 rounded-lg bg-[#1a1b1f] group-hover:bg-[#1e2024] flex items-center justify-center text-[#6f7177] group-hover:text-[#8b8d93] text-[13px] font-medium transition-colors duration-150">
+          <div className="w-9 h-9 rounded-lg bg-[#1f2023] group-hover:bg-[#27282b] flex items-center justify-center text-[#8b8d90] group-hover:text-[#8b8d90] text-[13px] font-medium transition-colors duration-150">
             {userName.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0 text-left">
-            <span className="text-[14px] text-[#8b8d93] group-hover:text-[#ececed] transition-colors duration-150 truncate block">
+            <span className="text-[14px] text-[#8b8d90] group-hover:text-[#f7f8f8] transition-colors duration-150 truncate block">
               {userName}
             </span>
           </div>
           {isPremium && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#5e6ad2]/15 text-[#8b93ff] font-medium">
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#5e6dd2]/15 text-[#8b93ff] font-medium">
               Pro
             </span>
           )}
@@ -105,8 +105,8 @@ export function DesktopSidebar({
                   w-full flex items-center gap-3 px-3 py-3 rounded-xl
                   transition-all duration-150 relative
                   ${isActive
-                    ? 'bg-[#141518] text-[#ececed]'
-                    : 'text-[#6f7177] hover:text-[#ececed] hover:bg-[#141518]'
+                    ? 'bg-[#18191b] text-[#f7f8f8]'
+                    : 'text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[#18191b]'
                   }
                 `}
               >
@@ -114,14 +114,14 @@ export function DesktopSidebar({
                 {isActive && (
                   <motion.div
                     layoutId="activeNav"
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-[#5e6ad2]"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-[#5e6dd2]"
                     transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
                   />
                 )}
 
                 <Icon
                   className={`w-[18px] h-[18px] transition-colors duration-150 ${
-                    isActive ? 'text-[#ececed]' : 'text-[#4a4b50]'
+                    isActive ? 'text-[#f7f8f8]' : 'text-[#5e6063]'
                   }`}
                   strokeWidth={1.5}
                 />
@@ -156,22 +156,22 @@ export function DesktopSidebar({
                     w-full flex items-center gap-3 px-3 py-2.5 rounded-xl
                     transition-all duration-150 relative
                     ${isActive
-                      ? 'bg-[#141518] text-[#ececed]'
-                      : 'text-[#4a4b50] hover:text-[#8b8d93] hover:bg-[#141518]'
+                      ? 'bg-[#18191b] text-[#f7f8f8]'
+                      : 'text-[#5e6063] hover:text-[#8b8d90] hover:bg-[#18191b]'
                     }
                   `}
                 >
                   {isActive && (
                     <motion.div
                       layoutId="activeNav2"
-                      className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-r-full bg-[#5e6ad2]/70"
+                      className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-r-full bg-[#5e6dd2]/70"
                       transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
                     />
                   )}
 
                   <Icon
                     className={`w-[18px] h-[18px] transition-colors duration-150 ${
-                      isActive ? 'text-[#8b8d93]' : 'text-[#3a3b40]'
+                      isActive ? 'text-[#8b8d90]' : 'text-[#3a3b40]'
                     }`}
                     strokeWidth={1.5}
                   />
@@ -186,11 +186,11 @@ export function DesktopSidebar({
       {/* ============================================ */}
       {/* TERTIARY - Settings & Logout */}
       {/* ============================================ */}
-      <div className="px-3 py-4 border-t border-[#1a1b1f]/50">
+      <div className="px-3 py-4 border-t border-[#1f2023]/50">
         <div className="space-y-0.5">
           <button
             onClick={() => navigate('/preferences')}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#4a4b50] hover:text-[#8b8d93] hover:bg-[#141518] transition-all duration-150"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#5e6063] hover:text-[#8b8d90] hover:bg-[#18191b] transition-all duration-150"
           >
             <Settings className="w-[18px] h-[18px] text-[#3a3b40]" strokeWidth={1.5} />
             <span className="text-[13px]">Paramètres</span>
@@ -198,7 +198,7 @@ export function DesktopSidebar({
 
           <button
             onClick={onLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#4a4b50] hover:text-[#f87171] hover:bg-[#f87171]/5 transition-all duration-150"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#5e6063] hover:text-[#f87171] hover:bg-[#f87171]/5 transition-all duration-150"
           >
             <LogOut className="w-[18px] h-[18px] text-[#3a3b40]" strokeWidth={1.5} />
             <span className="text-[13px]">Déconnexion</span>
