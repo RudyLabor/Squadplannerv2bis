@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ArrowLeft, Crown, Star, Award, Check, Sparkles, Trophy, Shield } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';

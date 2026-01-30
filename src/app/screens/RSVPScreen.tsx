@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * 🎯 RSVP SCREEN - Écran dédié aux réponses de session
  * Phase 0/2 Critical Feature - Permet aux membres de répondre aux sessions

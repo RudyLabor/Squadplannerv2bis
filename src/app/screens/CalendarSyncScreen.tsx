@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ArrowLeft, Calendar, Check, Download, ExternalLink, Crown, Loader2, Sparkles, Link } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';

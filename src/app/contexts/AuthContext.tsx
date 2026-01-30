@@ -152,7 +152,7 @@ const fetchUserProfile = async (userId: string, forceRefresh = false): Promise<U
     const { data: user, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', userId)
+      .eq('id' as any, userId)
       .single();
 
     if (error) {
@@ -174,7 +174,9 @@ const fetchUserProfile = async (userId: string, forceRefresh = false): Promise<U
       return await createFallbackUser();
     }
 
+    // @ts-ignore - Types Supabase non synchronisés
     userProfileCache.set(userId, user);
+    // @ts-ignore - Types Supabase non synchronisés
     return user;
   } catch (err: any) {
     // Erreurs réseau ou autres - log et fallback

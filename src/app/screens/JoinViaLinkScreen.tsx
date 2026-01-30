@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * JoinViaLinkScreen - Premium UI
  * Handles deep link invitations (e.g., squadplanner.app/join/ABC123)

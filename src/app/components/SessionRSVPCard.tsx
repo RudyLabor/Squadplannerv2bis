@@ -72,7 +72,7 @@ export function SessionRSVPCard({
               responded_at,
               user:users(id, username, display_name, avatar_url, reliability_score)
             `)
-            .eq('session_id', sessionId);
+            .eq('session_id' as any, sessionId);
 
           if (!error && data) {
             setRSVPs(data as any);

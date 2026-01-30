@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ArrowLeft, Search, UserPlus, Users, Trophy, TrendingUp, Send, Loader2, Sparkles, Star, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';

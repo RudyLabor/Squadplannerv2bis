@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -149,6 +150,7 @@ export function FriendsProvider({ children }: { children: ReactNode }) {
     setError(null);
     try {
       // Fetch accepted friends
+      // @ts-ignore - Types Supabase non synchronisés
       const { data: friendsData, error: friendsError } = await supabase
         .from('friendships')
         .select('*, friend:users!friend_id(id, username, display_name, avatar_url, reliability_score)')

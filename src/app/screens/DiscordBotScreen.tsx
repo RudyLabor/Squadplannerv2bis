@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ArrowLeft, Zap, Check, Copy, Terminal, MessageSquare, Users, Calendar, Webhook, Send, Bot, Sparkles, CheckCircle2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';

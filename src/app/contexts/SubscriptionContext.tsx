@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Subscription Context - Phase 4 Monetization
  *

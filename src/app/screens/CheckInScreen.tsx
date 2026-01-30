@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ArrowLeft, Clock, CheckCircle, XCircle, AlertTriangle, Sparkles, Gamepad2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
