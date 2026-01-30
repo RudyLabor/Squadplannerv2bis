@@ -107,12 +107,25 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const loadProfileFromBackend = async () => {
     setIsLoadingProfile(true);
     try {
-      const { supabase } = await import('@/utils/supabase/client');
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session?.access_token) {
+      // WORKAROUND: Vérifier le token directement dans localStorage
+      // car supabase.auth.getSession() bloque à cause des Web Locks
+      const storageKey = 'sb-cwtoprbowdqcemdjrtir-auth-token';
+      const storedData = localStorage.getItem(storageKey);
+
+      if (!storedData) {
         // Use default profile with basic info
+        setUserProfile({
+          ...defaultProfile,
+          email: user?.email || '',
+        });
+        setIsLoadingProfile(false);
+        return;
+      }
+
+      // Vérifier que le token n'est pas expiré
+      const tokenData = JSON.parse(storedData);
+      const now = Math.floor(Date.now() / 1000);
+      if (tokenData.expires_at && tokenData.expires_at < now) {
         setUserProfile({
           ...defaultProfile,
           email: user?.email || '',

@@ -18,9 +18,9 @@
 ### 0.1 Authentification
 | # | Test | Statut | Bug |
 |---|------|--------|-----|
-| 0.1.1 | Page login s'affiche correctement | [ ] | |
-| 0.1.2 | Connexion avec email/password fonctionne | [ ] | |
-| 0.1.3 | Redirection vers Home après login | [ ] | |
+| 0.1.1 | Page login s'affiche correctement | [x] | |
+| 0.1.2 | Connexion avec email/password fonctionne | [x] | |
+| 0.1.3 | Redirection vers Home après login | [x] | |
 | 0.1.4 | Déconnexion fonctionne | [ ] | |
 | 0.1.5 | Mot de passe oublié fonctionne | [ ] | |
 | 0.1.6 | Création de compte fonctionne | [ ] | |
@@ -39,8 +39,8 @@
 ### 0.3 Navigation
 | # | Test | Statut | Bug |
 |---|------|--------|-----|
-| 0.3.1 | Menu latéral visible (Accueil, Squads, Sessions, Profil) | [ ] | |
-| 0.3.2 | Navigation vers Squads fonctionne | [ ] | |
+| 0.3.1 | Menu latéral visible (Accueil, Squads, Sessions, Profil) | [x] | |
+| 0.3.2 | Navigation vers Squads fonctionne | [x] | |
 | 0.3.3 | Navigation vers Sessions fonctionne | [ ] | |
 | 0.3.4 | Navigation vers Profil fonctionne | [ ] | |
 | 0.3.5 | Retour à Accueil fonctionne | [ ] | |
@@ -49,15 +49,15 @@
 ### 0.4 Gestion des Squads
 | # | Test | Statut | Bug |
 |---|------|--------|-----|
-| 0.4.1 | Page Squads s'affiche | [ ] | |
-| 0.4.2 | Liste des squads visible | [ ] | |
-| 0.4.3 | Bouton "Créer une squad" fonctionne | [ ] | |
-| 0.4.4 | Formulaire création squad (nom, jeu, timezone) | [ ] | |
-| 0.4.5 | Squad créée apparaît dans la liste | [ ] | |
-| 0.4.6 | Clic sur squad ouvre le détail | [ ] | |
-| 0.4.7 | Détail squad affiche: nom, jeu, membres | [ ] | |
+| 0.4.1 | Page Squads s'affiche | [x] | |
+| 0.4.2 | Liste des squads visible | [x] | |
+| 0.4.3 | Bouton "Créer une squad" fonctionne | [x] | |
+| 0.4.4 | Formulaire création squad (nom, jeu, timezone) | [x] | |
+| 0.4.5 | Squad créée apparaît dans la liste | [x] | CORRIGÉ |
+| 0.4.6 | Clic sur squad ouvre le détail | [x] | |
+| 0.4.7 | Détail squad affiche: nom, jeu, membres | [x] | CORRIGÉ |
 | 0.4.8 | Bouton inviter membre fonctionne | [ ] | |
-| 0.4.9 | Lien d'invitation généré | [ ] | |
+| 0.4.9 | Lien d'invitation généré | [x] | |
 | 0.4.10 | Bouton quitter squad fonctionne | [ ] | |
 
 ### 0.5 Planification de Sessions
@@ -256,13 +256,26 @@
 
 | # | Phase | Description | Sévérité | Fichier | Corrigé |
 |---|-------|-------------|----------|---------|---------|
-| 1 | | | | | [ ] |
-| 2 | | | | | [ ] |
-| 3 | | | | | [ ] |
+| 1 | 0.4 | Création squad bloque (RLS recursion) | Haute | Supabase RLS | [x] |
+| 2 | 0.4 | Page détail squad invisible (opacity: 0) | Haute | SquadDetailScreen.tsx | [x] |
+| 3 | 0.4 | Affichage "0 membres" (RLS trop restrictive) | Moyenne | Supabase RLS | [x] |
 
 ---
 
 ## NOTES DE SESSION
+
+### Session 30 Jan 2026 - 22h00
+- Bug animation détail squad CORRIGÉ (containerVariants)
+- Bug affichage membres CORRIGÉ (policy RLS)
+- Tests Phase 0.4 Squads: tous les tests passent!
+
+### Session 30 Jan 2026 - 21h30
+- Bug création squad CORRIGÉ (récursion RLS infinite)
+- Policies RLS simplifiées pour éviter références croisées
+
+### Session 30 Jan 2026 - 20h45
+- Bug F5/refresh CORRIGÉ (workaround localStorage)
+- Tests Phase 0.1 Auth: OK
 
 ### Session 30 Jan 2026
 - Policies RLS appliquées sur Supabase

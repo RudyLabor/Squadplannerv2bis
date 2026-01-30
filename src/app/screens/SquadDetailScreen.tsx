@@ -33,12 +33,17 @@ interface SquadDetailScreenProps {
   data?: { squadId?: string };
 }
 
-// Linear-style animations
+// Linear-style animations - Fixed to prevent opacity stuck at 0
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.02 }
+    transition: {
+      duration: 0.15,
+      staggerChildren: 0.04,
+      delayChildren: 0.02,
+      when: "beforeChildren"
+    }
   }
 };
 
@@ -47,7 +52,7 @@ const itemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }
+    transition: { duration: 0.12, ease: [0.25, 0.1, 0.25, 1] }
   }
 };
 

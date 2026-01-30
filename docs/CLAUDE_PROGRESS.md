@@ -148,15 +148,80 @@ OBSERVÉ:
 
 ---
 
-## Autres bugs identifiés (à traiter après le fix F5)
+## ✅ BUG CORRIGÉ - Création de Squad (30 Jan 2026 - 21h30)
 
-### Bug création de squad
-- Erreur lors de la création (message non capturé)
-- Policies RLS vérifiées et OK
+### Description du problème
+Le bouton "Créer la Squad" restait bloqué en état de chargement (spinner infini) ou affichait "Erreur lors de la création".
+
+### Cause racine identifiée
+**Récursion infinie dans les policies RLS** des tables `squads` et `squad_members`.
+
+```
+Erreur Supabase: HTTP 500
+Code: 42P17
+Message: "infinite recursion detected in policy for relation \"squad_members\""
+```
+
+Les policies faisaient des références croisées:
+- `squads_select` → sous-requête sur `squad_members`
+- `squad_members_select` → sous-requête sur `squads`
+
+### Solution appliquée
+Simplification des policies RLS pour éliminer toute référence croisée.
+
+**SQL exécuté sur Supabase:**
+```sql
+-- SQUADS: Policies simples SANS référence à squad_members
+CREATE POLICY "squads_select" ON squads FOR SELECT USING (
+  owner_id = auth.uid() OR is_public = true
+);
+CREATE POLICY "squads_insert" ON squads FOR INSERT
+WITH CHECK (auth.uid() IS NOT NULL AND owner_id = auth.uid());
+CREATE POLICY "squads_update" ON squads FOR UPDATE USING (owner_id = auth.uid());
+CREATE POLICY "squads_delete" ON squads FOR DELETE USING (owner_id = auth.uid());
+
+-- SQUAD_MEMBERS: Policies simples SANS référence à squads
+CREATE POLICY "squad_members_select" ON squad_members FOR SELECT USING (user_id = auth.uid());
+CREATE POLICY "squad_members_insert" ON squad_members FOR INSERT WITH CHECK (user_id = auth.uid());
+CREATE POLICY "squad_members_update" ON squad_members FOR UPDATE USING (user_id = auth.uid());
+CREATE POLICY "squad_members_delete" ON squad_members FOR DELETE USING (user_id = auth.uid());
+```
+
+### Fichier migration créé
+`supabase/migrations/20260130200000_fix_infinite_recursion.sql`
+
+### Test Puppeteer (30 Jan 2026 - 21h30)
+- ✅ Connexion fonctionne
+- ✅ Navigation vers Squads
+- ✅ Formulaire création squad
+- ✅ **Création de squad "Test Squad Claude" → SUCCÈS**
+- ✅ Squad apparaît dans la liste
 
 ---
 
-## Tests Phase 0 - Résultats (sans compter le bug F5)
+## ✅ BUGS CORRIGÉS - Page Détail Squad (30 Jan 2026 - 22h00)
+
+### Bug 1: Animation bloquée (opacity: 0)
+- **Problème**: Le contenu de la page détail squad restait invisible (opacity: 0)
+- **Cause**: Animation Framer Motion `containerVariants` ne se déclenchait pas correctement
+- **Solution**: Ajout de `duration: 0.15` et `when: "beforeChildren"` aux variants
+- **Fichier modifié**: `src/app/screens/SquadDetailScreen.tsx`
+
+### Bug 2: Affichage "0 membres"
+- **Problème**: La liste des membres affichait 0 alors qu'il y avait 1 membre (le créateur)
+- **Cause**: Policy RLS trop restrictive - ne permettait que de voir ses propres memberships
+- **Solution**: Ajout policy `squad_members_view_owned_squads` pour voir les membres des squads possédées
+
+```sql
+CREATE POLICY "squad_members_view_owned_squads" ON squad_members
+FOR SELECT USING (
+  squad_id IN (SELECT id FROM squads WHERE owner_id = auth.uid())
+);
+```
+
+---
+
+## Tests Phase 0 - Résultats
 
 | Test | Résultat |
 |------|----------|
@@ -171,6 +236,11 @@ OBSERVÉ:
 | 0.3.3 Navigation Sessions | ✅ |
 | 0.3.4 Navigation Profil | ✅ |
 | **F5 / Refresh** | ✅ CORRIGÉ |
+| 0.4.3 Bouton créer squad | ✅ |
+| 0.4.4 Formulaire création | ✅ |
+| **0.4.5 Création squad** | ✅ CORRIGÉ |
+| 0.4.6 Clic sur squad ouvre détail | ✅ |
+| **0.4.7 Détail squad affiche** | ✅ CORRIGÉ |
 
 ---
 
@@ -200,5 +270,5 @@ vercel logs
 
 ---
 
-*Dernière mise à jour: 30 Janvier 2026 - 20h30*
-*Statut: 🟢 Bug F5 CORRIGÉ*
+*Dernière mise à jour: 30 Janvier 2026 - 22h00*
+*Statut: 🟢 Tous les bugs majeurs CORRIGÉS (F5, création squad, détail squad)*
