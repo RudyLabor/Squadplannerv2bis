@@ -237,271 +237,89 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initDone.current = true;
 
     let isMounted = true;
-    let timeoutId: NodeJS.Timeout | null = null;
 
-    const initAuth = async () => {
-      console.log('[Auth] 🚀 Initialisation de l\'authentification...');
+    console.log('[Auth] 🚀 Initialisation...');
 
-      // FAST-PATH: Vérification synchrone du token AVANT l'appel async
-      const tokenCheck = checkAuthTokenSync();
-
-      if (!tokenCheck.hasToken) {
-        // Pas de token = pas connecté, on peut terminer immédiatement
-        console.log('[Auth] ⚡ Fast-path: Aucun token trouvé - utilisateur non connecté');
-        setUser(null);
-        setLoading(false);
-        return;
-      }
-
-      if (tokenCheck.isExpired) {
-        // Token expiré, on nettoie et on redirige vers login
-        console.log('[Auth] ⚡ Fast-path: Token expiré - nettoyage...');
-        userProfileCache.clear();
-        setUser(null);
-        setLoading(false);
-        return;
-      }
-
-      // Token présent et non expiré, on continue avec la vérification async
-      console.log('[Auth] ✅ Token valide trouvé, vérification de la session...');
-
-      // Timeout de sécurité - avec tentative de récupération automatique
-      timeoutId = setTimeout(async () => {
-        if (!isMounted) return;
-
-        console.warn('[Auth] ⏱️ Timeout - tentative de récupération automatique...');
-
-        // Tenter un refresh du token avant d'abandonner
-        try {
-          const { data, error } = await supabase.auth.refreshSession();
-          if (!error && data.session && isMounted) {
-            console.log('[Auth] ✅ Récupération réussie après timeout');
-            const currentUser = await fetchUserProfile(data.session.user.id);
-            if (isMounted && currentUser) {
-              setUser(currentUser);
-              setLoading(false);
-              setAuthError(null);
-              return;
-            }
-          }
-        } catch (e) {
-          console.error('[Auth] Échec de la récupération après timeout:', e);
-        }
-
-        // Si la récupération échoue, nettoyer et afficher l'erreur
-        if (isMounted) {
-          userProfileCache.clear();
-          setAuthError('L\'authentification prend trop de temps. Veuillez réessayer.');
-          setLoading(false);
-          setUser(null);
-        }
-      }, AUTH_TIMEOUT_MS);
-
+    // WORKAROUND: Le SDK Supabase ne restaure pas la session correctement
+    // On lit le token manuellement et on crée l'utilisateur si valide
+    const restoreFromLocalStorage = async (): Promise<boolean> => {
       try {
-        console.log('[Auth] 📡 Vérification de la session Supabase...');
-
-        // D'abord, essayer de restaurer la session depuis localStorage si elle existe
         const storageKey = 'sb-cwtoprbowdqcemdjrtir-auth-token';
-        const storedToken = localStorage.getItem(storageKey);
-        if (storedToken) {
-          try {
-            const tokenData = JSON.parse(storedToken);
-            if (tokenData.access_token && tokenData.refresh_token) {
-              console.log('[Auth] 🔄 Restauration de la session depuis localStorage...');
-              const { error: setError } = await supabase.auth.setSession({
-                access_token: tokenData.access_token,
-                refresh_token: tokenData.refresh_token
-              });
-              if (setError) {
-                console.warn('[Auth] ⚠️ Erreur setSession:', setError.message);
-              } else {
-                console.log('[Auth] ✅ Session restaurée depuis localStorage');
-              }
-            }
-          } catch (parseError) {
-            console.warn('[Auth] ⚠️ Erreur parsing token localStorage:', parseError);
-          }
+        const storedData = localStorage.getItem(storageKey);
+
+        if (!storedData) {
+          console.log('[Auth] ℹ️ Pas de token stocké');
+          return false;
         }
 
-        // Créer une promesse avec timeout pour getSession
-        const sessionPromise = supabase.auth.getSession();
-        const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Session check timeout')), OPERATION_TIMEOUT_MS)
-        );
+        const tokenData = JSON.parse(storedData);
+        const now = Math.floor(Date.now() / 1000);
 
-        let session;
-        let sessionError;
-
-        try {
-          const result = await Promise.race([sessionPromise, timeoutPromise]);
-          session = result.data?.session;
-          sessionError = result.error;
-        } catch (raceError: any) {
-          // Ignorer AbortError (causé par React StrictMode double-mount/unmount)
-          if (raceError?.name === 'AbortError' || raceError?.message?.includes('aborted')) {
-            console.log('[Auth] ℹ️ Request aborted (StrictMode) - ignoré');
-            if (!isMounted) return;
-            // Tenter quand même un refresh silencieux
-          }
-
-          // Timeout sur getSession - tenter un refresh
-          console.warn('[Auth] ⚠️ Timeout/erreur sur getSession, tentative refresh...');
-          try {
-            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-
-            if (refreshError || !refreshData.session) {
-              // Si pas de session, l'utilisateur n'est pas connecté
-              if (!isMounted) return;
-              console.log('[Auth] ℹ️ Pas de session après refresh - utilisateur non connecté');
-              setUser(null);
-              setLoading(false);
-              return;
-            }
-
-            session = refreshData.session;
-            sessionError = null;
-          } catch (refreshErr: any) {
-            // Ignorer AbortError sur le refresh aussi
-            if (refreshErr?.name === 'AbortError' || refreshErr?.message?.includes('aborted')) {
-              console.log('[Auth] ℹ️ Refresh aborted - ignoré');
-              if (!isMounted) return;
-            }
-            // Fallback: essayer de restaurer depuis localStorage
-            console.warn('[Auth] ⚠️ Timeout - tentative restauration depuis localStorage');
-            try {
-              const storedSession = localStorage.getItem('sb-cwtoprbowdqcemdjrtir-auth-token');
-              if (storedSession) {
-                const parsed = JSON.parse(storedSession);
-                if (parsed.access_token && parsed.refresh_token) {
-                  const { data: restoredData } = await supabase.auth.setSession({
-                    access_token: parsed.access_token,
-                    refresh_token: parsed.refresh_token
-                  });
-                  if (restoredData.session) {
-                    console.log('[Auth] ✅ Session restaurée depuis localStorage');
-                    session = restoredData.session;
-                    sessionError = null;
-                  }
-                }
-              }
-            } catch (e) {
-              console.warn('[Auth] localStorage fallback failed:', e);
-            }
-            if (!session) {
-              // Pas de session - utilisateur non connecté
-              if (!isMounted) return;
-              setUser(null);
-              setLoading(false);
-              return;
-            }
-          }
+        // Vérifier si le token est expiré
+        if (tokenData.expires_at && tokenData.expires_at < now) {
+          console.log('[Auth] ⚠️ Token expiré');
+          localStorage.removeItem(storageKey);
+          return false;
         }
 
-        if (!isMounted) return;
-
-        if (sessionError) {
-          console.warn('[Auth] ⚠️ Erreur session, tentative refresh...', sessionError.message);
-          // Tenter un refresh en cas d'erreur
-          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-
-          if (refreshError || !refreshData.session) {
-            console.error('[Auth] ❌ Refresh échoué:', refreshError?.message);
-            setAuthError(`Erreur de session: ${sessionError.message}`);
-            setUser(null);
-            setLoading(false);
-            return;
-          }
-
-          // Refresh réussi
-          console.log('[Auth] ✅ Refresh réussi après erreur session');
-          session = refreshData.session;
+        if (!tokenData.user?.id) {
+          console.log('[Auth] ⚠️ Pas de user dans le token');
+          return false;
         }
 
-        if (!session) {
-          console.log('[Auth] ℹ️ Aucune session trouvée - utilisateur non connecté');
-          setUser(null);
-          setLoading(false);
-          return;
-        }
+        console.log('[Auth] ✅ Token valide trouvé, restauration...');
 
-        console.log('[Auth] ✅ Session trouvée, chargement du profil...');
-        // Session found - load profile (uses cache)
-        const currentUser = await fetchUserProfile(session.user.id);
+        // Créer l'utilisateur depuis les données du token
+        const fallbackUser: User = {
+          id: tokenData.user.id,
+          email: tokenData.user.email || '',
+          username: tokenData.user.user_metadata?.username || tokenData.user.email?.split('@')[0] || 'user',
+          display_name: tokenData.user.user_metadata?.display_name,
+          avatar_url: tokenData.user.user_metadata?.avatar_url,
+        };
 
         if (isMounted) {
-          if (currentUser) {
-            console.log('[Auth] ✅ Profil chargé:', currentUser.email);
-          } else {
-            console.warn('[Auth] ⚠️ Profil non trouvé, utilisation des données de session');
-          }
-          setUser(currentUser);
+          setUser(fallbackUser);
           setLoading(false);
-          setAuthError(null); // Clear any previous error
-        }
-      } catch (error: any) {
-        // Ignorer AbortError silencieusement (React StrictMode)
-        if (error?.name === 'AbortError' || error?.message?.includes('aborted')) {
-          console.log('[Auth] ℹ️ Init aborted (StrictMode cleanup) - ignoré');
-          return; // Ne pas modifier l'état si le composant est démonté
+          console.log('[Auth] ✅ Session restaurée:', fallbackUser.email);
         }
 
-        console.error('[Auth] ❌ Erreur initAuth:', error);
-        if (isMounted) {
-          // Tenter une dernière récupération silencieuse
-          try {
-            const { data } = await supabase.auth.refreshSession();
-            if (data.session) {
-              const currentUser = await fetchUserProfile(data.session.user.id);
-              if (isMounted && currentUser) {
-                console.log('[Auth] ✅ Récupération de dernière chance réussie');
-                setUser(currentUser);
-                setLoading(false);
-                setAuthError(null);
-                return;
-              }
-            }
-          } catch (e: any) {
-            // Ignorer AbortError sur la récupération aussi
-            if (e?.name === 'AbortError' || e?.message?.includes('aborted')) {
-              console.log('[Auth] ℹ️ Recovery aborted - ignoré');
-              return;
-            }
-            console.error('[Auth] ❌ Dernière tentative échouée:', e);
+        // Essayer de charger le profil complet en arrière-plan
+        fetchUserProfile(tokenData.user.id).then(profile => {
+          if (isMounted && profile) {
+            setUser(profile);
           }
+        }).catch(() => {});
 
-          setAuthError(`Erreur d'authentification: ${error?.message || 'Erreur inconnue'}`);
-          setUser(null);
-          setLoading(false);
-        }
-      } finally {
-        // Annuler le timeout si on a terminé normalement
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
+        return true;
+      } catch (e) {
+        console.warn('[Auth] Erreur restauration localStorage:', e);
+        return false;
       }
     };
 
-    // Listen to auth changes - but skip when we're handling it in signIn
+    // Écouter les changements d'auth pour les futures connexions/déconnexions
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!isMounted) return;
 
-      // Skip if we're currently signing in (we handle it there)
-      if (isSigningIn.current && event === 'SIGNED_IN') {
-        return;
-      }
-
-      // Skip initial session (handled in initAuth)
-      if (event === 'INITIAL_SESSION') {
-        return;
-      }
+      console.log('[Auth] Event:', event);
 
       if (event === 'SIGNED_OUT') {
         userProfileCache.clear();
         setUser(null);
+        setLoading(false);
         return;
       }
 
-      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
+      if (event === 'SIGNED_IN' && session && !isSigningIn.current) {
+        const currentUser = await fetchUserProfile(session.user.id);
+        if (isMounted && currentUser) {
+          setUser(currentUser);
+          setLoading(false);
+        }
+      }
+
+      if (event === 'TOKEN_REFRESHED' && session) {
         const currentUser = await fetchUserProfile(session.user.id);
         if (isMounted && currentUser) {
           setUser(currentUser);
@@ -509,14 +327,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    initAuth();
+    // Essayer de restaurer depuis localStorage
+    restoreFromLocalStorage().then(restored => {
+      if (!restored && isMounted) {
+        // Pas de token valide - utilisateur non connecté
+        setUser(null);
+        setLoading(false);
+      }
+    });
 
     return () => {
       isMounted = false;
       subscription.unsubscribe();
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
     };
   }, []);
 
