@@ -23,6 +23,8 @@ export const supabase = createClient<Database>(supabaseUrl, publicAnonKey, {
     detectSessionInUrl: false, // ✅ CORRIGÉ: était true, causait blocage sur F5
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     // ✅ SUPPRIMÉ: flowType: 'pkce' - non nécessaire pour auth email/mot de passe
+    // @ts-ignore - Option non documentée mais nécessaire pour éviter le blocage Web Lock
+    lock: false, // ✅ FIX CRITIQUE: Désactive Web Locks API qui bloque getSession() indéfiniment
   },
   realtime: {
     params: {
