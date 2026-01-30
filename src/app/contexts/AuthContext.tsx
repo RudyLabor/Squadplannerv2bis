@@ -496,66 +496,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = useCallback(async (email: string, password: string) => {
     isSigningIn.current = true;
     setLoading(true);
-    console.log('[Auth] 🔐 Début signIn...');
 
     try {
-      console.log('[Auth] 📡 Appel signInWithPassword...');
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
-      console.log('[Auth] 📥 Réponse reçue:', { hasSession: !!data?.session, hasUser: !!data?.user, error: error?.message });
+      if (error) throw error;
 
-      if (error) {
-        console.error('[Auth] ❌ Erreur:', error.message);
-        throw error;
-      }
+      if (data.user && data.session) {
+        // Créer l'utilisateur immédiatement avec les données de session
+        const newUser: User = {
+          id: data.user.id,
+          email: data.user.email || '',
+          username: data.user.user_metadata?.username || data.user.email?.split('@')[0] || 'user',
+          display_name: data.user.user_metadata?.display_name || data.user.user_metadata?.name,
+        };
 
-      // Vérifier que la session est bien créée
-      if (data.session) {
-        console.log('[Auth] ✅ Session créée avec succès');
+        // Mettre à jour l'état AVANT de mettre loading à false
+        setUser(newUser);
 
-        // Forcer le stockage de la session TOUJOURS (pas seulement si absent)
-        const storageKey = `sb-cwtoprbowdqcemdjrtir-auth-token`;
-        console.log('[Auth] 💾 Stockage du token dans localStorage...');
-        try {
-          localStorage.setItem(storageKey, JSON.stringify({
-            access_token: data.session.access_token,
-            refresh_token: data.session.refresh_token,
-            expires_at: data.session.expires_at,
-            expires_in: data.session.expires_in,
-            token_type: data.session.token_type,
-            user: data.session.user
-          }));
-          console.log('[Auth] ✅ Token stocké avec succès');
-        } catch (storageError) {
-          console.error('[Auth] ❌ Erreur stockage localStorage:', storageError);
-        }
-      } else {
-        console.warn('[Auth] ⚠️ Pas de session dans la réponse');
-      }
-
-      if (data.user) {
-        // Fetch profile immediately - don't wait for onAuthStateChange
-        const currentUser = await fetchUserProfile(data.user.id, true);
-        if (currentUser) {
-          setUser(currentUser);
-        } else {
-          // Créer un utilisateur minimal à partir des données de session
-          setUser({
-            id: data.user.id,
-            email: data.user.email || '',
-            username: data.user.email?.split('@')[0] || 'user',
-            display_name: data.user.user_metadata?.name,
-          });
-        }
+        // Essayer de charger le profil complet en background (non-bloquant)
+        fetchUserProfile(data.user.id, true).then(profile => {
+          if (profile) {
+            setUser(profile);
+          }
+        }).catch(() => {});
       }
     } catch (error) {
       throw error;
     } finally {
       setLoading(false);
-      // Small delay before allowing onAuthStateChange to process
       setTimeout(() => { isSigningIn.current = false; }, 100);
     }
   }, []);
