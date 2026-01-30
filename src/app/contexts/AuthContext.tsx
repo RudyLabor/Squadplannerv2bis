@@ -482,6 +482,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) throw error;
 
+      // Vérifier que la session est bien créée
+      if (data.session) {
+        console.log('[Auth] Session créée avec succès');
+
+        // Forcer le stockage de la session si nécessaire
+        const storageKey = `sb-cwtoprbowdqcemdjrtir-auth-token`;
+        const existingToken = localStorage.getItem(storageKey);
+        if (!existingToken) {
+          console.log('[Auth] Token non trouvé dans localStorage, stockage manuel...');
+          localStorage.setItem(storageKey, JSON.stringify({
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token,
+            expires_at: data.session.expires_at,
+            expires_in: data.session.expires_in,
+            token_type: data.session.token_type,
+            user: data.session.user
+          }));
+        }
+      }
+
       if (data.user) {
         // Fetch profile immediately - don't wait for onAuthStateChange
         const currentUser = await fetchUserProfile(data.user.id, true);
