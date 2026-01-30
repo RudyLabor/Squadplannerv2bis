@@ -1,6 +1,6 @@
 /**
- * 👑 PREMIUM SCREEN - Refonte UI Premium
- * Design System v3 - Animations + Glassmorphism
+ * PREMIUM SCREEN - Design System Linear Dark
+ * Structure: Header, Hero Banner, 3 Plans, FAQ
  */
 
 import { useState } from "react";
@@ -11,21 +11,18 @@ import { upgradeToPremium, openCustomerPortal } from "@/utils/stripe";
 import {
   ArrowLeft,
   Crown,
-  Brain,
-  BarChart3,
-  Clock,
-  Calendar,
-  Bot,
-  Users,
   Check,
-  ChevronRight,
-  Star,
-  Sparkles,
+  X,
+  ChevronDown,
   Zap,
+  Users,
+  Calendar,
+  BarChart3,
+  Bot,
+  Brain,
   Shield,
-  Gift,
+  Sparkles,
 } from "lucide-react";
-import { IconButton, SkeletonPage } from "@/design-system";
 
 interface PremiumScreenProps {
   onNavigate: (screen: string, data?: any) => void;
@@ -37,103 +34,129 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.06, delayChildren: 0.1 }
+    transition: { staggerChildren: 0.08, delayChildren: 0.1 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
+    transition: { type: "spring", stiffness: 400, damping: 28 }
   }
 };
 
-const featureVariants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    x: 0,
-    transition: { delay: i * 0.05, type: "spring", stiffness: 300, damping: 24 }
-  })
-};
+// Plans data
+const plans = [
+  {
+    id: "free",
+    name: "Free",
+    price: "0",
+    period: "Gratuit pour toujours",
+    description: "Pour découvrir Squad Planner",
+    features: [
+      { text: "1 squad maximum", included: true },
+      { text: "5 membres par squad", included: true },
+      { text: "Sessions basiques", included: true },
+      { text: "Historique 30 jours", included: true },
+      { text: "Suggestions IA", included: false },
+      { text: "Stats avancées", included: false },
+      { text: "Bot Discord", included: false },
+      { text: "Export calendrier", included: false },
+    ],
+    cta: "Plan actuel",
+    popular: false,
+  },
+  {
+    id: "premium",
+    name: "Premium",
+    price: "4,99",
+    period: "/mois",
+    yearlyPrice: "2,99",
+    yearlyTotal: "35,88",
+    description: "Pour les gamers sérieux",
+    features: [
+      { text: "5 squads maximum", included: true },
+      { text: "20 membres par squad", included: true },
+      { text: "Sessions illimitées", included: true },
+      { text: "Historique illimité", included: true },
+      { text: "Suggestions IA", included: true },
+      { text: "Stats avancées", included: true },
+      { text: "Bot Discord basique", included: true },
+      { text: "Export calendrier", included: false },
+    ],
+    cta: "Upgrader",
+    popular: true,
+  },
+  {
+    id: "pro",
+    name: "Pro",
+    price: "9,99",
+    period: "/mois",
+    yearlyPrice: "7,99",
+    yearlyTotal: "95,88",
+    description: "Pour les équipes compétitives",
+    features: [
+      { text: "Squads illimitées", included: true },
+      { text: "Membres illimités", included: true },
+      { text: "Sessions illimitées", included: true },
+      { text: "Historique illimité", included: true },
+      { text: "Suggestions IA avancées", included: true },
+      { text: "Stats pro + analytics", included: true },
+      { text: "Bot Discord complet", included: true },
+      { text: "Export tous calendriers", included: true },
+    ],
+    cta: "Upgrader",
+    popular: false,
+  },
+];
+
+// FAQ data
+const faqItems = [
+  {
+    question: "Puis-je annuler mon abonnement ?",
+    answer: "Oui, vous pouvez annuler votre abonnement a tout moment depuis votre profil. Vous conserverez l'acces Premium jusqu'a la fin de votre periode de facturation.",
+  },
+  {
+    question: "Comment fonctionne l'essai gratuit ?",
+    answer: "L'essai gratuit de 7 jours vous donne acces a toutes les fonctionnalites Premium. Aucun paiement n'est requis pour commencer. Vous serez facture uniquement apres les 7 jours.",
+  },
+  {
+    question: "Puis-je changer de plan ?",
+    answer: "Oui, vous pouvez upgrader ou downgrader votre plan a tout moment. Le changement sera effectif immediatement et le prorata sera calcule automatiquement.",
+  },
+  {
+    question: "Quels moyens de paiement acceptez-vous ?",
+    answer: "Nous acceptons toutes les cartes bancaires (Visa, Mastercard, American Express) ainsi que PayPal. Les paiements sont securises par Stripe.",
+  },
+  {
+    question: "Y a-t-il un engagement ?",
+    answer: "Non, aucun engagement. L'abonnement mensuel est sans engagement. L'abonnement annuel offre une reduction de 40% et peut etre annule avec remboursement sous 14 jours.",
+  },
+];
 
 export function PremiumScreen({ onNavigate, showToast }: PremiumScreenProps) {
   const { user } = useAuth();
   const { subscription, isPremium, isPro, isEnterprise, loading: subLoading } = useSubscription();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
-  const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
+  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const isSubscribed = isPremium || isPro || isEnterprise;
 
-  const price = billingCycle === "yearly" ? "2,99" : "4,99";
-  const yearlyPrice = "35,88";
-  const originalYearlyPrice = "59,88";
-  const discount = "40%";
+  // Get current plan ID
+  const getCurrentPlanId = () => {
+    if (isPro || isEnterprise) return "pro";
+    if (isPremium) return "premium";
+    return "free";
+  };
 
-  const features = [
-    {
-      icon: Brain,
-      title: "Suggestions IA",
-      description: "Créneaux optimaux basés sur votre historique",
-      gradient: "from-purple-500 to-indigo-600",
-    },
-    {
-      icon: BarChart3,
-      title: "Stats avancées",
-      description: "Analyse détaillée de vos performances",
-      gradient: "from-blue-500 to-cyan-600",
-    },
-    {
-      icon: Clock,
-      title: "Historique illimité",
-      description: "Accès à toutes vos sessions passées",
-      gradient: "from-emerald-500 to-teal-600",
-    },
-    {
-      icon: Calendar,
-      title: "Export calendrier",
-      description: "Sync Google, Apple, Outlook",
-      gradient: "from-orange-500 to-amber-600",
-    },
-    {
-      icon: Bot,
-      title: "Bot Discord avancé",
-      description: "Automatisation complète Discord",
-      gradient: "from-violet-500 to-purple-600",
-    },
-    {
-      icon: Users,
-      title: "Rôles personnalisés",
-      description: "Coach, Manager, Capitaine, etc.",
-      gradient: "from-pink-500 to-rose-600",
-    },
-    {
-      icon: Crown,
-      title: "Squads illimitées",
-      description: "Créez autant de squads que vous voulez",
-      gradient: "from-amber-500 to-orange-600",
-    },
-  ];
+  const currentPlanId = getCurrentPlanId();
 
-  const testimonials = [
-    {
-      text: "Les suggestions IA sont incroyables. On a doublé notre fréquence de jeu !",
-      author: "RudyFramade",
-      squad: "FragGirls",
-      avatar: "🎮",
-    },
-    {
-      text: "Export calendrier = game changer. Plus aucune excuse de no-show.",
-      author: "KANA",
-      squad: "Apex Legends Squad",
-      avatar: "🦊",
-    },
-  ];
+  const handleSubscribe = async (planId: string) => {
+    if (planId === "free" || planId === currentPlanId) return;
 
-  const handleSubscribe = async () => {
     if (!user?.id) {
       showToast("Veuillez vous connecter pour continuer", "error");
       onNavigate("login");
@@ -145,10 +168,9 @@ export function PremiumScreen({ onNavigate, showToast }: PremiumScreenProps) {
 
     try {
       await upgradeToPremium(user.id, billingCycle);
-      // Stripe will redirect to checkout page
     } catch (error: any) {
       console.error("[Premium] Checkout error:", error);
-      showToast("Erreur lors du paiement. Réessayez.", "error");
+      showToast("Erreur lors du paiement. Reessayez.", "error");
       setIsProcessing(false);
     }
   };
@@ -161,432 +183,314 @@ export function PremiumScreen({ onNavigate, showToast }: PremiumScreenProps) {
       await openCustomerPortal();
     } catch (error: any) {
       console.error("[Premium] Portal error:", error);
-      showToast("Erreur d'ouverture du portail. Réessayez.", "error");
+      showToast("Erreur d'ouverture du portail. Reessayez.", "error");
       setIsProcessing(false);
     }
   };
 
-  // Format subscription tier for display
-  const getTierLabel = () => {
-    if (isEnterprise) return "Enterprise";
-    if (isPro) return "Pro";
-    if (isPremium) return "Premium";
-    return "Free";
-  };
-
-  const getNextBillingDate = () => {
-    if (!subscription?.current_period_end) return null;
-    return new Date(subscription.current_period_end).toLocaleDateString('fr-FR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pb-32 overflow-hidden">
-      {/* Background elements - Static for performance */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 -right-20 w-80 h-80 bg-amber-500/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-40 -left-20 w-60 h-60 bg-purple-500/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 right-1/4 w-40 h-40 bg-pink-500/10 rounded-full blur-2xl" />
-      </div>
+    <div className="min-h-screen bg-[#08090a] pb-32">
+      {/* Subtle gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#5e6dd2]/5 via-transparent to-transparent pointer-events-none" />
 
       <motion.div
-        className="relative px-4 py-6"
+        className="relative px-4 py-6 max-w-4xl mx-auto"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
         {/* Header */}
         <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
-          <IconButton
-            icon={<ArrowLeft className="w-5 h-5 text-white/70" />}
+          <button
             onClick={() => onNavigate("profile")}
-            variant="ghost"
-            aria-label="Retour au profil"
-            className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20"
-          />
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <Crown className="w-6 h-6 text-amber-400" />
-              <h1 className="text-xl font-bold tracking-tight text-white">
-                Squad Planner
+            className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center hover:bg-[rgba(255,255,255,0.05)] transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 text-[#8b8d90]" />
+          </button>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#5e6dd2] to-[#8b5cf6] flex items-center justify-center">
+              <Crown className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg font-semibold text-[#f7f8f8]">
+                Squad Planner Premium
               </h1>
+              <p className="text-sm text-[#8b8d90]">Choisissez votre plan</p>
             </div>
-            <p className="text-sm text-white/50">Passez au niveau supérieur</p>
           </div>
         </motion.div>
 
-        {/* Loading state */}
-        {subLoading && (
-          <motion.div
-            variants={itemVariants}
-            className="py-8"
-          >
-            <SkeletonPage />
-          </motion.div>
-        )}
-
-        {/* Already Subscribed Card */}
-        {isSubscribed && !subLoading && (
-          <motion.div
-            variants={itemVariants}
-            className="relative rounded-3xl p-6 mb-8 overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 via-teal-500/10 to-cyan-500/20 backdrop-blur-xl rounded-3xl border border-emerald-500/30" />
-
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
-                    <Crown className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold tracking-tight text-white">Abonnement {getTierLabel()}</h3>
-                    <p className="text-sm text-emerald-400">Actif</p>
-                  </div>
-                </div>
-                <div className="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30">
-                  <Check className="w-5 h-5 text-emerald-400" />
-                </div>
-              </div>
-
-              {getNextBillingDate() && (
-                <p className="text-sm text-white/60 mb-4">
-                  Prochain renouvellement : {getNextBillingDate()}
-                </p>
-              )}
-
-              <motion.button
-                onClick={handleManageSubscription}
-                disabled={isProcessing}
-                className="w-full py-3 rounded-xl bg-white/10 border border-white/20 text-white font-medium flex items-center justify-center gap-2 hover:bg-white/20 transition-colors"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                {isProcessing ? (
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                  />
-                ) : (
-                  <>
-                    <Shield className="w-4 h-4" />
-                    Gérer mon abonnement
-                  </>
-                )}
-              </motion.button>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Hero Card with glassmorphism - Only show if not subscribed */}
-        {!isSubscribed && !subLoading && (
-          <motion.div
-            variants={itemVariants}
-            className="relative rounded-3xl p-6 mb-8 overflow-hidden"
-          >
-            {/* Glass background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-pink-500/20 backdrop-blur-xl rounded-3xl border border-white/10" />
-
-            {/* Subtle glow - static for performance */}
-            <div className="absolute inset-0 bg-gradient-to-r from-amber-400/0 via-amber-400/10 to-amber-400/0" />
-
-            <div className="relative z-10">
-              {/* Premium badge */}
-              <div className="flex justify-center mb-4">
-                <div className="px-4 py-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-xs font-bold text-white flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" />
-                  PREMIUM
-                  <Sparkles className="w-3 h-3" />
-                </div>
-              </div>
-
-              {/* Crown icon */}
-              <div className="flex justify-center mb-4">
-                <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-amber-400 via-orange-500 to-pink-500 flex items-center justify-center shadow-2xl shadow-amber-500/30">
-                  <Crown className="w-10 h-10 text-white" />
-                </div>
-              </div>
-
-              <h2 className="text-2xl font-bold tracking-tight text-white text-center mb-2">
-                Débloquez votre potentiel
-              </h2>
-              <p className="text-sm text-white/60 text-center max-w-xs mx-auto">
-                Intelligence artificielle, stats avancées, automatisation complète.
-                Tout pour organiser vos sessions comme des pros.
-              </p>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Billing Toggle - Premium style - Only show if not subscribed */}
-        {!isSubscribed && !subLoading && (
-          <motion.div variants={itemVariants} className="flex justify-center mb-6">
-            <div className="inline-flex items-center gap-1 p-1 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10">
-              <motion.button
-                onClick={() => setBillingCycle("monthly")}
-                className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                  billingCycle === "monthly"
-                    ? "bg-white/10 text-white"
-                    : "text-white/50 hover:text-white/70"
-                }`}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                Mensuel
-              </motion.button>
-              <motion.button
-                onClick={() => setBillingCycle("yearly")}
-                className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all relative ${
-                  billingCycle === "yearly"
-                    ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30"
-                    : "text-white/50 hover:text-white/70"
-                }`}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                Annuel
-                {billingCycle === "yearly" && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full bg-emerald-500 text-[10px] font-bold text-white"
-                  >
-                    -{discount}
-                  </motion.span>
-                )}
-              </motion.button>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Price - Big and bold - Only show if not subscribed */}
-        {!isSubscribed && !subLoading && (
-          <motion.div variants={itemVariants} className="text-center mb-8">
-            <div className="flex items-baseline justify-center gap-1">
-              <motion.span
-                key={price}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-6xl font-black text-white"
-              >
-                {price}
-              </motion.span>
-              <span className="text-2xl text-white/50 font-medium">€</span>
-              <span className="text-lg text-white/40">/mois</span>
-            </div>
-            <AnimatePresence mode="wait">
-              {billingCycle === "yearly" && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="mt-2"
-                >
-                  <p className="text-sm text-white/40">
-                    Facturé {yearlyPrice}€/an
-                    <span className="ml-2 line-through text-white/30">{originalYearlyPrice}€</span>
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        )}
-
-        {/* CTA Button - Super premium - Only show if not subscribed */}
-        {!isSubscribed && !subLoading && (
-          <motion.div variants={itemVariants} className="mb-8">
-            <motion.button
-              onClick={handleSubscribe}
-              disabled={isProcessing}
-              className={`w-full h-16 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 text-white shadow-2xl shadow-amber-500/30 relative overflow-hidden ${isProcessing ? 'opacity-80 cursor-wait' : ''}`}
-              whileHover={!isProcessing ? { scale: 1.02, y: -2 } : {}}
-              whileTap={!isProcessing ? { scale: 0.98 } : {}}
-            >
-              {/* Subtle shine - static for performance */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-              <span className="relative z-10 flex items-center gap-2">
-                {isProcessing ? (
-                  <>
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    >
-                      <Zap className="w-5 h-5" />
-                    </motion.div>
-                    Redirection en cours...
-                  </>
-                ) : (
-                  <>
-                    <Zap className="w-5 h-5" />
-                    Commencer l'essai gratuit
-                    <Gift className="w-5 h-5" />
-                  </>
-                )}
-              </span>
-            </motion.button>
-            <motion.div
-              className="flex items-center justify-center gap-4 mt-3"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              <div className="flex items-center gap-1.5 text-white/40 text-xs">
-                <Shield className="w-3.5 h-3.5" />
-                <span>7 jours gratuits</span>
-              </div>
-              <div className="w-1 h-1 rounded-full bg-white/20" />
-              <div className="flex items-center gap-1.5 text-white/40 text-xs">
-                <Check className="w-3.5 h-3.5" />
-                <span>Annulation facile</span>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-
-        {/* Features - Animated list */}
-        <motion.div variants={itemVariants}>
-          <h3 className="text-lg font-bold tracking-tight text-white mb-4 flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-amber-400" />
-            Tout ce qui est inclus
-          </h3>
-          <div className="space-y-3">
-            {features.map((feature, index) => (
-              <motion.div
-                key={index}
-                custom={index}
-                variants={featureVariants}
-                initial="hidden"
-                animate="visible"
-                onHoverStart={() => setHoveredFeature(index)}
-                onHoverEnd={() => setHoveredFeature(null)}
-                className="relative"
-              >
-                <motion.div
-                  className={`flex items-center gap-4 p-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 transition-all ${
-                    hoveredFeature === index ? 'bg-white/10 border-white/20' : ''
-                  }`}
-                  whileHover={{ x: 5 }}
-                >
-                  <motion.div
-                    className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center flex-shrink-0 shadow-lg`}
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                  >
-                    <feature.icon className="w-6 h-6 text-white" />
-                  </motion.div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-white">
-                        {feature.title}
-                      </span>
-                      <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-bold">
-                        PRO
-                      </span>
-                    </div>
-                    <p className="text-sm text-white/50 truncate">
-                      {feature.description}
-                    </p>
-                  </div>
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: index * 0.05 + 0.3 }}
-                  >
-                    <Check className="w-5 h-5 text-emerald-400" />
-                  </motion.div>
-                </motion.div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Premium Tools - Quick access */}
-        <motion.div variants={itemVariants} className="mt-8">
-          <h3 className="text-lg font-bold tracking-tight text-white mb-4">
-            Outils Premium
-          </h3>
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { label: "Stats", icon: BarChart3, screen: "advanced-stats", color: "from-blue-500 to-cyan-500" },
-              { label: "Coaching", icon: Brain, screen: "coaching-tools", color: "from-purple-500 to-pink-500" },
-              { label: "Calendrier", icon: Calendar, screen: "calendar-sync", color: "from-orange-500 to-amber-500" },
-            ].map((tool, index) => (
-              <motion.button
-                key={index}
-                onClick={() => onNavigate(tool.screen)}
-                className="relative p-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 overflow-hidden group"
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <motion.div
-                  className={`absolute inset-0 bg-gradient-to-br ${tool.color} opacity-0 group-hover:opacity-20 transition-opacity`}
-                />
-                <div className="relative z-10 flex flex-col items-center gap-2">
-                  <tool.icon className="w-6 h-6 text-white/70 group-hover:text-white transition-colors" />
-                  <span className="text-xs font-medium text-white/70 group-hover:text-white transition-colors">
-                    {tool.label}
-                  </span>
-                </div>
-                <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 group-hover:text-white/50 transition-colors" />
-              </motion.button>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Testimonials - Glowing cards */}
-        <motion.div variants={itemVariants} className="mt-8">
-          <h3 className="text-lg font-bold tracking-tight text-white mb-4 flex items-center gap-2">
-            <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
-            Témoignages
-          </h3>
-          <div className="space-y-4">
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 + index * 0.1 }}
-                className="relative p-5 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 overflow-hidden"
-              >
-                {/* Glow effect */}
-                <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/10 rounded-full blur-2xl" />
-
-                <div className="relative z-10">
-                  <p className="text-sm text-white/80 italic mb-4 leading-relaxed">
-                    "{testimonial.text}"
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-lg">
-                      {testimonial.avatar}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="w-3 h-3 text-amber-400 fill-amber-400" />
-                        ))}
-                      </div>
-                      <span className="text-xs text-white/50">
-                        {testimonial.author} • {testimonial.squad}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Final CTA */}
+        {/* Hero Banner */}
         <motion.div
           variants={itemVariants}
-          className="mt-10 text-center"
+          className="relative rounded-2xl p-6 mb-8 overflow-hidden bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]"
         >
-          <p className="text-white/50 text-sm">
-            Rejoins +10,000 gamers Premium
-          </p>
+          {/* Gradient accent */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#5e6dd2]/10 via-[#8b5cf6]/5 to-transparent pointer-events-none" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#5e6dd2]/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="w-5 h-5 text-[#5e6dd2]" />
+              <span className="text-sm font-medium text-[#5e6dd2]">Offre speciale</span>
+            </div>
+            <h2 className="text-2xl font-bold text-[#f7f8f8] mb-2">
+              Debloquez tout le potentiel de Squad Planner
+            </h2>
+            <p className="text-[#8b8d90] mb-4 max-w-lg">
+              Intelligence artificielle, statistiques avancees, bot Discord et bien plus.
+              Organisez vos sessions comme des pros.
+            </p>
+
+            {/* Quick features */}
+            <div className="flex flex-wrap gap-3">
+              {[
+                { icon: Brain, label: "IA Suggestions" },
+                { icon: BarChart3, label: "Stats avancees" },
+                { icon: Bot, label: "Bot Discord" },
+                { icon: Calendar, label: "Sync Calendrier" },
+              ].map((item, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.06)]"
+                >
+                  <item.icon className="w-4 h-4 text-[#5e6dd2]" />
+                  <span className="text-sm text-[#f7f8f8]">{item.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Billing Toggle */}
+        <motion.div variants={itemVariants} className="flex justify-center mb-8">
+          <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]">
+            <button
+              onClick={() => setBillingCycle("monthly")}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                billingCycle === "monthly"
+                  ? "bg-[rgba(255,255,255,0.08)] text-[#f7f8f8]"
+                  : "text-[#8b8d90] hover:text-[#f7f8f8]"
+              }`}
+            >
+              Mensuel
+            </button>
+            <button
+              onClick={() => setBillingCycle("yearly")}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all relative ${
+                billingCycle === "yearly"
+                  ? "bg-[#5e6dd2] text-white"
+                  : "text-[#8b8d90] hover:text-[#f7f8f8]"
+              }`}
+            >
+              Annuel
+              <span className="absolute -top-2 -right-2 px-1.5 py-0.5 rounded-full bg-emerald-500 text-[10px] font-bold text-white">
+                -40%
+              </span>
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Plans Grid */}
+        <motion.div
+          variants={itemVariants}
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12"
+        >
+          {plans.map((plan) => {
+            const isCurrentPlan = plan.id === currentPlanId;
+            const displayPrice = billingCycle === "yearly" && plan.yearlyPrice
+              ? plan.yearlyPrice
+              : plan.price;
+
+            return (
+              <div
+                key={plan.id}
+                className={`relative rounded-2xl p-5 bg-[rgba(255,255,255,0.02)] border transition-all ${
+                  isCurrentPlan
+                    ? "border-[#5e6dd2]"
+                    : plan.popular
+                    ? "border-[rgba(255,255,255,0.12)]"
+                    : "border-[rgba(255,255,255,0.06)]"
+                } ${plan.popular ? "md:-mt-2 md:mb-2" : ""}`}
+              >
+                {/* Popular badge */}
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[#5e6dd2] text-xs font-semibold text-white">
+                    Populaire
+                  </div>
+                )}
+
+                {/* Current plan badge */}
+                {isCurrentPlan && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-emerald-500 text-xs font-semibold text-white">
+                    Plan actuel
+                  </div>
+                )}
+
+                {/* Plan header */}
+                <div className="mb-4 pt-2">
+                  <h3 className="text-lg font-semibold text-[#f7f8f8] mb-1">
+                    {plan.name}
+                  </h3>
+                  <p className="text-sm text-[#8b8d90]">{plan.description}</p>
+                </div>
+
+                {/* Price */}
+                <div className="mb-5">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-bold text-[#f7f8f8]">
+                      {displayPrice}
+                    </span>
+                    <span className="text-lg text-[#8b8d90]">€</span>
+                    <span className="text-sm text-[#8b8d90]">{plan.period}</span>
+                  </div>
+                  {billingCycle === "yearly" && plan.yearlyTotal && (
+                    <p className="text-xs text-[#8b8d90] mt-1">
+                      Facture {plan.yearlyTotal}€/an
+                    </p>
+                  )}
+                </div>
+
+                {/* Features list */}
+                <div className="space-y-2.5 mb-5">
+                  {plan.features.map((feature, idx) => (
+                    <div key={idx} className="flex items-center gap-2.5">
+                      {feature.included ? (
+                        <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                          <Check className="w-3 h-3 text-emerald-400" />
+                        </div>
+                      ) : (
+                        <div className="w-5 h-5 rounded-full bg-[rgba(255,255,255,0.04)] flex items-center justify-center">
+                          <X className="w-3 h-3 text-[#8b8d90]/50" />
+                        </div>
+                      )}
+                      <span
+                        className={`text-sm ${
+                          feature.included ? "text-[#f7f8f8]" : "text-[#8b8d90]/50"
+                        }`}
+                      >
+                        {feature.text}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTA Button */}
+                <button
+                  onClick={() => handleSubscribe(plan.id)}
+                  disabled={isProcessing || isCurrentPlan || plan.id === "free"}
+                  className={`w-full py-2.5 rounded-xl text-sm font-medium transition-all ${
+                    isCurrentPlan
+                      ? "bg-[rgba(255,255,255,0.04)] text-[#8b8d90] cursor-default"
+                      : plan.id === "free"
+                      ? "bg-[rgba(255,255,255,0.04)] text-[#8b8d90] cursor-default"
+                      : plan.popular
+                      ? "bg-[#5e6dd2] hover:bg-[#6a79db] text-white"
+                      : "bg-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.1)] text-[#f7f8f8]"
+                  }`}
+                >
+                  {isProcessing && !isCurrentPlan && plan.id !== "free" ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                      />
+                      Chargement...
+                    </span>
+                  ) : isCurrentPlan ? (
+                    "Plan actuel"
+                  ) : plan.id === "free" ? (
+                    "Plan gratuit"
+                  ) : (
+                    <span className="flex items-center justify-center gap-2">
+                      <Zap className="w-4 h-4" />
+                      Upgrader
+                    </span>
+                  )}
+                </button>
+              </div>
+            );
+          })}
+        </motion.div>
+
+        {/* Manage subscription button for subscribed users */}
+        {isSubscribed && (
+          <motion.div variants={itemVariants} className="mb-12">
+            <button
+              onClick={handleManageSubscription}
+              disabled={isProcessing}
+              className="w-full py-3 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] text-[#f7f8f8] font-medium flex items-center justify-center gap-2 hover:bg-[rgba(255,255,255,0.05)] transition-colors"
+            >
+              <Shield className="w-4 h-4 text-[#5e6dd2]" />
+              Gerer mon abonnement
+            </button>
+          </motion.div>
+        )}
+
+        {/* FAQ Section */}
+        <motion.div variants={itemVariants}>
+          <h3 className="text-lg font-semibold text-[#f7f8f8] mb-4">
+            Questions frequentes
+          </h3>
+          <div className="space-y-2">
+            {faqItems.map((item, index) => (
+              <div
+                key={index}
+                className="rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] overflow-hidden"
+              >
+                <button
+                  onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
+                  className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-[rgba(255,255,255,0.02)] transition-colors"
+                >
+                  <span className="text-sm font-medium text-[#f7f8f8]">
+                    {item.question}
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-[#8b8d90] transition-transform ${
+                      expandedFaq === index ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                <AnimatePresence>
+                  {expandedFaq === index && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <p className="px-4 pb-4 text-sm text-[#8b8d90] leading-relaxed">
+                        {item.answer}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Trust badges */}
+        <motion.div
+          variants={itemVariants}
+          className="mt-8 flex items-center justify-center gap-6 text-[#8b8d90]"
+        >
+          <div className="flex items-center gap-2 text-xs">
+            <Shield className="w-4 h-4" />
+            <span>Paiement securise</span>
+          </div>
+          <div className="w-1 h-1 rounded-full bg-[rgba(255,255,255,0.1)]" />
+          <div className="flex items-center gap-2 text-xs">
+            <Check className="w-4 h-4" />
+            <span>Annulation facile</span>
+          </div>
+          <div className="w-1 h-1 rounded-full bg-[rgba(255,255,255,0.1)]" />
+          <div className="flex items-center gap-2 text-xs">
+            <Users className="w-4 h-4" />
+            <span>+10,000 gamers</span>
+          </div>
         </motion.div>
       </motion.div>
     </div>
