@@ -402,11 +402,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     try {
       userProfileCache.clear();
-      await supabase.auth.signOut();
+
+      // Clear localStorage directly (workaround for Web Locks blocking)
+      const storageKey = `sb-cwtoprbowdqcemdjrtir-auth-token`;
+      localStorage.removeItem(storageKey);
+
+      // Try SDK signOut with timeout (may block due to Web Locks)
+      const signOutPromise = supabase.auth.signOut();
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('SignOut timeout')), 3000)
+      );
+
+      try {
+        await Promise.race([signOutPromise, timeoutPromise]);
+      } catch (e) {
+        console.warn('[Auth] SignOut timeout, localStorage already cleared');
+      }
+
       setUser(null);
     } catch (error) {
+      // Even on error, clear user state
       setUser(null);
-      throw error;
+      console.error('[Auth] SignOut error:', error);
     }
   }, []);
 

@@ -9,7 +9,7 @@
 1. **Toujours commiter** les changements avec un message descriptif (format conventionnel : `fix:`, `feat:`, `perf:`, etc.)
 2. **Toujours pousser** vers `origin/main` pour déployer sur Vercel
 3. **Toujours mettre à jour** ce fichier CLAUDE_PROGRESS.md avec les changements effectués
-4. utilser puppeteer pour tester
+4. **Utiliser Puppeteer** pour tester chaque page après modification
 
 ---
 
@@ -34,436 +34,294 @@
 
 ---
 
-## 🔴 BUG CRITIQUE BLOQUANT - DÉCONNEXION SUR F5
+## MISSION ACTUELLE - Refonte UI Complète (51 écrans)
 
-### Description du problème
+### Objectif
 
-**L'utilisateur est déconnecté à chaque actualisation de page (F5) ou navigation directe vers une URL.**
+Refonte complète des 51 écrans restants de Squad Planner avec le design system Linear (dark, premium, minimal). S'inspirer des pages déjà refaites : Home, Squads, Sessions, Profil.
 
-### Comportement observé
+### Progression Globale
 
-1. L'utilisateur se connecte avec succès
-2. Il navigue normalement dans l'application (Squads, Sessions, Profil)
-3. Il actualise la page (F5) ou entre une URL directement
-4. **RÉSULTAT**: Redirection vers la page de Login (déconnecté)
+| Groupe                    | Total | Fait | Reste | Progression |
+| ------------------------- | ----- | ---- | ----- | ----------- |
+| 1. Auth                   | 2     | 2    | 0     | 100%        |
+| 2. Dashboard & Home       | 8     | 1    | 7     | 12%         |
+| 3. Squads                 | 10    | 5    | 5     | 50%         |
+| 4. Sessions               | 8     | 1    | 7     | 12%         |
+| 5. Profile & Settings     | 11    | 1    | 10    | 9%          |
+| 6. Social & Community     | 10    | 0    | 10    | 0%          |
+| 7. Compétition            | 6     | 0    | 6     | 0%          |
+| 8. B2B & Avancé           | 6     | 0    | 6     | 0%          |
+| **TOTAL**                 | **61**| **10**| **51**| **16%**    |
 
-### Diagnostic effectué (30 Jan 2026)
+### Pages à Refaire (par priorité)
 
-#### ✅ Ce qui fonctionne
+#### PRIORITÉ 1 - Dashboard (7 pages)
+- [ ] NotificationsScreen `/notifications`
+- [ ] NotificationSettingsScreen `/notification-settings`
+- [ ] SmartSuggestionsScreen `/smart-suggestions`
+- [ ] AvailabilityHeatmapScreen `/availability`
+- [ ] CalendarSyncScreen `/calendar-sync`
+- [ ] WeeklyRecapScreen `/weekly-recap`
+- [ ] ActivityFeedScreen `/activity`
 
-- Le token EST stocké dans localStorage après connexion
-- Le token n'est PAS expiré
-- La clé utilisée : `sb-cwtoprbowdqcemdjrtir-auth-token`
-- Structure du token : `{ access_token, refresh_token, expires_at, ... }`
+#### PRIORITÉ 2 - Squads (5 pages)
+- [ ] SquadHealthScreen `/squad-health/:id`
+- [ ] SquadCompositionScreen `/squad-composition/:id`
+- [ ] LeadershipAnalysisScreen `/leadership-analysis/:id`
+- [ ] JoinSquadScreen `/join-squad`
+- [ ] DiscoverSquadsScreen `/discover-squads`
 
-#### ❌ Ce qui ne fonctionne pas
+#### PRIORITÉ 3 - Sessions (7 pages)
+- [ ] ProposeSessionScreen `/propose-session` (formulaire déjà vu mais à vérifier)
+- [ ] RSVPScreen `/rsvp/:id`
+- [ ] VoteSessionScreen `/vote-session/:id`
+- [ ] CheckInScreen `/check-in/:id`
+- [ ] RecurringSessionScreen `/recurring-sessions`
+- [ ] AutoCoachingScreen `/auto-coaching`
+- [ ] CoachingToolsScreen `/coaching-tools`
 
-- `supabase.auth.getSession()` ne récupère pas la session au chargement
-- `supabase.auth.setSession()` avec les tokens du localStorage ne fonctionne pas
-- La session n'est pas restaurée malgré un token valide
+#### PRIORITÉ 4 - Profile & Settings (10 pages)
+- [ ] EditProfileScreen `/edit-profile`
+- [ ] PublicProfileScreen `/profile/:id`
+- [ ] PremiumScreen `/premium`
+- [ ] PremiumSuccessScreen `/premium/success`
+- [ ] AdvancedStatsScreen `/advanced-stats`
+- [ ] PreferencesScreen `/preferences`
+- [ ] PrivacyScreen `/privacy`
+- [ ] IntegrationsScreen `/integrations`
+- [ ] DiscordConnectScreen `/discord-connect`
+- [ ] DiscordBotScreen `/discord-bot`
 
-### Test Puppeteer (30 Jan 2026 - 20h00)
+#### PRIORITÉ 5 - Social & Community (10 pages)
+- [ ] FriendsScreen `/friends`
+- [ ] SearchPlayersScreen `/search-players`
+- [ ] CommunityScreen `/community`
+- [ ] AchievementsScreen `/achievements` (existe déjà, à vérifier)
+- [ ] BadgesScreen `/badges`
+- [ ] HistoryScreen `/history`
+- [ ] ShareScreen `/share`
+- [ ] InviteMemberScreen `/invite-member/:id`
+- [ ] JoinViaLinkScreen `/join/:code`
+- [ ] AcademyScreen `/academy`
 
-#### Scénario testé
+#### PRIORITÉ 6 - Compétition (6 pages)
+- [ ] LeaderboardScreen `/leaderboard`
+- [ ] RankingScreen `/ranking`
+- [ ] TournamentsScreen `/tournaments`
+- [ ] LeaguesScreen `/leagues`
+- [ ] SeasonsScreen `/seasons`
+- [ ] ChallengesScreen `/challenges`
 
-1. Navigation vers http://localhost:5174
-2. Connexion avec rudylabor@hotmail.fr / SquadPlanner2026!
-3. Connexion réussie → Dashboard affiché "Bienvenue, Ruuddaams"
-4. **F5 (refresh de la page)**
-5. **RÉSULTAT**: Page bloquée sur "Chargement..." indéfiniment (>25 secondes)
+#### PRIORITÉ 7 - B2B & Avancé (6 pages)
+- [ ] OrganizationScreen `/organization`
+- [ ] EsportTeamScreen `/esport-team`
+- [ ] EsportIntegrationsScreen `/esport-integrations`
+- [ ] StreamerDashboardScreen `/streamer-dashboard`
+- [ ] IntelligenceScreen `/intelligence`
+- [ ] ApiDocsScreen `/api-docs`
 
-#### Observations
+---
 
-- Le token reste présent dans localStorage après le refresh
-- Le token n'est pas expiré (expires_at dans le futur)
-- L'application ne redirige PAS vers login, elle reste bloquée sur "Chargement..."
-- Le timeout de 20s défini dans AuthContext.tsx ne semble pas se déclencher correctement
+## Design System Linear (Référence)
 
-#### Cause probable identifiée
+### Couleurs
 
-L'option `lock: false` dans la config Supabase n'est PAS une option valide du SDK.
-Le SDK utilise la Web Locks API en interne qui peut causer des deadlocks lors de l'appel à `getSession()`.
+```
+Background:
+  base:       #08090a      (page background)
+  elevated:   #101012      (cards, surfaces)
+  surface:    #18191b      (raised elements)
+  hover:      #1f2023      (hover states)
+  active:     #27282b      (active/pressed)
 
-### Fichiers concernés
+Foreground:
+  primary:    #f7f8f8      (main text)
+  secondary:  #c9cace      (secondary text)
+  tertiary:   #8b8d90      (muted text)
+  quaternary: #5e6063      (very muted)
 
-1. **`src/lib/supabase.ts`** - Configuration du client Supabase
-2. **`src/app/contexts/AuthContext.tsx`** - Logique d'initialisation auth
+Borders (RGBA):
+  subtle:     rgba(255, 255, 255, 0.05)
+  default:    rgba(255, 255, 255, 0.08)
+  strong:     rgba(255, 255, 255, 0.12)
+  focus:      rgba(94, 109, 210, 0.5)
 
-### Configuration actuelle de Supabase (src/lib/supabase.ts)
+Primary:      #5e6dd2 (hover: #6a79db)
+Success:      #4ade80
+Warning:      #f5a623
+Error:        #f87171
+Info:         #60a5fa
+```
+
+### Icônes colorées par catégorie
+
+```
+Squads/Gaming:  #5e6dd2 (violet)
+Sessions/Time:  #f5a623 (orange)
+Stats/Success:  #4ade80 (vert)
+Time/Clock:     #60a5fa (bleu)
+Users/Friends:  #8b93ff (violet clair)
+```
+
+### Composants Standards
+
+```
+Card (transparent):
+  bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]
+  hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)]
+
+Input Linear:
+  bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)]
+  focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)]
+
+Button Primary:
+  bg-[#5e6dd2] hover:bg-[#6a79db] shadow-lg shadow-[#5e6dd2]/20
+
+Button Secondary:
+  bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)]
+  hover:bg-[rgba(255,255,255,0.06)]
+```
+
+### Animations Framer Motion
 
 ```typescript
-export const supabase = createClient<Database>(supabaseUrl, publicAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: false,
-    storage: customStorage, // Custom localStorage adapter
-    storageKey: `sb-${projectId}-auth-token`,
-    flowType: "implicit",
-    // @ts-ignore
-    lock: false, // Tentative de désactiver Web Locks
-  },
-});
-```
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      duration: 0.15,
+      when: "beforeChildren",
+      staggerChildren: 0.05
+    }
+  }
+};
 
-### Flux d'initialisation dans AuthContext.tsx
-
-1. `checkAuthTokenSync()` - Vérifie si token présent dans localStorage
-2. Si token trouvé et non expiré → tente `setSession()` avec les tokens
-3. Puis appelle `getSession()` pour vérifier la session
-4. **PROBLÈME**: getSession() retourne null ou timeout
-
-### Tentatives de fix déjà essayées
-
-| #   | Fix tenté                       | Résultat             |
-| --- | ------------------------------- | -------------------- |
-| 1   | `lock: { enabled: false }`      | ❌ Ne fonctionne pas |
-| 2   | `lock: false`                   | ❌ Ne fonctionne pas |
-| 3   | `flowType: 'implicit'`          | ❌ Pas suffisant     |
-| 4   | `detectSessionInUrl: false`     | ❌ Pas suffisant     |
-| 5   | Custom storage adapter          | ❌ Pas suffisant     |
-| 6   | setSession() avant getSession() | ❌ Ne fonctionne pas |
-
-### ✅ FIX APPLIQUÉ (30 Jan 2026 - 20h30)
-
-**Cause racine identifiée**: Le SDK Supabase (v2.93.2) ne restaure pas correctement la session depuis localStorage au chargement. Les appels à `getSession()`, `getUser()`, et même l'événement `INITIAL_SESSION` de `onAuthStateChange` retournent `null` malgré un token valide stocké.
-
-**Solution implémentée**: Workaround qui lit manuellement le token depuis localStorage et crée l'utilisateur directement sans dépendre du SDK pour la restauration.
-
-**Fichiers modifiés**:
-
-1. `src/lib/supabase.ts` - Configuration simplifiée (suppression de lock, customStorage, etc.)
-2. `src/app/contexts/AuthContext.tsx` - Ajout de `restoreFromLocalStorage()` qui:
-   - Lit le token depuis `sb-cwtoprbowdqcemdjrtir-auth-token`
-   - Vérifie que le token n'est pas expiré
-   - Crée l'utilisateur depuis les données du token (`tokenData.user`)
-   - Charge le profil complet en arrière-plan
-
-**Test Puppeteer**:
-
-- ✅ Connexion fonctionne
-- ✅ F5 (refresh) conserve la session
-- ✅ Multiple F5 fonctionnent
-
-### Logs attendus vs observés
-
-```
-ATTENDU:
-[Auth] ✅ Token valide trouvé, vérification de la session...
-[Auth] ✅ Session trouvée, chargement du profil...
-[Auth] ✅ Profil chargé: rudylabor@hotmail.fr
-
-OBSERVÉ:
-[Auth] ✅ Token valide trouvé, vérification de la session...
-[Auth] ⚠️ Timeout/erreur sur getSession...
-[Auth] ℹ️ Pas de session après refresh - utilisateur non connecté
-→ Redirection vers /login
-```
-
-### Version des dépendances
-
-- `@supabase/supabase-js`: ^2.93.2
-- `react`: ^18.x
-- `vite`: ^5.x
-
----
-
-## ✅ BUG CORRIGÉ - Création de Squad (30 Jan 2026 - 21h30)
-
-### Description du problème
-
-Le bouton "Créer la Squad" restait bloqué en état de chargement (spinner infini) ou affichait "Erreur lors de la création".
-
-### Cause racine identifiée
-
-**Récursion infinie dans les policies RLS** des tables `squads` et `squad_members`.
-
-```
-Erreur Supabase: HTTP 500
-Code: 42P17
-Message: "infinite recursion detected in policy for relation \"squad_members\""
-```
-
-Les policies faisaient des références croisées:
-
-- `squads_select` → sous-requête sur `squad_members`
-- `squad_members_select` → sous-requête sur `squads`
-
-### Solution appliquée
-
-Simplification des policies RLS pour éliminer toute référence croisée.
-
-**SQL exécuté sur Supabase:**
-
-```sql
--- SQUADS: Policies simples SANS référence à squad_members
-CREATE POLICY "squads_select" ON squads FOR SELECT USING (
-  owner_id = auth.uid() OR is_public = true
-);
-CREATE POLICY "squads_insert" ON squads FOR INSERT
-WITH CHECK (auth.uid() IS NOT NULL AND owner_id = auth.uid());
-CREATE POLICY "squads_update" ON squads FOR UPDATE USING (owner_id = auth.uid());
-CREATE POLICY "squads_delete" ON squads FOR DELETE USING (owner_id = auth.uid());
-
--- SQUAD_MEMBERS: Policies simples SANS référence à squads
-CREATE POLICY "squad_members_select" ON squad_members FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "squad_members_insert" ON squad_members FOR INSERT WITH CHECK (user_id = auth.uid());
-CREATE POLICY "squad_members_update" ON squad_members FOR UPDATE USING (user_id = auth.uid());
-CREATE POLICY "squad_members_delete" ON squad_members FOR DELETE USING (user_id = auth.uid());
-```
-
-### Fichier migration créé
-
-`supabase/migrations/20260130200000_fix_infinite_recursion.sql`
-
-### Test Puppeteer (30 Jan 2026 - 21h30)
-
-- ✅ Connexion fonctionne
-- ✅ Navigation vers Squads
-- ✅ Formulaire création squad
-- ✅ **Création de squad "Test Squad Claude" → SUCCÈS**
-- ✅ Squad apparaît dans la liste
-
----
-
-## ✅ BUGS CORRIGÉS - Page Détail Squad (30 Jan 2026 - 22h00)
-
-### Bug 1: Animation bloquée (opacity: 0)
-
-- **Problème**: Le contenu de la page détail squad restait invisible (opacity: 0)
-- **Cause**: Animation Framer Motion `containerVariants` ne se déclenchait pas correctement
-- **Solution**: Ajout de `duration: 0.15` et `when: "beforeChildren"` aux variants
-- **Fichier modifié**: `src/app/screens/SquadDetailScreen.tsx`
-
-### Bug 2: Affichage "0 membres"
-
-- **Problème**: La liste des membres affichait 0 alors qu'il y avait 1 membre (le créateur)
-- **Cause**: Policy RLS trop restrictive - ne permettait que de voir ses propres memberships
-- **Solution**: Ajout policy `squad_members_view_owned_squads` pour voir les membres des squads possédées
-
-```sql
-CREATE POLICY "squad_members_view_owned_squads" ON squad_members
-FOR SELECT USING (
-  squad_id IN (SELECT id FROM squads WHERE owner_id = auth.uid())
-);
+const itemVariants = {
+  hidden: { opacity: 0, y: 6 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }
+  }
+};
 ```
 
 ---
 
-## Tests Phase 0 - Résultats
+## BUGS CONNUS (À CORRIGER)
 
-| Test                              | Résultat   |
-| --------------------------------- | ---------- |
-| 0.1.1 Page login s'affiche        | ✅         |
-| 0.1.2 Connexion fonctionne        | ✅         |
-| 0.1.3 Redirection vers Home       | ✅         |
-| 0.2.1 Page Home s'affiche         | ✅         |
-| 0.2.2 Nom utilisateur affiché     | ✅         |
-| 0.2.3 Stats affichées             | ✅         |
-| 0.3.1 Menu latéral visible        | ✅         |
-| 0.3.2 Navigation Squads           | ✅         |
-| 0.3.3 Navigation Sessions         | ✅         |
-| 0.3.4 Navigation Profil           | ✅         |
-| **F5 / Refresh**                  | ✅ CORRIGÉ |
-| 0.4.3 Bouton créer squad          | ✅         |
-| 0.4.4 Formulaire création         | ✅         |
-| **0.4.5 Création squad**          | ✅ CORRIGÉ |
-| 0.4.6 Clic sur squad ouvre détail | ✅         |
-| **0.4.7 Détail squad affiche**    | ✅ CORRIGÉ |
+| #   | Description                                  | Sévérité | Fichier              | Statut     |
+| --- | -------------------------------------------- | -------- | -------------------- | ---------- |
+| 1   | Création squad bloque (RLS recursion)        | Haute    | Supabase RLS         | ✅ CORRIGÉ |
+| 2   | Page détail squad invisible (opacity: 0)     | Haute    | SquadDetailScreen    | ✅ CORRIGÉ |
+| 3   | Affichage "0 membres" (RLS trop restrictive) | Moyenne  | Supabase RLS         | ✅ CORRIGÉ |
+| 4   | Page Home timeout après F5 (Web Locks SDK)   | Haute    | api.ts, supabase.ts  | ✅ CORRIGÉ |
+| 5   | Bouton Déconnexion sidebar ne fonctionne pas | Moyenne  | DesktopSidebar.tsx   | ❌ À CORRIGER |
 
 ---
 
-## Commandes utiles
+## TESTS AUTOMATISÉS (TEST_CHECKLIST.md)
+
+### Phase 0 - MVP Core
+
+| Section         | Passés | Total | Statut |
+| --------------- | ------ | ----- | ------ |
+| 0.1 Auth        | 3/7    | 7     | 43%    |
+| 0.2 Home        | 5/7    | 7     | 71%    |
+| 0.3 Navigation  | 6/6    | 6     | 100%   |
+| 0.4 Squads      | 8/10   | 10    | 80%    |
+| 0.5 Sessions    | 8/10   | 10    | 80%    |
+| 0.6 RSVP        | 0/8    | 8     | 0%     |
+| 0.7 Chat        | 0/4    | 4     | 0%     |
+
+### Phase 1 - Engagement
+
+| Section         | Passés | Total | Statut |
+| --------------- | ------ | ----- | ------ |
+| 1.1 Fiabilité   | 3/5    | 5     | 60%    |
+| 1.5 Badges      | 3/5    | 5     | 60%    |
+
+---
+
+## Fichiers Clés du Projet
+
+### Configuration
+- `vite.config.ts` - Build config
+- `tailwind.config.js` - Theme et design tokens
+- `src/styles/tokens.ts` - Couleurs Linear et variants
+
+### Composants Réutilisables
+- `src/app/components/DesktopSidebar.tsx` - Navigation desktop
+- `src/app/components/BottomNav.tsx` - Navigation mobile
+- `src/app/components/AnimatedBackground.tsx` - Background statique CSS
+
+### Écrans de Référence (déjà refaits)
+- `src/app/screens/HomeScreen.tsx` - Page d'accueil
+- `src/app/screens/SquadsScreen.tsx` - Liste des squads
+- `src/app/screens/SessionsScreen.tsx` - Liste des sessions
+- `src/app/screens/ProfileScreen.tsx` - Profil utilisateur
+
+### Services & Contexts
+- `src/lib/supabase.ts` - Client Supabase
+- `src/app/contexts/AuthContext.tsx` - Authentification
+- `src/app/contexts/SquadsContext.tsx` - Données squads
+- `src/app/services/api.ts` - API calls
+
+---
+
+## Commandes Utiles
 
 ```bash
-# Dev local
+# Démarrer le serveur de dev
 npm run dev
 
-# Build
+# Build production
 npm run build
 
-# Deploy
-git push origin main
+# Pousser vers Vercel (auto-deploy)
+git add . && git commit -m "message" && git push origin main
 
-# Voir les logs Vercel
-vercel logs
+# Tester avec Puppeteer (dans Claude)
+# Utiliser les outils mcp__puppeteer__*
 ```
 
 ---
 
-## Liens
+## Historique des Sessions
 
-- **Vercel**: https://vercel.com/dashboard
-- **Supabase Dashboard**: https://supabase.com/dashboard/project/cwtoprbowdqcemdjrtir
-- **GitHub Issues Supabase**: https://github.com/supabase/supabase-js/issues
+### Session 30 Jan 2026 - Tests et Bug Discovery
 
----
+**Tests effectués avec Puppeteer:**
+- ✅ Navigation (0.3.3-0.3.6) - TOUS PASSÉS
+- ✅ Sessions (0.5.1-0.5.8) - TOUS PASSÉS
+- ✅ Fiabilité (1.1.1, 1.1.2, 1.1.4) - PASSÉS
+- ✅ Badges (1.5.1-1.5.3) - PASSÉS
+- ❌ Déconnexion (0.1.4) - BUG TROUVÉ
 
-## 🔴 BUG EN COURS - Page Home Timeout (30 Jan 2026 - 22h30)
+**Bug découvert:**
+- Bouton Déconnexion dans DesktopSidebar ne déclenche pas signOut()
+- Workaround: vider localStorage + reload
 
-### Description du problème
+### Sessions précédentes
 
-La page Home affiche "Oups ! Le chargement prend trop de temps. Vérifie ta connexion." avec un bouton "Réessayer".
-
-### Comportement observé
-
-1. Connexion fonctionne → Page Home affiche "Bienvenue, Ruuddams"
-2. **F5 (refresh)** → Page affiche des skeletons (loading)
-3. Après ~15 secondes → Message "Oups !"
-4. Le token est présent dans localStorage
-5. Cliquer "Réessayer" ne résout pas le problème
-
-### 🔍 Diagnostic approfondi (30 Jan 2026)
-
-#### Test Puppeteer - Requête HTTP directe
-```javascript
-// Test fetch direct avec le token
-const response = await fetch(url, {
-  headers: {
-    'apikey': publicAnonKey,
-    'Authorization': 'Bearer ' + tokenData.access_token,
-  }
-});
-// Résultat: { status: 401, duration: "86ms" }
-```
-
-**CAUSE RACINE IDENTIFIÉE**: Le `access_token` retourne **401 Unauthorized** même si `expires_at` dans localStorage n'est pas expiré. Le JWT access_token a une durée de vie plus courte (~1h) que le `expires_at` stocké.
-
-#### Chaîne de blocage
-1. AuthContext restaure l'utilisateur depuis localStorage → ✅ OK (sidebar affiche "rudylabor")
-2. SquadsContext appelle `refreshSquads()` → `squadsAPI.getAll()`
-3. `squadsAPI.getAll()` fait une requête Supabase
-4. Le SDK Supabase essaie de rafraîchir le token via Web Locks → **BLOQUE**
-5. Timeout de 15s dans HomeScreen.tsx se déclenche → "Oups !"
-
-### 🧪 Tentatives de fix (30 Jan 2026)
-
-| #   | Fix tenté | Fichier(s) modifié(s) | Résultat |
-|-----|-----------|----------------------|----------|
-| 1 | Restaurer session avec `setSession()` dans api.ts | `src/app/services/api.ts` | ❌ `setSession()` bloque avec Web Locks |
-| 2 | Custom storage pour Supabase | `src/lib/supabase.ts` | ❌ Le SDK bloque quand même |
-| 3 | Désactiver `autoRefreshToken: false` | `src/lib/supabase.ts` | ❌ Les tokens expirent et 401 |
-| 4 | Ajouter timeout à `setSession()` | `src/lib/supabase.ts` | ❌ Timeout se déclenche, requêtes échouent |
-| 5 | `initializeSession()` avec `refreshSession()` | `src/lib/supabase.ts` | ❌ `refreshSession()` bloque aussi |
-| 6 | Refresh HTTP direct (sans SDK) | `src/lib/supabase.ts` | ❌ Tokens rafraîchis mais SDK ne les utilise pas |
-| 7 | Lire user directement du localStorage dans `getCurrentUser()` | `src/app/services/api.ts` | ❌ Requêtes Supabase échouent avec 401 |
-
-### Fichiers modifiés (non commités)
-
-1. `src/lib/supabase.ts` - Ajout `initializeSession()` avec refresh HTTP
-2. `src/app/services/api.ts` - Simplification `getCurrentUser()` pour lire localStorage
-3. `src/app/contexts/SquadsContext.tsx` - Appel `initializeSession()` avant les requêtes
-
-### Analyse technique
-
-Le problème fondamental est que le SDK Supabase v2 utilise la **Web Locks API** pour synchroniser les opérations d'authentification. Cette API peut causer des **deadlocks** dans certaines conditions:
-
-1. Au refresh de page, le SDK tente de restaurer la session
-2. Il acquiert un lock pour éviter les conditions de course
-3. Le lock ne se libère jamais dans certains cas → blocage
-
-**Solutions possibles à explorer**:
-1. Downgrade vers Supabase SDK v1 (sans Web Locks)
-2. Utiliser un worker séparé pour l'auth
-3. Forcer la déconnexion/reconnexion après timeout
-4. Contacter le support Supabase
-
-### ✅ SOLUTION QUI FONCTIONNE (30 Jan 2026 - 23h50)
-
-**Approche**: Au lieu d'essayer de réparer le SDK Supabase, on contourne le problème avec des timeouts et une gestion d'erreur robuste.
-
-**Fichiers modifiés**:
-
-1. **`src/app/services/api.ts`** - Ajout timeout de 10s sur `squadsAPI.getAll()`:
-```typescript
-const timeoutPromise = new Promise<never>((_, reject) => {
-  setTimeout(() => reject(new Error('Request timeout (10s)')), 10000);
-});
-const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
-```
-
-2. **`src/app/contexts/SquadsContext.tsx`** - Gestion du 401/timeout:
-```typescript
-} catch (err: any) {
-  if (err.message?.includes('401') || err.message?.includes('timeout')) {
-    setSquads([]); // Retourner liste vide au lieu de bloquer
-  }
-} finally {
-  setLoading(false); // Toujours arrêter le loading
-}
-```
-
-3. **`src/lib/supabase.ts`** - Refresh HTTP direct des tokens (contourne Web Locks)
-
-**Test Puppeteer**:
-- ✅ Connexion → Page Home s'affiche
-- ✅ F5 (refresh) → Page Home s'affiche
-- ✅ Multiple F5 → Fonctionne
-
-### Statut
-
-**✅ CORRIGÉ** - La page Home s'affiche maintenant après F5
+- **30 Jan 23h55**: Fix Page Home timeout après F5
+- **30 Jan 22h00**: Fix détail squad (animation + membres)
+- **30 Jan 21h30**: Fix création squad (RLS recursion)
+- **30 Jan 20h45**: Fix F5/refresh (workaround localStorage)
 
 ---
 
-## Policies RLS actuelles sur Supabase (30 Jan 2026)
+## Prochaines Étapes
 
-### Table `squads`
-
-```sql
--- SELECT: Owner ou squads publiques
-CREATE POLICY "squads_select" ON squads FOR SELECT
-USING (owner_id = auth.uid() OR is_public = true);
-
--- INSERT: Utilisateur authentifié, owner = lui-même
-CREATE POLICY "squads_insert" ON squads FOR INSERT
-WITH CHECK (auth.uid() IS NOT NULL AND owner_id = auth.uid());
-
--- UPDATE/DELETE: Seulement le owner
-CREATE POLICY "squads_update" ON squads FOR UPDATE USING (owner_id = auth.uid());
-CREATE POLICY "squads_delete" ON squads FOR DELETE USING (owner_id = auth.uid());
-```
-
-### Table `squad_members`
-
-```sql
--- SELECT: Ses propres memberships
-CREATE POLICY "squad_members_select" ON squad_members FOR SELECT
-USING (user_id = auth.uid());
-
--- SELECT: Membres des squads qu'on possède
-CREATE POLICY "squad_members_view_owned_squads" ON squad_members FOR SELECT
-USING (squad_id IN (SELECT id FROM squads WHERE owner_id = auth.uid()));
-
--- INSERT: S'ajouter soi-même
-CREATE POLICY "squad_members_insert" ON squad_members FOR INSERT
-WITH CHECK (user_id = auth.uid());
-
--- UPDATE/DELETE: Soi-même
-CREATE POLICY "squad_members_update" ON squad_members FOR UPDATE USING (user_id = auth.uid());
-CREATE POLICY "squad_members_delete" ON squad_members FOR DELETE USING (user_id = auth.uid());
-```
+1. **Corriger Bug #5** - Bouton Déconnexion
+2. **Commencer Refonte Groupe 2** - Dashboard (7 pages)
+3. **Tester chaque page** avec Puppeteer après refonte
+4. **Identifier et corriger** les bugs au fur et à mesure
+5. **Mettre à jour** ROADMAP_UI_REDESIGN.md après chaque page
 
 ---
 
-## Dernier commit Git (30 Jan 2026 - 22h00)
-
-```
-Commit: affea1d
-Branch: main
-Message: fix: Resolve squad detail page bugs and RLS policy issues
-
-Fichiers modifiés:
-- docs/CLAUDE_PROGRESS.md (documentation)
-- docs/TEST_CHECKLIST.md (documentation)
-- src/app/screens/SquadDetailScreen.tsx (fix animation opacity)
-- src/app/contexts/UserContext.tsx (workaround localStorage)
-- supabase/migrations/20260130200000_fix_infinite_recursion.sql (nouveau)
-
-Pushed to: origin/main (déployé sur Vercel)
-```
-
----
-
-_Dernière mise à jour: 30 Janvier 2026 - 23h55_
-_Statut: ✅ Bug page Home CORRIGÉ - F5 fonctionne maintenant_
+_Dernière mise à jour: 30 Janvier 2026_
+_Mission: Refonte UI 51 écrans + Bug fixing_
