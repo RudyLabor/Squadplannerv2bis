@@ -473,24 +473,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = useCallback(async (email: string, password: string) => {
     isSigningIn.current = true;
     setLoading(true);
+    console.log('[Auth] 🔐 Début signIn...');
 
     try {
+      console.log('[Auth] 📡 Appel signInWithPassword...');
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
-      if (error) throw error;
+      console.log('[Auth] 📥 Réponse reçue:', { hasSession: !!data?.session, hasUser: !!data?.user, error: error?.message });
+
+      if (error) {
+        console.error('[Auth] ❌ Erreur:', error.message);
+        throw error;
+      }
 
       // Vérifier que la session est bien créée
       if (data.session) {
-        console.log('[Auth] Session créée avec succès');
+        console.log('[Auth] ✅ Session créée avec succès');
 
-        // Forcer le stockage de la session si nécessaire
+        // Forcer le stockage de la session TOUJOURS (pas seulement si absent)
         const storageKey = `sb-cwtoprbowdqcemdjrtir-auth-token`;
-        const existingToken = localStorage.getItem(storageKey);
-        if (!existingToken) {
-          console.log('[Auth] Token non trouvé dans localStorage, stockage manuel...');
+        console.log('[Auth] 💾 Stockage du token dans localStorage...');
+        try {
           localStorage.setItem(storageKey, JSON.stringify({
             access_token: data.session.access_token,
             refresh_token: data.session.refresh_token,
@@ -499,7 +505,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             token_type: data.session.token_type,
             user: data.session.user
           }));
+          console.log('[Auth] ✅ Token stocké avec succès');
+        } catch (storageError) {
+          console.error('[Auth] ❌ Erreur stockage localStorage:', storageError);
         }
+      } else {
+        console.warn('[Auth] ⚠️ Pas de session dans la réponse');
       }
 
       if (data.user) {
