@@ -1,0 +1,434 @@
+/* ================================================================
+   SQUAD PLANNER - LINEAR DESIGN SYSTEM TOKENS
+   Inspired by Linear.app - Dark, Premium, Precise
+   ================================================================ */
+
+:root {
+  /* ============================================
+     COLORS - LINEAR DARK PALETTE
+     ============================================ */
+
+  /* Background System */
+  --linear-bg-primary: #08090a;           /* Noir profond - page background */
+  --linear-bg-secondary: #101113;         /* Cards, panels */
+  --linear-bg-tertiary: #18191b;          /* Hover states */
+  --linear-bg-elevated: #141517;          /* Modals, popovers */
+  --linear-bg-overlay: rgba(8, 9, 10, 0.8);
+
+  /* Text System */
+  --linear-text-primary: #f7f8f8;         /* Blanc cassé - titres, texte principal */
+  --linear-text-secondary: #8a8f98;       /* Gris moyen - descriptions */
+  --linear-text-tertiary: #5d6066;        /* Gris foncé - labels secondaires */
+  --linear-text-placeholder: #424449;     /* Placeholder text */
+  --linear-text-disabled: #2e3033;        /* Disabled text */
+
+  /* Border System */
+  --linear-border-primary: rgba(255, 255, 255, 0.08);   /* Bordures standard */
+  --linear-border-secondary: rgba(255, 255, 255, 0.04); /* Dividers subtils */
+  --linear-border-hover: rgba(255, 255, 255, 0.12);     /* Hover state */
+  --linear-border-focus: rgba(94, 109, 210, 0.5);       /* Focus ring */
+
+  /* Accent Colors - Brand */
+  --linear-accent-blue: #5e6dd2;          /* Bleu Linear principal */
+  --linear-accent-blue-hover: #6977dc;    /* Bleu hover */
+  --linear-accent-blue-active: #5463c7;   /* Bleu active */
+  --linear-accent-blue-subtle: rgba(94, 109, 210, 0.1);
+
+  --linear-accent-purple: #945cf2;        /* Violet */
+  --linear-accent-purple-subtle: rgba(148, 92, 242, 0.1);
+
+  /* Semantic Colors */
+  --linear-success: #25bc68;              /* Vert - Success */
+  --linear-success-subtle: rgba(37, 188, 104, 0.1);
+  --linear-success-border: rgba(37, 188, 104, 0.2);
+
+  --linear-warning: #ff8c42;              /* Orange - Warning */
+  --linear-warning-subtle: rgba(255, 140, 66, 0.1);
+  --linear-warning-border: rgba(255, 140, 66, 0.2);
+
+  --linear-error: #ff5555;                /* Rouge - Error */
+  --linear-error-subtle: rgba(255, 85, 85, 0.1);
+  --linear-error-border: rgba(255, 85, 85, 0.2);
+
+  /* ============================================
+     TYPOGRAPHY
+     ============================================ */
+
+  /* Font Family */
+  --linear-font-sans: "Inter", "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --linear-font-mono: "JetBrains Mono", "SF Mono", Monaco, monospace;
+
+  /* Font Sizes */
+  --linear-text-xs: 11px;
+  --linear-text-sm: 13px;
+  --linear-text-base: 14px;
+  --linear-text-md: 15px;
+  --linear-text-lg: 16px;
+  --linear-text-xl: 18px;
+  --linear-text-2xl: 22px;
+  --linear-text-3xl: 28px;
+  --linear-text-4xl: 32px;
+  --linear-text-5xl: 48px;
+  --linear-text-6xl: 64px;
+
+  /* Font Weights - NOTE: Linear uses 510 for medium */
+  --linear-font-normal: 400;
+  --linear-font-medium: 510;              /* IMPORTANT: pas 500 ! */
+  --linear-font-semibold: 600;
+  --linear-font-bold: 700;
+
+  /* Line Heights */
+  --linear-leading-none: 1;
+  --linear-leading-tight: 1.2;
+  --linear-leading-snug: 1.375;
+  --linear-leading-normal: 1.5;
+  --linear-leading-relaxed: 1.625;
+
+  /* Letter Spacing */
+  --linear-tracking-tighter: -0.03em;
+  --linear-tracking-tight: -0.02em;
+  --linear-tracking-normal: -0.01em;
+  --linear-tracking-wide: 0;
+
+  /* ============================================
+     SPACING (4px grid)
+     ============================================ */
+  --linear-space-0: 0;
+  --linear-space-1: 4px;
+  --linear-space-2: 8px;
+  --linear-space-3: 12px;
+  --linear-space-4: 16px;
+  --linear-space-5: 20px;
+  --linear-space-6: 24px;
+  --linear-space-8: 32px;
+  --linear-space-10: 40px;
+  --linear-space-12: 48px;
+  --linear-space-16: 64px;
+  --linear-space-20: 80px;
+  --linear-space-24: 96px;
+
+  /* ============================================
+     BORDER RADIUS
+     ============================================ */
+  --linear-radius-xs: 4px;
+  --linear-radius-sm: 6px;
+  --linear-radius-md: 8px;
+  --linear-radius-lg: 12px;
+  --linear-radius-xl: 16px;
+  --linear-radius-2xl: 20px;
+  --linear-radius-full: 9999px;
+
+  /* ============================================
+     SHADOWS
+     ============================================ */
+  --linear-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --linear-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.25);
+  --linear-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --linear-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --linear-shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.5);
+
+  /* Glow Effects */
+  --linear-glow-blue: 0 0 24px rgba(94, 109, 210, 0.3);
+  --linear-glow-purple: 0 0 24px rgba(148, 92, 242, 0.3);
+  --linear-glow-success: 0 0 24px rgba(37, 188, 104, 0.3);
+
+  /* Focus Ring */
+  --linear-focus-ring: 0 0 0 3px rgba(94, 109, 210, 0.15);
+
+  /* ============================================
+     TRANSITIONS
+     ============================================ */
+  --linear-duration-instant: 100ms;
+  --linear-duration-fast: 150ms;
+  --linear-duration-base: 200ms;
+  --linear-duration-slow: 300ms;
+  --linear-duration-slower: 500ms;
+
+  --linear-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --linear-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --linear-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --linear-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --linear-ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* ============================================
+     Z-INDEX
+     ============================================ */
+  --linear-z-base: 0;
+  --linear-z-dropdown: 100;
+  --linear-z-sticky: 200;
+  --linear-z-fixed: 300;
+  --linear-z-modal-backdrop: 400;
+  --linear-z-modal: 500;
+  --linear-z-popover: 600;
+  --linear-z-tooltip: 700;
+  --linear-z-toast: 800;
+
+  /* ============================================
+     LAYOUT
+     ============================================ */
+  --linear-sidebar-width: 240px;
+  --linear-header-height: 56px;
+  --linear-max-content-width: 1280px;
+}
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--linear-font-sans);
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  background: var(--linear-bg-primary);
+  color: var(--linear-text-primary);
+  font-size: var(--linear-text-base);
+  line-height: var(--linear-leading-normal);
+  letter-spacing: var(--linear-tracking-normal);
+}
+
+/* ============================================
+   COMPONENT CLASSES - LINEAR STYLE
+   ============================================ */
+
+/* Cards */
+.linear-card {
+  background: var(--linear-bg-secondary);
+  border: 1px solid var(--linear-border-primary);
+  border-radius: var(--linear-radius-lg);
+  padding: var(--linear-space-5);
+  transition: all var(--linear-duration-fast) var(--linear-ease-out);
+}
+
+.linear-card:hover {
+  border-color: var(--linear-border-hover);
+  box-shadow: var(--linear-shadow-md);
+  transform: translateY(-2px);
+}
+
+/* Buttons */
+.linear-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--linear-space-2);
+  height: 36px;
+  padding: 0 var(--linear-space-4);
+  font-size: var(--linear-text-sm);
+  font-weight: var(--linear-font-medium);
+  border-radius: var(--linear-radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--linear-duration-fast) var(--linear-ease-out);
+}
+
+.linear-btn-primary {
+  background: var(--linear-accent-blue);
+  color: white;
+  box-shadow: 0 0 0 1px rgba(94, 109, 210, 0.3);
+}
+
+.linear-btn-primary:hover {
+  background: var(--linear-accent-blue-hover);
+  box-shadow: 0 0 0 1px rgba(94, 109, 210, 0.5), var(--linear-glow-blue);
+  transform: translateY(-1px);
+}
+
+.linear-btn-primary:active {
+  transform: scale(0.98);
+  background: var(--linear-accent-blue-active);
+}
+
+.linear-btn-secondary {
+  background: var(--linear-bg-tertiary);
+  color: var(--linear-text-primary);
+  border-color: var(--linear-border-primary);
+}
+
+.linear-btn-secondary:hover {
+  background: var(--linear-bg-elevated);
+  border-color: var(--linear-border-hover);
+}
+
+.linear-btn-ghost {
+  background: transparent;
+  color: var(--linear-text-secondary);
+}
+
+.linear-btn-ghost:hover {
+  background: var(--linear-bg-tertiary);
+  color: var(--linear-text-primary);
+}
+
+/* Inputs */
+.linear-input {
+  height: 40px;
+  padding: 0 var(--linear-space-3);
+  background: var(--linear-bg-tertiary);
+  border: 1px solid var(--linear-border-primary);
+  border-radius: var(--linear-radius-md);
+  color: var(--linear-text-primary);
+  font-size: var(--linear-text-base);
+  transition: all var(--linear-duration-fast) var(--linear-ease-out);
+}
+
+.linear-input::placeholder {
+  color: var(--linear-text-placeholder);
+}
+
+.linear-input:hover {
+  border-color: var(--linear-border-hover);
+}
+
+.linear-input:focus {
+  outline: none;
+  border-color: var(--linear-accent-blue);
+  box-shadow: var(--linear-focus-ring);
+}
+
+/* Badges */
+.linear-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--linear-space-1);
+  padding: 2px var(--linear-space-2);
+  font-size: var(--linear-text-xs);
+  font-weight: var(--linear-font-medium);
+  border-radius: var(--linear-radius-sm);
+  background: var(--linear-bg-tertiary);
+  color: var(--linear-text-secondary);
+}
+
+.linear-badge-primary {
+  background: var(--linear-accent-blue-subtle);
+  color: var(--linear-accent-blue);
+}
+
+.linear-badge-success {
+  background: var(--linear-success-subtle);
+  color: var(--linear-success);
+  border: 1px solid var(--linear-success-border);
+}
+
+.linear-badge-warning {
+  background: var(--linear-warning-subtle);
+  color: var(--linear-warning);
+}
+
+.linear-badge-error {
+  background: var(--linear-error-subtle);
+  color: var(--linear-error);
+}
+
+/* Empty State */
+.linear-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--linear-space-20) var(--linear-space-8);
+  text-align: center;
+}
+
+.linear-empty-icon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--linear-bg-tertiary);
+  border: 1px solid var(--linear-border-primary);
+  border-radius: var(--linear-radius-lg);
+  color: var(--linear-text-tertiary);
+  margin-bottom: var(--linear-space-6);
+}
+
+.linear-empty-title {
+  font-size: var(--linear-text-lg);
+  font-weight: var(--linear-font-medium);
+  color: var(--linear-text-primary);
+  margin-bottom: var(--linear-space-2);
+}
+
+.linear-empty-description {
+  font-size: var(--linear-text-base);
+  color: var(--linear-text-secondary);
+  max-width: 400px;
+  margin-bottom: var(--linear-space-6);
+}
+
+/* Skeleton Loading */
+.linear-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--linear-bg-secondary) 0%,
+    var(--linear-bg-tertiary) 50%,
+    var(--linear-bg-secondary) 100%
+  );
+  background-size: 936px 100%;
+  animation: linear-shimmer 2s infinite linear;
+  border-radius: var(--linear-radius-md);
+}
+
+@keyframes linear-shimmer {
+  0% { background-position: -468px 0; }
+  100% { background-position: 468px 0; }
+}
+
+/* Focus Styles */
+.linear-focus:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--linear-bg-primary), 0 0 0 4px var(--linear-accent-blue);
+}
+
+/* Interactive Elements */
+.linear-interactive {
+  transition: all var(--linear-duration-fast) var(--linear-ease-out);
+}
+
+.linear-interactive:hover {
+  background: var(--linear-bg-tertiary);
+}
+
+.linear-interactive:active {
+  transform: scale(0.98);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--linear-border-hover);
+  border-radius: var(--linear-radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--linear-text-tertiary);
+}
+
+/* Selection */
+::selection {
+  background: rgba(94, 109, 210, 0.3);
+  color: var(--linear-text-primary);
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

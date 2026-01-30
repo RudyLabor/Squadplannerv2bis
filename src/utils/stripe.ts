@@ -1,36 +1,51 @@
 /**
- * Stripe Payment Integration
+ * Stripe Payment Integration - Phase 4 Monetization
  *
  * Handles Premium subscription checkout flows
  */
 
-// Stripe Publishable Key (add to .env)
-const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '';
-const API_URL = import.meta.env.VITE_API_URL || 'https://your-supabase-project.supabase.co/functions/v1';
+import { supabase } from '@/lib/supabase';
+
+// Environment variables
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
+
+/**
+ * Get auth headers for API calls
+ */
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) {
+    throw new Error('Not authenticated');
+  }
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${session.access_token}`,
+  };
+}
 
 /**
  * Create a Stripe checkout session for Premium subscription
  */
 export const createCheckoutSession = async (
   priceId: string,
-  userId: string
+  _userId?: string // User ID is extracted from auth token
 ): Promise<{ sessionId: string; url: string }> => {
   try {
-    const response = await fetch(`${API_URL}/payments/create-checkout-session`, {
+    const headers = await getAuthHeaders();
+
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({
         priceId,
-        userId,
-        successUrl: `${window.location.origin}/premium/success`,
+        successUrl: `${window.location.origin}/premium/success?session_id={CHECKOUT_SESSION_ID}`,
         cancelUrl: `${window.location.origin}/premium`,
       }),
     });
 
     if (!response.ok) {
-      throw new Error('Failed to create checkout session');
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to create checkout session');
     }
 
     const data = await response.json();
@@ -81,16 +96,17 @@ export const upgradeToPro = async (userId: string, plan: 'monthly' | 'yearly' = 
  */
 export const cancelSubscription = async (subscriptionId: string): Promise<void> => {
   try {
-    const response = await fetch(`${API_URL}/payments/cancel-subscription`, {
+    const headers = await getAuthHeaders();
+
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/cancel-subscription`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({ subscriptionId }),
     });
 
     if (!response.ok) {
-      throw new Error('Failed to cancel subscription');
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to cancel subscription');
     }
   } catch (error: any) {
     console.error('[Stripe] Cancel error:', error);
@@ -101,21 +117,21 @@ export const cancelSubscription = async (subscriptionId: string): Promise<void> 
 /**
  * Get customer portal URL for managing subscription
  */
-export const getCustomerPortalUrl = async (customerId: string): Promise<string> => {
+export const getCustomerPortalUrl = async (): Promise<string> => {
   try {
-    const response = await fetch(`${API_URL}/payments/customer-portal`, {
+    const headers = await getAuthHeaders();
+
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/customer-portal`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({
-        customerId,
         returnUrl: `${window.location.origin}/premium`,
       }),
     });
 
     if (!response.ok) {
-      throw new Error('Failed to get portal URL');
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to get portal URL');
     }
 
     const data = await response.json();
@@ -126,9 +142,19 @@ export const getCustomerPortalUrl = async (customerId: string): Promise<string> 
   }
 };
 
+/**
+ * Open Stripe customer portal
+ */
+export const openCustomerPortal = async (): Promise<void> => {
+  const url = await getCustomerPortalUrl();
+  window.location.href = url;
+};
+
 export default {
+  createCheckoutSession,
   upgradeToPremium,
   upgradeToPro,
   cancelSubscription,
   getCustomerPortalUrl,
+  openCustomerPortal,
 };

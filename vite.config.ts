@@ -35,9 +35,7 @@ export default defineConfig({
       overlay: true,
     },
   },
-  optimizeDeps: {
-    force: true,
-  },
+  // optimizeDeps: { force: true } - RETIRÉ car causait des HMR excessifs
   build: {
     sourcemap: true,
     // Réduire la taille des chunks

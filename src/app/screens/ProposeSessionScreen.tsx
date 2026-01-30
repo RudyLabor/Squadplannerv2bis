@@ -1,15 +1,14 @@
 /**
- * 📅 PROPOSE SESSION SCREEN - Premium UI Design
- * Design System v2 - Mobile-first with Framer Motion
+ * PROPOSE SESSION SCREEN - LINEAR DESIGN SYSTEM
+ * Clean, minimal form for session creation
  */
 
 import { useState, useEffect } from "react";
-import { ArrowLeft, Gamepad2, Users, Calendar, Clock, Sparkles, Check, X } from "lucide-react";
+import { ArrowLeft, Gamepad2, Users, Calendar, Clock, Plus, Check, X, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { sessionsAPI, squadsAPI } from "@/utils/api";
 import { TimePicker } from "@/app/components/TimePicker";
 import { DatePicker } from "@/app/components/DatePicker";
-import { Button, IconButton } from "@/design-system";
 
 interface ProposeSessionScreenProps {
   onNavigate: (screen: string, data?: any) => void;
@@ -17,29 +16,30 @@ interface ProposeSessionScreenProps {
   data?: { squadId?: string };
 }
 
+// Linear animations
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
+    transition: { staggerChildren: 0.05, delayChildren: 0.02 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 6 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
+    transition: { duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }
   }
 };
 
 const GAMES = [
-  { id: "valorant", name: "Valorant", icon: "🎯", gradient: "from-red-500 to-pink-500" },
-  { id: "lol", name: "League of Legends", icon: "⚔️", gradient: "from-blue-500 to-cyan-500" },
-  { id: "cs2", name: "CS2", icon: "🔫", gradient: "from-amber-500 to-orange-500" },
-  { id: "apex", name: "Apex Legends", icon: "🦊", gradient: "from-red-600 to-orange-500" },
-  { id: "overwatch", name: "Overwatch 2", icon: "🎮", gradient: "from-orange-500 to-amber-400" },
+  { id: "valorant", name: "Valorant", icon: "🎯" },
+  { id: "lol", name: "League of Legends", icon: "⚔️" },
+  { id: "cs2", name: "CS2", icon: "🔫" },
+  { id: "apex", name: "Apex Legends", icon: "🦊" },
+  { id: "overwatch", name: "Overwatch 2", icon: "🎮" },
 ];
 
 const PLAYER_COUNTS = [2, 3, 4, 5, 6];
@@ -126,61 +126,45 @@ export function ProposeSessionScreen({
   const selectedGameData = GAMES.find((g) => g.id === selectedGame);
 
   return (
-    <div className="min-h-screen pb-24 pt-safe bg-[var(--bg-base)] relative overflow-hidden">
-      {/* Background decorations - Static for performance */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-[var(--color-primary-400)]/20 to-purple-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10 px-4 py-6 max-w-2xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 15, filter: "blur(5px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ duration: 0.35 }}
-        >
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
+    <div className="min-h-screen bg-[#08090a] pb-24 md:pb-8">
+      <motion.div
+        className="max-w-2xl mx-auto px-4 md:px-6 py-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Header - Linear style */}
+        <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
+          <motion.button
+            onClick={() => onNavigate("sessions")}
+            className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center text-[#8b8d90] hover:bg-[rgba(255,255,255,0.06)] hover:text-[#f7f8f8] transition-all"
+            whileHover={{ x: -2 }}
+            whileTap={{ scale: 0.95 }}
           >
-            {/* Header */}
-            <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
-              <IconButton
-                aria-label="Retour"
-                icon={<ArrowLeft className="w-5 h-5" />}
-                variant="secondary"
-                size="lg"
-                onClick={() => onNavigate("sessions")}
-                className="rounded-2xl bg-[var(--bg-elevated)]/80 backdrop-blur-sm border-[var(--border-subtle)]/50 shadow-lg"
-              />
-              <div className="flex-1">
-                <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-[var(--color-primary-600)] to-purple-600 bg-clip-text text-transparent">
-                  Proposer une session
-                </h1>
-                <p className="text-sm text-[var(--color-primary-500)] font-medium mt-0.5">
-                  Organise ta prochaine partie
-                </p>
-              </div>
-              <motion.div
-                className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--color-primary-500)] to-purple-600 flex items-center justify-center shadow-lg shadow-[var(--color-primary-500)]/30"
-                whileHover={{ scale: 1.05, rotate: 5 }}
-              >
-                <Calendar className="w-6 h-6 text-white" strokeWidth={2} />
-              </motion.div>
-            </motion.div>
+            <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
+          </motion.button>
+          <div className="flex-1">
+            <h1 className="text-[24px] md:text-[28px] font-semibold text-[#f7f8f8]">
+              Proposer une session
+            </h1>
+            <p className="text-[13px] text-[#5e6063]">
+              Organise ta prochaine partie
+            </p>
+          </div>
+          <div className="w-11 h-11 rounded-xl bg-[rgba(245,166,35,0.1)] flex items-center justify-center">
+            <Calendar className="w-5 h-5 text-[#f5a623]" strokeWidth={1.5} />
+          </div>
+        </motion.div>
 
-          {/* Mode Toggle */}
-          <motion.div
-            variants={itemVariants}
-            className="bg-[var(--bg-elevated)]/60 backdrop-blur-sm rounded-2xl p-1.5 flex mb-6 border border-[var(--border-subtle)]/50"
-          >
+        {/* Mode Toggle - Linear style */}
+        <motion.div variants={itemVariants} className="mb-6">
+          <div className="flex gap-2 p-1 rounded-lg bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]">
             <motion.button
               onClick={() => setMode("single")}
-              className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all ${
+              className={`flex-1 py-2.5 rounded-md text-[13px] font-medium transition-all ${
                 mode === "single"
-                  ? "bg-gradient-to-r from-[var(--color-primary-500)] to-purple-500 text-white shadow-md"
-                  : "text-[var(--fg-secondary)]"
+                  ? "bg-[rgba(94,109,210,0.15)] text-[#8b93ff] border border-[rgba(94,109,210,0.3)]"
+                  : "text-[#8b8d90] hover:text-[#f7f8f8]"
               }`}
               whileTap={{ scale: 0.98 }}
             >
@@ -188,235 +172,243 @@ export function ProposeSessionScreen({
             </motion.button>
             <motion.button
               onClick={() => setMode("multi")}
-              className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all ${
+              className={`flex-1 py-2.5 rounded-md text-[13px] font-medium transition-all ${
                 mode === "multi"
-                  ? "bg-gradient-to-r from-[var(--color-primary-500)] to-purple-500 text-white shadow-md"
-                  : "text-[var(--fg-secondary)]"
+                  ? "bg-[rgba(94,109,210,0.15)] text-[#8b93ff] border border-[rgba(94,109,210,0.3)]"
+                  : "text-[#8b8d90] hover:text-[#f7f8f8]"
               }`}
               whileTap={{ scale: 0.98 }}
             >
               Plusieurs créneaux
             </motion.button>
-          </motion.div>
+          </div>
+        </motion.div>
 
-          {/* Squad Selector */}
-          {squads.length > 0 && (
-            <motion.div variants={itemVariants} className="mb-6">
-              <label className="block text-sm font-semibold text-[var(--fg-primary)] mb-2">
-                Squad
-              </label>
-              <div className="relative">
-                <select
-                  value={selectedSquad || ""}
-                  onChange={(e) => setSelectedSquad(e.target.value)}
-                  className="w-full h-14 px-4 bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)]/50 text-[var(--fg-primary)] font-medium appearance-none shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]/30"
-                >
-                  {squads.map((squad) => (
-                    <option key={squad.id} value={squad.id}>
-                      {squad.name}
-                    </option>
-                  ))}
-                </select>
-                <Users className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--fg-tertiary)] pointer-events-none" />
+        {/* Squad Selector - Linear style */}
+        {squads.length > 0 && (
+          <motion.div variants={itemVariants} className="mb-6">
+            <label className="block text-[11px] font-medium text-[#5e6063] uppercase tracking-wider mb-2">
+              Squad
+            </label>
+            <div className="relative">
+              <select
+                value={selectedSquad || ""}
+                onChange={(e) => setSelectedSquad(e.target.value)}
+                className="w-full h-12 px-4 pr-10 bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-xl text-[#f7f8f8] text-[14px] font-medium appearance-none hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all"
+              >
+                {squads.map((squad) => (
+                  <option key={squad.id} value={squad.id} className="bg-[#18191b]">
+                    {squad.name}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5e6063] pointer-events-none" />
+            </div>
+          </motion.div>
+        )}
+
+        {/* Title - Linear style */}
+        <motion.div variants={itemVariants} className="mb-6">
+          <label className="block text-[11px] font-medium text-[#5e6063] uppercase tracking-wider mb-2">
+            Titre de la session
+          </label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Ex: Ranked Valorant"
+            className="w-full h-12 px-4 bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-xl text-[#f7f8f8] text-[14px] placeholder:text-[#5e6063] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all"
+          />
+        </motion.div>
+
+        {/* Game Picker - Linear style */}
+        <motion.div variants={itemVariants} className="mb-6">
+          <label className="block text-[11px] font-medium text-[#5e6063] uppercase tracking-wider mb-2">
+            Jeu
+          </label>
+          <motion.button
+            onClick={() => setShowGamePicker(true)}
+            className={`w-full h-16 bg-[rgba(255,255,255,0.02)] border rounded-xl flex items-center justify-center transition-all group ${
+              selectedGameData
+                ? 'border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.12)]'
+                : 'border-dashed border-[rgba(255,255,255,0.1)] hover:border-[rgba(94,109,210,0.3)]'
+            }`}
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.99 }}
+          >
+            {selectedGameData ? (
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[rgba(94,109,210,0.1)] flex items-center justify-center">
+                  <span className="text-xl">{selectedGameData.icon}</span>
+                </div>
+                <span className="text-[14px] font-medium text-[#f7f8f8]">{selectedGameData.name}</span>
               </div>
-            </motion.div>
-          )}
+            ) : (
+              <div className="flex items-center gap-2 text-[#5e6063] group-hover:text-[#8b8d90]">
+                <Gamepad2 className="w-5 h-5" strokeWidth={1.5} />
+                <span className="text-[14px] font-medium">Choisir un jeu</span>
+              </div>
+            )}
+          </motion.button>
+        </motion.div>
 
-          {/* Title */}
-          <motion.div variants={itemVariants} className="mb-6">
-            <label className="block text-sm font-semibold text-[var(--fg-primary)] mb-2">
-              Titre de la session
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ex: Ranked Valorant"
-              className="w-full h-14 px-4 bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)]/50 text-[var(--fg-primary)] placeholder:text-[var(--fg-tertiary)] font-medium shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]/30"
-            />
-          </motion.div>
+        {/* Player Count - Linear style */}
+        <motion.div variants={itemVariants} className="mb-6">
+          <label className="block text-[11px] font-medium text-[#5e6063] uppercase tracking-wider mb-2">
+            Joueurs requis
+          </label>
+          <div className="flex gap-2">
+            {PLAYER_COUNTS.map((count) => (
+              <motion.button
+                key={count}
+                onClick={() => setPlayerCount(count)}
+                className={`flex-1 h-12 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
+                  playerCount === count
+                    ? "bg-[rgba(74,222,128,0.15)] text-[#4ade80] border border-[rgba(74,222,128,0.3)]"
+                    : "bg-[rgba(255,255,255,0.02)] text-[#8b8d90] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.1)] hover:text-[#f7f8f8]"
+                }`}
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Users className="w-4 h-4" strokeWidth={1.5} />
+                <span className="text-[13px] font-semibold">{count}</span>
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
 
-          {/* Game Picker */}
-          <motion.div variants={itemVariants} className="mb-6">
-            <label className="block text-sm font-semibold text-[var(--fg-primary)] mb-2">
-              Jeu
-            </label>
+        {/* Date & Time - Linear style */}
+        <motion.div variants={itemVariants} className="mb-6">
+          <label className="block text-[11px] font-medium text-[#5e6063] uppercase tracking-wider mb-2">
+            Date et heure
+          </label>
+          <div className="grid grid-cols-2 gap-3 mb-3">
             <motion.button
-              onClick={() => setShowGamePicker(true)}
-              className={`w-full h-20 bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)]/50 flex flex-col items-center justify-center shadow-lg ${
-                selectedGameData ? '' : 'border-dashed'
-              }`}
-              whileHover={{ scale: 1.02 }}
+              type="button"
+              onClick={() => setShowDatePicker(true)}
+              className="h-14 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl text-left px-4 flex items-center gap-3 hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)] transition-all group"
+              whileHover={{ y: -1 }}
               whileTap={{ scale: 0.99 }}
             >
-              {selectedGameData ? (
-                <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${selectedGameData.gradient} flex items-center justify-center shadow-md`}>
-                    <span className="text-2xl">{selectedGameData.icon}</span>
-                  </div>
-                  <span className="font-semibold text-[var(--fg-primary)]">{selectedGameData.name}</span>
-                </div>
-              ) : (
-                <>
-                  <Gamepad2 className="w-6 h-6 text-[var(--fg-tertiary)] mb-1" />
-                  <span className="text-sm text-[var(--fg-secondary)] font-medium">Choisir un jeu</span>
-                </>
-              )}
+              <div className="w-9 h-9 rounded-lg bg-[rgba(245,166,35,0.1)] flex items-center justify-center">
+                <Calendar className="w-4 h-4 text-[#f5a623]" strokeWidth={1.5} />
+              </div>
+              <div>
+                <span className="text-[10px] text-[#5e6063] font-medium block uppercase">Date</span>
+                <span className={`text-[13px] font-medium ${date ? 'text-[#f7f8f8]' : 'text-[#5e6063]'}`}>
+                  {date ? new Date(date + 'T00:00:00').toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'short'
+                  }) : 'Choisir'}
+                </span>
+              </div>
             </motion.button>
-          </motion.div>
-
-          {/* Player Count */}
-          <motion.div variants={itemVariants} className="mb-6">
-            <label className="block text-sm font-semibold text-[var(--fg-primary)] mb-2">
-              Joueurs requis
-            </label>
+            <motion.button
+              type="button"
+              onClick={() => setShowTimePicker(true)}
+              className="h-14 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl text-left px-4 flex items-center gap-3 hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)] transition-all group"
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.99 }}
+            >
+              <div className="w-9 h-9 rounded-lg bg-[rgba(96,165,250,0.1)] flex items-center justify-center">
+                <Clock className="w-4 h-4 text-[#60a5fa]" strokeWidth={1.5} />
+              </div>
+              <div>
+                <span className="text-[10px] text-[#5e6063] font-medium block uppercase">Heure</span>
+                <span className={`text-[13px] font-medium ${time ? 'text-[#f7f8f8]' : 'text-[#5e6063]'}`}>
+                  {time ? `${time.split(':')[0]}h${time.split(':')[1]}` : 'Choisir'}
+                </span>
+              </div>
+            </motion.button>
+          </div>
+          <div>
+            <span className="text-[10px] text-[#5e6063] font-medium block mb-2 uppercase">Durée</span>
             <div className="flex gap-2">
-              {PLAYER_COUNTS.map((count) => (
+              {DURATIONS.map((d) => (
                 <motion.button
-                  key={count}
-                  onClick={() => setPlayerCount(count)}
-                  className={`flex-1 h-14 rounded-xl flex flex-col items-center justify-center transition-all shadow-md ${
-                    playerCount === count
-                      ? "bg-gradient-to-br from-[var(--color-success-500)] to-teal-500 text-white"
-                      : "bg-[var(--bg-elevated)]/80 backdrop-blur-sm text-[var(--fg-secondary)] border border-[var(--border-subtle)]/50"
+                  key={d}
+                  onClick={() => setDuration(d)}
+                  className={`flex-1 h-10 rounded-lg text-[13px] font-medium transition-all ${
+                    duration === d
+                      ? "bg-[rgba(94,109,210,0.15)] text-[#8b93ff] border border-[rgba(94,109,210,0.3)]"
+                      : "bg-[rgba(255,255,255,0.02)] text-[#8b8d90] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.1)] hover:text-[#f7f8f8]"
                   }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ y: -1 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  <Users className="w-4 h-4 mb-0.5" />
-                  <span className="text-xs font-bold">{count}</span>
+                  {d}
                 </motion.button>
               ))}
             </div>
-          </motion.div>
-
-          {/* Date & Time */}
-          <motion.div variants={itemVariants} className="mb-6">
-            <label className="block text-sm font-semibold text-[var(--fg-primary)] mb-2">
-              Date et heure
-            </label>
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <motion.button
-                type="button"
-                onClick={() => setShowDatePicker(true)}
-                className="h-14 bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)]/50 text-left px-4 flex items-center gap-3 shadow-lg"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.99 }}
-              >
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary-500)] to-purple-500 flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <span className="text-xs text-[var(--fg-tertiary)] font-medium block">DATE</span>
-                  <span className={date ? 'text-[var(--fg-primary)] font-semibold' : 'text-[var(--fg-tertiary)]'}>
-                    {date ? new Date(date + 'T00:00:00').toLocaleDateString('fr-FR', {
-                      day: 'numeric',
-                      month: 'short'
-                    }) : 'Choisir'}
-                  </span>
-                </div>
-              </motion.button>
-              <motion.button
-                type="button"
-                onClick={() => setShowTimePicker(true)}
-                className="h-14 bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)]/50 text-left px-4 flex items-center gap-3 shadow-lg"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.99 }}
-              >
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-warning-500)] to-orange-500 flex items-center justify-center">
-                  <Clock className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <span className="text-xs text-[var(--fg-tertiary)] font-medium block">HEURE</span>
-                  <span className={time ? 'text-[var(--fg-primary)] font-semibold' : 'text-[var(--fg-tertiary)]'}>
-                    {time ? `${time.split(':')[0]}h${time.split(':')[1]}` : 'Choisir'}
-                  </span>
-                </div>
-              </motion.button>
-            </div>
-            <div>
-              <span className="text-xs text-[var(--fg-tertiary)] font-medium block mb-2">DUREE</span>
-              <div className="flex gap-2">
-                {DURATIONS.map((d) => (
-                  <motion.button
-                    key={d}
-                    onClick={() => setDuration(d)}
-                    className={`flex-1 h-12 rounded-xl text-sm font-semibold transition-all shadow-md ${
-                      duration === d
-                        ? "bg-gradient-to-r from-[var(--color-primary-500)] to-purple-500 text-white"
-                        : "bg-[var(--bg-elevated)]/80 backdrop-blur-sm text-[var(--fg-secondary)] border border-[var(--border-subtle)]/50"
-                    }`}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {d}
-                  </motion.button>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Comment */}
-          <motion.div variants={itemVariants} className="mb-8">
-            <label className="block text-sm font-semibold text-[var(--fg-primary)] mb-2">
-              Commentaire (optionnel)
-            </label>
-            <textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Strategie, roles, objectifs..."
-              rows={3}
-              className="w-full p-4 bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl border border-[var(--border-subtle)]/50 text-[var(--fg-primary)] placeholder:text-[var(--fg-tertiary)] font-medium shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]/30 resize-none"
-            />
-          </motion.div>
-
-          {/* Create Button */}
-          <Button
-            variant="primary"
-            size="lg"
-            fullWidth
-            onClick={handleCreate}
-            disabled={isCreating}
-            icon={isCreating ? undefined : <Sparkles className="w-5 h-5" />}
-            className="shadow-lg shadow-[var(--color-primary-500)]/30"
-          >
-            {isCreating ? "Creation..." : "Creer la session"}
-          </Button>
-          </motion.div>
+          </div>
         </motion.div>
-      </div>
 
-      {/* Game Picker Modal */}
+        {/* Comment - Linear style */}
+        <motion.div variants={itemVariants} className="mb-8">
+          <label className="block text-[11px] font-medium text-[#5e6063] uppercase tracking-wider mb-2">
+            Commentaire (optionnel)
+          </label>
+          <textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Stratégie, rôles, objectifs..."
+            rows={3}
+            className="w-full p-4 bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-xl text-[#f7f8f8] text-[14px] placeholder:text-[#5e6063] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all resize-none"
+          />
+        </motion.div>
+
+        {/* Create Button - Linear style */}
+        <motion.button
+          onClick={handleCreate}
+          disabled={isCreating}
+          className="w-full h-12 rounded-xl bg-[#5e6dd2] text-white text-[14px] font-semibold flex items-center justify-center gap-2.5 hover:bg-[#6a79db] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#5e6dd2]/20 transition-all"
+          whileHover={{ y: -1 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          {isCreating ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              Création...
+            </>
+          ) : (
+            <>
+              <Plus className="w-5 h-5" strokeWidth={2} />
+              Créer la session
+            </>
+          )}
+        </motion.button>
+      </motion.div>
+
+      {/* Game Picker Modal - Linear style */}
       <AnimatePresence>
         {showGamePicker && (
           <motion.div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end"
+            className="fixed inset-0 bg-[rgba(0,0,0,0.6)] backdrop-blur-sm z-50 flex items-end md:items-center md:justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setShowGamePicker(false)}
           >
             <motion.div
-              className="bg-[var(--bg-elevated)] rounded-t-3xl w-full"
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="bg-[#101012] border-t md:border border-[rgba(255,255,255,0.08)] rounded-t-2xl md:rounded-2xl w-full md:max-w-md md:mx-4"
+              initial={{ y: "100%", opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: "100%", opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="w-12 h-1.5 bg-[var(--border-subtle)] rounded-full mx-auto my-3" />
-              <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
-                <h2 className="font-bold tracking-tight text-[var(--fg-primary)] text-lg">Choisir un jeu</h2>
+              <div className="w-10 h-1 bg-[rgba(255,255,255,0.1)] rounded-full mx-auto my-3 md:hidden" />
+              <div className="p-4 border-b border-[rgba(255,255,255,0.06)] flex items-center justify-between">
+                <h2 className="text-[16px] font-semibold text-[#f7f8f8]">Choisir un jeu</h2>
                 <motion.button
                   onClick={() => setShowGamePicker(false)}
-                  className="w-8 h-8 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
+                  className="w-8 h-8 rounded-lg bg-[rgba(255,255,255,0.04)] flex items-center justify-center text-[#8b8d90] hover:bg-[rgba(255,255,255,0.08)] hover:text-[#f7f8f8] transition-colors"
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <X className="w-4 h-4 text-[var(--fg-secondary)]" />
+                  <X className="w-4 h-4" strokeWidth={1.5} />
                 </motion.button>
               </div>
-              <div className="p-4 grid grid-cols-2 gap-3 pb-8">
+              <div className="p-4 grid grid-cols-2 gap-3 pb-8 md:pb-4">
                 {GAMES.map((game, index) => (
                   <motion.button
                     key={game.id}
@@ -424,30 +416,30 @@ export function ProposeSessionScreen({
                       setSelectedGame(game.id);
                       setShowGamePicker(false);
                     }}
-                    className={`p-4 rounded-2xl text-center transition-all relative ${
+                    className={`p-4 rounded-xl text-center transition-all relative ${
                       selectedGame === game.id
-                        ? `bg-gradient-to-br ${game.gradient} text-white shadow-lg`
-                        : "bg-[var(--bg-subtle)] hover:bg-[var(--bg-subtle)]/80"
+                        ? "bg-[rgba(94,109,210,0.15)] border border-[rgba(94,109,210,0.3)]"
+                        : "bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)]"
                     }`}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    whileHover={{ scale: 1.02 }}
+                    transition={{ delay: index * 0.03, duration: 0.15 }}
+                    whileHover={{ y: -2 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <span className="text-3xl block mb-2">{game.icon}</span>
-                    <span className={`text-sm font-semibold ${
-                      selectedGame === game.id ? 'text-white' : 'text-[var(--fg-primary)]'
+                    <span className="text-2xl block mb-2">{game.icon}</span>
+                    <span className={`text-[13px] font-medium ${
+                      selectedGame === game.id ? 'text-[#8b93ff]' : 'text-[#f7f8f8]'
                     }`}>
                       {game.name}
                     </span>
                     {selectedGame === game.id && (
                       <motion.div
-                        className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/30 flex items-center justify-center"
+                        className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[rgba(94,109,210,0.3)] flex items-center justify-center"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                       >
-                        <Check className="w-4 h-4 text-white" />
+                        <Check className="w-3 h-3 text-[#8b93ff]" />
                       </motion.div>
                     )}
                   </motion.button>

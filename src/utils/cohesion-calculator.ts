@@ -85,9 +85,10 @@ export async function calculateSquadCohesion(squadId: string): Promise<{
       const daysSinceActive = Math.floor((Date.now() - lastUpdated.getTime()) / (1000 * 60 * 60 * 24));
 
       // Calculer le nombre de sessions auxquelles le membre a participé
-      const memberSessions = (recentSessions || []).filter(session =>
-        session.rsvps?.some((rsvp: any) => rsvp.user_id === member.user_id && rsvp.response === 'yes')
-      );
+      const memberSessions = (recentSessions || []).filter(session => {
+        const rsvps = (session.rsvps as unknown) as any[] | null;
+        return rsvps?.some((rsvp: any) => rsvp.user_id === member.user_id && rsvp.response === 'yes');
+      });
 
       const totalSessions = recentSessions?.length || 0;
       const sessionsAttended = memberSessions.length;

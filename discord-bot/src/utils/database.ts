@@ -74,25 +74,26 @@ export async function getSquadWebhook(squadId: string): Promise<string | null> {
 }
 
 /**
- * Get all users who RSVP'd yes to a session
+ * Get all users who RSVP'd to a session (with their response)
  */
 export async function getSessionAttendees(sessionId: string): Promise<Array<{
   user_id: string;
   discord_id: string | null;
   username: string;
+  response: 'yes' | 'no' | 'maybe';
 }>> {
   const { data, error } = await supabase
     .from('session_rsvps')
     .select(`
       user_id,
+      response,
       user:profiles!user_id(
         username,
         display_name,
         discord_id
       )
     `)
-    .eq('session_id', sessionId)
-    .eq('response', 'yes');
+    .eq('session_id', sessionId);
 
   if (error || !data) {
     return [];
@@ -104,6 +105,7 @@ export async function getSessionAttendees(sessionId: string): Promise<Array<{
       user_id: rsvp.user_id,
       discord_id: user?.discord_id || null,
       username: user?.display_name || user?.username || 'Unknown',
+      response: rsvp.response as 'yes' | 'no' | 'maybe',
     };
   });
 }

@@ -1128,6 +1128,142 @@ CREATE POLICY "Squad admins can manage recurring sessions" ON recurring_sessions
   );
 
 -- ============================================================================
+-- FONCTION: Génération automatique des sessions récurrentes
+-- ============================================================================
+
+-- Fonction pour générer les prochaines sessions à partir des récurrences actives
+CREATE OR REPLACE FUNCTION generate_recurring_sessions()
+RETURNS INTEGER AS $$
+DECLARE
+  rec RECORD;
+  next_date DATE;
+  sessions_created INTEGER := 0;
+BEGIN
+  -- Parcourir toutes les récurrences actives
+  FOR rec IN
+    SELECT
+      rs.*,
+      s.name as squad_name
+    FROM recurring_sessions rs
+    JOIN squads s ON s.id = rs.squad_id
+    WHERE rs.is_active = true
+      AND s.is_active = true
+  LOOP
+    -- Calculer la prochaine date basée sur day_of_week
+    -- day_of_week: 0 = Dimanche, 1 = Lundi, etc.
+    next_date := CURRENT_DATE + ((rec.day_of_week - EXTRACT(DOW FROM CURRENT_DATE)::INTEGER + 7) % 7);
+
+    -- Si la date calculée est aujourd'hui mais l'heure est passée, prendre la semaine prochaine
+    IF next_date = CURRENT_DATE AND rec.scheduled_time < CURRENT_TIME THEN
+      next_date := next_date + INTERVAL '7 days';
+    END IF;
+
+    -- Vérifier si une session existe déjà pour cette date/heure
+    IF NOT EXISTS (
+      SELECT 1 FROM sessions
+      WHERE recurring_session_id = rec.id
+        AND scheduled_date = next_date
+    ) THEN
+      -- Créer la nouvelle session
+      INSERT INTO sessions (
+        squad_id,
+        title,
+        description,
+        scheduled_date,
+        scheduled_time,
+        duration,
+        timezone,
+        is_recurring,
+        recurring_session_id,
+        proposed_by,
+        status
+      ) VALUES (
+        rec.squad_id,
+        rec.title,
+        rec.description,
+        next_date,
+        rec.scheduled_time,
+        rec.duration,
+        rec.timezone,
+        true,
+        rec.id,
+        rec.created_by,
+        'pending'
+      );
+
+      sessions_created := sessions_created + 1;
+
+      RAISE NOTICE 'Created recurring session: % for %', rec.title, next_date;
+    END IF;
+
+    -- Également générer pour la semaine suivante (lookahead)
+    next_date := next_date + INTERVAL '7 days';
+
+    IF NOT EXISTS (
+      SELECT 1 FROM sessions
+      WHERE recurring_session_id = rec.id
+        AND scheduled_date = next_date
+    ) THEN
+      INSERT INTO sessions (
+        squad_id,
+        title,
+        description,
+        scheduled_date,
+        scheduled_time,
+        duration,
+        timezone,
+        is_recurring,
+        recurring_session_id,
+        proposed_by,
+        status
+      ) VALUES (
+        rec.squad_id,
+        rec.title,
+        rec.description,
+        next_date,
+        rec.scheduled_time,
+        rec.duration,
+        rec.timezone,
+        true,
+        rec.id,
+        rec.created_by,
+        'pending'
+      );
+
+      sessions_created := sessions_created + 1;
+    END IF;
+  END LOOP;
+
+  RETURN sessions_created;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Fonction pour nettoyer les anciennes sessions récurrentes
+CREATE OR REPLACE FUNCTION cleanup_old_recurring_sessions()
+RETURNS INTEGER AS $$
+DECLARE
+  deleted_count INTEGER;
+BEGIN
+  -- Supprimer les sessions récurrentes passées qui n'ont aucun RSVP
+  DELETE FROM sessions
+  WHERE is_recurring = true
+    AND scheduled_date < CURRENT_DATE - INTERVAL '7 days'
+    AND status = 'pending'
+    AND id NOT IN (
+      SELECT session_id FROM session_rsvps
+    );
+
+  GET DIAGNOSTICS deleted_count = ROW_COUNT;
+
+  RETURN deleted_count;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant execute permissions
+GRANT EXECUTE ON FUNCTION generate_recurring_sessions() TO authenticated;
+GRANT EXECUTE ON FUNCTION cleanup_old_recurring_sessions() TO authenticated;
+
+-- ============================================================================
 -- FIN DU SCRIPT
 -- ============================================================================
 

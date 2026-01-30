@@ -11,7 +11,19 @@
 ## URLs
 - **Production**: https://squadplanner.vercel.app
 - **Local**: http://localhost:5173
-- **Supabase**: https://ecvuakmbjxwqhobkntnw.supabase.co
+- **Supabase**: https://cwtoprbowdqcemdjrtir.supabase.co
+
+## ⚠️ GESTION DU CONTEXTE - IMPORTANT
+Quand la conversation devient longue:
+1. **Prévenir l'utilisateur** quand on approche de la limite
+2. **Sauvegarder la progression** dans `docs/CLAUDE_PROGRESS.md`
+3. **Ne jamais perdre** les credentials et l'état des bugs
+
+## Credentials Supabase
+- **Project ID**: cwtoprbowdqcemdjrtir
+- **Service Role Key**: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3dG9wcmJvd2RxY2VtZGpydGlyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2OTIxNDI2MywiZXhwIjoyMDg0NzkwMjYzfQ.9QuJ0c3WpLKQHHmPKsJlDttU8YFPR7f-xD_VLl8gFDE
+- **DB Password**: Ruudboy92600*
+- **Compte Test**: rudylabor@hotmail.fr / SquadPlanner2026!
 
 ## État Actuel du Projet
 

@@ -68,16 +68,16 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.06, delayChildren: 0.1 }
+    transition: { staggerChildren: 0.05, delayChildren: 0.02 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 12 },
+  hidden: { opacity: 0, y: 6 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }
+    transition: { duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }
   }
 };
 
@@ -143,44 +143,44 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
   const requiredFieldsCount = (name.trim().length >= 2 ? 1 : 0) + (selectedGame ? 1 : 0);
 
   return (
-    <div className="min-h-screen bg-[#0e0f11] pb-32">
-      {/* Subtle background gradient */}
-      <div className="fixed inset-0 bg-gradient-to-b from-[#5e6ad2]/[0.02] via-transparent to-transparent pointer-events-none" />
-
+    <div className="min-h-screen bg-[#08090a] pb-24 md:pb-8">
       <motion.div
-        className="px-4 py-6 max-w-lg mx-auto relative"
+        className="max-w-lg mx-auto px-4 md:px-6 py-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        {/* Header */}
-        <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
+        {/* Header - Linear style */}
+        <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
           <motion.button
             onClick={() => onNavigate("squads")}
-            className="w-10 h-10 rounded-xl bg-[#141518] border border-[#1e2024] flex items-center justify-center text-[#8b8d93] hover:text-[#ececed] hover:bg-[#1a1b1f] transition-all"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center text-[#8b8d90] hover:bg-[rgba(255,255,255,0.06)] hover:text-[#f7f8f8] transition-all"
+            whileHover={{ x: -2 }}
+            whileTap={{ scale: 0.95 }}
           >
             <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
           </motion.button>
           <div className="flex-1">
-            <h1 className="text-[20px] font-semibold text-[#ececed] tracking-tight">
+            <h1 className="text-[24px] md:text-[28px] font-semibold text-[#f7f8f8]">
               Nouvelle Squad
             </h1>
-            <p className="text-[13px] text-[#6f7177] mt-0.5">
+            <p className="text-[13px] text-[#5e6063]">
               Crée ton équipe
             </p>
           </div>
+          <div className="w-11 h-11 rounded-xl bg-[rgba(94,109,210,0.1)] flex items-center justify-center">
+            <Users className="w-5 h-5 text-[#5e6dd2]" strokeWidth={1.5} />
+          </div>
         </motion.div>
 
-        {/* Progress indicator - compact */}
+        {/* Progress indicator - Linear style */}
         <motion.div variants={itemVariants} className="mb-8">
           <div className="flex items-center gap-2 mb-2">
             <div className="flex items-center gap-1.5">
-              <div className={`w-2 h-2 rounded-full transition-colors duration-200 ${name.trim().length >= 2 ? 'bg-[#4ade80]' : 'bg-[#26282d]'}`} />
-              <div className={`w-2 h-2 rounded-full transition-colors duration-200 ${selectedGame ? 'bg-[#4ade80]' : 'bg-[#26282d]'}`} />
+              <div className={`w-2 h-2 rounded-full transition-colors duration-200 ${name.trim().length >= 2 ? 'bg-[#4ade80]' : 'bg-[rgba(255,255,255,0.1)]'}`} />
+              <div className={`w-2 h-2 rounded-full transition-colors duration-200 ${selectedGame ? 'bg-[#4ade80]' : 'bg-[rgba(255,255,255,0.1)]'}`} />
             </div>
-            <span className="text-[12px] text-[#6f7177] ml-auto">
+            <span className="text-[12px] text-[#5e6063] ml-auto">
               {isValid ? (
                 <span className="text-[#4ade80]">Prêt à créer</span>
               ) : (
@@ -188,9 +188,9 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
               )}
             </span>
           </div>
-          <div className="h-1 bg-[#1e2024] rounded-full overflow-hidden">
+          <div className="h-1 bg-[rgba(255,255,255,0.06)] rounded-full overflow-hidden">
             <motion.div
-              className="h-full bg-gradient-to-r from-[#5e6ad2] to-[#4ade80] rounded-full"
+              className="h-full bg-[#5e6dd2] rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${requiredFieldsCount * 50}%` }}
               transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
@@ -198,10 +198,10 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
           </div>
         </motion.div>
 
-        {/* Squad Name */}
+        {/* Squad Name - Linear style */}
         <motion.div variants={itemVariants} className="mb-6">
-          <label className="flex items-center gap-2 text-[12px] font-medium text-[#8b8d93] mb-3 uppercase tracking-wide">
-            <Users className="w-4 h-4" strokeWidth={1.5} />
+          <label className="flex items-center gap-2 text-[11px] font-medium text-[#5e6063] mb-2 uppercase tracking-wider">
+            <Users className="w-3.5 h-3.5 text-[#8b93ff]" strokeWidth={1.5} />
             Nom de la Squad
           </label>
           <div className="relative">
@@ -210,7 +210,7 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
               value={name}
               onChange={(e) => setName(e.target.value.slice(0, 30))}
               placeholder="Ex : Les Légendes"
-              className="w-full h-14 px-4 bg-[#111214] border border-[#1e2024] rounded-xl text-[16px] font-medium text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6ad2] focus:bg-[#141518] focus:outline-none transition-all duration-150"
+              className="w-full h-12 px-4 bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-xl text-[14px] font-medium text-[#f7f8f8] placeholder:text-[#5e6063] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all"
             />
             <AnimatePresence>
               {name.trim().length >= 2 && (
@@ -218,68 +218,70 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#4ade80] rounded-full flex items-center justify-center"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 bg-[#4ade80] rounded-full flex items-center justify-center"
                 >
-                  <Check className="w-4 h-4 text-[#0e0f11]" strokeWidth={2} />
+                  <Check className="w-3 h-3 text-[#08090a]" strokeWidth={2} />
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
           <div className="flex justify-between mt-2 px-1">
-            <span className="text-[11px] text-[#4a4b50]">Un nom mémorable</span>
-            <span className={`text-[11px] transition-colors ${name.length > 25 ? 'text-[#f5a623]' : 'text-[#4a4b50]'}`}>
+            <span className="text-[11px] text-[#5e6063]">Un nom mémorable</span>
+            <span className={`text-[11px] transition-colors ${name.length > 25 ? 'text-[#f5a623]' : 'text-[#5e6063]'}`}>
               {name.length}/30
             </span>
           </div>
         </motion.div>
 
-        {/* Game Picker Button */}
+        {/* Game Picker Button - Linear style */}
         <motion.div variants={itemVariants} className="mb-6">
-          <label className="flex items-center gap-2 text-[12px] font-medium text-[#8b8d93] mb-3 uppercase tracking-wide">
-            <Gamepad2 className="w-4 h-4" strokeWidth={1.5} />
+          <label className="flex items-center gap-2 text-[11px] font-medium text-[#5e6063] mb-2 uppercase tracking-wider">
+            <Gamepad2 className="w-3.5 h-3.5 text-[#5e6dd2]" strokeWidth={1.5} />
             Jeu Principal
           </label>
           <motion.button
             onClick={() => setShowGamePicker(true)}
-            className={`w-full h-20 rounded-xl flex items-center px-5 transition-all duration-150 ${
+            className={`w-full h-16 rounded-xl flex items-center px-4 transition-all ${
               selectedGameData
-                ? 'bg-[#141518] border border-[#5e6ad2]'
-                : 'bg-[#111214] border border-[#1e2024] border-dashed hover:border-[#26282d] hover:bg-[#131416]'
+                ? 'bg-[rgba(94,109,210,0.08)] border border-[rgba(94,109,210,0.25)]'
+                : 'bg-[rgba(255,255,255,0.02)] border border-dashed border-[rgba(255,255,255,0.1)] hover:border-[rgba(94,109,210,0.3)] hover:bg-[rgba(255,255,255,0.04)]'
             }`}
-            whileHover={{ scale: 1.01 }}
+            whileHover={{ y: -1 }}
             whileTap={{ scale: 0.99 }}
           >
             {selectedGameData ? (
-              <div className="flex items-center gap-4 w-full">
-                <span className="text-4xl">{selectedGameData.icon}</span>
+              <div className="flex items-center gap-3 w-full">
+                <div className="w-10 h-10 rounded-lg bg-[rgba(94,109,210,0.1)] flex items-center justify-center">
+                  <span className="text-xl">{selectedGameData.icon}</span>
+                </div>
                 <div className="flex-1 text-left">
-                  <span className="text-[15px] font-medium text-[#ececed] block">
+                  <span className="text-[14px] font-medium text-[#f7f8f8] block">
                     {selectedGameData.name}
                   </span>
-                  <span className="text-[12px] text-[#6f7177]">Cliquer pour changer</span>
+                  <span className="text-[11px] text-[#5e6063]">Cliquer pour changer</span>
                 </div>
-                <Check className="w-5 h-5 text-[#5e6ad2]" strokeWidth={2} />
+                <Check className="w-4 h-4 text-[#5e6dd2]" strokeWidth={2} />
               </div>
             ) : (
-              <div className="flex items-center gap-4 w-full">
-                <div className="w-12 h-12 rounded-xl bg-[#1e2024] flex items-center justify-center">
-                  <Gamepad2 className="w-6 h-6 text-[#4a4b50]" strokeWidth={1.5} />
+              <div className="flex items-center gap-3 w-full">
+                <div className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.04)] flex items-center justify-center">
+                  <Gamepad2 className="w-5 h-5 text-[#5e6063]" strokeWidth={1.5} />
                 </div>
                 <div className="flex-1 text-left">
-                  <span className="text-[14px] text-[#6f7177] block">Sélectionner un jeu</span>
-                  <span className="text-[11px] text-[#4a4b50]">Requis</span>
+                  <span className="text-[14px] text-[#8b8d90] block">Sélectionner un jeu</span>
+                  <span className="text-[11px] text-[#5e6063]">Requis</span>
                 </div>
               </div>
             )}
           </motion.button>
         </motion.div>
 
-        {/* Preferred Days */}
+        {/* Preferred Days - Linear style */}
         <motion.div variants={itemVariants} className="mb-6">
-          <label className="flex items-center gap-2 text-[12px] font-medium text-[#8b8d93] mb-3 uppercase tracking-wide">
-            <Calendar className="w-4 h-4" strokeWidth={1.5} />
+          <label className="flex items-center gap-2 text-[11px] font-medium text-[#5e6063] mb-2 uppercase tracking-wider">
+            <Calendar className="w-3.5 h-3.5 text-[#f5a623]" strokeWidth={1.5} />
             Jours préférés
-            <span className="text-[#4a4b50] font-normal lowercase">(optionnel)</span>
+            <span className="text-[#5e6063] font-normal lowercase">(optionnel)</span>
           </label>
           <div className="flex gap-2">
             {DAYS.map((day) => {
@@ -288,19 +290,13 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
                 <motion.button
                   key={day.id}
                   onClick={() => toggleDay(day.id)}
-                  className={`flex-1 h-12 rounded-lg text-[13px] font-semibold transition-all duration-150 ${
+                  className={`flex-1 h-10 rounded-lg text-[13px] font-medium transition-all ${
                     isSelected
-                      ? "bg-[#5e6ad2] text-white shadow-lg shadow-[#5e6ad2]/20"
-                      : "bg-[#111214] border border-[#1e2024] text-[#6f7177] hover:border-[#26282d] hover:text-[#8b8d93]"
+                      ? "bg-[rgba(94,109,210,0.15)] text-[#8b93ff] border border-[rgba(94,109,210,0.3)]"
+                      : "bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] text-[#8b8d90] hover:border-[rgba(255,255,255,0.1)] hover:text-[#f7f8f8]"
                   }`}
-                  whileHover={{ y: -2, scale: 1.02 }}
-                  whileTap={{ scale: 0.92 }}
-                  animate={isSelected ? {
-                    boxShadow: ['0 4px 15px rgba(94, 106, 210, 0.2)', '0 4px 20px rgba(94, 106, 210, 0.35)', '0 4px 15px rgba(94, 106, 210, 0.2)']
-                  } : {}}
-                  transition={isSelected ? {
-                    boxShadow: { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
-                  } : {}}
+                  whileHover={{ y: -1 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   {day.label}
                 </motion.button>
@@ -309,33 +305,34 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
           </div>
         </motion.div>
 
-        {/* Session Duration */}
+        {/* Session Duration - Linear style */}
         <motion.div variants={itemVariants} className="mb-10">
-          <label className="flex items-center gap-2 text-[12px] font-medium text-[#8b8d93] mb-3 uppercase tracking-wide">
-            <Clock className="w-4 h-4" strokeWidth={1.5} />
+          <label className="flex items-center gap-2 text-[11px] font-medium text-[#5e6063] mb-2 uppercase tracking-wider">
+            <Clock className="w-3.5 h-3.5 text-[#60a5fa]" strokeWidth={1.5} />
             Durée typique
+            <span className="text-[#5e6063] font-normal lowercase">(optionnel)</span>
           </label>
           <div className="grid grid-cols-4 gap-2">
             {DURATIONS.map((d) => (
               <motion.button
                 key={d.value}
                 onClick={() => setDuration(d.value)}
-                className={`relative p-3 rounded-xl text-center transition-all duration-150 ${
+                className={`relative p-3 rounded-xl text-center transition-all duration-100 ${
                   duration === d.value
-                    ? "bg-[#141518] border border-[#5e6ad2]"
-                    : "bg-[#111214] border border-[#1e2024] hover:border-[#26282d]"
+                    ? "bg-[rgba(94,109,210,0.1)] border border-[rgba(94,109,210,0.3)]"
+                    : "bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.04)]"
                 }`}
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <span className={`block text-[16px] font-bold ${duration === d.value ? 'text-[#ececed]' : 'text-[#8b8d93]'}`}>
+                <span className={`block text-[16px] font-semibold ${duration === d.value ? 'text-[#f7f8f8]' : 'text-[#8b8d90]'}`}>
                   {d.label}
                 </span>
-                <span className={`block text-[10px] mt-0.5 ${duration === d.value ? 'text-[#5e6ad2]' : 'text-[#4a4b50]'}`}>
+                <span className={`block text-[10px] mt-0.5 ${duration === d.value ? 'text-[#8b93ff]' : 'text-[#5e6063]'}`}>
                   {d.desc}
                 </span>
                 {d.default && duration !== d.value && (
-                  <span className="absolute -top-1 -right-1 text-[8px] bg-[#5e6ad2]/20 text-[#5e6ad2] px-1.5 py-0.5 rounded-full font-medium">
+                  <span className="absolute -top-1 -right-1 text-[8px] bg-[rgba(94,109,210,0.2)] text-[#8b93ff] px-1.5 py-0.5 rounded-full font-medium">
                     Défaut
                   </span>
                 )}
@@ -344,15 +341,15 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
           </div>
         </motion.div>
 
-        {/* Create Button */}
+        {/* Create Button - Linear style */}
         <motion.div variants={itemVariants}>
           <motion.button
             onClick={handleCreate}
             disabled={isCreating || !isValid}
-            className={`w-full h-14 flex items-center justify-center gap-2.5 rounded-xl text-[14px] font-semibold transition-all duration-150 ${
+            className={`w-full h-14 flex items-center justify-center gap-2.5 rounded-xl text-[14px] font-semibold transition-all duration-100 ${
               isValid
-                ? "bg-[#5e6ad2] text-white hover:bg-[#6872d9] shadow-lg shadow-[#5e6ad2]/20"
-                : "bg-[#1e2024] text-[#4a4b50] cursor-not-allowed"
+                ? "bg-[#5e6dd2] text-white hover:bg-[#6a79db] shadow-lg shadow-[#5e6dd2]/20"
+                : "bg-[rgba(255,255,255,0.04)] text-[#5e6063] border border-[rgba(255,255,255,0.06)] cursor-not-allowed"
             }`}
             whileHover={isValid ? { y: -2 } : {}}
             whileTap={isValid ? { scale: 0.98 } : {}}
@@ -367,14 +364,14 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
             )}
           </motion.button>
           {!isValid && (
-            <p className="text-center text-[12px] text-[#4a4b50] mt-3">
+            <p className="text-center text-[12px] text-[#5e6063] mt-3">
               Remplis le nom et choisis un jeu
             </p>
           )}
         </motion.div>
       </motion.div>
 
-      {/* Game Picker Modal - Bottom Sheet */}
+      {/* Game Picker Modal - Linear style Bottom Sheet */}
       <AnimatePresence>
         {showGamePicker && (
           <>
@@ -389,23 +386,23 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
               initial={{ opacity: 0, y: "100%" }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: "100%" }}
-              transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-              className="fixed bottom-0 left-0 right-0 bg-[#141518] border-t border-[#1e2024] rounded-t-2xl z-50 max-h-[85vh] flex flex-col"
+              transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+              className="fixed bottom-0 left-0 right-0 bg-[#101012] border-t border-[rgba(255,255,255,0.08)] rounded-t-2xl z-50 max-h-[85vh] flex flex-col"
             >
               {/* Handle */}
               <div className="flex justify-center py-3 flex-shrink-0">
-                <div className="w-10 h-1 bg-[#26282d] rounded-full" />
+                <div className="w-10 h-1 bg-[rgba(255,255,255,0.1)] rounded-full" />
               </div>
 
               {/* Header */}
               <div className="px-5 pb-4 flex items-center justify-between flex-shrink-0">
                 <div>
-                  <h2 className="text-[18px] font-semibold text-[#ececed]">Choisir un jeu</h2>
-                  <p className="text-[13px] text-[#6f7177]">Quel est ton jeu principal ?</p>
+                  <h2 className="text-[18px] font-semibold text-[#f7f8f8]">Choisir un jeu</h2>
+                  <p className="text-[13px] text-[#5e6063]">Quel est ton jeu principal ?</p>
                 </div>
                 <motion.button
                   onClick={() => setShowGamePicker(false)}
-                  className="w-10 h-10 rounded-xl bg-[#1e2024] flex items-center justify-center text-[#6f7177] hover:text-[#ececed] transition-colors"
+                  className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.06)] transition-all"
                   whileTap={{ scale: 0.95 }}
                 >
                   <X className="w-5 h-5" strokeWidth={1.5} />
@@ -415,13 +412,13 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
               {/* Search */}
               <div className="px-4 pb-4 flex-shrink-0">
                 <div className="relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4a4b50]" strokeWidth={1.5} />
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5e6063]" strokeWidth={1.5} />
                   <input
                     type="text"
                     value={gameSearch}
                     onChange={(e) => setGameSearch(e.target.value)}
                     placeholder="Rechercher un jeu..."
-                    className="w-full h-11 pl-11 pr-4 bg-[#111214] border border-[#1e2024] rounded-xl text-[14px] text-[#ececed] placeholder:text-[#4a4b50] focus:border-[#5e6ad2] focus:outline-none transition-all"
+                    className="w-full h-11 pl-11 pr-4 bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-xl text-[14px] text-[#f7f8f8] placeholder:text-[#5e6063] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all"
                     autoFocus
                   />
                 </div>
@@ -434,7 +431,7 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
                   <div className="mb-6">
                     <div className="flex items-center gap-2 mb-3 px-1">
                       <Star className="w-3.5 h-3.5 text-[#f5a623]" strokeWidth={2} />
-                      <span className="text-[11px] font-semibold text-[#8b8d93] uppercase tracking-wide">
+                      <span className="text-[11px] font-semibold text-[#5e6063] uppercase tracking-wider">
                         Populaires
                       </span>
                     </div>
@@ -447,22 +444,22 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
                             setShowGamePicker(false);
                             setGameSearch("");
                           }}
-                          className={`relative p-4 rounded-xl text-left transition-all duration-150 ${
+                          className={`relative p-4 rounded-xl text-left transition-all duration-100 ${
                             selectedGame === game.id
-                              ? "bg-[#1a1b1f] border border-[#5e6ad2]"
-                              : "bg-[#111214] border border-[#1e2024] hover:border-[#26282d] hover:bg-[#131416]"
+                              ? "bg-[rgba(94,109,210,0.1)] border border-[rgba(94,109,210,0.3)]"
+                              : "bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.04)]"
                           }`}
-                          initial={{ opacity: 0, y: 10 }}
+                          initial={{ opacity: 0, y: 6 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.02 }}
-                          whileHover={{ scale: 1.02 }}
+                          transition={{ delay: index * 0.02, duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
+                          whileHover={{ y: -1 }}
                           whileTap={{ scale: 0.98 }}
                         >
                           <div className="flex items-center gap-3">
                             <span className="text-2xl">{game.icon}</span>
                             <div className="flex-1 min-w-0">
                               <span className={`text-[13px] font-medium block truncate ${
-                                selectedGame === game.id ? 'text-[#ececed]' : 'text-[#8b8d93]'
+                                selectedGame === game.id ? 'text-[#f7f8f8]' : 'text-[#8b8d90]'
                               }`}>
                                 {game.name}
                               </span>
@@ -478,7 +475,7 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
                             <motion.div
                               initial={{ scale: 0 }}
                               animate={{ scale: 1 }}
-                              className="absolute top-2 right-2 w-5 h-5 bg-[#5e6ad2] rounded-full flex items-center justify-center"
+                              className="absolute top-2 right-2 w-5 h-5 bg-[#5e6dd2] rounded-full flex items-center justify-center"
                             >
                               <Check className="w-3 h-3 text-white" strokeWidth={2} />
                             </motion.div>
@@ -493,8 +490,8 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
                 {otherGames.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-3 px-1">
-                      <Gamepad2 className="w-3.5 h-3.5 text-[#6f7177]" strokeWidth={2} />
-                      <span className="text-[11px] font-semibold text-[#8b8d93] uppercase tracking-wide">
+                      <Gamepad2 className="w-3.5 h-3.5 text-[#8b8d90]" strokeWidth={2} />
+                      <span className="text-[11px] font-semibold text-[#5e6063] uppercase tracking-wider">
                         Autres jeux
                       </span>
                     </div>
@@ -507,21 +504,21 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
                             setShowGamePicker(false);
                             setGameSearch("");
                           }}
-                          className={`relative p-4 rounded-xl text-left transition-all duration-150 ${
+                          className={`relative p-4 rounded-xl text-left transition-all duration-100 ${
                             selectedGame === game.id
-                              ? "bg-[#1a1b1f] border border-[#5e6ad2]"
-                              : "bg-[#111214] border border-[#1e2024] hover:border-[#26282d] hover:bg-[#131416]"
+                              ? "bg-[rgba(94,109,210,0.1)] border border-[rgba(94,109,210,0.3)]"
+                              : "bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.04)]"
                           }`}
-                          initial={{ opacity: 0, y: 10 }}
+                          initial={{ opacity: 0, y: 6 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: (popularGames.length + index) * 0.02 }}
-                          whileHover={{ scale: 1.02 }}
+                          transition={{ delay: (popularGames.length + index) * 0.02, duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
+                          whileHover={{ y: -1 }}
                           whileTap={{ scale: 0.98 }}
                         >
                           <div className="flex items-center gap-3">
                             <span className="text-2xl">{game.icon}</span>
                             <span className={`text-[13px] font-medium truncate ${
-                              selectedGame === game.id ? 'text-[#ececed]' : 'text-[#8b8d93]'
+                              selectedGame === game.id ? 'text-[#f7f8f8]' : 'text-[#8b8d90]'
                             }`}>
                               {game.name}
                             </span>
@@ -530,7 +527,7 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
                             <motion.div
                               initial={{ scale: 0 }}
                               animate={{ scale: 1 }}
-                              className="absolute top-2 right-2 w-5 h-5 bg-[#5e6ad2] rounded-full flex items-center justify-center"
+                              className="absolute top-2 right-2 w-5 h-5 bg-[#5e6dd2] rounded-full flex items-center justify-center"
                             >
                               <Check className="w-3 h-3 text-white" strokeWidth={2} />
                             </motion.div>
@@ -544,9 +541,9 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
                 {/* No results */}
                 {filteredGames.length === 0 && (
                   <div className="text-center py-12">
-                    <Gamepad2 className="w-10 h-10 text-[#26282d] mx-auto mb-3" strokeWidth={1.5} />
-                    <p className="text-[14px] text-[#6f7177]">Aucun jeu trouvé</p>
-                    <p className="text-[12px] text-[#4a4b50] mt-1">Essaie "Autre jeu"</p>
+                    <Gamepad2 className="w-10 h-10 text-[rgba(255,255,255,0.1)] mx-auto mb-3" strokeWidth={1.5} />
+                    <p className="text-[14px] text-[#8b8d90]">Aucun jeu trouvé</p>
+                    <p className="text-[12px] text-[#5e6063] mt-1">Essaie "Autre jeu"</p>
                   </div>
                 )}
               </div>

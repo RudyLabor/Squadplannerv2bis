@@ -1,55 +1,124 @@
 import { supabase } from '@/utils/supabase/client';
 
-const BUCKET_NAME = 'make-e884809f-uploads';
+// Standard bucket name - must be created in Supabase Storage
+const BUCKET_NAME = 'avatars';
+
+// Helper to check if bucket exists and create it if needed
+const ensureBucketExists = async (bucketName: string) => {
+  const { data: buckets } = await supabase.storage.listBuckets();
+  const bucketExists = buckets?.some(b => b.name === bucketName);
+
+  if (!bucketExists) {
+    // Try to create the bucket (requires admin rights)
+    const { error } = await supabase.storage.createBucket(bucketName, {
+      public: true,
+      fileSizeLimit: 5 * 1024 * 1024, // 5MB
+    });
+
+    if (error && !error.message.includes('already exists')) {
+      console.error('Failed to create bucket:', error);
+      // Don't throw - bucket might exist but user doesn't have list permission
+    }
+  }
+};
 
 export const uploadService = {
   // Upload avatar
   uploadAvatar: async (file: File, userId: string): Promise<string> => {
-    const fileExt = file.name.split('.').pop();
+    if (!file || !userId) {
+      throw new Error('File and userId are required');
+    }
+
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
     const fileName = `${userId}-${Date.now()}.${fileExt}`;
-    const filePath = `avatars/${fileName}`;
+    const filePath = `${fileName}`;
 
-    const { data, error } = await supabase.storage
-      .from(BUCKET_NAME)
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: true,
-      });
+    try {
+      // Ensure bucket exists
+      await ensureBucketExists(BUCKET_NAME);
 
-    if (error) throw error;
+      const { error } = await supabase.storage
+        .from(BUCKET_NAME)
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true,
+        });
 
-    // Obtenir l'URL signée
-    const { data: urlData } = await supabase.storage
-      .from(BUCKET_NAME)
-      .createSignedUrl(filePath, 31536000); // 1 an
+      if (error) {
+        console.error('Upload error:', error);
+        throw new Error(`Erreur d'upload: ${error.message}`);
+      }
 
-    if (!urlData) throw new Error('Failed to get signed URL');
+      // Get public URL (for public buckets) or signed URL
+      const { data: publicUrlData } = supabase.storage
+        .from(BUCKET_NAME)
+        .getPublicUrl(filePath);
 
-    return urlData.signedUrl;
+      if (publicUrlData?.publicUrl) {
+        return publicUrlData.publicUrl;
+      }
+
+      // Fallback to signed URL if public URL fails
+      const { data: urlData, error: urlError } = await supabase.storage
+        .from(BUCKET_NAME)
+        .createSignedUrl(filePath, 31536000); // 1 year
+
+      if (urlError || !urlData) {
+        throw new Error('Impossible de générer l\'URL de l\'image');
+      }
+
+      return urlData.signedUrl;
+    } catch (err: any) {
+      console.error('Avatar upload failed:', err);
+      throw new Error(err.message || 'Échec du téléchargement de l\'avatar');
+    }
   },
 
   // Upload squad banner
   uploadSquadBanner: async (file: File, squadId: string): Promise<string> => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${squadId}-${Date.now()}.${fileExt}`;
-    const filePath = `banners/${fileName}`;
+    if (!file || !squadId) {
+      throw new Error('File and squadId are required');
+    }
 
-    const { data, error } = await supabase.storage
-      .from(BUCKET_NAME)
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: true,
-      });
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    const fileName = `banners/${squadId}-${Date.now()}.${fileExt}`;
 
-    if (error) throw error;
+    try {
+      await ensureBucketExists(BUCKET_NAME);
 
-    const { data: urlData } = await supabase.storage
-      .from(BUCKET_NAME)
-      .createSignedUrl(filePath, 31536000);
+      const { error } = await supabase.storage
+        .from(BUCKET_NAME)
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true,
+        });
 
-    if (!urlData) throw new Error('Failed to get signed URL');
+      if (error) {
+        console.error('Banner upload error:', error);
+        throw new Error(`Erreur d'upload: ${error.message}`);
+      }
 
-    return urlData.signedUrl;
+      const { data: publicUrlData } = supabase.storage
+        .from(BUCKET_NAME)
+        .getPublicUrl(fileName);
+
+      if (publicUrlData?.publicUrl) {
+        return publicUrlData.publicUrl;
+      }
+
+      const { data: urlData, error: urlError } = await supabase.storage
+        .from(BUCKET_NAME)
+        .createSignedUrl(fileName, 31536000);
+
+      if (urlError || !urlData) {
+        throw new Error('Impossible de générer l\'URL de l\'image');
+      }
+
+      return urlData.signedUrl;
+    } catch (err: any) {
+      console.error('Banner upload failed:', err);
+      throw new Error(err.message || 'Échec du téléchargement de la bannière');
+    }
   },
 
   // Delete file
@@ -58,6 +127,9 @@ export const uploadService = {
       .from(BUCKET_NAME)
       .remove([filePath]);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Delete file error:', error);
+      throw new Error(`Erreur de suppression: ${error.message}`);
+    }
   },
 };

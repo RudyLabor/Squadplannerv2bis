@@ -41,7 +41,7 @@ enable_anonymous_sign_ins = false
 # Email provider (configure in production)
 [auth.email]
 enable_signup = true
-double_confirm_changes = true
+double_confirm_changes = false  # Disabled to prevent email bounces
 enable_confirmations = false  # Disabled for dev (auto-confirm)
 
 # OAuth providers (optional - configure in production)

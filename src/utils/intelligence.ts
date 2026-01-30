@@ -251,10 +251,10 @@ export const intelligenceEngine = {
    */
   async getSquadHealth(squadId: string): Promise<{
     healthScore: number;
-    insights: Array<{ type: string; title: string; description: string; priority: 'high' | 'medium' | 'low' }>;
+    insights: Array<{ type: string; title: string; description: string; priority: 'high' | 'medium' | 'low'; recommendations?: string[] }>;
   }> {
     try {
-      const insights: Array<{ type: string; title: string; description: string; priority: 'high' | 'medium' | 'low' }> = [];
+      const insights: Array<{ type: string; title: string; description: string; priority: 'high' | 'medium' | 'low'; recommendations?: string[] }> = [];
       let healthScore = 100;
 
       // Check recent session attendance
@@ -306,6 +306,64 @@ export const intelligenceEngine = {
         });
       }
 
+      // Check member activity (last active)
+      const { data: members } = await supabase
+        .from('squad_members')
+        .select(`
+          user_id,
+          user:profiles(last_seen_at)
+        `)
+        .eq('squad_id', squadId);
+
+      if (members && members.length > 0) {
+        const now = new Date();
+        const inactiveMembers = members.filter((m: any) => {
+          if (!m.user?.last_seen_at) return true;
+          const lastSeen = new Date(m.user.last_seen_at);
+          const daysSinceActive = (now.getTime() - lastSeen.getTime()) / (1000 * 60 * 60 * 24);
+          return daysSinceActive > 14;
+        });
+
+        if (inactiveMembers.length > members.length * 0.3) {
+          healthScore -= 25;
+          insights.push({
+            type: 'member_activity',
+            title: 'Membres inactifs',
+            description: `${inactiveMembers.length} membre(s) inactif(s) depuis 2+ semaines`,
+            priority: 'medium',
+          });
+        }
+      }
+
+      // Add recommendations based on insights
+      insights.forEach(insight => {
+        const recommendations: string[] = [];
+
+        switch (insight.type) {
+          case 'attendance':
+            insight.recommendations = [
+              'Proposez des créneaux plus flexibles',
+              'Envoyez des rappels 24h avant',
+              'Récompensez la régularité avec des badges',
+            ];
+            break;
+          case 'engagement':
+            insight.recommendations = [
+              'Lancez des discussions sur les prochaines sessions',
+              'Partagez du contenu (clips, actualités)',
+              'Organisez des events sociaux',
+            ];
+            break;
+          case 'member_activity':
+            insight.recommendations = [
+              'Contactez les membres inactifs',
+              'Proposez des sessions adaptées à leurs horaires',
+              'Créez des sous-groupes par disponibilité',
+            ];
+            break;
+        }
+      });
+
       return {
         healthScore: Math.max(0, healthScore),
         insights,
@@ -315,6 +373,166 @@ export const intelligenceEngine = {
       return {
         healthScore: 50,
         insights: [],
+      };
+    }
+  },
+
+  /**
+   * Generate smart session recommendations
+   */
+  async getSessionRecommendations(squadId: string): Promise<Array<{
+    type: string;
+    title: string;
+    description: string;
+    actionLabel: string;
+    data?: any;
+  }>> {
+    const recommendations: Array<{
+      type: string;
+      title: string;
+      description: string;
+      actionLabel: string;
+      data?: any;
+    }> = [];
+
+    try {
+      // Get optimal times
+      const optimalTimes = await this.getOptimalTimes(squadId);
+
+      if (optimalTimes.confidence > 30) {
+        recommendations.push({
+          type: 'optimal_time',
+          title: 'Créneau optimal détecté',
+          description: `${optimalTimes.bestDay} à ${optimalTimes.bestTime} - ${optimalTimes.attendanceRate}% de présence historique`,
+          actionLabel: 'Créer une session',
+          data: { day: optimalTimes.bestDay, time: optimalTimes.bestTime },
+        });
+      }
+
+      // Check for upcoming weekend
+      const today = new Date();
+      const daysUntilWeekend = (6 - today.getDay() + 7) % 7;
+
+      if (daysUntilWeekend <= 3) {
+        recommendations.push({
+          type: 'weekend_reminder',
+          title: 'Weekend à venir',
+          description: 'Le weekend approche, c\'est le moment idéal pour planifier une session !',
+          actionLabel: 'Proposer une session',
+        });
+      }
+
+      // Check session frequency
+      const { data: recentSessions } = await supabase
+        .from('sessions')
+        .select('id')
+        .eq('squad_id', squadId)
+        .gte('scheduled_date', new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+
+      if (!recentSessions || recentSessions.length < 2) {
+        recommendations.push({
+          type: 'activity_boost',
+          title: 'Boost d\'activité conseillé',
+          description: 'Moins de 2 sessions ces 2 dernières semaines. Gardez le momentum !',
+          actionLabel: 'Créer une session',
+        });
+      }
+
+      return recommendations;
+    } catch (error) {
+      console.error('[Intelligence] Session recommendations error:', error);
+      return recommendations;
+    }
+  },
+
+  /**
+   * Calculate member cohesion score
+   */
+  async getMemberCohesion(squadId: string): Promise<{
+    score: number;
+    topPairs: Array<{ user1: string; user2: string; sessionsTogerther: number }>;
+    suggestions: string[];
+  }> {
+    try {
+      // Get sessions with attendees
+      const { data: sessions } = await supabase
+        .from('sessions')
+        .select(`
+          id,
+          rsvps:session_rsvps(user_id, response)
+        `)
+        .eq('squad_id', squadId)
+        .eq('status', 'completed')
+        .limit(20);
+
+      if (!sessions || sessions.length === 0) {
+        return {
+          score: 50,
+          topPairs: [],
+          suggestions: ['Organisez plus de sessions pour mesurer la cohésion'],
+        };
+      }
+
+      // Calculate co-attendance matrix
+      const coAttendance: Record<string, Record<string, number>> = {};
+
+      sessions.forEach((session: any) => {
+        const yesMembers = session.rsvps
+          ?.filter((r: any) => r.response === 'yes')
+          .map((r: any) => r.user_id) || [];
+
+        yesMembers.forEach((userId1: string) => {
+          yesMembers.forEach((userId2: string) => {
+            if (userId1 >= userId2) return;
+
+            if (!coAttendance[userId1]) coAttendance[userId1] = {};
+            if (!coAttendance[userId1][userId2]) coAttendance[userId1][userId2] = 0;
+            coAttendance[userId1][userId2]++;
+          });
+        });
+      });
+
+      // Find top pairs
+      const pairs: Array<{ user1: string; user2: string; sessionsTogerther: number }> = [];
+      Object.entries(coAttendance).forEach(([user1, users]) => {
+        Object.entries(users).forEach(([user2, count]) => {
+          pairs.push({ user1, user2, sessionsTogerther: count });
+        });
+      });
+
+      const topPairs = pairs
+        .sort((a, b) => b.sessionsTogerther - a.sessionsTogerther)
+        .slice(0, 5);
+
+      // Calculate cohesion score (based on average co-attendance)
+      const avgCoAttendance = pairs.length > 0
+        ? pairs.reduce((sum, p) => sum + p.sessionsTogerther, 0) / pairs.length
+        : 0;
+
+      const cohesionScore = Math.min(100, Math.round((avgCoAttendance / sessions.length) * 100 * 2));
+
+      const suggestions: string[] = [];
+      if (cohesionScore < 40) {
+        suggestions.push('Organisez des sessions plus fréquentes pour renforcer les liens');
+      }
+      if (cohesionScore >= 40 && cohesionScore < 70) {
+        suggestions.push('Essayez des formats de jeu différents pour mixer les interactions');
+      }
+      if (cohesionScore >= 70) {
+        suggestions.push('Excellente cohésion ! Maintenez le rythme actuel');
+      }
+
+      return {
+        score: cohesionScore,
+        topPairs,
+        suggestions,
+      };
+    } catch (error) {
+      console.error('[Intelligence] Member cohesion error:', error);
+      return {
+        score: 50,
+        topPairs: [],
+        suggestions: [],
       };
     }
   },

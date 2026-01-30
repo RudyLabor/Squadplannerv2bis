@@ -131,7 +131,8 @@ export async function getUserDetailedStats(
   userId: string
 ): Promise<UserStats | null> {
   try {
-    const { data, error } = await supabase.rpc('get_user_detailed_stats', {
+    // Type assertion needed for custom RPC function
+    const { data, error } = await (supabase.rpc as any)('get_user_detailed_stats', {
       user_uuid: userId,
     });
 
@@ -169,13 +170,14 @@ export async function recalculateAllReliability(): Promise<{
   count: number;
 }> {
   try {
-    const { data, error } = await supabase.rpc('recalculate_all_reliability');
+    // Type assertion needed for custom RPC function
+    const { data, error } = await (supabase.rpc as any)('recalculate_all_reliability');
 
     if (error) throw error;
 
     return {
       success: true,
-      count: data?.length || 0,
+      count: Array.isArray(data) ? data.length : 0,
     };
   } catch (error) {
     console.error('Error recalculating reliability:', error);

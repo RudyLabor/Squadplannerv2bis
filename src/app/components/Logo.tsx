@@ -38,7 +38,7 @@ const sizes = {
  */
 function LogoMark({
   size = 32,
-  color = '#5e6ad2',
+  color = '#5e6dd2',
   className = '',
 }: {
   size?: number;
@@ -70,7 +70,7 @@ function LogoMark({
  */
 function LogoCompact({
   size = 32,
-  color = '#5e6ad2',
+  color = '#5e6dd2',
   className = '',
 }: {
   size?: number;
@@ -112,9 +112,9 @@ export function Logo({
   const s = sizes[size];
 
   // Color based on mono variant
-  const iconColor = mono === 'light' ? '#ffffff' : mono === 'dark' ? '#1a1b1f' : '#5e6ad2';
-  const textColor = mono === 'light' ? '#ffffff' : mono === 'dark' ? '#1a1b1f' : '#ececed';
-  const subtextColor = mono === 'light' ? 'rgba(255,255,255,0.6)' : mono === 'dark' ? 'rgba(26,27,31,0.6)' : '#6f7177';
+  const iconColor = mono === 'light' ? '#ffffff' : mono === 'dark' ? '#1f2023' : '#5e6dd2';
+  const textColor = mono === 'light' ? '#ffffff' : mono === 'dark' ? '#1f2023' : '#f7f8f8';
+  const subtextColor = mono === 'light' ? 'rgba(255,255,255,0.6)' : mono === 'dark' ? 'rgba(31,32,35,0.6)' : '#8b8d90';
 
   // ============================================
   // SIDEBAR VARIANT - For desktop navigation
@@ -241,7 +241,7 @@ export function LogoLoader({ size = 24 }: { size?: number }) {
       animate={{ opacity: [0.4, 1, 0.4] }}
       transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
     >
-      <LogoMark size={size} color="#5e6ad2" />
+      <LogoMark size={size} color="#5e6dd2" />
     </motion.div>
   );
 }

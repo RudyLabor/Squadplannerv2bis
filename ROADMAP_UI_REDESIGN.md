@@ -154,52 +154,112 @@
 
 ---
 
-## Design System - Rappel
+## Design System - Linear Dark Mode (MIS À JOUR 30 Jan 2026)
 
-### Couleurs
+### Couleurs Linear
 ```
-Background:     #0e0f11 (base), #111214 (recessed), #141518 (card), #1e2024 (elevated)
-Primary:        #5e6ad2
-Text:           #ececed (primary), #8b8d93 (secondary), #6f7177 (tertiary), #4a4b50 (muted)
-Success:        #4ade80
-Warning:        #f5a623
-Error:          #f87171
+Background:
+  base:       #08090a                          (page background)
+  elevated:   #101012                          (cards, surfaces)
+  surface:    #18191b                          (raised elements)
+  hover:      #1f2023                          (hover states)
+  active:     #27282b                          (active/pressed)
+
+Foreground:
+  primary:    #f7f8f8                          (main text)
+  secondary:  #c9cace                          (secondary text)
+  tertiary:   #8b8d90                          (muted text)
+  quaternary: #5e6063                          (very muted)
+
+Borders (RGBA pour transparence):
+  subtle:     rgba(255, 255, 255, 0.05)
+  default:    rgba(255, 255, 255, 0.08)
+  strong:     rgba(255, 255, 255, 0.12)
+  focus:      rgba(94, 109, 210, 0.5)
+
+Primary:      #5e6dd2 (hover: #6a79db)
+Success:      #4ade80
+Warning:      #f5a623
+Error:        #f87171
+Info:         #60a5fa
 ```
 
-### Animations
+### Standards d'Icônes (colorées par catégorie)
+```
+Squads/Gaming:  #5e6dd2 (violet)
+Sessions/Time:  #f5a623 (orange)
+Stats/Success:  #4ade80 (vert)
+Time/Clock:     #60a5fa (bleu)
+Users/Friends:  #8b93ff (violet clair)
+```
+
+### Animations Linear
 ```typescript
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.06, delayChildren: 0.1 }
+    transition: { staggerChildren: 0.05, delayChildren: 0.02 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 12 },
+  hidden: { opacity: 0, y: 6 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }
+    transition: { duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }
   }
 };
 ```
 
-### Composants Standards
-- Input: `h-12 rounded-xl bg-[#111214] border border-[#1e2024] focus:border-[#5e6ad2]`
-- Card: `rounded-xl bg-[#141518] border border-[#1e2024]`
-- Button Primary: `bg-[#5e6ad2] hover:bg-[#6872d9] shadow-lg shadow-[#5e6ad2]/20`
-- Button Secondary: `bg-[#1e2024] text-[#8b8d93] hover:text-[#ececed]`
+### Composants Standards Linear
+```
+Card (transparent):
+  bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]
+  hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)]
+
+Input Linear:
+  bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)]
+  hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)]
+  focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)]
+
+Button Primary:
+  bg-[#5e6dd2] hover:bg-[#6a79db] shadow-lg shadow-[#5e6dd2]/20
+
+Button Secondary (transparent):
+  bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)]
+  hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)]
+
+StatCard (avec icône colorée):
+  bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]
+  + icône avec backgroundColor: `${accentColor}15`
+
+EmptyState:
+  bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]
+  + icône colorée par catégorie
+```
 
 ---
 
 ## Notes
 
 - Chaque page doit être validée visuellement avant de passer à la suivante
-- Le cache Vite est désactivé (`optimizeDeps.force: true`)
+- **IMPORTANT**: Utiliser les backgrounds rgba transparents (0.02) au lieu des couleurs hex solides
+- Les icônes doivent être colorées par catégorie (voir Standards d'Icônes)
+- Les focus states doivent inclure un ring: `focus:ring-2 focus:ring-[rgba(94,109,210,0.15)]`
 - Redémarrer le serveur après chaque session: `npm run dev`
+
+## Changelog
+
+### 30 Janvier 2026 - Refonte Linear Complete
+- ✅ Mise à jour HomeScreen avec backgrounds transparents et icônes colorées
+- ✅ Mise à jour SquadsScreen avec StatCards colorés et cards transparentes
+- ✅ Mise à jour SessionsScreen avec FilterTabs Linear et cards transparentes
+- ✅ Mise à jour ProfileScreen avec sections colorées et ListItems améliorés
+- ✅ Création tokens.ts avec `linearDark` et `motionVariants`
+- ✅ Mise à jour theme.css avec classes `.linear-*`
 
 ---
 
-*Dernière mise à jour: 29 janvier 2026*
+*Dernière mise à jour: 30 janvier 2026*

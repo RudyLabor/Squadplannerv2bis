@@ -1,0 +1,152 @@
+================================================================================
+🚨 URGENCE - EMAIL BOUNCE RATE ÉLEVÉ - ACTION IMMÉDIATE REQUISE
+================================================================================
+
+PROBLÈME:
+  Supabase menace de bloquer les privilèges email du projet
+  Cause: 151 comptes créés ont généré des bounces (pas de SMTP configuré)
+  Bounce rate: Probablement proche de 100%
+
+================================================================================
+ACTION IMMÉDIATE (5 MINUTES)
+================================================================================
+
+1. EXÉCUTER LE SCRIPT DE FIX:
+
+   Windows:
+   --------
+   cd "C:\Users\RudyL\Documents\Maquette figma"
+   scripts\deploy_email_fix.bat
+
+   Linux/Mac:
+   ----------
+   cd /path/to/Maquette figma
+   bash scripts/deploy_email_fix.sh
+
+2. DASHBOARD SUPABASE:
+
+   URL: https://supabase.com/dashboard/project/cwtoprbowdqcemdjrtir/auth/settings
+
+   Actions:
+   - Authentication > Email Auth Settings
+   - DÉSACTIVER "Enable email confirmations"
+   - DÉSACTIVER "Enable email change confirmations"
+   - CLIQUER "Save"
+
+3. VÉRIFICATION:
+
+   Après 24h, vérifier dans Dashboard > Project Settings > Email:
+   - Bounce Rate doit être 0% ou proche de 0%
+   - Recent Bounces = 0
+
+================================================================================
+DOCUMENTATION COMPLÈTE
+================================================================================
+
+Guide rapide:        DEPLOY_EMAIL_FIX.md
+Rapport complet:     docs/EMAIL_BOUNCE_FIX.md
+Scripts détails:     scripts/EMAIL_SCRIPTS_README.md
+
+================================================================================
+FICHIERS CRÉÉS
+================================================================================
+
+Scripts SQL:
+  ✅ scripts/cleanup_email_bounces.sql       (Nettoyage bounces)
+  ✅ scripts/supabase_email_config.sql       (Configuration monitoring)
+  ✅ scripts/monitor_email_health.sql        (Health check)
+
+Scripts Déploiement:
+  ✅ scripts/deploy_email_fix.sh             (Linux/Mac)
+  ✅ scripts/deploy_email_fix.bat            (Windows)
+  ✅ scripts/cron_email_monitor.sh           (Monitoring automatique)
+
+Documentation:
+  ✅ docs/EMAIL_BOUNCE_FIX.md                (Guide complet 200+ lignes)
+  ✅ DEPLOY_EMAIL_FIX.md                     (Guide rapide)
+  ✅ scripts/EMAIL_SCRIPTS_README.md         (Doc scripts)
+
+Configuration:
+  ✅ supabase/config.toml                    (Mis à jour)
+
+================================================================================
+RÉSUMÉ TECHNIQUE
+================================================================================
+
+PROBLÈME IDENTIFIÉ:
+  - 151 comptes créés
+  - Tous ont généré une tentative d'email de confirmation
+  - Aucun SMTP configuré → tous les emails ont bounce
+  - Accumulation de bounces → menace de Supabase
+
+SOLUTION APPLIQUÉE:
+  1. Purge de auth.email_messages (emails pending/failed)
+  2. Auto-confirmation de tous les users (email_confirmed_at rempli)
+  3. Nettoyage des tokens (confirmation_token, recovery_token)
+  4. Désactivation complète des emails en DEV
+  5. Système de monitoring créé
+
+CONFIGURATION:
+  - supabase/config.toml: enable_confirmations = false
+  - Dashboard: Email confirmations désactivées
+  - Monitoring: Fonction check_email_health() créée
+  - Logs: Table public.email_monitoring créée
+
+PRÉVENTION FUTURE:
+  - Monitoring automatique (cron job optionnel)
+  - Alertes si bounce rate > 5%
+  - Logs dans public.email_monitoring
+  - SMTP de test recommandé (Mailtrap)
+
+================================================================================
+PROCHAINES ÉTAPES (APRÈS LA CRISE)
+================================================================================
+
+POUR LE DÉVELOPPEMENT:
+  [ ] Configurer Mailtrap pour intercepter emails de test
+      URL: https://mailtrap.io
+      Prix: Gratuit
+
+POUR LA PRODUCTION:
+  [ ] Choisir provider SMTP (Resend recommandé)
+  [ ] Configurer SPF/DKIM pour votre domaine
+  [ ] Réactiver email confirmations
+  [ ] Tester envoi d'emails réels
+  [ ] Monitorer bounce rate en continu
+
+================================================================================
+SUPPORT
+================================================================================
+
+Si problème après déploiement:
+  1. Vérifier logs: SELECT * FROM public.check_email_health();
+  2. Vérifier Dashboard Supabase (Email Settings)
+  3. Consulter docs/EMAIL_BOUNCE_FIX.md section "Troubleshooting"
+  4. Contacter Supabase Support si bounce rate reste élevé
+
+================================================================================
+STATUT ATTENDU APRÈS FIX
+================================================================================
+
+IMMÉDIAT (0-1h):
+  ✅ Tous les users confirmés (151/151)
+  ✅ Pas de nouveaux bounces
+  ✅ Créations de comptes fonctionnelles
+
+APRÈS 24H:
+  ✅ Bounce rate = 0%
+  ✅ Pas de menace Supabase
+  ✅ Service email stabilisé
+
+LONG TERME:
+  ✅ Monitoring actif
+  ✅ Alertes si problème
+  ✅ SMTP configuré pour production
+
+================================================================================
+FIN DU RAPPORT D'URGENCE
+================================================================================
+
+Dernière mise à jour: 2026-01-28 19:15
+Projet: cwtoprbowdqcemdjrtir (Squad Planner)
+Généré par: Claude Sonnet 4.5

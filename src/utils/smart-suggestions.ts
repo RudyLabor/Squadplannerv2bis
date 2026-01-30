@@ -101,18 +101,19 @@ export async function getSmartSuggestions(
     const suggestions: TimeSlotSuggestion[] = [];
 
     Object.entries(heatmap).forEach(([day, hours]) => {
-      Object.entries(hours).forEach(([hour, data]) => {
-        const avgScore = data.score / data.sessions;
-        const avgAttendance = data.attendees / data.sessions;
+      Object.entries(hours).forEach(([hour, slotData]) => {
+        const slot = slotData as { score: number; attendees: number; sessions: number };
+        const avgScore = slot.score / slot.sessions;
+        const avgAttendance = slot.attendees / slot.sessions;
         const avgRSVPRate = (avgScore / 100) * 2; // Approximation
 
         suggestions.push({
           dayOfWeek: parseInt(day),
           hour: parseInt(hour),
           confidence: Math.min(100, avgScore),
-          reason: generateReason(avgScore, data.sessions, avgAttendance),
+          reason: generateReason(avgScore, slot.sessions, avgAttendance),
           historicalData: {
-            timesUsed: data.sessions,
+            timesUsed: slot.sessions,
             averageAttendance: Math.round(avgAttendance * 10) / 10,
             averageRSVPRate: Math.round(avgRSVPRate * 100) / 100,
           },

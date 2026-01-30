@@ -88,7 +88,7 @@ export const pushNotifications = {
 
       subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: convertedVapidKey,
+        applicationServerKey: convertedVapidKey.buffer as ArrayBuffer,
       });
     }
 

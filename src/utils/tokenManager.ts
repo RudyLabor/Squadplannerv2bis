@@ -224,7 +224,7 @@ export const tokenManager = {
       throw error;
     }
 
-    return data || [];
+    return (data || []) as StoredIntegration[];
   },
 
   /**

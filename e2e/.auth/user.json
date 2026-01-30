@@ -1,0 +1,14 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:5173",
+      "localStorage": [
+        {
+          "name": "sb-cwtoprbowdqcemdjrtir-auth-token",
+          "value": "{\"access_token\":\"eyJhbGciOiJFUzI1NiIsImtpZCI6IjQyYjlmODhjLTEwZGMtNDE0OC04Y2FiLTMwOTdmNTgxOTg0NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2N3dG9wcmJvd2RxY2VtZGpydGlyLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI0ZjQwMGZhZC0xMGMxLTRjYTUtYTc4Zi02ZDhkYjY5OWMwZDciLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzY5NzMyNTY1LCJpYXQiOjE3Njk3Mjg5NjUsImVtYWlsIjoicnVkeWxhYm9yQGhvdG1haWwuZnIiLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJuYW1lIjoiUnV1ZGFhbXMifSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJwYXNzd29yZCIsInRpbWVzdGFtcCI6MTc2OTcyODk2NX1dLCJzZXNzaW9uX2lkIjoiYjY2OWE3MGItOGNiNy00ZjEyLThjYmQtN2JiMWNlMGRkOWEwIiwiaXNfYW5vbnltb3VzIjpmYWxzZX0.ibSP0he9uaakYILQvMrQLep9BAbL5vaPR-kKb-Q15p8lkSOFEWhL4TfeWa_iHPW5RQrKm9h7k0McEek8DDwn6A\",\"token_type\":\"bearer\",\"expires_in\":3600,\"expires_at\":1769732565,\"refresh_token\":\"hs3dkootl6xu\",\"user\":{\"id\":\"4f400fad-10c1-4ca5-a78f-6d8db699c0d7\",\"aud\":\"authenticated\",\"role\":\"authenticated\",\"email\":\"rudylabor@hotmail.fr\",\"email_confirmed_at\":\"2026-01-28T18:48:35.05577Z\",\"phone\":\"\",\"confirmed_at\":\"2026-01-28T18:48:35.05577Z\",\"last_sign_in_at\":\"2026-01-29T23:22:45.686436422Z\",\"app_metadata\":{\"provider\":\"email\",\"providers\":[\"email\"]},\"user_metadata\":{\"email_verified\":true,\"name\":\"Ruudaams\"},\"identities\":[{\"identity_id\":\"80c0c5a4-5fcd-4e32-9917-526e27521588\",\"id\":\"4f400fad-10c1-4ca5-a78f-6d8db699c0d7\",\"user_id\":\"4f400fad-10c1-4ca5-a78f-6d8db699c0d7\",\"identity_data\":{\"email\":\"rudylabor@hotmail.fr\",\"email_verified\":false,\"phone_verified\":false,\"sub\":\"4f400fad-10c1-4ca5-a78f-6d8db699c0d7\"},\"provider\":\"email\",\"last_sign_in_at\":\"2026-01-24T22:36:21.44464Z\",\"created_at\":\"2026-01-24T22:36:21.445271Z\",\"updated_at\":\"2026-01-24T22:36:21.445271Z\",\"email\":\"rudylabor@hotmail.fr\"}],\"created_at\":\"2026-01-24T22:36:21.409644Z\",\"updated_at\":\"2026-01-29T23:22:45.698165Z\",\"is_anonymous\":false},\"weak_password\":null}"
+        }
+      ]
+    }
+  ]
+}

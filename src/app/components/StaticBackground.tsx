@@ -62,7 +62,7 @@ export function StaticBackground({ variant = 'default' }: StaticBackgroundProps)
       <div
         className="absolute inset-0"
         style={{
-          background: 'radial-gradient(circle at center, transparent 0%, rgba(14, 15, 17, 0.4) 100%)',
+          background: 'radial-gradient(circle at center, transparent 0%, rgba(8, 9, 10, 0.4) 100%)',
         }}
       />
     </div>
@@ -75,7 +75,7 @@ export function StaticBackground({ variant = 'default' }: StaticBackgroundProps)
 export function MinimalBackground() {
   return (
     <div
-      className="fixed inset-0 pointer-events-none z-0 bg-[#0e0f11]"
+      className="fixed inset-0 pointer-events-none z-0 bg-[#08090a]"
       style={{
         background: `
           radial-gradient(ellipse 100% 100% at 50% 0%, rgba(94, 106, 210, 0.05) 0%, transparent 50%)
