@@ -1,21 +1,29 @@
+/**
+ * BOTTOM NAV - LINEAR DESIGN SYSTEM
+ * Mobile navigation - Invisible when understood, accessible when needed
+ * Comfortable tap zones, clear active states
+ */
+
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Users, Calendar, User } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
+import { usePrefetch } from '@/app/hooks/usePrefetch';
 
 interface BottomNavProps {
-  onCommandOpen: () => void;
-  isMobile: boolean;
+  onCommandOpen?: () => void;
+  isMobile?: boolean;
 }
 
 export function BottomNav({ onCommandOpen }: BottomNavProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  
-  // Extraire l'onglet actif du pathname
+  const { prefetch, cancelPrefetch } = usePrefetch();
+
+  // Extract active tab from pathname
   const activeTab = location.pathname.split('/')[1] || 'home';
-  
+
   const tabs = [
     { id: 'home', labelKey: 'nav.home', icon: Home },
     { id: 'squads', labelKey: 'nav.squads', icon: Users },
@@ -25,15 +33,18 @@ export function BottomNav({ onCommandOpen }: BottomNavProps) {
 
   return (
     <motion.div
-      className="fixed bottom-0 left-0 right-0 pb-safe z-[var(--z-sticky)]"
+      className="fixed bottom-0 left-0 right-0 pb-safe z-50"
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
     >
-      {/* Premium glass dock */}
-      <div className="flex justify-center px-4 pb-4">
-        <nav className="w-full max-w-md bg-white/90 backdrop-blur-2xl rounded-3xl p-2 border-[0.5px] border-[var(--border-medium)] shadow-2xl">
-          <div className="flex items-center justify-around">
+      {/* Background blur layer */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0e0f11] via-[#0e0f11]/95 to-transparent pointer-events-none" />
+
+      {/* Navigation dock */}
+      <div className="relative flex justify-center px-4 pb-4">
+        <nav className="w-full max-w-md bg-[#111214]/98 backdrop-blur-xl rounded-2xl border border-[#1e2024] shadow-lg shadow-black/30">
+          <div className="flex items-center justify-around p-1">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -42,52 +53,49 @@ export function BottomNav({ onCommandOpen }: BottomNavProps) {
                 <motion.button
                   key={tab.id}
                   onClick={() => navigate(`/${tab.id}`)}
-                  className="relative flex flex-col items-center gap-1 py-3 px-5 rounded-2xl flex-1"
+                  onMouseEnter={() => prefetch(`/${tab.id}`)}
+                  onMouseLeave={cancelPrefetch}
+                  onFocus={() => prefetch(`/${tab.id}`)}
+                  className="relative flex flex-col items-center justify-center gap-1.5 py-3 px-5 rounded-xl flex-1 min-h-[60px]"
                   whileTap={{ scale: 0.95 }}
-                  transition={{ duration: 0.15 }}
+                  transition={{ duration: 0.1 }}
                 >
-                  {/* Active background avec animation fluide */}
+                  {/* Active background - Subtle */}
                   {isActive && (
                     <motion.div
                       layoutId="activeTab"
-                      className="absolute inset-0 rounded-2xl bg-[var(--primary-50)]"
-                      transition={{
-                        type: "spring",
-                        stiffness: 500,
-                        damping: 35
-                      }}
+                      className="absolute inset-1 rounded-xl bg-[#1a1b1f]"
+                      transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
                     />
                   )}
 
-                  {/* Icon avec animation */}
-                  <motion.div
-                    animate={{
-                      scale: isActive ? 1.1 : 1,
-                      y: isActive ? -2 : 0
-                    }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Icon
-                      className={`w-6 h-6 relative z-10 transition-colors duration-200 ${
-                        isActive 
-                          ? 'text-[var(--primary-500)]' 
-                          : 'text-[var(--fg-tertiary)]'
-                      }`}
-                      strokeWidth={isActive ? 2.5 : 1.5}
-                    />
-                  </motion.div>
+                  {/* Icon */}
+                  <Icon
+                    className={`w-[22px] h-[22px] relative z-10 transition-colors duration-150 ${
+                      isActive
+                        ? 'text-[#ececed]'
+                        : 'text-[#4a4b50]'
+                    }`}
+                    strokeWidth={isActive ? 1.75 : 1.5}
+                  />
 
-                  {/* Label - seulement si actif */}
+                  {/* Label - Readable size */}
+                  <span
+                    className={`text-[11px] font-medium relative z-10 transition-colors duration-150 ${
+                      isActive ? 'text-[#ececed]' : 'text-[#4a4b50]'
+                    }`}
+                  >
+                    {t(tab.labelKey)}
+                  </span>
+
+                  {/* Active dot indicator */}
                   {isActive && (
-                    <motion.span
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: 0.2 }}
-                      className="text-xs font-semibold text-[var(--primary-500)] relative z-10"
-                    >
-                      {t(tab.labelKey)}
-                    </motion.span>
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute bottom-1.5 w-1 h-1 rounded-full bg-[#5e6ad2]"
+                      transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
+                    />
                   )}
                 </motion.button>
               );
