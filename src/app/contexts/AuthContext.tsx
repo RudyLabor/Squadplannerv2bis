@@ -366,7 +366,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               console.log('[Auth] ℹ️ Refresh aborted - ignoré');
               if (!isMounted) return;
             }
-            throw new Error('Session timeout et refresh échoué');
+            // Fallback: essayer de restaurer depuis localStorage
+            console.warn('[Auth] ⚠️ Timeout - tentative restauration depuis localStorage');
+            try {
+              const storedSession = localStorage.getItem('sb-cwtoprbowdqcemdjrtir-auth-token');
+              if (storedSession) {
+                const parsed = JSON.parse(storedSession);
+                if (parsed.access_token && parsed.refresh_token) {
+                  const { data: restoredData } = await supabase.auth.setSession({
+                    access_token: parsed.access_token,
+                    refresh_token: parsed.refresh_token
+                  });
+                  if (restoredData.session) {
+                    console.log('[Auth] ✅ Session restaurée depuis localStorage');
+                    session = restoredData.session;
+                    sessionError = null;
+                  }
+                }
+              }
+            } catch (e) {
+              console.warn('[Auth] localStorage fallback failed:', e);
+            }
+            if (!session) {
+              // Pas de session - utilisateur non connecté
+              if (!isMounted) return;
+              setUser(null);
+              setLoading(false);
+              return;
+            }
           }
         }
 
