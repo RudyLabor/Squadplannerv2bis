@@ -29,12 +29,13 @@
 ### 0.2 Home / Accueil
 | # | Test | Statut | Bug |
 |---|------|--------|-----|
-| 0.2.1 | Page Home s'affiche après login | [ ] | |
-| 0.2.2 | Nom utilisateur affiché (Bienvenue, X) | [ ] | |
-| 0.2.3 | Stats affichées (Sessions, Joueurs, Fiabilité) | [ ] | |
+| 0.2.1 | Page Home s'affiche après login | [x] | |
+| 0.2.2 | Nom utilisateur affiché (Bienvenue, X) | [x] | |
+| 0.2.3 | Stats affichées (Sessions, Joueurs, Fiabilité) | [x] | |
 | 0.2.4 | Countdown prochaine session visible | [ ] | |
-| 0.2.5 | Message "Aucune session prévue" si pas de session | [ ] | |
+| 0.2.5 | Message "Aucune session prévue" si pas de session | [x] | |
 | 0.2.6 | Barre de recherche fonctionne | [ ] | |
+| 0.2.7 | **F5 (refresh) conserve la session et affiche Home** | [x] | CORRIGÉ |
 
 ### 0.3 Navigation
 | # | Test | Statut | Bug |
@@ -259,10 +260,18 @@
 | 1 | 0.4 | Création squad bloque (RLS recursion) | Haute | Supabase RLS | [x] |
 | 2 | 0.4 | Page détail squad invisible (opacity: 0) | Haute | SquadDetailScreen.tsx | [x] |
 | 3 | 0.4 | Affichage "0 membres" (RLS trop restrictive) | Moyenne | Supabase RLS | [x] |
+| 4 | 0.2 | Page Home timeout après F5 (Web Locks SDK) | Haute | api.ts, SquadsContext.tsx, supabase.ts | [x] |
 
 ---
 
 ## NOTES DE SESSION
+
+### Session 30 Jan 2026 - 23h55
+- Bug Page Home timeout après F5 CORRIGÉ
+- Cause: SDK Supabase v2 bloque avec Web Locks API
+- Solution: Timeout 10s sur requêtes + gestion erreur 401 + refresh HTTP direct
+- Fichiers modifiés: api.ts, SquadsContext.tsx, supabase.ts
+- Tests Puppeteer: Connexion OK, F5 OK, Multiple F5 OK
 
 ### Session 30 Jan 2026 - 22h00
 - Bug animation détail squad CORRIGÉ (containerVariants)
