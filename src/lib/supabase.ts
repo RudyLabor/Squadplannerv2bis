@@ -11,49 +11,13 @@ import { projectId, publicAnonKey } from '@/utils/supabase/info';
 
 const supabaseUrl = `https://${projectId}.supabase.co`;
 
-// Custom storage wrapper that bypasses Web Locks completely
-// The Supabase SDK v2.93.2 uses Web Locks API which can hang indefinitely
-const createNoLockStorage = () => {
-  if (typeof window === 'undefined') return undefined;
-
-  return {
-    getItem: (key: string) => {
-      try {
-        return window.localStorage.getItem(key);
-      } catch (e) {
-        console.warn('[Supabase Storage] getItem error:', e);
-        return null;
-      }
-    },
-    setItem: (key: string, value: string) => {
-      try {
-        window.localStorage.setItem(key, value);
-      } catch (e) {
-        console.warn('[Supabase Storage] setItem error:', e);
-      }
-    },
-    removeItem: (key: string) => {
-      try {
-        window.localStorage.removeItem(key);
-      } catch (e) {
-        console.warn('[Supabase Storage] removeItem error:', e);
-      }
-    },
-  };
-};
-
-// Create typed Supabase client with improved error handling
-// FIX: detectSessionInUrl: false et pas de flowType PKCE pour éviter le blocage sur getSession()
-// lors des rafraîchissements de page (le SDK attendait un code PKCE dans l'URL qui n'arrivait jamais)
+// Create typed Supabase client - configuration minimale et stable
 export const supabase = createClient<Database>(supabaseUrl, publicAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: false, // ✅ CORRIGÉ: était true, causait blocage sur F5
-    storage: createNoLockStorage(), // ✅ Custom storage sans Web Locks
-    // @ts-ignore - Option non documentée mais nécessaire pour éviter le blocage Web Lock
-    lock: false, // ✅ FIX CRITIQUE: Désactive Web Locks API
-    storageKey: `sb-${projectId}-auth-token`, // ✅ Clé explicite pour éviter les conflits
+    detectSessionInUrl: false,
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
   },
   realtime: {
     params: {
