@@ -1,12 +1,16 @@
-// @ts-nocheck
-import { ArrowLeft, Crown, Star, Award, Check, Sparkles, Trophy, Shield } from 'lucide-react';
+/**
+ * BADGES SCREEN - LINEAR DESIGN SYSTEM
+ * Collection de badges gaming avec rarete
+ * Premium minimal design inspired by Linear.app
+ */
+
+import { ArrowLeft, Crown, Star, Award, Check, Sparkles, Trophy, Shield, Lock, Gem } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { mockBadges } from '@/data/mockData';
 import { statsAPI } from '@/utils/api';
 import { useUser } from '@/app/contexts/UserContext';
-import { Card, Badge, SkeletonPage } from '@/design-system';
 
 interface BadgesScreenProps {
   onNavigate: (screen: string) => void;
@@ -26,54 +30,79 @@ interface BadgeItem {
   unlockedAt: string | null;
 }
 
+// ============================================
+// ANIMATIONS - Linear-like smooth motion
+// ============================================
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
+    transition: { staggerChildren: 0.04, delayChildren: 0.02 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 8 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
+    transition: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }
   }
 };
 
-const rarityConfig: Record<BadgeRarity, { gradient: string; icon: React.ElementType; color: string; bgColor: string; borderColor: string }> = {
+// ============================================
+// RARITY CONFIG - Colors per rarity level
+// ============================================
+const rarityConfig: Record<BadgeRarity, {
+  gradient: string;
+  icon: React.ElementType;
+  color: string;
+  bgColor: string;
+  borderColor: string;
+  glowColor: string;
+  label: string;
+}> = {
   legendary: {
-    gradient: 'from-amber-500 to-orange-500',
+    gradient: 'from-amber-500 to-orange-600',
     icon: Crown,
-    color: 'text-amber-500',
+    color: 'text-amber-400',
     bgColor: 'bg-amber-500/10',
-    borderColor: 'border-amber-300'
+    borderColor: 'border-amber-500/30',
+    glowColor: 'rgba(245,158,11,0.15)',
+    label: 'Legendaire'
   },
   epic: {
-    gradient: 'from-purple-500 to-pink-500',
-    icon: Sparkles,
-    color: 'text-purple-500',
+    gradient: 'from-purple-500 to-violet-600',
+    icon: Gem,
+    color: 'text-purple-400',
     bgColor: 'bg-purple-500/10',
-    borderColor: 'border-purple-300'
+    borderColor: 'border-purple-500/30',
+    glowColor: 'rgba(168,85,247,0.15)',
+    label: 'Epique'
   },
   rare: {
-    gradient: 'from-blue-500 to-cyan-500',
+    gradient: 'from-blue-500 to-cyan-600',
     icon: Star,
-    color: 'text-blue-500',
+    color: 'text-blue-400',
     bgColor: 'bg-blue-500/10',
-    borderColor: 'border-blue-300'
+    borderColor: 'border-blue-500/30',
+    glowColor: 'rgba(59,130,246,0.15)',
+    label: 'Rare'
   },
   common: {
-    gradient: 'from-gray-400 to-gray-500',
+    gradient: 'from-[#5e6063] to-[#3a3d42]',
     icon: Award,
-    color: 'text-gray-500',
-    bgColor: 'bg-gray-100',
-    borderColor: 'border-gray-200'
+    color: 'text-[#8b8d90]',
+    bgColor: 'bg-[rgba(255,255,255,0.05)]',
+    borderColor: 'border-[rgba(255,255,255,0.1)]',
+    glowColor: 'rgba(255,255,255,0.05)',
+    label: 'Commun'
   }
 };
 
+// ============================================
+// BADGE CARD - Premium design per rarity
+// ============================================
 interface PremiumBadgeCardProps {
   badge: BadgeItem;
   isEquipped: boolean;
@@ -90,74 +119,151 @@ function PremiumBadgeCard({ badge, isEquipped, onToggleEquip, index }: PremiumBa
       variants={itemVariants}
       custom={index}
       onClick={onToggleEquip}
-      className={`relative overflow-hidden rounded-2xl p-4 text-left transition-all duration-300 ${
+      disabled={!badge.unlocked}
+      className={`relative overflow-hidden rounded-xl p-4 text-left transition-all duration-200 ${
         badge.unlocked
           ? isEquipped
-            ? 'bg-[var(--bg-elevated)] border-2 border-[var(--color-primary-500)] shadow-lg shadow-[var(--color-primary-500)]/20'
-            : 'bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:bg-[var(--bg-elevated)]/90'
-          : 'bg-[var(--bg-elevated)]/40 border border-[var(--border-subtle)] opacity-60'
-      } backdrop-blur-sm`}
-      whileHover={badge.unlocked ? { scale: 1.02, y: -2 } : {}}
+            ? `bg-[rgba(255,255,255,0.04)] border-2 ${config.borderColor}`
+            : 'bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)]'
+          : 'bg-[rgba(255,255,255,0.01)] border border-[rgba(255,255,255,0.04)] opacity-50 cursor-not-allowed'
+      }`}
+      whileHover={badge.unlocked ? { y: -2 } : {}}
       whileTap={badge.unlocked ? { scale: 0.98 } : {}}
+      transition={{ duration: 0.15 }}
     >
-      {/* Rarity Glow Effect - static for performance */}
+      {/* Subtle glow effect for unlocked badges */}
       {badge.unlocked && (
-        <div className={`absolute -top-10 -right-10 w-24 h-24 bg-gradient-to-br ${config.gradient} rounded-full blur-2xl opacity-20`} />
+        <div
+          className="absolute -top-8 -right-8 w-20 h-20 rounded-full blur-2xl pointer-events-none"
+          style={{ backgroundColor: config.glowColor }}
+        />
       )}
 
       {/* Equipped Indicator */}
       {isEquipped && badge.unlocked && (
         <motion.div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full bg-gradient-to-r from-[var(--color-primary-500)] to-purple-500 flex items-center justify-center shadow-md"
+          className={`absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-gradient-to-br ${config.gradient} flex items-center justify-center`}
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 500 }}
         >
-          <Check className="w-4 h-4 text-white" strokeWidth={3} />
+          <Check className="w-3 h-3 text-white" strokeWidth={3} />
         </motion.div>
       )}
 
-      {/* Icon */}
-      <motion.div
-        className={`w-14 h-14 rounded-xl flex items-center justify-center mb-3 ${
+      {/* Badge Icon */}
+      <div
+        className={`w-12 h-12 rounded-lg flex items-center justify-center mb-3 ${
           badge.unlocked
-            ? `bg-gradient-to-br ${config.gradient} shadow-lg`
-            : 'bg-[var(--bg-base)]'
+            ? `bg-gradient-to-br ${config.gradient}`
+            : 'bg-[rgba(255,255,255,0.04)]'
         }`}
-        whileHover={badge.unlocked ? { rotate: 5, scale: 1.1 } : {}}
       >
-        <Icon className={`w-7 h-7 ${badge.unlocked ? 'text-white' : 'text-[var(--fg-tertiary)]'}`} strokeWidth={2} />
-      </motion.div>
+        <Icon className={`w-6 h-6 ${badge.unlocked ? 'text-white' : 'text-[#3a3d42]'}`} strokeWidth={1.5} />
+      </div>
 
       {/* Content */}
       <div className="relative z-10">
-        <div className={`text-sm font-bold tracking-tight mb-1 ${badge.unlocked ? 'text-[var(--fg-primary)]' : 'text-[var(--fg-tertiary)]'}`}>
+        <div className={`text-[13px] font-semibold tracking-tight mb-1 ${badge.unlocked ? 'text-[#f7f8f8]' : 'text-[#3a3d42]'}`}>
           {badge.name}
         </div>
-        <div className={`text-sm mb-3 leading-relaxed ${badge.unlocked ? 'text-[var(--fg-secondary)]' : 'text-[var(--fg-tertiary)]'}`}>
+        <div className={`text-[12px] leading-relaxed mb-3 line-clamp-2 ${badge.unlocked ? 'text-[#8b8d90]' : 'text-[#3a3d42]'}`}>
           {badge.description}
         </div>
 
         {/* Rarity Tag */}
-        <Badge
-          variant={badge.unlocked ? "default" : "secondary"}
-          size="sm"
-          className={badge.unlocked ? `${config.bgColor} ${config.color}` : ''}
-        >
-          {badge.rarity}
-        </Badge>
+        <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-medium uppercase tracking-wider ${
+          badge.unlocked
+            ? `${config.bgColor} ${config.color}`
+            : 'bg-[rgba(255,255,255,0.03)] text-[#3a3d42]'
+        }`}>
+          {config.label}
+        </div>
       </div>
 
       {/* Lock Overlay */}
       {!badge.unlocked && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg-base)]/40 backdrop-blur-[1px] rounded-2xl">
-          <div className="text-2xl">🔒</div>
+        <div className="absolute inset-0 flex items-center justify-center bg-[#08090a]/60 rounded-xl">
+          <Lock className="w-5 h-5 text-[#3a3d42]" strokeWidth={1.5} />
         </div>
       )}
     </motion.button>
   );
 }
 
+// ============================================
+// EQUIPPED BADGE SLOT
+// ============================================
+function EquippedBadgeSlot({ badge, index }: { badge?: BadgeItem; index: number }) {
+  const config = badge ? rarityConfig[badge.rarity] : null;
+  const Icon = config?.icon || Award;
+
+  return (
+    <motion.div
+      className="flex-1"
+      initial={{ scale: 0.9, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ delay: 0.1 + index * 0.05, duration: 0.2 }}
+    >
+      {badge ? (
+        <div className={`bg-[rgba(255,255,255,0.06)] rounded-xl p-3 text-center border ${config?.borderColor || 'border-[rgba(255,255,255,0.1)]'}`}>
+          <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${config?.gradient} flex items-center justify-center mx-auto mb-2`}>
+            <Icon className="w-5 h-5 text-white" strokeWidth={1.5} />
+          </div>
+          <div className="text-[11px] text-[#f7f8f8] font-medium truncate">
+            {badge.name}
+          </div>
+        </div>
+      ) : (
+        <div className="bg-[rgba(255,255,255,0.02)] rounded-xl p-3 text-center border border-dashed border-[rgba(255,255,255,0.08)]">
+          <div className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.03)] flex items-center justify-center mx-auto mb-2">
+            <div className="w-5 h-5 rounded bg-[rgba(255,255,255,0.05)]" />
+          </div>
+          <div className="text-[11px] text-[#3a3d42] font-medium">
+            Slot {index + 1}
+          </div>
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
+// ============================================
+// SKELETON LOADER
+// ============================================
+function BadgesSkeleton() {
+  return (
+    <div className="min-h-screen bg-[#08090a] pb-24 pt-safe">
+      <div className="px-4 py-6 max-w-2xl mx-auto">
+        {/* Header skeleton */}
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.04)] animate-pulse" />
+          <div className="flex-1">
+            <div className="h-6 w-40 bg-[rgba(255,255,255,0.04)] rounded animate-pulse mb-2" />
+            <div className="h-4 w-32 bg-[rgba(255,255,255,0.03)] rounded animate-pulse" />
+          </div>
+        </div>
+
+        {/* Equipped section skeleton */}
+        <div className="h-32 bg-[rgba(255,255,255,0.02)] rounded-xl mb-6 animate-pulse" />
+
+        {/* Progress skeleton */}
+        <div className="h-20 bg-[rgba(255,255,255,0.02)] rounded-xl mb-6 animate-pulse" />
+
+        {/* Grid skeleton */}
+        <div className="grid grid-cols-2 gap-3">
+          {[1,2,3,4,5,6].map(i => (
+            <div key={i} className="h-40 bg-[rgba(255,255,255,0.02)] rounded-xl animate-pulse" />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================
+// MAIN COMPONENT
+// ============================================
 export function BadgesScreen({ onNavigate, showToast, useMockData = false }: BadgesScreenProps) {
   const { userProfile: user } = useUser();
   const [equippedBadges, setEquippedBadges] = useState<string[]>(['1', '2', '3']);
@@ -220,7 +326,7 @@ export function BadgesScreen({ onNavigate, showToast, useMockData = false }: Bad
         return [...prev, badgeId];
       }
     });
-    showToast('Badge equipe mis a jour', 'success');
+    showToast('Badge mis a jour', 'success');
   };
 
   const unlockedCount = badges.filter(b => b.unlocked).length;
@@ -229,185 +335,143 @@ export function BadgesScreen({ onNavigate, showToast, useMockData = false }: Bad
     : 0;
 
   if (loading) {
-    return <SkeletonPage />;
+    return <BadgesSkeleton />;
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15, filter: "blur(5px)" }}
-      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      transition={{ duration: 0.35 }}
-      className="min-h-screen pb-24 pt-safe bg-[var(--bg-base)] relative overflow-hidden"
-    >
-      {/* Background decorations - static for performance */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 left-1/2 w-64 h-64 bg-gradient-to-br from-blue-400/15 to-cyan-400/15 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {/* Header */}
-          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
-            <motion.button
-              onClick={() => onNavigate('profile')}
-              className="w-12 h-12 rounded-2xl bg-[var(--bg-elevated)] backdrop-blur-sm border border-[var(--border-subtle)] flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <ArrowLeft className="w-5 h-5 text-[var(--fg-secondary)]" strokeWidth={2} />
-            </motion.button>
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-                Collection de Badges
-              </h1>
-              <p className="text-sm text-amber-600/80 font-medium mt-0.5">
-                {unlockedCount}/{badges.length} debloques · {equippedBadges.length}/3 equipes
-              </p>
-            </div>
-            <motion.div
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg"
-              whileHover={{ scale: 1.05, rotate: 5 }}
-            >
-              <Trophy className="w-6 h-6 text-white" strokeWidth={2} />
-            </motion.div>
-          </motion.div>
-
-          {/* Equipped Badges Preview */}
-          <motion.div
-            variants={itemVariants}
+    <div className="min-h-screen bg-[#08090a] pb-24 pt-safe">
+      <motion.div
+        className="px-4 py-6 max-w-2xl mx-auto"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Header */}
+        <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
+          <motion.button
+            onClick={() => onNavigate('profile')}
+            className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center hover:bg-[rgba(255,255,255,0.06)] transition-colors"
             whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <Card className="p-6 mb-6 bg-gradient-to-r from-[var(--color-primary-500)] via-purple-500 to-pink-500 border-0 shadow-xl shadow-[var(--color-primary-500)]/20 relative overflow-hidden">
-              {/* Static particles - no animation for performance */}
-              <div className="absolute top-4 right-4 w-2 h-2 bg-white/40 rounded-full" />
-              <div className="absolute bottom-6 left-1/4 w-1.5 h-1.5 bg-white/30 rounded-full" />
-
-              <div className="flex items-center gap-2 text-white/90 text-sm font-semibold mb-4">
-                <Shield className="w-4 h-4" />
-                Badges affiches sur ton profil
-              </div>
-              <div className="flex gap-3">
-                {[0, 1, 2].map((index) => {
-                  const equippedBadge = badges.find(b => b.id === equippedBadges[index]);
-                  const config = equippedBadge ? rarityConfig[equippedBadge.rarity] : null;
-                  const Icon = config?.icon || Award;
-
-                  return (
-                    <motion.div
-                      key={index}
-                      className="flex-1"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ delay: 0.2 + index * 0.1, type: "spring" }}
-                    >
-                      {equippedBadge ? (
-                        <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 text-center border border-white/20">
-                          <motion.div
-                            className="w-12 h-12 rounded-xl bg-white/25 backdrop-blur-sm flex items-center justify-center mx-auto mb-2"
-                            whileHover={{ rotate: 10, scale: 1.1 }}
-                          >
-                            <Icon className="w-6 h-6 text-white" strokeWidth={2} />
-                          </motion.div>
-                          <div className="text-sm text-white font-semibold truncate">
-                            {equippedBadge.name}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center border-2 border-dashed border-white/20">
-                          <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2">
-                            <div className="w-8 h-8 rounded-lg bg-white/10" />
-                          </div>
-                          <div className="text-sm text-white/60 font-medium">
-                            Slot {index + 1}
-                          </div>
-                        </div>
-                      )}
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </Card>
-          </motion.div>
-
-          {/* Progress Card */}
-          <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }}>
-            <Card className="p-5 mb-6">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-amber-500" />
-                  <span className="text-sm font-semibold tracking-tight text-[var(--fg-primary)]">Progression globale</span>
-                </div>
-                <div className="text-2xl font-bold tracking-tight bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
-                  {progressPercent}%
-                </div>
-              </div>
-              <div className="h-3 bg-[var(--bg-base)] rounded-full overflow-hidden">
-                <motion.div
-                  className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-pink-500 rounded-full"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progressPercent}%` }}
-                  transition={{ duration: 1.5, ease: "easeOut", delay: 0.3 }}
-                />
-              </div>
-            </Card>
-          </motion.div>
-
-          {/* Info Banner */}
-          <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }}>
-            <Card className="p-4 mb-6 bg-gradient-to-r from-amber-100/80 to-orange-100/80 border-amber-200/50">
-              <div className="flex items-center gap-3 text-sm text-amber-800 font-medium">
-                <span className="text-xl">💡</span>
-                Equipe jusqu'a 3 badges sur ton profil pour montrer tes accomplissements
-              </div>
-            </Card>
-          </motion.div>
-
-          {/* Badges Grid */}
-          <AnimatePresence mode="wait">
-            {badges.length === 0 ? (
-              <motion.div
-                key="empty"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-center py-16"
-              >
-                <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-6 shadow-xl">
-                  <Trophy className="w-12 h-12 text-white" strokeWidth={1.5} />
-                </div>
-                <h3 className="text-xl font-bold tracking-tight text-[var(--fg-primary)] mb-2">Aucun badge</h3>
-                <p className="text-sm text-[var(--fg-secondary)] max-w-xs mx-auto">
-                  Participe a des sessions pour debloquer tes premiers badges
-                </p>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="badges"
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                className="grid grid-cols-2 gap-4"
-              >
-                {badges.map((badge, index) => (
-                  <PremiumBadgeCard
-                    key={badge.id}
-                    badge={badge}
-                    isEquipped={equippedBadges.includes(badge.id)}
-                    onToggleEquip={() => handleToggleEquip(badge.id)}
-                    index={index}
-                  />
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
+            <ArrowLeft className="w-[18px] h-[18px] text-[#8b8d90]" strokeWidth={1.5} />
+          </motion.button>
+          <div className="flex-1">
+            <h1 className="text-[20px] font-semibold text-[#f7f8f8] tracking-tight">
+              Collection de Badges
+            </h1>
+            <p className="text-[13px] text-[#5e6063] mt-0.5">
+              {unlockedCount}/{badges.length} debloques
+            </p>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+            <Trophy className="w-5 h-5 text-white" strokeWidth={1.5} />
+          </div>
         </motion.div>
-      </div>
-    </motion.div>
+
+        {/* Equipped Badges Preview */}
+        <motion.div
+          variants={itemVariants}
+          className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4 mb-5"
+        >
+          <div className="flex items-center gap-2 text-[#8b8d90] text-[12px] font-medium mb-4">
+            <Shield className="w-4 h-4" strokeWidth={1.5} />
+            <span>Badges affiches sur ton profil</span>
+            <span className="ml-auto text-[#5e6063]">{equippedBadges.length}/3</span>
+          </div>
+          <div className="flex gap-3">
+            {[0, 1, 2].map((index) => {
+              const equippedBadge = badges.find(b => b.id === equippedBadges[index]);
+              return (
+                <EquippedBadgeSlot
+                  key={index}
+                  badge={equippedBadge}
+                  index={index}
+                />
+              );
+            })}
+          </div>
+        </motion.div>
+
+        {/* Progress Card */}
+        <motion.div
+          variants={itemVariants}
+          className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4 mb-5"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
+              <span className="text-[13px] font-medium text-[#f7f8f8]">Progression</span>
+            </div>
+            <div className="text-[16px] font-semibold text-amber-400 tabular-nums">
+              {progressPercent}%
+            </div>
+          </div>
+          <div className="h-2 bg-[rgba(255,255,255,0.04)] rounded-full overflow-hidden">
+            <motion.div
+              className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPercent}%` }}
+              transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+            />
+          </div>
+        </motion.div>
+
+        {/* Info Banner */}
+        <motion.div
+          variants={itemVariants}
+          className="bg-[rgba(94,109,210,0.08)] border border-[rgba(94,109,210,0.15)] rounded-xl p-3.5 mb-5"
+        >
+          <div className="flex items-center gap-3 text-[12px] text-[#8b8d90]">
+            <div className="w-8 h-8 rounded-lg bg-[rgba(94,109,210,0.15)] flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-4 h-4 text-[#5e6dd2]" strokeWidth={1.5} />
+            </div>
+            <span>
+              Clique sur un badge pour l'equiper. Tu peux afficher jusqu'a <span className="text-[#f7f8f8] font-medium">3 badges</span> sur ton profil.
+            </span>
+          </div>
+        </motion.div>
+
+        {/* Badges Grid */}
+        <AnimatePresence mode="wait">
+          {badges.length === 0 ? (
+            <motion.div
+              key="empty"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="text-center py-16"
+            >
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center mx-auto mb-5">
+                <Trophy className="w-10 h-10 text-white" strokeWidth={1.5} />
+              </div>
+              <h3 className="text-[16px] font-semibold text-[#f7f8f8] mb-2">Aucun badge</h3>
+              <p className="text-[13px] text-[#5e6063] max-w-[240px] mx-auto leading-relaxed">
+                Participe a des sessions pour debloquer tes premiers badges
+              </p>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="badges"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="grid grid-cols-2 gap-3"
+            >
+              {badges.map((badge, index) => (
+                <PremiumBadgeCard
+                  key={badge.id}
+                  badge={badge}
+                  isEquipped={equippedBadges.includes(badge.id)}
+                  onToggleEquip={() => handleToggleEquip(badge.id)}
+                  index={index}
+                />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </div>
   );
 }
 

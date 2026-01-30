@@ -31,19 +31,16 @@ const features = [
     icon: MessageSquare,
     title: 'Commandes Slash',
     description: 'Utilisez /plan pour créer une session et /join pour rejoindre sans quitter Discord.',
-    gradient: 'from-indigo-500 to-purple-500',
   },
   {
     icon: Shield,
     title: 'Synchro des Rôles',
     description: 'Attribuez automatiquement le rôle "In Session" aux joueurs présents.',
-    gradient: 'from-emerald-500 to-teal-500',
   },
   {
     icon: Bell,
     title: 'Notifications',
     description: 'Recevez des notifications Discord pour les sessions et les rappels.',
-    gradient: 'from-amber-500 to-orange-500',
   },
 ];
 
@@ -135,12 +132,21 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
   };
 
   return (
-    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
-      {/* Background decorations */}
+    <div className="min-h-screen pb-24 pt-safe bg-[#08090a] relative overflow-hidden">
+      {/* Background subtle gradient */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-[#5865F2]/30 to-[#7289DA]/30 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[#5865F2]/8 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#5865F2]/5 rounded-full blur-[100px]" />
       </div>
+
+      {/* Grid pattern overlay */}
+      <div
+        className="absolute inset-0 opacity-[0.02]"
+        style={{
+          backgroundImage: `linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)`,
+          backgroundSize: '64px 64px'
+        }}
+      />
 
       <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
         <motion.div
@@ -149,31 +155,28 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
           animate="visible"
         >
           {/* Header */}
-          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
+          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
             <motion.button
               onClick={() => onNavigate('integrations')}
-              className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+              className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
+              <ArrowLeft className="w-5 h-5 text-gray-400" strokeWidth={2} />
             </motion.button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-[#5865F2] to-[#7289DA] bg-clip-text text-transparent">
+              <h1 className="text-xl font-semibold text-white">
                 Discord
               </h1>
-              <p className="text-sm text-gray-500 font-medium">
+              <p className="text-sm text-gray-500">
                 Connectez votre compte Discord
               </p>
             </div>
-            <motion.div
-              className="w-12 h-12 rounded-2xl bg-[#5865F2] flex items-center justify-center shadow-lg shadow-[#5865F2]/30"
-              whileHover={{ scale: 1.05, rotate: 5 }}
-            >
-              <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+            <div className="w-10 h-10 rounded-xl bg-[#5865F2] flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
               </svg>
-            </motion.div>
+            </div>
           </motion.div>
 
           {/* Connection Status Card */}
@@ -184,7 +187,7 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-5 mb-6 border border-emerald-200/50 shadow-lg"
+                className="bg-emerald-500/10 rounded-2xl p-4 mb-6 border border-emerald-500/20"
               >
                 <div className="flex items-center gap-4">
                   <div className="relative">
@@ -192,30 +195,30 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
                       <img
                         src={discordUser.avatar_url}
                         alt="Discord Avatar"
-                        className="w-16 h-16 rounded-xl object-cover border-2 border-white shadow-md"
+                        className="w-14 h-14 rounded-xl object-cover border border-white/10"
                       />
                     ) : (
-                      <div className="w-16 h-16 rounded-xl bg-[#5865F2] flex items-center justify-center border-2 border-white shadow-md">
-                        <User className="w-8 h-8 text-white" />
+                      <div className="w-14 h-14 rounded-xl bg-[#5865F2] flex items-center justify-center border border-white/10">
+                        <User className="w-7 h-7 text-white" />
                       </div>
                     )}
                     <motion.div
-                      className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center shadow-md"
+                      className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-[#08090a] flex items-center justify-center"
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ type: "spring", stiffness: 500, delay: 0.2 }}
                     >
-                      <CheckCircle2 className="w-4 h-4 text-white" />
+                      <CheckCircle2 className="w-3 h-3 text-white" />
                     </motion.div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-emerald-700 text-lg">Connecté</p>
-                    <p className="text-sm text-emerald-600 font-medium truncate">{discordUser.username}</p>
+                    <p className="font-semibold text-emerald-400">Connecté</p>
+                    <p className="text-sm text-gray-400 truncate">{discordUser.username}</p>
                   </div>
                   <motion.button
                     onClick={handleDisconnect}
                     disabled={connecting}
-                    className="w-12 h-12 rounded-xl bg-white text-red-500 flex items-center justify-center hover:bg-red-50 transition-all border border-red-200 shadow-sm"
+                    className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center hover:bg-red-500/20 transition-all"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -229,26 +232,25 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
           {/* Hero Section */}
           <motion.div
             variants={itemVariants}
-            className="bg-[#5865F2] rounded-3xl p-8 text-center text-white mb-6 shadow-2xl shadow-[#5865F2]/30 relative overflow-hidden"
+            className="rounded-2xl p-6 text-center mb-6 border border-[#5865F2]/30 bg-gradient-to-b from-[#5865F2]/10 to-transparent relative overflow-hidden"
           >
-            {/* Static background circles */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-            <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+            {/* Glow effect */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-24 bg-[#5865F2]/20 blur-3xl" />
 
             <div className="relative">
               <motion.div
-                className="w-24 h-24 bg-white/15 rounded-3xl flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-white/20"
-                whileHover={{ scale: 1.05, rotate: 5 }}
+                className="w-20 h-20 bg-[#5865F2]/20 border border-[#5865F2]/30 rounded-2xl flex items-center justify-center mx-auto mb-5"
+                whileHover={{ scale: 1.05 }}
               >
-                <svg className="w-14 h-14 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <svg className="w-10 h-10 text-[#5865F2]" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
                 </svg>
               </motion.div>
 
-              <h2 className="text-3xl font-black mb-3">
+              <h2 className="text-2xl font-bold text-white mb-2">
                 {isConnected ? 'Discord Connecté' : 'Connecter Discord'}
               </h2>
-              <p className="text-white/80 mb-8 max-w-sm mx-auto leading-relaxed font-medium">
+              <p className="text-gray-400 mb-6 max-w-sm mx-auto text-sm leading-relaxed">
                 {isConnected
                   ? 'Votre compte Discord est lié. Vous pouvez maintenant utiliser les fonctionnalités avancées.'
                   : 'Connectez votre compte Discord pour synchroniser vos sessions et recevoir des notifications.'}
@@ -258,9 +260,9 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
                 <motion.button
                   onClick={handleConnect}
                   disabled={connecting || loading}
-                  className="w-full h-14 bg-white text-[#5865F2] hover:bg-white/95 font-bold text-base rounded-2xl disabled:opacity-50 shadow-lg flex items-center justify-center gap-2"
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
+                  className="w-full h-12 bg-[#5865F2] hover:bg-[#4752C4] text-white font-medium text-sm rounded-xl disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
                 >
                   {loading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -271,7 +273,7 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
                     </>
                   ) : (
                     <>
-                      <Zap className="w-5 h-5" />
+                      <Zap className="w-4 h-4" />
                       Se connecter avec Discord
                     </>
                   )}
@@ -282,8 +284,8 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
 
           {/* Features */}
           <motion.div variants={itemVariants} className="mb-6">
-            <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-indigo-500" />
+            <h3 className="text-sm font-medium text-gray-400 mb-4 flex items-center gap-2 uppercase tracking-wider">
+              <Sparkles className="w-4 h-4 text-[#5865F2]" />
               Fonctionnalités
             </h3>
             <div className="space-y-3">
@@ -294,33 +296,37 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
                     key={feature.title}
                     variants={itemVariants}
                     custom={index}
-                    className={`bg-white/80 backdrop-blur-sm p-5 rounded-2xl border ${
-                      isConnected ? 'border-emerald-200/50 bg-emerald-50/30' : 'border-white/50'
-                    } shadow-lg flex gap-4 transition-all`}
-                    whileHover={{ scale: 1.01, y: -2 }}
+                    className={`p-4 rounded-xl border transition-all ${
+                      isConnected
+                        ? 'bg-emerald-500/5 border-emerald-500/20'
+                        : 'bg-white/[0.02] border-white/[0.06] hover:bg-white/[0.04] hover:border-white/10'
+                    }`}
                   >
-                    <motion.div
-                      className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center flex-shrink-0 shadow-md`}
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                    >
-                      <Icon className="w-6 h-6 text-white" strokeWidth={2} />
-                    </motion.div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-gray-800 flex items-center gap-2">
-                        {feature.title}
-                        {isConnected && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ type: "spring", stiffness: 500 }}
-                          >
-                            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                          </motion.div>
-                        )}
-                      </h4>
-                      <p className="text-sm text-gray-500 font-medium line-clamp-2">
-                        {feature.description}
-                      </p>
+                    <div className="flex gap-4">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                        isConnected
+                          ? 'bg-emerald-500/20 text-emerald-400'
+                          : 'bg-[#5865F2]/20 text-[#5865F2]'
+                      }`}>
+                        <Icon className="w-5 h-5" strokeWidth={2} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-white flex items-center gap-2 text-sm">
+                          {feature.title}
+                          {isConnected && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={{ type: "spring", stiffness: 500 }}
+                            >
+                              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                            </motion.div>
+                          )}
+                        </h4>
+                        <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                          {feature.description}
+                        </p>
+                      </div>
                     </div>
                   </motion.div>
                 );
@@ -337,33 +343,30 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
               >
-                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <Gamepad2 className="w-5 h-5 text-[#5865F2]" />
+                <h3 className="text-sm font-medium text-gray-400 mb-4 flex items-center gap-2 uppercase tracking-wider">
+                  <Gamepad2 className="w-4 h-4 text-[#5865F2]" />
                   Bot Discord (Optionnel)
                 </h3>
                 <motion.div
-                  className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/50 shadow-lg"
-                  whileHover={{ scale: 1.01 }}
+                  className="rounded-xl p-5 border border-white/[0.06] bg-white/[0.02]"
+                  whileHover={{ borderColor: 'rgba(255,255,255,0.1)' }}
                 >
-                  <div className="flex items-center gap-4 mb-5">
-                    <motion.div
-                      className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#5865F2] to-[#7289DA] flex items-center justify-center shadow-lg"
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                    >
-                      <Gamepad2 className="w-7 h-7 text-white" />
-                    </motion.div>
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 rounded-xl bg-[#5865F2]/20 border border-[#5865F2]/30 flex items-center justify-center">
+                      <Gamepad2 className="w-6 h-6 text-[#5865F2]" />
+                    </div>
                     <div>
-                      <p className="font-bold text-gray-800">Squad Planner Bot</p>
-                      <p className="text-sm text-gray-500 font-medium">Invitez le bot sur votre serveur</p>
+                      <p className="font-medium text-white">Squad Planner Bot</p>
+                      <p className="text-xs text-gray-500">Invitez le bot sur votre serveur</p>
                     </div>
                   </div>
                   <motion.button
                     onClick={() => onNavigate('discord-bot')}
-                    className="w-full py-4 rounded-xl bg-gradient-to-r from-[#5865F2] to-[#7289DA] text-white font-bold hover:shadow-lg hover:shadow-[#5865F2]/30 transition-all flex items-center justify-center gap-2"
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
+                    className="w-full py-3 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-white font-medium text-sm flex items-center justify-center gap-2 transition-colors"
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
                   >
-                    <ExternalLink className="w-5 h-5" />
+                    <ExternalLink className="w-4 h-4" />
                     Configurer le Bot
                   </motion.button>
                 </motion.div>

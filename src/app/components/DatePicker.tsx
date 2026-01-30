@@ -1,3 +1,8 @@
+/**
+ * DATE PICKER - LINEAR DARK DESIGN
+ * Clean, minimal date picker with dark theme
+ */
+
 import { ChevronLeft, ChevronRight, Calendar, X, Zap } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -33,7 +38,7 @@ export function DatePicker({ isOpen, onClose, onSelect, selectedDate, minDate }:
     }
   }, [selectedDate]);
 
-  // Générer les raccourcis rapides
+  // Generer les raccourcis rapides
   const quickDates = useMemo(() => {
     const dates = [];
     const now = new Date();
@@ -57,7 +62,7 @@ export function DatePicker({ isOpen, onClose, onSelect, selectedDate, minDate }:
       emoji: '🌅'
     });
 
-    // Après-demain
+    // Apres-demain
     const dayAfter = new Date(now);
     dayAfter.setDate(dayAfter.getDate() + 2);
     const dayAfterName = getDayName(dayAfter);
@@ -96,8 +101,8 @@ export function DatePicker({ isOpen, onClose, onSelect, selectedDate, minDate }:
   }, []);
 
   const monthNames = [
-    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+    'Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin',
+    'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre'
   ];
 
   const dayNames = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
@@ -108,24 +113,24 @@ export function DatePicker({ isOpen, onClose, onSelect, selectedDate, minDate }:
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
-    
+
     // Get the day of week for the first day (0 = Sunday, 1 = Monday, etc.)
     let firstDayOfWeek = firstDay.getDay();
     // Convert Sunday (0) to 7 to make Monday (1) the first day
     if (firstDayOfWeek === 0) firstDayOfWeek = 7;
-    
+
     const days: (number | null)[] = [];
-    
+
     // Add empty cells for days before the first day of the month
     for (let i = 1; i < firstDayOfWeek; i++) {
       days.push(null);
     }
-    
+
     // Add all days of the month
     for (let i = 1; i <= daysInMonth; i++) {
       days.push(i);
     }
-    
+
     return days;
   };
 
@@ -142,12 +147,12 @@ export function DatePicker({ isOpen, onClose, onSelect, selectedDate, minDate }:
     const month = currentMonth.getMonth();
     const selectedDateObj = new Date(year, month, day);
     const dateString = selectedDateObj.toISOString().split('T')[0];
-    
+
     // Check if date is before minDate
     if (minDate && dateString < minDate) {
       return;
     }
-    
+
     setTempSelectedDate(dateString);
   };
 
@@ -195,7 +200,7 @@ export function DatePicker({ isOpen, onClose, onSelect, selectedDate, minDate }:
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+        className="fixed inset-0 bg-[rgba(0,0,0,0.7)] backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
         onClick={onClose}
       >
         <motion.div
@@ -204,45 +209,45 @@ export function DatePicker({ isOpen, onClose, onSelect, selectedDate, minDate }:
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 30, stiffness: 300 }}
           onClick={(e) => e.stopPropagation()}
-          className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md shadow-2xl overflow-hidden"
+          className="bg-[#101012] border-t sm:border border-[rgba(255,255,255,0.08)] rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-[var(--border-subtle)]">
+          <div className="flex items-center justify-between p-5 border-b border-[rgba(255,255,255,0.06)]">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-white" strokeWidth={2} />
+              <div className="w-10 h-10 rounded-xl bg-[rgba(245,166,35,0.15)] flex items-center justify-center">
+                <Calendar className="w-5 h-5 text-[#f5a623]" strokeWidth={1.5} />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-[var(--fg-primary)] tracking-tight">
+                <h2 className="text-[16px] font-semibold text-[#f7f8f8]">
                   Choisir une date
                 </h2>
-                <p className="text-xs text-[var(--fg-tertiary)] mt-0.5">
-                  {tempSelectedDate ? new Date(tempSelectedDate + 'T00:00:00').toLocaleDateString('fr-FR', { 
+                <p className="text-[12px] text-[#5e6063] mt-0.5">
+                  {tempSelectedDate ? new Date(tempSelectedDate + 'T00:00:00').toLocaleDateString('fr-FR', {
                     weekday: 'long',
                     day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                  }) : 'Sélectionnez une date'}
+                    month: 'long'
+                  }) : 'Selectionnez une date'}
                 </p>
               </div>
             </div>
-            <button
+            <motion.button
               onClick={onClose}
-              className="w-10 h-10 rounded-xl bg-[var(--bg-subtle)] hover:bg-[var(--bg-muted)] flex items-center justify-center transition-colors"
+              className="w-9 h-9 rounded-lg bg-[rgba(255,255,255,0.04)] flex items-center justify-center text-[#8b8d90] hover:bg-[rgba(255,255,255,0.08)] hover:text-[#f7f8f8] transition-colors"
+              whileTap={{ scale: 0.95 }}
             >
-              <X className="w-5 h-5 text-[var(--fg-secondary)]" strokeWidth={2} />
-            </button>
+              <X className="w-4 h-4" strokeWidth={1.5} />
+            </motion.button>
           </div>
 
           {/* Quick Date Shortcuts */}
-          <div className="px-6 pt-4 pb-2">
+          <div className="px-5 pt-4 pb-2">
             <div className="flex items-center gap-2 mb-3">
-              <Zap className="w-4 h-4 text-amber-500" />
-              <span className="text-xs font-semibold text-[var(--fg-tertiary)] uppercase tracking-wide">Raccourcis</span>
+              <Zap className="w-3.5 h-3.5 text-[#f5a623]" strokeWidth={1.5} />
+              <span className="text-[10px] font-medium text-[#5e6063] uppercase tracking-wider">Raccourcis</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {quickDates.map((quick, index) => (
-                <button
+                <motion.button
                   key={index}
                   onClick={() => {
                     setTempSelectedDate(quick.date);
@@ -251,61 +256,67 @@ export function DatePicker({ isOpen, onClose, onSelect, selectedDate, minDate }:
                   }}
                   className={`p-3 rounded-xl text-left transition-all ${
                     tempSelectedDate === quick.date
-                      ? 'bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] text-white shadow-lg shadow-[var(--primary-500)]/20'
-                      : 'bg-[var(--bg-subtle)] hover:bg-[var(--bg-muted)]'
+                      ? 'bg-[rgba(245,166,35,0.15)] border border-[rgba(245,166,35,0.3)]'
+                      : 'bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)]'
                   }`}
+                  whileHover={{ y: -1 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">{quick.emoji}</span>
+                    <span className="text-base">{quick.emoji}</span>
                     <div className="flex-1 min-w-0">
-                      <p className={`font-medium text-sm truncate ${
-                        tempSelectedDate === quick.date ? 'text-white' : 'text-[var(--fg-primary)]'
+                      <p className={`font-medium text-[12px] truncate ${
+                        tempSelectedDate === quick.date ? 'text-[#f5a623]' : 'text-[#f7f8f8]'
                       }`}>
                         {quick.label}
                       </p>
-                      <p className={`text-xs truncate ${
-                        tempSelectedDate === quick.date ? 'text-white/80' : 'text-[var(--fg-tertiary)]'
+                      <p className={`text-[10px] truncate ${
+                        tempSelectedDate === quick.date ? 'text-[#f5a623]/70' : 'text-[#5e6063]'
                       }`}>
                         {quick.sublabel}
                       </p>
                     </div>
                   </div>
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
 
           {/* Calendar */}
-          <div className="p-6 pt-4">
+          <div className="p-5 pt-4">
             {/* Month Navigation */}
-            <div className="flex items-center justify-between mb-6">
-              <button
+            <div className="flex items-center justify-between mb-4">
+              <motion.button
                 onClick={handlePrevMonth}
-                className="w-10 h-10 rounded-xl bg-[var(--bg-subtle)] hover:bg-[var(--bg-muted)] flex items-center justify-center transition-colors"
+                className="w-9 h-9 rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center text-[#8b8d90] hover:bg-[rgba(255,255,255,0.08)] hover:text-[#f7f8f8] transition-colors"
+                whileHover={{ x: -1 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <ChevronLeft className="w-5 h-5 text-[var(--fg-secondary)]" strokeWidth={2} />
-              </button>
-              
+                <ChevronLeft className="w-4 h-4" strokeWidth={1.5} />
+              </motion.button>
+
               <div className="text-center">
-                <div className="text-base font-semibold text-[var(--fg-primary)]">
+                <div className="text-[14px] font-semibold text-[#f7f8f8]">
                   {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
                 </div>
               </div>
 
-              <button
+              <motion.button
                 onClick={handleNextMonth}
-                className="w-10 h-10 rounded-xl bg-[var(--bg-subtle)] hover:bg-[var(--bg-muted)] flex items-center justify-center transition-colors"
+                className="w-9 h-9 rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center text-[#8b8d90] hover:bg-[rgba(255,255,255,0.08)] hover:text-[#f7f8f8] transition-colors"
+                whileHover={{ x: 1 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <ChevronRight className="w-5 h-5 text-[var(--fg-secondary)]" strokeWidth={2} />
-              </button>
+                <ChevronRight className="w-4 h-4" strokeWidth={1.5} />
+              </motion.button>
             </div>
 
             {/* Day Names */}
-            <div className="grid grid-cols-7 gap-2 mb-3">
+            <div className="grid grid-cols-7 gap-1.5 mb-2">
               {dayNames.map((day) => (
                 <div
                   key={day}
-                  className="text-center text-xs font-semibold text-[var(--fg-tertiary)] py-2"
+                  className="text-center text-[10px] font-medium text-[#5e6063] py-2 uppercase tracking-wider"
                 >
                   {day}
                 </div>
@@ -313,7 +324,7 @@ export function DatePicker({ isOpen, onClose, onSelect, selectedDate, minDate }:
             </div>
 
             {/* Days Grid */}
-            <div className="grid grid-cols-7 gap-2">
+            <div className="grid grid-cols-7 gap-1.5">
               {days.map((day, index) => {
                 if (day === null) {
                   return <div key={`empty-${index}`} />;
@@ -330,14 +341,14 @@ export function DatePicker({ isOpen, onClose, onSelect, selectedDate, minDate }:
                     whileTap={!disabled ? { scale: 0.95 } : {}}
                     onClick={() => !disabled && handleSelectDay(day)}
                     disabled={disabled}
-                    className={`aspect-square rounded-xl text-sm font-semibold transition-all duration-200 ${
+                    className={`aspect-square rounded-lg text-[13px] font-medium transition-all flex items-center justify-center ${
                       selected
-                        ? 'bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] text-white shadow-lg shadow-[var(--primary-500)]/20'
+                        ? 'bg-[#5e6dd2] text-white shadow-lg shadow-[#5e6dd2]/30'
                         : today
-                        ? 'bg-[var(--primary-100)] text-[var(--primary-600)] border-2 border-[var(--primary-300)]'
+                        ? 'bg-[rgba(245,166,35,0.15)] text-[#f5a623] border border-[rgba(245,166,35,0.3)]'
                         : disabled
-                        ? 'bg-transparent text-[var(--fg-tertiary)]/30 cursor-not-allowed'
-                        : 'bg-[var(--bg-subtle)] text-[var(--fg-primary)] hover:bg-[var(--bg-muted)] hover:shadow-sm'
+                        ? 'bg-transparent text-[#5e6063]/30 cursor-not-allowed'
+                        : 'bg-[rgba(255,255,255,0.02)] text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.06)] border border-transparent hover:border-[rgba(255,255,255,0.08)]'
                     }`}
                   >
                     {day}
@@ -347,26 +358,30 @@ export function DatePicker({ isOpen, onClose, onSelect, selectedDate, minDate }:
             </div>
           </div>
 
-          {/* Footer - Toujours visible */}
-          <div className="p-6 border-t border-[var(--border-subtle)] bg-gradient-to-br from-[var(--primary-50)] to-white">
+          {/* Footer */}
+          <div className="p-5 border-t border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)]">
             <div className="flex gap-3">
-              <button
+              <motion.button
                 onClick={onClose}
-                className="flex-1 h-12 rounded-xl bg-[var(--bg-subtle)] text-[var(--fg-secondary)] text-sm font-semibold hover:bg-[var(--bg-muted)] transition-colors"
+                className="flex-1 h-11 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-[#8b8d90] text-[13px] font-semibold hover:bg-[rgba(255,255,255,0.06)] hover:text-[#f7f8f8] transition-all"
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.98 }}
               >
                 Annuler
-              </button>
-              <button
+              </motion.button>
+              <motion.button
                 onClick={handleConfirm}
                 disabled={!tempSelectedDate}
-                className={`flex-1 h-12 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                className={`flex-1 h-11 rounded-xl text-[13px] font-semibold transition-all ${
                   tempSelectedDate
-                    ? 'bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] text-white shadow-lg shadow-[var(--primary-500)]/20 hover:shadow-xl hover:shadow-[var(--primary-500)]/30'
-                    : 'bg-[var(--bg-muted)] text-[var(--fg-tertiary)] cursor-not-allowed'
+                    ? 'bg-[#5e6dd2] text-white shadow-lg shadow-[#5e6dd2]/20 hover:bg-[#6a79db]'
+                    : 'bg-[rgba(255,255,255,0.04)] text-[#5e6063] cursor-not-allowed border border-[rgba(255,255,255,0.06)]'
                 }`}
+                whileHover={tempSelectedDate ? { y: -1 } : {}}
+                whileTap={tempSelectedDate ? { scale: 0.98 } : {}}
               >
                 Confirmer
-              </button>
+              </motion.button>
             </div>
           </div>
         </motion.div>

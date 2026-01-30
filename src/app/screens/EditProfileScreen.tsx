@@ -1,9 +1,10 @@
 /**
  * EDIT PROFILE SCREEN - LINEAR DESIGN SYSTEM
  * Premium, Dark, Minimal - Profile editing
+ * Fully redesigned with Linear.app aesthetics
  */
 
-import { ArrowLeft, Camera, Save, Mail, User, AtSign, MapPin, Calendar, Trophy, Trash2, AlertCircle, Shield, Gamepad2, Check, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Camera, Save, Mail, User, AtSign, MapPin, Calendar, Trophy, Trash2, AlertCircle, Shield, Gamepad2, ChevronDown, Loader2 } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
@@ -17,23 +18,156 @@ interface EditProfileScreenProps {
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
-// Linear-style animations
+// Linear-style animations - subtle and fast
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.02 }
+    transition: { staggerChildren: 0.04, delayChildren: 0.01 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 6 },
+  hidden: { opacity: 0, y: 8 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }
+    transition: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }
   }
 };
+
+// Reusable Input component with Linear styling
+interface InputFieldProps {
+  label: string;
+  icon?: React.ReactNode;
+  type?: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  maxLength?: number;
+  showCount?: boolean;
+}
+
+function InputField({ label, icon, type = 'text', value, onChange, placeholder, maxLength, showCount }: InputFieldProps) {
+  const charCount = value?.length || 0;
+  const isNearLimit = maxLength && charCount > maxLength * 0.9;
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <label className="text-[13px] text-[#a2a3a5] font-medium">{label}</label>
+        {showCount && maxLength && (
+          <span className={`text-[11px] tabular-nums ${isNearLimit ? 'text-[#f5a623]' : 'text-[#5e6063]'}`}>
+            {charCount}/{maxLength}
+          </span>
+        )}
+      </div>
+      <div className="relative group">
+        {icon && (
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5e6063] group-focus-within:text-[#8b93ff] transition-colors duration-150">
+            {icon}
+          </div>
+        )}
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => onChange(maxLength ? e.target.value.slice(0, maxLength) : e.target.value)}
+          placeholder={placeholder}
+          className={`
+            w-full h-11 ${icon ? 'pl-10' : 'pl-3.5'} pr-3.5
+            bg-[rgba(255,255,255,0.03)]
+            border border-[rgba(255,255,255,0.06)]
+            rounded-lg
+            text-[14px] text-[#f7f8f8]
+            placeholder:text-[#4a4b4d]
+            hover:bg-[rgba(255,255,255,0.05)]
+            hover:border-[rgba(255,255,255,0.1)]
+            focus:bg-[rgba(255,255,255,0.04)]
+            focus:border-[rgba(94,109,210,0.5)]
+            focus:ring-2 focus:ring-[rgba(94,109,210,0.15)]
+            focus:outline-none
+            transition-all duration-150
+          `}
+        />
+      </div>
+    </div>
+  );
+}
+
+// Reusable Select component with Linear styling
+interface SelectFieldProps {
+  label: string;
+  icon?: React.ReactNode;
+  value: string;
+  onChange: (value: string) => void;
+  options: { value: string; label: string }[];
+}
+
+function SelectField({ label, icon, value, onChange, options }: SelectFieldProps) {
+  return (
+    <div className="space-y-2">
+      <label className="text-[13px] text-[#a2a3a5] font-medium">{label}</label>
+      <div className="relative group">
+        {icon && (
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5e6063] group-focus-within:text-[#8b93ff] transition-colors duration-150 pointer-events-none z-10">
+            {icon}
+          </div>
+        )}
+        <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5e6063] pointer-events-none" strokeWidth={1.5} />
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={`
+            w-full h-11 ${icon ? 'pl-10' : 'pl-3.5'} pr-10
+            bg-[rgba(255,255,255,0.03)]
+            border border-[rgba(255,255,255,0.06)]
+            rounded-lg
+            text-[14px] text-[#f7f8f8]
+            hover:bg-[rgba(255,255,255,0.05)]
+            hover:border-[rgba(255,255,255,0.1)]
+            focus:bg-[rgba(255,255,255,0.04)]
+            focus:border-[rgba(94,109,210,0.5)]
+            focus:ring-2 focus:ring-[rgba(94,109,210,0.15)]
+            focus:outline-none
+            transition-all duration-150
+            appearance-none cursor-pointer
+          `}
+        >
+          {options.map(opt => (
+            <option key={opt.value} value={opt.value} className="bg-[#18191b] text-[#f7f8f8]">
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+}
+
+// Section card component
+interface SectionCardProps {
+  icon: React.ReactNode;
+  iconColor: string;
+  title: string;
+  children: React.ReactNode;
+  variant?: 'default' | 'danger';
+}
+
+function SectionCard({ icon, iconColor, title, children, variant = 'default' }: SectionCardProps) {
+  const bgColor = variant === 'danger' ? 'bg-[rgba(248,113,113,0.04)]' : 'bg-[rgba(255,255,255,0.02)]';
+  const borderColor = variant === 'danger' ? 'border-[rgba(248,113,113,0.1)]' : 'border-[rgba(255,255,255,0.04)]';
+  const titleColor = variant === 'danger' ? 'text-[#f87171]' : 'text-[#5e6063]';
+
+  return (
+    <div className={`p-5 rounded-xl ${bgColor} border ${borderColor}`}>
+      <div className={`flex items-center gap-2.5 text-[11px] font-semibold ${titleColor} mb-5 uppercase tracking-[0.5px]`}>
+        <span className={iconColor}>{icon}</span>
+        {title}
+      </div>
+      {children}
+    </div>
+  );
+}
 
 export function EditProfileScreen({ onNavigate, showToast }: EditProfileScreenProps) {
   const { impact } = useHaptic();
@@ -70,7 +204,7 @@ export function EditProfileScreen({ onNavigate, showToast }: EditProfileScreenPr
       let finalAvatarUrl = avatarUrl;
 
       if (pendingAvatarFile && user) {
-        showToast('Téléchargement de l\'avatar...', 'info');
+        showToast('Telechargement de l\'avatar...', 'info');
         finalAvatarUrl = await uploadService.uploadAvatar(pendingAvatarFile, user.id);
       }
 
@@ -88,7 +222,7 @@ export function EditProfileScreen({ onNavigate, showToast }: EditProfileScreenPr
       });
 
       updateUserProfile({ ...formData, avatarUrl: finalAvatarUrl });
-      showToast('Profil mis à jour', 'success');
+      showToast('Profil mis a jour', 'success');
       setHasChanges(false);
       setPendingAvatarFile(null);
 
@@ -111,12 +245,12 @@ export function EditProfileScreen({ onNavigate, showToast }: EditProfileScreenPr
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      showToast('L\'image ne doit pas dépasser 5MB', 'error');
+      showToast('L\'image ne doit pas depasser 5MB', 'error');
       return;
     }
 
     if (!file.type.startsWith('image/')) {
-      showToast('Le fichier doit être une image', 'error');
+      showToast('Le fichier doit etre une image', 'error');
       return;
     }
 
@@ -124,19 +258,38 @@ export function EditProfileScreen({ onNavigate, showToast }: EditProfileScreenPr
     setAvatarUrl(previewUrl);
     setPendingAvatarFile(file);
     setHasChanges(true);
-    showToast('Photo sélectionnée', 'info');
+    showToast('Photo selectionnee', 'info');
   };
 
   const handleDeleteAccount = () => {
     impact();
     const confirmed = window.confirm(
-      'Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.'
+      'Etes-vous sur de vouloir supprimer votre compte ? Cette action est irreversible.'
     );
     if (confirmed) {
-      showToast('Compte supprimé', 'error');
+      showToast('Compte supprime', 'error');
       onNavigate('login');
     }
   };
+
+  // Game options
+  const gameOptions = [
+    { value: 'Valorant', label: 'Valorant' },
+    { value: 'CS2', label: 'Counter-Strike 2' },
+    { value: 'League of Legends', label: 'League of Legends' },
+    { value: 'Apex Legends', label: 'Apex Legends' },
+    { value: 'Overwatch 2', label: 'Overwatch 2' },
+    { value: 'Fortnite', label: 'Fortnite' },
+  ];
+
+  // Play style options
+  const playStyleOptions = [
+    { value: 'Aggressive', label: 'Agressif' },
+    { value: 'Defensive', label: 'Defensif' },
+    { value: 'Balanced', label: 'Equilibre' },
+    { value: 'Support', label: 'Support' },
+    { value: 'Strategic', label: 'Strategique' },
+  ];
 
   return (
     <div className="min-h-screen pb-24 md:pb-8 bg-[#08090a]">
@@ -154,36 +307,43 @@ export function EditProfileScreen({ onNavigate, showToast }: EditProfileScreenPr
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="space-y-6"
+          className="space-y-5"
         >
           {/* Header - Linear style */}
-          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-2">
+          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
             <motion.button
               onClick={() => onNavigate('profile')}
-              className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.06)] transition-all"
+              className="w-9 h-9 rounded-lg bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.1)] transition-all duration-150"
               whileHover={{ x: -2 }}
               whileTap={{ scale: 0.95 }}
             >
-              <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
+              <ArrowLeft className="w-[18px] h-[18px]" strokeWidth={1.5} />
             </motion.button>
+
             <div className="flex-1">
-              <h1 className="text-[20px] md:text-[22px] font-semibold text-[#f7f8f8]">
+              <h1 className="text-[18px] md:text-[20px] font-semibold text-[#f7f8f8] tracking-[-0.02em]">
                 Modifier le profil
               </h1>
+              <p className="text-[13px] text-[#5e6063] mt-0.5">
+                Mettez a jour vos informations
+              </p>
             </div>
+
             <motion.button
               onClick={handleSave}
               disabled={!hasChanges || isSaving}
-              className={`h-10 px-4 flex items-center gap-2 rounded-xl text-[13px] font-semibold transition-all ${
-                hasChanges && !isSaving
-                  ? 'bg-[#5e6dd2] text-white hover:bg-[#6a79db]'
-                  : 'bg-[rgba(255,255,255,0.04)] text-[#5e6063] cursor-not-allowed'
-              }`}
-              whileHover={hasChanges && !isSaving ? { y: -1 } : {}}
+              className={`
+                h-9 px-4 flex items-center gap-2 rounded-lg text-[13px] font-medium transition-all duration-150
+                ${hasChanges && !isSaving
+                  ? 'bg-[#5e6dd2] text-white hover:bg-[#6a79db] shadow-[0_0_0_1px_rgba(94,109,210,0.5)]'
+                  : 'bg-[rgba(255,255,255,0.03)] text-[#4a4b4d] border border-[rgba(255,255,255,0.04)] cursor-not-allowed'
+                }
+              `}
+              whileHover={hasChanges && !isSaving ? { scale: 1.02 } : {}}
               whileTap={hasChanges && !isSaving ? { scale: 0.98 } : {}}
             >
               {isSaving ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
               ) : (
                 <Save className="w-4 h-4" strokeWidth={1.5} />
               )}
@@ -193,15 +353,15 @@ export function EditProfileScreen({ onNavigate, showToast }: EditProfileScreenPr
 
           {/* Avatar Section */}
           <motion.div variants={itemVariants}>
-            <div className="p-5 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]">
-              <label className="flex items-center gap-2 text-[11px] font-medium text-[#5e6063] mb-4 uppercase tracking-wider">
-                <Camera className="w-3.5 h-3.5 text-[#8b93ff]" strokeWidth={1.5} />
-                Photo de profil
-              </label>
+            <SectionCard
+              icon={<Camera className="w-3.5 h-3.5" strokeWidth={1.5} />}
+              iconColor="text-[#8b93ff]"
+              title="Photo de profil"
+            >
               <div className="flex items-center gap-5">
                 <div className="relative">
                   <motion.div
-                    className="w-20 h-20 rounded-xl overflow-hidden ring-2 ring-[rgba(94,109,210,0.2)]"
+                    className="w-[72px] h-[72px] rounded-xl overflow-hidden ring-2 ring-[rgba(94,109,210,0.15)] ring-offset-2 ring-offset-[#08090a]"
                     whileHover={{ scale: 1.02 }}
                   >
                     <ImageWithFallback
@@ -212,79 +372,65 @@ export function EditProfileScreen({ onNavigate, showToast }: EditProfileScreenPr
                   </motion.div>
                   <motion.button
                     onClick={handleChangeAvatar}
-                    className="absolute -bottom-1 -right-1 w-8 h-8 rounded-lg bg-[#5e6dd2] text-white flex items-center justify-center shadow-lg shadow-[#5e6dd2]/20"
+                    className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-lg bg-[#5e6dd2] text-white flex items-center justify-center shadow-lg shadow-[#5e6dd2]/25 hover:bg-[#6a79db] transition-colors duration-150"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                   >
-                    <Camera className="w-4 h-4" strokeWidth={2} />
+                    <Camera className="w-3.5 h-3.5" strokeWidth={2} />
                   </motion.button>
                 </div>
                 <div>
-                  <p className="text-[13px] text-[#f7f8f8] font-medium mb-1">Photo publique</p>
-                  <p className="text-[12px] text-[#5e6063]">JPG, PNG ou GIF. Max 5MB.</p>
+                  <p className="text-[14px] text-[#f7f8f8] font-medium">Photo publique</p>
+                  <p className="text-[12px] text-[#5e6063] mt-0.5">JPG, PNG ou GIF. Max 5MB.</p>
+                  <button
+                    onClick={handleChangeAvatar}
+                    className="text-[12px] text-[#5e6dd2] hover:text-[#8b93ff] font-medium mt-2 transition-colors duration-150"
+                  >
+                    Changer la photo
+                  </button>
                 </div>
               </div>
-            </div>
+            </SectionCard>
           </motion.div>
 
           {/* Basic Info */}
           <motion.div variants={itemVariants}>
-            <div className="p-5 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]">
-              <label className="flex items-center gap-2 text-[11px] font-medium text-[#5e6063] mb-4 uppercase tracking-wider">
-                <User className="w-3.5 h-3.5 text-[#5e6dd2]" strokeWidth={1.5} />
-                Informations de base
-              </label>
+            <SectionCard
+              icon={<User className="w-3.5 h-3.5" strokeWidth={1.5} />}
+              iconColor="text-[#5e6dd2]"
+              title="Informations de base"
+            >
               <div className="space-y-4">
-                {/* Display Name */}
-                <div>
-                  <label className="text-[12px] text-[#8b8d90] mb-1.5 block">Nom d'affichage</label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5e6063]" strokeWidth={1.5} />
-                    <input
-                      type="text"
-                      value={formData.displayName}
-                      onChange={(e) => handleChange('displayName', e.target.value)}
-                      placeholder="Votre nom"
-                      className="w-full h-12 pl-11 pr-4 bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-xl text-[14px] text-[#f7f8f8] placeholder:text-[#5e6063] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all"
-                    />
-                  </div>
-                </div>
+                <InputField
+                  label="Nom d'affichage"
+                  icon={<User className="w-4 h-4" strokeWidth={1.5} />}
+                  value={formData.displayName}
+                  onChange={(v) => handleChange('displayName', v)}
+                  placeholder="Votre nom"
+                />
 
-                {/* Username */}
-                <div>
-                  <label className="text-[12px] text-[#8b8d90] mb-1.5 block">Nom d'utilisateur</label>
-                  <div className="relative">
-                    <AtSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5e6063]" strokeWidth={1.5} />
-                    <input
-                      type="text"
-                      value={formData.username}
-                      onChange={(e) => handleChange('username', e.target.value)}
-                      placeholder="username"
-                      className="w-full h-12 pl-11 pr-4 bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-xl text-[14px] text-[#f7f8f8] placeholder:text-[#5e6063] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all"
-                    />
-                  </div>
-                </div>
+                <InputField
+                  label="Nom d'utilisateur"
+                  icon={<AtSign className="w-4 h-4" strokeWidth={1.5} />}
+                  value={formData.username}
+                  onChange={(v) => handleChange('username', v)}
+                  placeholder="username"
+                />
 
-                {/* Email */}
-                <div>
-                  <label className="text-[12px] text-[#8b8d90] mb-1.5 block">Email</label>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5e6063]" strokeWidth={1.5} />
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => handleChange('email', e.target.value)}
-                      placeholder="votre@email.com"
-                      className="w-full h-12 pl-11 pr-4 bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-xl text-[14px] text-[#f7f8f8] placeholder:text-[#5e6063] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all"
-                    />
-                  </div>
-                </div>
+                <InputField
+                  label="Email"
+                  icon={<Mail className="w-4 h-4" strokeWidth={1.5} />}
+                  type="email"
+                  value={formData.email}
+                  onChange={(v) => handleChange('email', v)}
+                  placeholder="votre@email.com"
+                />
 
-                {/* Bio */}
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-[12px] text-[#8b8d90]">Bio</label>
-                    <span className={`text-[11px] ${(formData.bio?.length || 0) > 180 ? 'text-[#f5a623]' : 'text-[#5e6063]'}`}>
+                {/* Bio textarea */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[13px] text-[#a2a3a5] font-medium">Bio</label>
+                    <span className={`text-[11px] tabular-nums ${(formData.bio?.length || 0) > 180 ? 'text-[#f5a623]' : 'text-[#5e6063]'}`}>
                       {formData.bio?.length || 0}/200
                     </span>
                   </div>
@@ -293,141 +439,138 @@ export function EditProfileScreen({ onNavigate, showToast }: EditProfileScreenPr
                     onChange={(e) => handleChange('bio', e.target.value.slice(0, 200))}
                     placeholder="Parlez de vous..."
                     rows={3}
-                    className="w-full p-4 bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-xl text-[14px] text-[#f7f8f8] placeholder:text-[#5e6063] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all resize-none"
+                    className="
+                      w-full p-3.5
+                      bg-[rgba(255,255,255,0.03)]
+                      border border-[rgba(255,255,255,0.06)]
+                      rounded-lg
+                      text-[14px] text-[#f7f8f8]
+                      placeholder:text-[#4a4b4d]
+                      hover:bg-[rgba(255,255,255,0.05)]
+                      hover:border-[rgba(255,255,255,0.1)]
+                      focus:bg-[rgba(255,255,255,0.04)]
+                      focus:border-[rgba(94,109,210,0.5)]
+                      focus:ring-2 focus:ring-[rgba(94,109,210,0.15)]
+                      focus:outline-none
+                      transition-all duration-150
+                      resize-none
+                    "
                   />
                 </div>
               </div>
-            </div>
+            </SectionCard>
           </motion.div>
 
           {/* Personal Info */}
           <motion.div variants={itemVariants}>
-            <div className="p-5 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]">
-              <label className="flex items-center gap-2 text-[11px] font-medium text-[#5e6063] mb-4 uppercase tracking-wider">
-                <Shield className="w-3.5 h-3.5 text-[#4ade80]" strokeWidth={1.5} />
-                Informations personnelles
-              </label>
+            <SectionCard
+              icon={<Shield className="w-3.5 h-3.5" strokeWidth={1.5} />}
+              iconColor="text-[#4ade80]"
+              title="Informations personnelles"
+            >
               <div className="space-y-4">
-                {/* Location */}
-                <div>
-                  <label className="text-[12px] text-[#8b8d90] mb-1.5 block">Localisation</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5e6063]" strokeWidth={1.5} />
-                    <input
-                      type="text"
-                      value={formData.location}
-                      onChange={(e) => handleChange('location', e.target.value)}
-                      placeholder="Ville, Pays"
-                      className="w-full h-12 pl-11 pr-4 bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-xl text-[14px] text-[#f7f8f8] placeholder:text-[#5e6063] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all"
-                    />
-                  </div>
-                </div>
+                <InputField
+                  label="Localisation"
+                  icon={<MapPin className="w-4 h-4" strokeWidth={1.5} />}
+                  value={formData.location}
+                  onChange={(v) => handleChange('location', v)}
+                  placeholder="Ville, Pays"
+                />
 
-                {/* Birthday */}
-                <div>
-                  <label className="text-[12px] text-[#8b8d90] mb-1.5 block">Date de naissance</label>
-                  <div className="relative">
-                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5e6063]" strokeWidth={1.5} />
+                <div className="space-y-2">
+                  <label className="text-[13px] text-[#a2a3a5] font-medium">Date de naissance</label>
+                  <div className="relative group">
+                    <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5e6063] group-focus-within:text-[#8b93ff] transition-colors duration-150" strokeWidth={1.5} />
                     <input
                       type="date"
                       value={formData.birthday}
                       onChange={(e) => handleChange('birthday', e.target.value)}
-                      className="w-full h-12 pl-11 pr-4 bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-xl text-[14px] text-[#f7f8f8] placeholder:text-[#5e6063] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all"
+                      className="
+                        w-full h-11 pl-10 pr-3.5
+                        bg-[rgba(255,255,255,0.03)]
+                        border border-[rgba(255,255,255,0.06)]
+                        rounded-lg
+                        text-[14px] text-[#f7f8f8]
+                        hover:bg-[rgba(255,255,255,0.05)]
+                        hover:border-[rgba(255,255,255,0.1)]
+                        focus:bg-[rgba(255,255,255,0.04)]
+                        focus:border-[rgba(94,109,210,0.5)]
+                        focus:ring-2 focus:ring-[rgba(94,109,210,0.15)]
+                        focus:outline-none
+                        transition-all duration-150
+                        [color-scheme:dark]
+                      "
                     />
                   </div>
                 </div>
               </div>
-            </div>
+            </SectionCard>
           </motion.div>
 
           {/* Gaming Preferences */}
           <motion.div variants={itemVariants}>
-            <div className="p-5 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]">
-              <label className="flex items-center gap-2 text-[11px] font-medium text-[#5e6063] mb-4 uppercase tracking-wider">
-                <Gamepad2 className="w-3.5 h-3.5 text-[#f5a623]" strokeWidth={1.5} />
-                Préférences de jeu
-              </label>
+            <SectionCard
+              icon={<Gamepad2 className="w-3.5 h-3.5" strokeWidth={1.5} />}
+              iconColor="text-[#f5a623]"
+              title="Preferences de jeu"
+            >
               <div className="space-y-4">
-                {/* Favorite Game */}
-                <div>
-                  <label className="text-[12px] text-[#8b8d90] mb-1.5 block">Jeu favori</label>
-                  <div className="relative">
-                    <Trophy className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5e6063]" strokeWidth={1.5} />
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5e6063]" strokeWidth={1.5} />
-                    <select
-                      value={formData.favoriteGame}
-                      onChange={(e) => handleChange('favoriteGame', e.target.value)}
-                      className="w-full h-12 pl-11 pr-10 bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-xl text-[14px] text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all appearance-none cursor-pointer"
-                    >
-                      <option value="Valorant">Valorant</option>
-                      <option value="CS2">Counter-Strike 2</option>
-                      <option value="League of Legends">League of Legends</option>
-                      <option value="Apex Legends">Apex Legends</option>
-                      <option value="Overwatch 2">Overwatch 2</option>
-                      <option value="Fortnite">Fortnite</option>
-                    </select>
-                  </div>
-                </div>
+                <SelectField
+                  label="Jeu favori"
+                  icon={<Trophy className="w-4 h-4" strokeWidth={1.5} />}
+                  value={formData.favoriteGame}
+                  onChange={(v) => handleChange('favoriteGame', v)}
+                  options={gameOptions}
+                />
 
-                {/* Play Style */}
-                <div>
-                  <label className="text-[12px] text-[#8b8d90] mb-1.5 block">Style de jeu</label>
-                  <div className="relative">
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5e6063]" strokeWidth={1.5} />
-                    <select
-                      value={formData.playStyle}
-                      onChange={(e) => handleChange('playStyle', e.target.value)}
-                      className="w-full h-12 px-4 pr-10 bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-xl text-[14px] text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all appearance-none cursor-pointer"
-                    >
-                      <option value="Aggressive">Agressif</option>
-                      <option value="Defensive">Défensif</option>
-                      <option value="Balanced">Équilibré</option>
-                      <option value="Support">Support</option>
-                      <option value="Strategic">Stratégique</option>
-                    </select>
-                  </div>
-                </div>
+                <SelectField
+                  label="Style de jeu"
+                  value={formData.playStyle}
+                  onChange={(v) => handleChange('playStyle', v)}
+                  options={playStyleOptions}
+                />
               </div>
-            </div>
+            </SectionCard>
           </motion.div>
 
           {/* Danger Zone */}
           <motion.div variants={itemVariants}>
-            <div className="p-5 rounded-xl bg-[rgba(248,113,113,0.05)] border border-[rgba(248,113,113,0.15)]">
-              <label className="flex items-center gap-2 text-[11px] font-medium text-[#f87171] mb-3 uppercase tracking-wider">
-                <AlertCircle className="w-3.5 h-3.5" strokeWidth={1.5} />
-                Zone dangereuse
-              </label>
-              <p className="text-[13px] text-[#8b8d90] mb-4">
-                La suppression de votre compte est irréversible. Toutes vos données seront perdues.
+            <SectionCard
+              icon={<AlertCircle className="w-3.5 h-3.5" strokeWidth={1.5} />}
+              iconColor="text-[#f87171]"
+              title="Zone dangereuse"
+              variant="danger"
+            >
+              <p className="text-[13px] text-[#8b8d90] mb-4 leading-relaxed">
+                La suppression de votre compte est irreversible. Toutes vos donnees seront definitivement perdues.
               </p>
               <motion.button
                 onClick={handleDeleteAccount}
-                className="h-10 px-4 flex items-center gap-2 rounded-xl bg-[rgba(248,113,113,0.1)] border border-[rgba(248,113,113,0.2)] text-[#f87171] text-[13px] font-medium hover:bg-[rgba(248,113,113,0.15)] transition-all"
-                whileHover={{ y: -1 }}
-                whileTap={{ scale: 0.98 }}
+                className="h-9 px-4 flex items-center gap-2 rounded-lg bg-[rgba(248,113,113,0.08)] border border-[rgba(248,113,113,0.15)] text-[#f87171] text-[13px] font-medium hover:bg-[rgba(248,113,113,0.12)] hover:border-[rgba(248,113,113,0.25)] transition-all duration-150"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
               >
                 <Trash2 className="w-4 h-4" strokeWidth={1.5} />
                 Supprimer le compte
               </motion.button>
-            </div>
+            </SectionCard>
           </motion.div>
         </motion.div>
       </div>
 
-      {/* Unsaved changes indicator */}
+      {/* Unsaved changes indicator - Linear toast style */}
       <AnimatePresence>
         {hasChanges && (
           <motion.div
-            className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 bg-[rgba(255,255,255,0.06)] backdrop-blur-sm rounded-xl px-5 py-3 border border-[rgba(255,255,255,0.1)] z-50"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            transition={{ duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
+            className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 bg-[#18191b] backdrop-blur-xl rounded-lg px-4 py-2.5 border border-[rgba(255,255,255,0.08)] shadow-2xl shadow-black/50 z-50"
+            initial={{ opacity: 0, y: 16, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+            transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            <p className="text-[13px] text-[#f7f8f8] font-medium flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-[#f5a623] animate-pulse" />
-              Modifications non sauvegardées
+            <p className="text-[13px] text-[#f7f8f8] font-medium flex items-center gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#f5a623] animate-pulse" />
+              Modifications non sauvegardees
             </p>
           </motion.div>
         )}

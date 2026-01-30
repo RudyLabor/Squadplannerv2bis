@@ -1,7 +1,11 @@
-import { ArrowLeft, Users, TrendingUp, Globe, Lock, UserPlus, Search, Star, Sparkles, Zap, Crown, ChevronRight } from 'lucide-react';
+/**
+ * DISCOVER SQUADS SCREEN - LINEAR DESIGN SYSTEM
+ * Premium, Dark, Minimal - Squad discovery
+ */
+
+import { ArrowLeft, Users, Globe, Lock, UserPlus, Search, Star, Filter, TrendingUp, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-import { Button, Input, IconButton } from '@/design-system';
 
 interface DiscoverSquadsScreenProps {
   onNavigate: (screen: string) => void;
@@ -21,29 +25,31 @@ interface Squad {
   tags: string[];
 }
 
+// Linear-style animations
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
+    transition: { staggerChildren: 0.05, delayChildren: 0.02 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 6 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
+    transition: { duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }
   }
 };
 
-const gameGradients: Record<string, { gradient: string; shadow: string }> = {
-  'Valorant': { gradient: 'from-red-500 to-pink-500', shadow: 'shadow-red-500/30' },
-  'League of Legends': { gradient: 'from-blue-500 to-cyan-500', shadow: 'shadow-blue-500/30' },
-  'CS2': { gradient: 'from-amber-500 to-orange-500', shadow: 'shadow-amber-500/30' },
-  'Apex Legends': { gradient: 'from-red-600 to-orange-500', shadow: 'shadow-red-600/30' },
-  'default': { gradient: 'from-indigo-500 to-purple-500', shadow: 'shadow-indigo-500/30' }
+// Game colors - subtle and minimal
+const gameColors: Record<string, { bg: string; text: string; border: string }> = {
+  'Valorant': { bg: 'rgba(239,68,68,0.1)', text: '#f87171', border: 'rgba(239,68,68,0.2)' },
+  'League of Legends': { bg: 'rgba(59,130,246,0.1)', text: '#60a5fa', border: 'rgba(59,130,246,0.2)' },
+  'CS2': { bg: 'rgba(251,191,36,0.1)', text: '#fbbf24', border: 'rgba(251,191,36,0.2)' },
+  'Apex Legends': { bg: 'rgba(249,115,22,0.1)', text: '#fb923c', border: 'rgba(249,115,22,0.2)' },
+  'default': { bg: 'rgba(94,109,210,0.1)', text: '#8b93ff', border: 'rgba(94,109,210,0.2)' }
 };
 
 export function DiscoverSquadsScreen({ onNavigate, showToast }: DiscoverSquadsScreenProps) {
@@ -60,8 +66,8 @@ export function DiscoverSquadsScreen({ onNavigate, showToast }: DiscoverSquadsSc
       activityRate: 92,
       avgReliability: 88,
       isPublic: true,
-      description: 'Squad compétitive cherchant joueurs sérieux',
-      tags: ['Compétitif', 'Ranked', 'Soir'],
+      description: 'Squad competitive cherchant joueurs serieux',
+      tags: ['Competitif', 'Ranked', 'Soir'],
     },
     {
       id: '2',
@@ -84,8 +90,8 @@ export function DiscoverSquadsScreen({ onNavigate, showToast }: DiscoverSquadsSc
       activityRate: 95,
       avgReliability: 92,
       isPublic: true,
-      description: 'Sessions nocturnes régulières (22h-2h)',
-      tags: ['Nuit', 'Régulier', 'Adultes'],
+      description: 'Sessions nocturnes regulieres (22h-2h)',
+      tags: ['Nuit', 'Regulier', 'Adultes'],
     },
     {
       id: '4',
@@ -97,14 +103,14 @@ export function DiscoverSquadsScreen({ onNavigate, showToast }: DiscoverSquadsSc
       avgReliability: 79,
       isPublic: true,
       description: 'On joue que le weekend, vibes positives',
-      tags: ['Weekend', 'Débutants ok'],
+      tags: ['Weekend', 'Debutants ok'],
     },
   ];
 
   const games = ['all', 'Valorant', 'League of Legends', 'CS2', 'Apex Legends'];
 
   const handleRequestJoin = (squadId: string, squadName: string) => {
-    showToast(`Demande envoyée à ${squadName}`, 'success');
+    showToast(`Demande envoyee a ${squadName}`, 'success');
   };
 
   const filteredSquads = mockSquads.filter(squad => {
@@ -114,73 +120,80 @@ export function DiscoverSquadsScreen({ onNavigate, showToast }: DiscoverSquadsSc
     return matchesQuery && matchesGame;
   });
 
-  return (
-    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-[var(--color-primary-50)] via-purple-50 to-pink-50 relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-[var(--color-primary-400)]/20 to-purple-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 right-0 w-64 h-64 bg-gradient-to-br from-cyan-400/15 to-blue-400/15 rounded-full blur-3xl" />
-      </div>
+  const getActivityColor = (rate: number) => {
+    if (rate >= 90) return 'text-[#4ade80]';
+    if (rate >= 75) return 'text-[#8b93ff]';
+    return 'text-[#8b8d90]';
+  };
 
-      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
+  const getReliabilityColor = (score: number) => {
+    if (score >= 85) return 'text-[#4ade80] bg-[rgba(74,222,128,0.1)]';
+    if (score >= 70) return 'text-[#8b93ff] bg-[rgba(94,109,210,0.1)]';
+    return 'text-[#8b8d90] bg-[rgba(139,141,144,0.1)]';
+  };
+
+  return (
+    <div className="min-h-screen pb-24 md:pb-8 bg-[#08090a]">
+      <div className="px-4 md:px-6 py-6 max-w-2xl mx-auto">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
-          {/* Header */}
+          {/* Header - Linear style */}
           <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
-            <IconButton
-              variant="secondary"
-              size="md"
-              icon={<ArrowLeft className="w-5 h-5" strokeWidth={2} />}
+            <motion.button
               onClick={() => onNavigate('home')}
-              aria-label="Retour"
-            />
+              className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.06)] transition-all"
+              whileHover={{ x: -2 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
+            </motion.button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-[var(--color-primary-600)] to-purple-600 bg-clip-text text-transparent">
-                Découvrir Squads
+              <h1 className="text-[22px] md:text-[24px] font-semibold text-[#f7f8f8]">
+                Decouvrir Squads
               </h1>
-              <p className="text-sm text-[var(--fg-secondary)] font-medium mt-0.5">
-                Trouve ta prochaine équipe
+              <p className="text-[13px] text-[#8b8d90]">
+                Trouve ta prochaine equipe
               </p>
             </div>
-            <motion.div
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--color-primary-500)] to-purple-600 flex items-center justify-center shadow-lg shadow-[var(--color-primary-500)]/30"
-              whileHover={{ scale: 1.05, rotate: 5 }}
-            >
-              <Users className="w-6 h-6 text-white" strokeWidth={2} />
-            </motion.div>
-          </motion.div>
-
-          {/* Search Bar */}
-          <motion.div variants={itemVariants} className="mb-6">
-            <Input
-              placeholder="Rechercher une squad..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              icon={<Search className="w-5 h-5" strokeWidth={2} />}
-              size="lg"
-            />
-          </motion.div>
-
-          {/* Game Filters */}
-          <motion.div variants={itemVariants} className="mb-6">
-            <div className="text-sm font-semibold text-[var(--fg-primary)] mb-3">
-              Filtrer par jeu
+            <div className="w-11 h-11 rounded-xl bg-[rgba(94,109,210,0.15)] flex items-center justify-center">
+              <Users className="w-5 h-5 text-[#8b93ff]" strokeWidth={1.5} />
             </div>
-            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+          </motion.div>
+
+          {/* Search Bar - Linear style */}
+          <motion.div variants={itemVariants} className="mb-5">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#5e6063]" strokeWidth={1.5} />
+              <input
+                type="text"
+                placeholder="Rechercher une squad..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-11 md:h-12 pl-11 pr-4 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-[14px] text-[#f7f8f8] placeholder:text-[#5e6063] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all"
+              />
+            </div>
+          </motion.div>
+
+          {/* Game Filters - Linear style pills */}
+          <motion.div variants={itemVariants} className="mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Filter className="w-4 h-4 text-[#5e6063]" strokeWidth={1.5} />
+              <span className="text-[13px] font-medium text-[#8b8d90]">Filtrer par jeu</span>
+            </div>
+            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
               {games.map((game) => (
                 <motion.button
                   key={game}
                   onClick={() => setSelectedGame(game)}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ${
+                  className={`px-4 py-2 rounded-lg text-[13px] font-medium whitespace-nowrap transition-all ${
                     selectedGame === game
-                      ? 'bg-gradient-to-r from-[var(--color-primary-500)] to-purple-500 text-white shadow-lg shadow-[var(--color-primary-500)]/30'
-                      : 'bg-[var(--bg-elevated)]/80 backdrop-blur-sm text-[var(--fg-secondary)] border border-[var(--border-subtle)] hover:border-[var(--color-primary-200)]'
+                      ? 'bg-[rgba(94,109,210,0.15)] text-[#8b93ff] border border-[rgba(94,109,210,0.3)]'
+                      : 'bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] text-[#8b8d90] hover:border-[rgba(255,255,255,0.1)] hover:text-[#f7f8f8]'
                   }`}
-                  whileHover={{ scale: 1.02 }}
+                  whileHover={{ y: -1 }}
                   whileTap={{ scale: 0.98 }}
                 >
                   {game === 'all' ? 'Tous' : game}
@@ -191,106 +204,107 @@ export function DiscoverSquadsScreen({ onNavigate, showToast }: DiscoverSquadsSc
 
           {/* Results Count */}
           <motion.div variants={itemVariants} className="mb-4">
-            <div className="text-sm text-[var(--fg-secondary)] font-semibold">
+            <p className="text-[13px] text-[#5e6063]">
               {filteredSquads.length} squad{filteredSquads.length > 1 ? 's' : ''} disponible{filteredSquads.length > 1 ? 's' : ''}
-            </div>
+            </p>
           </motion.div>
 
-          {/* Squads List */}
+          {/* Squads List - Linear style cards */}
           <AnimatePresence mode="wait">
             <motion.div
               key={selectedGame}
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="space-y-4"
+              className="space-y-3"
             >
               {filteredSquads.map((squad, index) => {
                 const spotsLeft = squad.maxMembers - squad.members;
                 const isFull = spotsLeft === 0;
-                const gameStyle = gameGradients[squad.game] || gameGradients.default;
+                const gameStyle = gameColors[squad.game] || gameColors.default;
 
                 return (
                   <motion.div
                     key={squad.id}
                     variants={itemVariants}
                     custom={index}
-                    className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl p-5 border border-[var(--border-subtle)] shadow-lg hover:shadow-xl transition-all duration-300"
-                    whileHover={{ scale: 1.01, y: -2 }}
+                    className="p-4 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)] transition-all group"
+                    whileHover={{ y: -1 }}
                   >
-                    {/* Header */}
-                    <div className="flex items-start justify-between mb-4">
+                    {/* Header Row */}
+                    <div className="flex items-start justify-between mb-3">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="text-lg font-bold tracking-tight text-[var(--fg-primary)]">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <h3 className="text-[15px] font-semibold text-[#f7f8f8] group-hover:text-white transition-colors">
                             {squad.name}
                           </h3>
                           {squad.isPublic ? (
-                            <Globe className="w-4 h-4 text-emerald-500" strokeWidth={2} />
+                            <Globe className="w-3.5 h-3.5 text-[#4ade80]" strokeWidth={1.5} />
                           ) : (
-                            <Lock className="w-4 h-4 text-gray-400" strokeWidth={2} />
+                            <Lock className="w-3.5 h-3.5 text-[#5e6063]" strokeWidth={1.5} />
                           )}
                         </div>
-                        <div className="mb-2">
-                          <span className={`inline-flex px-2.5 py-1 rounded-lg bg-gradient-to-r ${gameStyle.gradient} text-white text-xs font-bold`}>
-                            {squad.game}
-                          </span>
-                        </div>
-                        <p className="text-sm text-[var(--fg-secondary)] font-medium">
-                          {squad.description}
-                        </p>
+                        <span
+                          className="inline-flex px-2 py-0.5 rounded-md text-[11px] font-medium"
+                          style={{
+                            backgroundColor: gameStyle.bg,
+                            color: gameStyle.text,
+                            border: `1px solid ${gameStyle.border}`
+                          }}
+                        >
+                          {squad.game}
+                        </span>
                       </div>
-                      <motion.div
-                        className={`w-14 h-14 rounded-xl bg-gradient-to-br ${gameStyle.gradient} flex items-center justify-center flex-shrink-0 shadow-lg ${gameStyle.shadow}`}
-                        whileHover={{ scale: 1.1, rotate: 5 }}
-                      >
-                        <Users className="w-7 h-7 text-white" strokeWidth={2} />
-                      </motion.div>
+
+                      {/* Activity indicator */}
+                      <div className="flex items-center gap-1.5 text-[12px]">
+                        <TrendingUp className={`w-3.5 h-3.5 ${getActivityColor(squad.activityRate)}`} strokeWidth={1.5} />
+                        <span className={getActivityColor(squad.activityRate)}>{squad.activityRate}%</span>
+                      </div>
                     </div>
 
+                    {/* Description */}
+                    <p className="text-[13px] text-[#8b8d90] mb-3 line-clamp-2">
+                      {squad.description}
+                    </p>
+
                     {/* Tags */}
-                    <div className="flex gap-2 flex-wrap mb-4">
+                    <div className="flex gap-1.5 flex-wrap mb-4">
                       {squad.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="px-2.5 py-1 bg-[var(--color-primary-100)] text-[var(--color-primary-600)] rounded-lg text-xs font-semibold"
+                          className="px-2 py-0.5 bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.06)] text-[#8b8d90] rounded-md text-[11px]"
                         >
                           {tag}
                         </span>
                       ))}
                     </div>
 
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-3 gap-3 mb-4">
-                      <div className="bg-[var(--bg-subtle)] rounded-xl p-3 text-center">
-                        <div className="text-lg font-bold text-[var(--fg-primary)]">
+                    {/* Stats Row */}
+                    <div className="flex items-center gap-4 mb-4 py-3 px-3 rounded-lg bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.04)]">
+                      <div className="flex-1 text-center">
+                        <div className="text-[15px] font-semibold text-[#f7f8f8]">
                           {squad.members}/{squad.maxMembers}
                         </div>
-                        <div className="text-[10px] text-[var(--fg-tertiary)] font-semibold uppercase tracking-wider">
+                        <div className="text-[10px] text-[#5e6063] uppercase tracking-wider">
                           Membres
                         </div>
                       </div>
-                      <div className="bg-[var(--bg-subtle)] rounded-xl p-3 text-center">
-                        <div className={`text-lg font-bold ${
-                          squad.activityRate >= 85 ? 'text-[var(--color-success-500)]' :
-                          squad.activityRate >= 70 ? 'text-[var(--color-primary-500)]' :
-                          'text-[var(--fg-tertiary)]'
-                        }`}>
+                      <div className="w-px h-8 bg-[rgba(255,255,255,0.06)]" />
+                      <div className="flex-1 text-center">
+                        <div className={`text-[15px] font-semibold ${getActivityColor(squad.activityRate)}`}>
                           {squad.activityRate}%
                         </div>
-                        <div className="text-[10px] text-[var(--fg-tertiary)] font-semibold uppercase tracking-wider">
+                        <div className="text-[10px] text-[#5e6063] uppercase tracking-wider">
                           Activite
                         </div>
                       </div>
-                      <div className="bg-[var(--bg-subtle)] rounded-xl p-3 text-center">
-                        <div className={`text-lg font-bold ${
-                          squad.avgReliability >= 85 ? 'text-[var(--color-success-500)]' :
-                          squad.avgReliability >= 70 ? 'text-[var(--color-primary-500)]' :
-                          'text-[var(--fg-tertiary)]'
-                        }`}>
+                      <div className="w-px h-8 bg-[rgba(255,255,255,0.06)]" />
+                      <div className="flex-1 text-center">
+                        <span className={`inline-flex px-2 py-0.5 rounded-md text-[13px] font-semibold ${getReliabilityColor(squad.avgReliability)}`}>
                           {squad.avgReliability}
-                        </div>
-                        <div className="text-[10px] text-[var(--fg-tertiary)] font-semibold uppercase tracking-wider">
+                        </span>
+                        <div className="text-[10px] text-[#5e6063] uppercase tracking-wider mt-0.5">
                           Fiabilite
                         </div>
                       </div>
@@ -298,23 +312,21 @@ export function DiscoverSquadsScreen({ onNavigate, showToast }: DiscoverSquadsSc
 
                     {/* Action Button */}
                     {isFull ? (
-                      <Button
-                        variant="secondary"
-                        size="md"
+                      <button
                         disabled
-                        className="w-full"
+                        className="w-full h-10 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] text-[#5e6063] font-medium text-[13px] cursor-not-allowed"
                       >
                         Squad complete
-                      </Button>
+                      </button>
                     ) : (
                       <motion.button
                         onClick={() => handleRequestJoin(squad.id, squad.name)}
-                        className={`w-full h-11 rounded-xl bg-gradient-to-r ${gameStyle.gradient} text-white font-semibold text-sm shadow-lg ${gameStyle.shadow} flex items-center justify-center gap-2`}
-                        whileHover={{ scale: 1.02, y: -2 }}
+                        className="w-full h-10 rounded-xl bg-[#5e6dd2] text-white font-semibold text-[13px] flex items-center justify-center gap-2 shadow-lg shadow-[#5e6dd2]/20 hover:bg-[#6a79db] transition-colors"
+                        whileHover={{ y: -1 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        <UserPlus className="w-4 h-4" strokeWidth={2} />
-                        Demander à rejoindre ({spotsLeft} place{spotsLeft > 1 ? 's' : ''})
+                        <UserPlus className="w-4 h-4" strokeWidth={1.5} />
+                        Demander a rejoindre ({spotsLeft} place{spotsLeft > 1 ? 's' : ''})
                       </motion.button>
                     )}
                   </motion.div>
@@ -326,73 +338,71 @@ export function DiscoverSquadsScreen({ onNavigate, showToast }: DiscoverSquadsSc
           {/* Empty State */}
           {filteredSquads.length === 0 && searchQuery.length > 0 && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-center py-16"
+              className="p-8 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]"
             >
-              <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[var(--color-primary-500)] to-purple-600 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-[var(--color-primary-500)]/30">
-                <Search className="w-10 h-10 text-white" strokeWidth={1.5} />
+              <div className="text-center max-w-[280px] mx-auto">
+                <div className="w-12 h-12 rounded-xl bg-[rgba(255,255,255,0.04)] flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-6 h-6 text-[#5e6063]" strokeWidth={1.5} />
+                </div>
+                <h3 className="text-[15px] font-semibold text-[#f7f8f8] mb-2">
+                  Aucune squad trouvee
+                </h3>
+                <p className="text-[13px] text-[#8b8d90]">
+                  Essaye une autre recherche
+                </p>
               </div>
-              <h3 className="text-xl font-bold tracking-tight text-[var(--fg-primary)] mb-2">
-                Aucune squad trouvée
-              </h3>
-              <p className="text-[var(--fg-secondary)] text-sm font-medium max-w-xs mx-auto">
-                Essaye une autre recherche
-              </p>
             </motion.div>
           )}
 
-          {/* Info Banner */}
+          {/* Info Banner - Linear style */}
           {searchQuery.length === 0 && (
             <motion.div
               variants={itemVariants}
-              className="relative overflow-hidden bg-gradient-to-br from-[var(--color-primary-500)] to-purple-600 rounded-2xl p-5 mt-8 shadow-xl"
+              className="mt-6 p-4 rounded-xl bg-[rgba(94,109,210,0.08)] border border-[rgba(94,109,210,0.15)]"
             >
-              {/* Decorative elements */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
-
-              <div className="relative z-10 flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-                  <Star className="w-6 h-6 text-white" strokeWidth={2} />
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[rgba(94,109,210,0.15)] flex items-center justify-center flex-shrink-0">
+                  <Star className="w-5 h-5 text-[#8b93ff]" strokeWidth={1.5} />
                 </div>
                 <div className="flex-1">
-                  <div className="text-base font-bold text-white mb-1">
-                    Trouve ta squad idéale
-                  </div>
-                  <div className="text-sm text-white/90 font-medium leading-relaxed">
-                    Parcours les squads publiques, filtre par jeu et vérifie leur niveau d'activité avant de rejoindre.
-                  </div>
+                  <h4 className="text-[14px] font-semibold text-[#f7f8f8] mb-1">
+                    Trouve ta squad ideale
+                  </h4>
+                  <p className="text-[13px] text-[#8b8d90] leading-relaxed">
+                    Parcours les squads publiques, filtre par jeu et verifie leur niveau d'activite avant de rejoindre.
+                  </p>
                 </div>
               </div>
             </motion.div>
           )}
 
-          {/* Create Squad CTA */}
-          <motion.div variants={itemVariants} className="mt-6">
-            <div className="bg-gradient-to-r from-amber-100/80 to-orange-100/80 backdrop-blur-sm rounded-2xl p-4 border border-amber-200/50">
+          {/* Create Squad CTA - Linear style */}
+          <motion.div variants={itemVariants} className="mt-4">
+            <motion.button
+              onClick={() => onNavigate('create-squad')}
+              className="w-full p-4 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)] transition-all group"
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.99 }}
+            >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-md">
-                  <Zap className="w-5 h-5 text-white" strokeWidth={2} />
+                <div className="w-10 h-10 rounded-lg bg-[rgba(74,222,128,0.1)] flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="w-5 h-5 text-[#4ade80]" strokeWidth={1.5} />
                 </div>
-                <div className="flex-1">
-                  <p className="text-xs font-bold text-amber-800">
+                <div className="flex-1 text-left">
+                  <h4 className="text-[14px] font-medium text-[#f7f8f8] group-hover:text-white transition-colors">
                     Tu ne trouves pas ta squad parfaite ?
-                  </p>
-                  <p className="text-[10px] text-amber-600 mt-0.5">
-                    Crée la tienne et invite tes amis !
+                  </h4>
+                  <p className="text-[12px] text-[#8b8d90]">
+                    Cree la tienne et invite tes amis
                   </p>
                 </div>
-                <motion.button
-                  onClick={() => onNavigate('create-squad')}
-                  className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl text-sm font-semibold shadow-md"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Créer
-                </motion.button>
+                <div className="w-8 h-8 rounded-lg bg-[#4ade80] flex items-center justify-center text-[#08090a]">
+                  <span className="text-[18px] font-semibold">+</span>
+                </div>
               </div>
-            </div>
+            </motion.button>
           </motion.div>
         </motion.div>
       </div>

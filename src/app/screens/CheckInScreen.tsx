@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { ArrowLeft, Clock, CheckCircle, XCircle, AlertTriangle, Sparkles, Gamepad2 } from 'lucide-react';
+import { ArrowLeft, Clock, CheckCircle, XCircle, Car, Sparkles, Gamepad2, Users } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { mockSessions } from '@/data/mockData';
@@ -10,7 +10,6 @@ import { useSoundEffects } from '@/app/hooks/useSoundEffects';
 import { Celebration } from '@/app/components/ui/Celebration';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 import { DeepLinkButton } from '@/app/components/ui/DeepLinkButton';
-import { Button, Card, Badge, SkeletonPage, IconButton } from '@/design-system';
 
 interface CheckInScreenProps {
   onNavigate: (screen: string, data?: any) => void;
@@ -31,11 +30,11 @@ const containerVariants = {
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
+    transition: { type: "spring", stiffness: 400, damping: 30 }
   }
 };
 
@@ -52,7 +51,6 @@ export function CheckInScreen({ onNavigate, showToast, useMockData = false, data
 
   useEffect(() => {
     if (useMockData) {
-      // Mode démo pour la galerie
       const mockSession = mockSessions[0];
       setSession(mockSession);
       setCheckIns(mockSession.attendees || []);
@@ -64,25 +62,23 @@ export function CheckInScreen({ onNavigate, showToast, useMockData = false, data
 
   const loadCheckIn = async () => {
     if (!data?.sessionId) {
-      showToast('Aucune session spécifiée', 'error');
+      showToast('Aucune session specifiee', 'error');
       setLoading(false);
       return;
     }
 
     try {
-      // Get all sessions and find the one we need
       const response = await sessionsAPI.getSessions();
       const foundSession = response.sessions?.find((s: any) => s.id === data.sessionId);
 
       if (!foundSession) {
-        showToast('Session non trouvée', 'error');
+        showToast('Session non trouvee', 'error');
         setLoading(false);
         return;
       }
 
       setSession(foundSession);
 
-      // Load check-ins (mock if API not available)
       const api = sessionsAPI as any;
       let loadedCheckIns: any[] = [];
       if (typeof api.getCheckIns === 'function') {
@@ -91,7 +87,6 @@ export function CheckInScreen({ onNavigate, showToast, useMockData = false, data
       }
       setCheckIns(loadedCheckIns);
 
-      // Check if user already checked in
       const userCheckIn = loadedCheckIns.find((ci: any) => ci.userId === user?.id);
       if (userCheckIn) {
         setUserStatus(userCheckIn.status);
@@ -107,7 +102,7 @@ export function CheckInScreen({ onNavigate, showToast, useMockData = false, data
 
   const handleCheckIn = async (status: 'present' | 'late' | 'absent') => {
     if (status === 'late' && !lateMinutes) {
-      showToast('Indiquez votre retard estimé', 'error');
+      showToast('Indiquez votre retard estime', 'error');
       return;
     }
 
@@ -130,13 +125,13 @@ export function CheckInScreen({ onNavigate, showToast, useMockData = false, data
         notification('success');
         play('success');
         setShowCelebration(true);
-        showToast('Présence confirmée ! +1 fiabilité', 'success');
+        showToast('Presence confirmee ! +1 fiabilite', 'success');
       } else if (status === 'late') {
-        showToast(`Retard signalé : ${lateMinutes} min`, 'info');
+        showToast(`Retard signale : ${lateMinutes} min`, 'info');
         notification('warning');
         play('whoosh');
       } else {
-        showToast('Absence signalée (score impacté)', 'error');
+        showToast('Absence signalee (score impacte)', 'error');
         notification('error');
         play('error');
       }
@@ -150,184 +145,173 @@ export function CheckInScreen({ onNavigate, showToast, useMockData = false, data
     }
   };
 
+  // Loading skeleton - Linear dark style
   if (loading) {
     return (
-      <div className="min-h-screen bg-[var(--bg-base)]">
-        <SkeletonPage />
+      <div className="min-h-screen bg-[#08090a]">
+        <div className="px-4 py-6 max-w-2xl mx-auto">
+          <div className="animate-pulse space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-[#1a1b1e] rounded-lg" />
+              <div className="flex-1 space-y-2">
+                <div className="h-5 bg-[#1a1b1e] rounded w-32" />
+                <div className="h-3 bg-[#1a1b1e] rounded w-24" />
+              </div>
+            </div>
+            <div className="h-32 bg-[#1a1b1e] rounded-xl" />
+            <div className="h-48 bg-[#1a1b1e] rounded-xl" />
+            <div className="space-y-3">
+              <div className="h-16 bg-[#1a1b1e] rounded-xl" />
+              <div className="h-16 bg-[#1a1b1e] rounded-xl" />
+              <div className="h-16 bg-[#1a1b1e] rounded-xl" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
+  // Session not found - Linear dark style
   if (!session) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[var(--color-primary-50)] via-purple-50 to-pink-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-[#08090a] flex items-center justify-center px-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
+          className="text-center max-w-md"
         >
-          <Card variant="elevated" padding="xl" className="text-center max-w-md bg-[var(--bg-elevated)]/80 backdrop-blur-sm border-[var(--border-subtle)]/50 shadow-xl">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--color-error-500)] to-orange-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[var(--color-error-500)]/30">
-              <AlertTriangle className="w-8 h-8 text-white" />
-            </div>
-            <h2 className="text-xl font-bold tracking-tight text-[var(--fg-primary)] mb-2">Session introuvable</h2>
-            <p className="text-[var(--fg-secondary)] font-medium mb-6">Cette session n'existe pas ou a été supprimée.</p>
-            <Button onClick={() => onNavigate('home')} variant="primary" fullWidth>
-              Retour à l'accueil
-            </Button>
-          </Card>
+          <div className="w-16 h-16 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
+            <XCircle className="w-8 h-8 text-red-400" />
+          </div>
+          <h2 className="text-xl font-semibold text-white mb-2">Session introuvable</h2>
+          <p className="text-[#8b8b8b] mb-6">Cette session n'existe pas ou a ete supprimee.</p>
+          <button
+            onClick={() => onNavigate('home')}
+            className="px-6 py-2.5 bg-[#1a1b1e] hover:bg-[#252629] border border-[#2a2b2e] text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            Retour a l'accueil
+          </button>
         </motion.div>
       </div>
     );
   }
 
-  // Calculate stats from check-ins
+  // Calculate stats
   const presentCount = checkIns.filter(ci => ci.status === 'present').length;
   const lateCount = checkIns.filter(ci => ci.status === 'late').length;
   const totalExpected = session.confirmedSlot?.responses?.filter((r: any) => r.response === 'yes').length || 0;
 
   return (
-    <div className="min-h-screen pb-24 pt-safe bg-[var(--bg-base)] relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-[var(--color-success-400)]/20 to-teal-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-[var(--color-primary-400)]/20 to-purple-400/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 right-0 w-64 h-64 bg-gradient-to-br from-[var(--color-warning-400)]/15 to-orange-400/15 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
+    <div className="min-h-screen pb-24 pt-safe bg-[#08090a] relative">
+      <div className="px-4 py-6 max-w-2xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 15, filter: "blur(5px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ duration: 0.35 }}
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
         >
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
           {/* Header */}
-          <motion.div variants={itemVariants} className="flex items-center gap-3 mb-8">
-            <IconButton
-              aria-label="Retour"
-              icon={<ArrowLeft className="w-5 h-5" strokeWidth={2} />}
-              variant="secondary"
-              size="lg"
+          <motion.div variants={itemVariants} className="flex items-center gap-3 mb-6">
+            <button
               onClick={() => onNavigate('squad-detail', { id: session.squadId || data?.squadId })}
-              className="rounded-2xl bg-[var(--bg-elevated)]/80 backdrop-blur-sm border-[var(--border-subtle)]/50 shadow-lg hover:shadow-xl"
-            />
+              className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#1a1b1e] hover:bg-[#252629] border border-[#2a2b2e] transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-[#8b8b8b]" />
+            </button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-[var(--color-primary-600)] to-purple-600 bg-clip-text text-transparent">
-                Check-in session
+              <h1 className="text-lg font-semibold text-white">
+                Check-in
               </h1>
-              <p className="text-sm text-[var(--fg-secondary)] font-medium mt-0.5">
+              <p className="text-sm text-[#8b8b8b]">
                 {session.squadName}
               </p>
             </div>
-            <motion.div
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--color-success-500)] to-teal-500 flex items-center justify-center shadow-lg shadow-[var(--color-success-500)]/30"
-              whileHover={{ scale: 1.05, rotate: 5 }}
-            >
-              <Clock className="w-6 h-6 text-white" strokeWidth={2} />
-            </motion.div>
+            <div className="w-10 h-10 rounded-lg bg-[#5e5ce6]/10 border border-[#5e5ce6]/20 flex items-center justify-center">
+              <Clock className="w-5 h-5 text-[#5e5ce6]" />
+            </div>
           </motion.div>
 
-          {/* Time Alert */}
+          {/* Time Alert Card */}
           <motion.div
             variants={itemVariants}
-            className="bg-gradient-to-br from-[var(--color-primary-500)] to-purple-600 rounded-3xl p-6 mb-8 shadow-xl shadow-[var(--color-primary-500)]/30 relative overflow-hidden"
+            className="bg-[#1a1b1e] border border-[#2a2b2e] rounded-xl p-5 mb-6"
           >
-            {/* Decorative elements */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
-
-            <div className="relative z-10 flex items-center gap-4 mb-4">
-              <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <Clock className="w-7 h-7 text-white" strokeWidth={2} />
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-[#5e5ce6]/10 border border-[#5e5ce6]/20 flex items-center justify-center">
+                <Clock className="w-6 h-6 text-[#5e5ce6]" />
               </div>
               <div>
-                <p className="text-xs text-white/80 font-semibold mb-1">
+                <p className="text-xs text-[#8b8b8b] font-medium uppercase tracking-wider mb-1">
                   C'est l'heure !
                 </p>
-                <p className="text-3xl font-bold text-white">
+                <p className="text-2xl font-semibold text-white">
                   {session.time}
                 </p>
               </div>
             </div>
-            <p className="relative z-10 text-sm text-white/90 font-medium">
-              Confirmez votre présence pour que l'équipe sache que vous êtes prêt.
+            <p className="text-sm text-[#8b8b8b] mt-4">
+              Confirmez votre presence pour que l'equipe sache que vous etes pret.
             </p>
           </motion.div>
 
-          {/* Session Info */}
+          {/* Session Info Card */}
           <motion.div variants={itemVariants}>
-            <Card variant="elevated" padding="none" className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm border-[var(--border-subtle)]/50 shadow-lg mb-8 overflow-hidden">
-              <div className="relative h-32">
+            <div className="bg-[#1a1b1e] border border-[#2a2b2e] rounded-xl overflow-hidden mb-6">
+              {/* Game Image Header */}
+              <div className="relative h-28">
                 <ImageWithFallback
                   src={session.gameImage}
                   alt={session.game}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-                <div className="absolute bottom-4 left-4">
-                  <p className="text-xs text-white/70 font-semibold mb-1">
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1a1b1e] via-transparent to-transparent" />
+                <div className="absolute bottom-3 left-4">
+                  <p className="text-xs text-[#8b8b8b] mb-0.5">
                     {session.game}
                   </p>
-                  <h2 className="text-xl font-bold tracking-tight text-white">
+                  <h2 className="text-base font-semibold text-white">
                     {session.title}
                   </h2>
                 </div>
               </div>
 
-              <div className="p-5">
-                <div className="grid grid-cols-3 gap-2 mb-4">
-                  <motion.div
-                    className="bg-gradient-to-br from-[var(--color-success-50)] to-teal-50 rounded-xl px-3 py-2 border border-[var(--color-success-200)]"
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    <p className="text-xs text-[var(--color-success-700)] font-semibold mb-1">
-                      Présents
-                    </p>
-                    <p className="text-lg font-bold text-[var(--color-success-600)]">
-                      {presentCount}
-                    </p>
-                  </motion.div>
-                  <motion.div
-                    className="bg-gradient-to-br from-[var(--color-warning-50)] to-orange-50 rounded-xl px-3 py-2 border border-[var(--color-warning-200)]"
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    <p className="text-xs text-[var(--color-warning-700)] font-semibold mb-1">
-                      En retard
-                    </p>
-                    <p className="text-lg font-bold text-[var(--color-warning-600)]">
-                      {lateCount}
-                    </p>
-                  </motion.div>
-                  <motion.div
-                    className="bg-gradient-to-br from-[var(--bg-subtle)] to-slate-50 rounded-xl px-3 py-2 border border-[var(--border-subtle)]"
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    <p className="text-xs text-[var(--fg-secondary)] font-semibold mb-1">
-                      En attente
-                    </p>
-                    <p className="text-lg font-bold text-[var(--fg-primary)]">
-                      {totalExpected - presentCount - lateCount}
-                    </p>
-                  </motion.div>
+              {/* Stats Grid */}
+              <div className="p-4">
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="bg-[#08090a] rounded-lg p-3 border border-[#2a2b2e]">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <p className="text-xs text-[#8b8b8b]">Presents</p>
+                    </div>
+                    <p className="text-lg font-semibold text-emerald-400">{presentCount}</p>
+                  </div>
+                  <div className="bg-[#08090a] rounded-lg p-3 border border-[#2a2b2e]">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-2 h-2 rounded-full bg-orange-500" />
+                      <p className="text-xs text-[#8b8b8b]">En route</p>
+                    </div>
+                    <p className="text-lg font-semibold text-orange-400">{lateCount}</p>
+                  </div>
+                  <div className="bg-[#08090a] rounded-lg p-3 border border-[#2a2b2e]">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-2 h-2 rounded-full bg-[#8b8b8b]" />
+                      <p className="text-xs text-[#8b8b8b]">Attente</p>
+                    </div>
+                    <p className="text-lg font-semibold text-[#8b8b8b]">{Math.max(0, totalExpected - presentCount - lateCount)}</p>
+                  </div>
                 </div>
 
                 {/* Players List */}
-                <div className="space-y-2">
+                <div className="space-y-1">
                   {session.confirmedSlot?.responses?.map((response: any) => {
                     const player = response.player;
                     const checkIn = checkIns.find((ci: any) => ci.userId === player.id);
                     return (
-                      <motion.div
+                      <div
                         key={player.id}
-                        className="flex items-center justify-between py-2 border-b border-[var(--border-subtle)] last:border-0"
-                        whileHover={{ x: 2 }}
+                        className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-[#08090a] transition-colors"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl overflow-hidden bg-gradient-to-br from-[var(--color-primary-500)] to-purple-500">
+                          <div className="w-8 h-8 rounded-lg overflow-hidden bg-[#2a2b2e]">
                             {player.avatar ? (
                               <img
                                 src={player.avatar}
@@ -335,173 +319,194 @@ export function CheckInScreen({ onNavigate, showToast, useMockData = false, data
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center text-white font-bold text-sm">
+                              <div className="w-full h-full flex items-center justify-center text-[#8b8b8b] font-medium text-sm">
                                 {player.name?.charAt(0)}
                               </div>
                             )}
                           </div>
-                          <span className="text-sm font-semibold text-[var(--fg-primary)]">
+                          <span className="text-sm font-medium text-white">
                             {player.name}
                           </span>
                         </div>
                         <div>
                           {checkIn?.status === 'present' && (
-                            <Badge variant="success" icon={<CheckCircle className="w-3.5 h-3.5" strokeWidth={2} />}>
-                              Présent
-                            </Badge>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-xs font-medium">
+                              <CheckCircle className="w-3.5 h-3.5" />
+                              Present
+                            </span>
                           )}
                           {checkIn?.status === 'late' && (
-                            <Badge variant="warning" icon={<Clock className="w-3.5 h-3.5" strokeWidth={2} />}>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-orange-500/10 text-orange-400 text-xs font-medium">
+                              <Car className="w-3.5 h-3.5" />
                               +{checkIn.note}min
-                            </Badge>
+                            </span>
                           )}
                           {checkIn?.status === 'absent' && (
-                            <Badge variant="error" icon={<XCircle className="w-3.5 h-3.5" strokeWidth={2} />}>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-red-500/10 text-red-400 text-xs font-medium">
+                              <XCircle className="w-3.5 h-3.5" />
                               Absent
-                            </Badge>
+                            </span>
                           )}
                           {!checkIn && (
-                            <Badge variant="gray" dot>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#2a2b2e] text-[#8b8b8b] text-xs font-medium">
                               En attente
-                            </Badge>
+                            </span>
                           )}
                         </div>
-                      </motion.div>
+                      </div>
                     );
                   })}
                 </div>
               </div>
-            </Card>
+            </div>
           </motion.div>
 
           {/* Check-in Actions */}
           {!userStatus && (
-            <motion.div variants={itemVariants} className="space-y-4">
+            <motion.div variants={itemVariants} className="space-y-3">
               <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-5 h-5 text-[var(--color-primary-500)]" />
-                <h2 className="text-lg font-bold tracking-tight text-[var(--fg-primary)]">
+                <Users className="w-4 h-4 text-[#5e5ce6]" />
+                <h2 className="text-sm font-medium text-white">
                   Confirmez votre presence
                 </h2>
               </div>
 
-              {/* Present */}
+              {/* Ready - Green button */}
               <motion.button
                 onClick={() => handleCheckIn('present')}
-                className="w-full bg-gradient-to-r from-[var(--color-success-500)] to-teal-500 hover:from-[var(--color-success-600)] hover:to-teal-600 text-white rounded-2xl p-5 shadow-lg shadow-[var(--color-success-500)]/30 hover:shadow-xl transition-all"
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.98 }}
+                className="w-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/50 rounded-xl p-4 transition-all group"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                    <CheckCircle className="w-6 h-6" strokeWidth={2} />
+                  <div className="w-11 h-11 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                    <CheckCircle className="w-5 h-5 text-emerald-400" />
                   </div>
                   <div className="text-left flex-1">
-                    <p className="text-base font-bold mb-1">
-                      Je suis là
+                    <p className="text-sm font-semibold text-emerald-400 mb-0.5">
+                      Je suis pret
                     </p>
-                    <p className="text-sm text-white/80 font-medium">
-                      Prêt à jouer maintenant
+                    <p className="text-xs text-emerald-400/60">
+                      Pret a jouer maintenant
                     </p>
+                  </div>
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <CheckCircle className="w-4 h-4 text-white" />
                   </div>
                 </div>
               </motion.button>
 
-              {/* Late */}
-              <motion.div whileHover={{ y: -2 }}>
-                <Card variant="elevated" padding="lg" className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm border-[var(--border-subtle)]/50 shadow-lg">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-warning-100)] to-orange-100 flex items-center justify-center">
-                      <Clock className="w-6 h-6 text-[var(--color-warning-600)]" strokeWidth={2} />
-                    </div>
-                    <div className="text-left flex-1">
-                      <p className="text-base font-bold text-[var(--fg-primary)] mb-1">
-                        Je suis en retard
-                      </p>
-                      <p className="text-sm text-[var(--fg-secondary)] font-medium">
-                        Indiquez votre retard estimé
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <input
-                      type="number"
-                      value={lateMinutes}
-                      onChange={(e) => setLateMinutes(e.target.value)}
-                      placeholder="Minutes"
-                      min="5"
-                      max="60"
-                      className="flex-1 h-11 bg-[var(--bg-elevated)]/80 border border-[var(--border-subtle)] rounded-xl px-4 text-sm text-[var(--fg-primary)] font-semibold focus:border-[var(--color-warning-500)] focus:ring-2 focus:ring-[var(--color-warning-500)]/20 transition-all"
-                    />
-                    <Button
-                      variant="primary"
-                      onClick={() => handleCheckIn('late')}
-                      disabled={!lateMinutes}
-                      className="h-11 px-5 bg-gradient-to-r from-[var(--color-warning-500)] to-orange-500 hover:from-[var(--color-warning-600)] hover:to-orange-600 rounded-xl font-semibold"
-                    >
-                      Confirmer
-                    </Button>
-                  </div>
-                </Card>
-              </motion.div>
-
-              {/* Absent */}
-              <motion.button
-                onClick={() => handleCheckIn('absent')}
-                className="w-full bg-[var(--bg-elevated)]/80 backdrop-blur-sm hover:bg-[var(--color-error-50)] border border-[var(--border-subtle)]/50 hover:border-[var(--color-error-300)] text-[var(--fg-primary)] rounded-2xl p-5 shadow-lg hover:shadow-xl transition-all"
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.98 }}
+              {/* Late / En route - Orange button */}
+              <motion.div
+                className="bg-orange-500/10 border border-orange-500/30 rounded-xl p-4"
+                whileHover={{ scale: 1.01 }}
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-error-100)] to-orange-100 flex items-center justify-center">
-                    <XCircle className="w-6 h-6 text-[var(--color-error-600)]" strokeWidth={2} />
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="w-11 h-11 rounded-lg bg-orange-500/20 flex items-center justify-center">
+                    <Car className="w-5 h-5 text-orange-400" />
                   </div>
                   <div className="text-left flex-1">
-                    <p className="text-base font-bold mb-1">
+                    <p className="text-sm font-semibold text-orange-400 mb-0.5">
+                      Je suis en route
+                    </p>
+                    <p className="text-xs text-orange-400/60">
+                      Indiquez votre retard estime
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    value={lateMinutes}
+                    onChange={(e) => setLateMinutes(e.target.value)}
+                    placeholder="Minutes"
+                    min="5"
+                    max="60"
+                    className="flex-1 h-10 bg-[#08090a] border border-orange-500/30 focus:border-orange-500/50 rounded-lg px-3 text-sm text-white placeholder-[#8b8b8b] focus:outline-none focus:ring-1 focus:ring-orange-500/30 transition-all"
+                  />
+                  <button
+                    onClick={() => handleCheckIn('late')}
+                    disabled={!lateMinutes}
+                    className="px-5 h-10 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-500/30 disabled:text-orange-400/50 text-white text-sm font-medium rounded-lg transition-colors disabled:cursor-not-allowed"
+                  >
+                    Confirmer
+                  </button>
+                </div>
+              </motion.div>
+
+              {/* Absent - Red button */}
+              <motion.button
+                onClick={() => handleCheckIn('absent')}
+                className="w-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 rounded-xl p-4 transition-all group"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-11 h-11 rounded-lg bg-red-500/20 flex items-center justify-center">
+                    <XCircle className="w-5 h-5 text-red-400" />
+                  </div>
+                  <div className="text-left flex-1">
+                    <p className="text-sm font-semibold text-red-400 mb-0.5">
                       Je ne viens pas
                     </p>
-                    <p className="text-sm text-[var(--fg-secondary)] font-medium">
-                      Votre score de fiabilité sera impacté
+                    <p className="text-xs text-red-400/60">
+                      Votre score de fiabilite sera impacte
                     </p>
+                  </div>
+                  <div className="w-8 h-8 rounded-lg bg-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <XCircle className="w-4 h-4 text-white" />
                   </div>
                 </div>
               </motion.button>
             </motion.div>
           )}
 
-          {/* Status Confirmed + Deep Links */}
+          {/* Status Confirmed */}
           {userStatus && (
             <>
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className={`rounded-2xl p-6 shadow-xl mb-6 ${
+                className={`rounded-xl p-5 mb-6 border ${
                   userStatus === 'present'
-                    ? 'bg-gradient-to-br from-[var(--color-success-500)] to-teal-500 shadow-[var(--color-success-500)]/30'
+                    ? 'bg-emerald-500/10 border-emerald-500/30'
                     : userStatus === 'late'
-                    ? 'bg-gradient-to-br from-[var(--color-warning-500)] to-orange-500 shadow-[var(--color-warning-500)]/30'
-                    : 'bg-gradient-to-br from-[var(--color-error-500)] to-orange-500 shadow-[var(--color-error-500)]/30'
+                    ? 'bg-orange-500/10 border-orange-500/30'
+                    : 'bg-red-500/10 border-red-500/30'
                 }`}
               >
                 <div className="text-center">
-                  <div className="w-16 h-16 rounded-3xl bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4">
-                    {userStatus === 'present' && <CheckCircle className="w-8 h-8 text-white" strokeWidth={2} />}
-                    {userStatus === 'late' && <Clock className="w-8 h-8 text-white" strokeWidth={2} />}
-                    {userStatus === 'absent' && <XCircle className="w-8 h-8 text-white" strokeWidth={2} />}
+                  <div className={`w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4 ${
+                    userStatus === 'present'
+                      ? 'bg-emerald-500/20'
+                      : userStatus === 'late'
+                      ? 'bg-orange-500/20'
+                      : 'bg-red-500/20'
+                  }`}>
+                    {userStatus === 'present' && <CheckCircle className="w-7 h-7 text-emerald-400" />}
+                    {userStatus === 'late' && <Car className="w-7 h-7 text-orange-400" />}
+                    {userStatus === 'absent' && <XCircle className="w-7 h-7 text-red-400" />}
                   </div>
-                  <h3 className="text-xl font-bold tracking-tight text-white mb-2">
-                    {userStatus === 'present' && 'Présence confirmée !'}
-                    {userStatus === 'late' && 'Retard signalé'}
-                    {userStatus === 'absent' && 'Absence enregistrée'}
+                  <h3 className={`text-lg font-semibold mb-1 ${
+                    userStatus === 'present'
+                      ? 'text-emerald-400'
+                      : userStatus === 'late'
+                      ? 'text-orange-400'
+                      : 'text-red-400'
+                  }`}>
+                    {userStatus === 'present' && 'Presence confirmee !'}
+                    {userStatus === 'late' && 'Retard signale'}
+                    {userStatus === 'absent' && 'Absence enregistree'}
                   </h3>
-                  <p className="text-sm text-white/90 font-medium">
+                  <p className="text-sm text-[#8b8b8b]">
                     {userStatus === 'present' && 'Amusez-vous bien !'}
-                    {userStatus === 'late' && 'L\'équipe est prévenue de votre retard'}
-                    {userStatus === 'absent' && 'Dommage... À la prochaine !'}
+                    {userStatus === 'late' && 'L\'equipe est prevenue de votre retard'}
+                    {userStatus === 'absent' && 'Dommage... A la prochaine !'}
                   </p>
                 </div>
               </motion.div>
 
-              {/* Deep Links - Launch Game/Discord */}
+              {/* Deep Links */}
               {userStatus === 'present' && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -510,8 +515,8 @@ export function CheckInScreen({ onNavigate, showToast, useMockData = false, data
                   className="space-y-3"
                 >
                   <div className="flex items-center gap-2 mb-3">
-                    <Gamepad2 className="w-5 h-5 text-[var(--color-primary-500)]" />
-                    <h3 className="text-sm font-bold text-[var(--fg-primary)]">
+                    <Gamepad2 className="w-4 h-4 text-[#5e5ce6]" />
+                    <h3 className="text-sm font-medium text-white">
                       Lancer le jeu
                     </h3>
                   </div>
@@ -543,7 +548,6 @@ export function CheckInScreen({ onNavigate, showToast, useMockData = false, data
               onComplete={() => setShowCelebration(false)}
             />
           )}
-          </motion.div>
         </motion.div>
       </div>
     </div>

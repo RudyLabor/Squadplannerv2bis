@@ -1,10 +1,10 @@
 /**
- * ADVANCED STATS SCREEN - LINEAR DESIGN SYSTEM
- * Premium, Dark, Minimal - Advanced statistics
+ * ADVANCED STATS SCREEN - LINEAR DARK DESIGN
+ * Premium analytics dashboard with Linear-inspired aesthetics
  */
 
 import { useState, useEffect } from 'react';
-import { ArrowLeft, TrendingUp, Clock, Users, Target, Award, Calendar, Zap, Crown, BarChart3, RefreshCw } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Clock, Users, Target, Award, Calendar, Zap, Crown, BarChart3, RefreshCw, Activity, Flame, Star, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { advancedStatsAPI, type AdvancedUserStats, type WeeklyData, type TopPerformer } from '@/utils/b2b-api';
 
@@ -13,22 +13,46 @@ interface AdvancedStatsScreenProps {
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
-// Linear-style animations
+// Linear-style smooth animations
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.02 }
+    transition: { staggerChildren: 0.06, delayChildren: 0.1 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 6 },
+  hidden: { opacity: 0, y: 8 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }
+    transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }
   }
+};
+
+// Linear color palette
+const COLORS = {
+  bg: '#08090a',
+  surface: 'rgba(255,255,255,0.02)',
+  surfaceHover: 'rgba(255,255,255,0.04)',
+  border: 'rgba(255,255,255,0.06)',
+  borderHover: 'rgba(255,255,255,0.1)',
+  text: '#f7f8f8',
+  textMuted: '#8b8d90',
+  textDim: '#5e6063',
+  purple: '#8b5cf6',
+  purpleGlow: 'rgba(139,92,246,0.15)',
+  blue: '#3b82f6',
+  blueGlow: 'rgba(59,130,246,0.15)',
+  green: '#10b981',
+  greenGlow: 'rgba(16,185,129,0.15)',
+  amber: '#f59e0b',
+  amberGlow: 'rgba(245,158,11,0.15)',
+  pink: '#ec4899',
+  pinkGlow: 'rgba(236,72,153,0.15)',
+  cyan: '#06b6d4',
+  cyanGlow: 'rgba(6,182,212,0.15)',
 };
 
 export function AdvancedStatsScreen({ onNavigate, showToast }: AdvancedStatsScreenProps) {
@@ -64,8 +88,8 @@ export function AdvancedStatsScreen({ onNavigate, showToast }: AdvancedStatsScre
   // Premium upsell for non-premium users
   if (!isPremium) {
     return (
-      <div className="min-h-screen pb-24 md:pb-8 bg-[#08090a]">
-        <div className="px-4 md:px-6 py-6 max-w-2xl mx-auto">
+      <div className="min-h-screen pb-24 md:pb-8" style={{ backgroundColor: COLORS.bg }}>
+        <div className="px-4 md:px-6 py-6 max-w-3xl mx-auto">
           <motion.div
             variants={containerVariants}
             initial="hidden"
@@ -75,50 +99,55 @@ export function AdvancedStatsScreen({ onNavigate, showToast }: AdvancedStatsScre
             <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
               <motion.button
                 onClick={() => onNavigate('profile')}
-                className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.06)] transition-all"
-                whileHover={{ x: -2 }}
+                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
+                style={{
+                  backgroundColor: COLORS.surface,
+                  border: `1px solid ${COLORS.border}`,
+                  color: COLORS.textMuted
+                }}
+                whileHover={{ x: -2, backgroundColor: COLORS.surfaceHover }}
                 whileTap={{ scale: 0.95 }}
               >
                 <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
               </motion.button>
-              <h1 className="text-[22px] font-semibold text-[#f7f8f8]">
-                Stats Avancées
+              <h1 className="text-[22px] font-semibold" style={{ color: COLORS.text }}>
+                Stats Avancees
               </h1>
             </motion.div>
 
-            {/* Premium Upsell */}
+            {/* Premium Upsell Card */}
             <motion.div
               variants={itemVariants}
-              className="rounded-2xl p-6 md:p-8 bg-[rgba(245,166,35,0.08)] border border-[rgba(245,166,35,0.2)] text-center"
+              className="rounded-2xl p-8 text-center relative overflow-hidden"
+              style={{
+                backgroundColor: COLORS.amberGlow,
+                border: `1px solid rgba(245,158,11,0.3)`
+              }}
             >
-              <div className="w-16 h-16 rounded-xl bg-[rgba(245,166,35,0.15)] mx-auto mb-5 flex items-center justify-center">
-                <Crown className="w-8 h-8 text-[#f5a623]" strokeWidth={1.5} />
-              </div>
-              <h2 className="text-[20px] font-semibold text-[#f7f8f8] mb-3">Fonctionnalité Premium</h2>
-              <p className="text-[14px] text-[#8b8d90] mb-6 max-w-sm mx-auto leading-relaxed">
-                Débloquez des analyses détaillées : performances par jour, membres les plus fiables, streaks, et bien plus.
-              </p>
-              <motion.button
-                onClick={() => onNavigate('premium')}
-                className="w-full h-12 bg-[#f5a623] text-[#08090a] font-semibold rounded-xl flex items-center justify-center gap-2 hover:bg-[#f5b43d] transition-colors"
-                whileHover={{ y: -1 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Crown className="w-5 h-5" strokeWidth={2} />
-                Passer Premium
-              </motion.button>
-            </motion.div>
-
-            {/* Preview Stats (blurred) */}
-            <motion.div variants={itemVariants} className="mt-6 opacity-30 pointer-events-none">
-              <div className="grid grid-cols-2 gap-3">
-                {[1, 2, 3, 4].map((_, i) => (
-                  <div key={i} className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4">
-                    <div className="w-8 h-8 rounded-lg bg-[rgba(255,255,255,0.06)] mb-2" />
-                    <div className="w-16 h-6 bg-[rgba(255,255,255,0.06)] rounded-lg mb-1" />
-                    <div className="w-12 h-4 bg-[rgba(255,255,255,0.04)] rounded-lg" />
-                  </div>
-                ))}
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-orange-500/5" />
+              <div className="relative">
+                <div
+                  className="w-16 h-16 rounded-2xl mx-auto mb-6 flex items-center justify-center"
+                  style={{ backgroundColor: 'rgba(245,158,11,0.2)' }}
+                >
+                  <Crown className="w-8 h-8" style={{ color: COLORS.amber }} strokeWidth={1.5} />
+                </div>
+                <h2 className="text-xl font-semibold mb-3" style={{ color: COLORS.text }}>
+                  Fonctionnalite Premium
+                </h2>
+                <p className="text-sm mb-6 max-w-sm mx-auto leading-relaxed" style={{ color: COLORS.textMuted }}>
+                  Debloquez des analyses detaillees : performances par jour, membres les plus fiables, streaks, et bien plus.
+                </p>
+                <motion.button
+                  onClick={() => onNavigate('premium')}
+                  className="w-full max-w-xs h-12 font-semibold rounded-xl flex items-center justify-center gap-2 mx-auto"
+                  style={{ backgroundColor: COLORS.amber, color: COLORS.bg }}
+                  whileHover={{ y: -2, boxShadow: '0 8px 24px rgba(245,158,11,0.3)' }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Crown className="w-5 h-5" strokeWidth={2} />
+                  Passer Premium
+                </motion.button>
               </div>
             </motion.div>
           </motion.div>
@@ -130,191 +159,425 @@ export function AdvancedStatsScreen({ onNavigate, showToast }: AdvancedStatsScre
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#08090a] flex items-center justify-center">
-        <div className="w-5 h-5 border-2 border-[#5e6dd2] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: COLORS.bg }}>
+        <div className="flex flex-col items-center gap-4">
+          <div
+            className="w-10 h-10 border-2 rounded-full animate-spin"
+            style={{ borderColor: COLORS.purple, borderTopColor: 'transparent' }}
+          />
+          <span className="text-sm" style={{ color: COLORS.textMuted }}>Chargement des stats...</span>
+        </div>
       </div>
     );
   }
 
+  const maxSessions = Math.max(...weeklyData.map(d => d.sessions), 1);
+
   return (
-    <div className="min-h-screen pb-24 md:pb-8 bg-[#08090a]">
-      <div className="px-4 md:px-6 py-6 max-w-2xl mx-auto">
+    <div className="min-h-screen pb-24 md:pb-8" style={{ backgroundColor: COLORS.bg }}>
+      <div className="px-4 md:px-6 py-6 max-w-3xl mx-auto">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
-          {/* Header - Linear style */}
-          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
+          {/* Header */}
+          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
             <motion.button
               onClick={() => onNavigate('profile')}
-              className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.06)] transition-all"
-              whileHover={{ x: -2 }}
+              className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
+              style={{
+                backgroundColor: COLORS.surface,
+                border: `1px solid ${COLORS.border}`,
+                color: COLORS.textMuted
+              }}
+              whileHover={{ x: -2, backgroundColor: COLORS.surfaceHover, color: COLORS.text }}
               whileTap={{ scale: 0.95 }}
             >
               <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
             </motion.button>
+
             <div className="flex-1">
-              <h1 className="text-[22px] md:text-[24px] font-semibold text-[#f7f8f8] flex items-center gap-2">
-                Stats Avancées
+              <h1 className="text-[22px] md:text-2xl font-semibold" style={{ color: COLORS.text }}>
+                Stats Avancees
               </h1>
-              <p className="text-[13px] text-[#f5a623] font-medium flex items-center gap-1">
-                <Crown className="w-3.5 h-3.5" />
-                Premium
-              </p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <Crown className="w-3.5 h-3.5" style={{ color: COLORS.amber }} />
+                <span className="text-xs font-medium" style={{ color: COLORS.amber }}>Premium</span>
+              </div>
             </div>
+
             <motion.button
               onClick={loadData}
               disabled={isLoading}
-              className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.06)] transition-all"
-              whileHover={{ y: -1 }}
+              className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
+              style={{
+                backgroundColor: COLORS.surface,
+                border: `1px solid ${COLORS.border}`,
+                color: COLORS.textMuted
+              }}
+              whileHover={{ y: -1, backgroundColor: COLORS.surfaceHover }}
               whileTap={{ scale: 0.95 }}
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} strokeWidth={1.5} />
             </motion.button>
-            <div className="w-11 h-11 rounded-xl bg-[rgba(94,109,210,0.1)] flex items-center justify-center">
-              <BarChart3 className="w-5 h-5 text-[#5e6dd2]" strokeWidth={1.5} />
+
+            <div
+              className="w-11 h-11 rounded-xl flex items-center justify-center"
+              style={{ backgroundColor: COLORS.purpleGlow }}
+            >
+              <BarChart3 className="w-5 h-5" style={{ color: COLORS.purple }} strokeWidth={1.5} />
             </div>
           </motion.div>
 
-          {/* Overview Cards */}
-          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-3 mb-6">
+          {/* Main Stats Grid */}
+          <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
             {[
-              { icon: Calendar, label: 'Sessions', value: stats?.totalSessions || 0, iconColor: 'text-[#5e6dd2]', bgColor: 'rgba(94,109,210,0.1)' },
-              { icon: Target, label: 'Présence', value: `${stats?.attendance || 0}%`, iconColor: 'text-[#4ade80]', bgColor: 'rgba(74,222,128,0.1)' },
-              { icon: Clock, label: 'Durée moy.', value: stats?.avgDuration || '0h', iconColor: 'text-[#60a5fa]', bgColor: 'rgba(96,165,250,0.1)' },
-              { icon: Zap, label: 'Total heures', value: `${stats?.totalHours || 0}h`, iconColor: 'text-[#f5a623]', bgColor: 'rgba(245,166,35,0.1)' },
+              {
+                icon: Calendar,
+                label: 'Sessions',
+                value: stats?.totalSessions || 0,
+                color: COLORS.purple,
+                glow: COLORS.purpleGlow,
+                suffix: ''
+              },
+              {
+                icon: Target,
+                label: 'Presence',
+                value: stats?.attendance || 0,
+                color: COLORS.green,
+                glow: COLORS.greenGlow,
+                suffix: '%'
+              },
+              {
+                icon: Clock,
+                label: 'Duree moy.',
+                value: stats?.avgDuration || '0h',
+                color: COLORS.blue,
+                glow: COLORS.blueGlow,
+                suffix: ''
+              },
+              {
+                icon: Zap,
+                label: 'Total heures',
+                value: stats?.totalHours || 0,
+                color: COLORS.amber,
+                glow: COLORS.amberGlow,
+                suffix: 'h'
+              },
             ].map((stat, index) => (
               <motion.div
                 key={index}
-                className="p-4 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)] transition-all"
-                whileHover={{ y: -1 }}
+                className="p-4 rounded-xl transition-all cursor-default"
+                style={{
+                  backgroundColor: COLORS.surface,
+                  border: `1px solid ${COLORS.border}`
+                }}
+                whileHover={{
+                  y: -2,
+                  backgroundColor: COLORS.surfaceHover,
+                  borderColor: COLORS.borderHover
+                }}
               >
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
-                  style={{ backgroundColor: stat.bgColor }}
+                  style={{ backgroundColor: stat.glow }}
                 >
-                  <stat.icon className={`w-5 h-5 ${stat.iconColor}`} strokeWidth={1.5} />
+                  <stat.icon className="w-5 h-5" style={{ color: stat.color }} strokeWidth={1.5} />
                 </div>
-                <div className="text-[22px] font-semibold text-[#f7f8f8] tabular-nums mb-0.5">{stat.value}</div>
-                <div className="text-[12px] text-[#5e6063]">{stat.label}</div>
+                <div className="text-2xl font-semibold tabular-nums" style={{ color: COLORS.text }}>
+                  {stat.value}{stat.suffix}
+                </div>
+                <div className="text-xs mt-1" style={{ color: COLORS.textDim }}>{stat.label}</div>
               </motion.div>
             ))}
           </motion.div>
 
-          {/* Best Times */}
+          {/* Weekly Activity Chart */}
           <motion.div
             variants={itemVariants}
-            className="p-5 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] mb-6"
+            className="p-5 rounded-xl mb-6"
+            style={{ backgroundColor: COLORS.surface, border: `1px solid ${COLORS.border}` }}
           >
-            <h3 className="text-[14px] font-semibold text-[#f7f8f8] mb-4 flex items-center gap-2">
-              <Award className="w-4 h-4 text-[#f5a623]" strokeWidth={1.5} />
-              Vos meilleurs créneaux
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-4 rounded-xl bg-[rgba(94,109,210,0.08)] border border-[rgba(94,109,210,0.15)]">
-                <div className="text-[11px] text-[#8b93ff] font-medium mb-1 uppercase tracking-wider">Meilleur jour</div>
-                <div className="text-[18px] font-semibold text-[#f7f8f8]">{stats?.bestDay || 'N/A'}</div>
-                <div className="text-[11px] text-[#5e6063] mt-1">96% présence</div>
-              </div>
-              <div className="p-4 rounded-xl bg-[rgba(74,222,128,0.08)] border border-[rgba(74,222,128,0.15)]">
-                <div className="text-[11px] text-[#4ade80] font-medium mb-1 uppercase tracking-wider">Meilleure heure</div>
-                <div className="text-[18px] font-semibold text-[#f7f8f8]">{stats?.bestTime || 'N/A'}</div>
-                <div className="text-[11px] text-[#5e6063] mt-1">8 sessions</div>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: COLORS.text }}>
+                <Activity className="w-4 h-4" style={{ color: COLORS.purple }} strokeWidth={1.5} />
+                Activite hebdomadaire
+              </h3>
+              <span className="text-xs" style={{ color: COLORS.textDim }}>30 derniers jours</span>
+            </div>
+
+            {/* Bar Chart */}
+            <div className="flex items-end justify-between gap-2 h-36 mb-3">
+              {weeklyData.map((day, index) => {
+                const height = maxSessions > 0 ? (day.sessions / maxSessions) * 100 : 10;
+                const isHighest = day.sessions === maxSessions && day.sessions > 0;
+
+                return (
+                  <motion.div
+                    key={index}
+                    className="flex-1 flex flex-col items-center gap-2"
+                    initial={{ opacity: 0, scaleY: 0 }}
+                    animate={{ opacity: 1, scaleY: 1 }}
+                    transition={{ delay: index * 0.05 + 0.2, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                  >
+                    <div className="w-full flex flex-col justify-end h-28">
+                      <motion.div
+                        className="w-full rounded-t-lg relative overflow-hidden"
+                        style={{
+                          height: `${Math.max(height, 8)}%`,
+                          backgroundColor: isHighest ? COLORS.purple : 'rgba(139,92,246,0.4)',
+                        }}
+                        whileHover={{
+                          backgroundColor: COLORS.purple,
+                          boxShadow: `0 0 20px ${COLORS.purpleGlow}`
+                        }}
+                      >
+                        {isHighest && (
+                          <div
+                            className="absolute inset-0 bg-gradient-to-t from-transparent to-white/20"
+                          />
+                        )}
+                      </motion.div>
+                    </div>
+                    <div className="text-[11px] font-medium" style={{ color: COLORS.textDim }}>
+                      {day.day}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Legend */}
+            <div className="flex items-center justify-center gap-4 pt-3" style={{ borderTop: `1px solid ${COLORS.border}` }}>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded" style={{ backgroundColor: COLORS.purple }} />
+                <span className="text-xs" style={{ color: COLORS.textMuted }}>Sessions</span>
               </div>
             </div>
           </motion.div>
 
-          {/* Weekly Chart */}
-          <motion.div
-            variants={itemVariants}
-            className="p-5 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] mb-6"
-          >
-            <h3 className="text-[14px] font-semibold text-[#f7f8f8] mb-4">Répartition hebdomadaire</h3>
-            <div className="flex items-end justify-between gap-2 h-32">
-              {weeklyData.map((day, index) => (
-                <motion.div
-                  key={index}
-                  className="flex-1 flex flex-col items-center gap-2"
-                  initial={{ scaleY: 0 }}
-                  animate={{ scaleY: 1 }}
-                  transition={{ delay: index * 0.05, duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
-                >
-                  <div className="flex-1 w-full flex flex-col justify-end">
-                    <motion.div
-                      className="w-full bg-[#5e6dd2] rounded-t-md"
-                      style={{ height: `${Math.max((day.sessions / 8) * 100, 8)}%` }}
-                      whileHover={{ backgroundColor: '#8b93ff' }}
-                      title={`${day.sessions} sessions · ${day.attendance}% présence`}
-                    />
-                  </div>
-                  <div className="text-[11px] text-[#5e6063] font-medium">{day.day}</div>
-                </motion.div>
-              ))}
+          {/* Best Performance Cards */}
+          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-3 mb-6">
+            <div
+              className="p-4 rounded-xl relative overflow-hidden"
+              style={{
+                backgroundColor: COLORS.purpleGlow,
+                border: `1px solid rgba(139,92,246,0.2)`
+              }}
+            >
+              <div className="absolute top-0 right-0 w-24 h-24 rounded-full blur-3xl" style={{ backgroundColor: 'rgba(139,92,246,0.2)' }} />
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-3">
+                  <Star className="w-4 h-4" style={{ color: COLORS.purple }} strokeWidth={1.5} />
+                  <span className="text-[11px] font-medium uppercase tracking-wider" style={{ color: COLORS.purple }}>
+                    Meilleur jour
+                  </span>
+                </div>
+                <div className="text-xl font-semibold" style={{ color: COLORS.text }}>
+                  {stats?.bestDay || 'N/A'}
+                </div>
+                <div className="text-xs mt-1" style={{ color: COLORS.textMuted }}>96% presence</div>
+              </div>
+            </div>
+
+            <div
+              className="p-4 rounded-xl relative overflow-hidden"
+              style={{
+                backgroundColor: COLORS.greenGlow,
+                border: `1px solid rgba(16,185,129,0.2)`
+              }}
+            >
+              <div className="absolute top-0 right-0 w-24 h-24 rounded-full blur-3xl" style={{ backgroundColor: 'rgba(16,185,129,0.2)' }} />
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-3">
+                  <Clock className="w-4 h-4" style={{ color: COLORS.green }} strokeWidth={1.5} />
+                  <span className="text-[11px] font-medium uppercase tracking-wider" style={{ color: COLORS.green }}>
+                    Meilleure heure
+                  </span>
+                </div>
+                <div className="text-xl font-semibold" style={{ color: COLORS.text }}>
+                  {stats?.bestTime || 'N/A'}
+                </div>
+                <div className="text-xs mt-1" style={{ color: COLORS.textMuted }}>8 sessions</div>
+              </div>
             </div>
           </motion.div>
 
-          {/* Streak */}
+          {/* Streak Card */}
           <motion.div
             variants={itemVariants}
-            className="p-5 rounded-xl bg-[rgba(245,166,35,0.08)] border border-[rgba(245,166,35,0.2)] mb-6"
+            className="p-5 rounded-xl mb-6 relative overflow-hidden"
+            style={{
+              background: `linear-gradient(135deg, ${COLORS.amberGlow} 0%, rgba(249,115,22,0.08) 100%)`,
+              border: `1px solid rgba(245,158,11,0.25)`
+            }}
           >
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-xl bg-[rgba(245,166,35,0.15)] flex items-center justify-center text-2xl">
-                🔥
+            <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full blur-3xl" style={{ backgroundColor: 'rgba(245,158,11,0.15)' }} />
+            <div className="flex items-center gap-5 relative">
+              <div
+                className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                style={{ backgroundColor: 'rgba(245,158,11,0.2)' }}
+              >
+                <Flame className="w-8 h-8" style={{ color: COLORS.amber }} strokeWidth={1.5} />
               </div>
               <div className="flex-1">
-                <div className="text-[24px] font-semibold text-[#f7f8f8] mb-0.5">{stats?.streak || 0} sessions</div>
-                <div className="text-[13px] text-[#f5a623]">Streak actuel · Continue comme ça !</div>
+                <div className="text-3xl font-bold" style={{ color: COLORS.text }}>
+                  {stats?.streak || 0}
+                  <span className="text-lg font-semibold ml-2" style={{ color: COLORS.textMuted }}>sessions</span>
+                </div>
+                <div className="text-sm mt-1" style={{ color: COLORS.amber }}>
+                  Streak actuel - Continue comme ca !
+                </div>
               </div>
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                className="text-3xl"
+              >
+                🔥
+              </motion.div>
             </div>
           </motion.div>
 
-          {/* Top Performers */}
+          {/* Favorite Game */}
           <motion.div
             variants={itemVariants}
-            className="p-5 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]"
+            className="p-4 rounded-xl mb-6 flex items-center gap-4"
+            style={{ backgroundColor: COLORS.surface, border: `1px solid ${COLORS.border}` }}
           >
-            <h3 className="text-[14px] font-semibold text-[#f7f8f8] mb-4 flex items-center gap-2">
-              <Users className="w-4 h-4 text-[#8b93ff]" strokeWidth={1.5} />
-              Classement fiabilité
-            </h3>
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center"
+              style={{ backgroundColor: COLORS.pinkGlow }}
+            >
+              <TrendingUp className="w-5 h-5" style={{ color: COLORS.pink }} strokeWidth={1.5} />
+            </div>
+            <div className="flex-1">
+              <div className="text-xs uppercase tracking-wider mb-1" style={{ color: COLORS.textDim }}>
+                Jeu favori
+              </div>
+              <div className="text-lg font-semibold" style={{ color: COLORS.text }}>
+                {stats?.favoriteGame || 'Valorant'}
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5" style={{ color: COLORS.textDim }} />
+          </motion.div>
+
+          {/* Top Performers Leaderboard */}
+          <motion.div
+            variants={itemVariants}
+            className="p-5 rounded-xl"
+            style={{ backgroundColor: COLORS.surface, border: `1px solid ${COLORS.border}` }}
+          >
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: COLORS.text }}>
+                <Users className="w-4 h-4" style={{ color: COLORS.cyan }} strokeWidth={1.5} />
+                Classement fiabilite
+              </h3>
+              <span className="text-xs px-2 py-1 rounded-lg" style={{ backgroundColor: COLORS.cyanGlow, color: COLORS.cyan }}>
+                Top 5
+              </span>
+            </div>
+
             <div className="space-y-2">
-              {topPerformers.map((player, index) => (
-                <motion.div
-                  key={index}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.04)] transition-all"
-                  initial={{ opacity: 0, x: -6 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05, duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
-                  whileHover={{ y: -1 }}
-                >
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center font-semibold text-[13px] ${
-                    player.rank === 1
-                      ? 'bg-[rgba(245,166,35,0.15)] text-[#f5a623]'
-                      : player.rank === 2
-                      ? 'bg-[rgba(192,192,192,0.15)] text-[#c0c0c0]'
-                      : player.rank === 3
-                      ? 'bg-[rgba(205,127,50,0.15)] text-[#cd7f32]'
-                      : 'bg-[rgba(255,255,255,0.04)] text-[#5e6063]'
-                  }`}>
-                    {player.rank === 1 ? '🥇' : player.rank === 2 ? '🥈' : player.rank === 3 ? '🥉' : player.rank}
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-[13px] font-medium text-[#f7f8f8]">{player.name}</div>
-                    <div className="text-[11px] text-[#5e6063]">{player.sessions} sessions</div>
-                  </div>
-                  <div className={`text-[15px] font-semibold tabular-nums ${
-                    player.reliability >= 90 ? 'text-[#4ade80]' :
-                    player.reliability >= 75 ? 'text-[#8b93ff]' :
-                    'text-[#8b8d90]'
-                  }`}>
-                    {player.reliability}%
-                  </div>
-                </motion.div>
-              ))}
+              {topPerformers.length === 0 ? (
+                <div className="text-center py-8" style={{ color: COLORS.textMuted }}>
+                  <Users className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Aucun membre dans vos squads</p>
+                </div>
+              ) : (
+                topPerformers.map((player, index) => (
+                  <motion.div
+                    key={player.id}
+                    className="flex items-center gap-3 p-3 rounded-xl transition-all"
+                    style={{
+                      backgroundColor: 'rgba(255,255,255,0.02)',
+                      border: `1px solid ${COLORS.border}`
+                    }}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.08 + 0.3, duration: 0.3 }}
+                    whileHover={{
+                      y: -1,
+                      backgroundColor: COLORS.surfaceHover,
+                      borderColor: COLORS.borderHover
+                    }}
+                  >
+                    {/* Rank Badge */}
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center font-semibold text-sm"
+                      style={{
+                        backgroundColor: player.rank === 1
+                          ? 'rgba(245,158,11,0.15)'
+                          : player.rank === 2
+                          ? 'rgba(192,192,192,0.15)'
+                          : player.rank === 3
+                          ? 'rgba(205,127,50,0.15)'
+                          : 'rgba(255,255,255,0.04)',
+                        color: player.rank === 1
+                          ? '#f5a623'
+                          : player.rank === 2
+                          ? '#c0c0c0'
+                          : player.rank === 3
+                          ? '#cd7f32'
+                          : COLORS.textDim
+                      }}
+                    >
+                      {player.rank === 1 ? '🥇' : player.rank === 2 ? '🥈' : player.rank === 3 ? '🥉' : player.rank}
+                    </div>
+
+                    {/* Avatar */}
+                    {player.avatarUrl ? (
+                      <img
+                        src={player.avatarUrl}
+                        alt={player.name}
+                        className="w-10 h-10 rounded-xl object-cover"
+                      />
+                    ) : (
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-medium"
+                        style={{ backgroundColor: COLORS.purpleGlow, color: COLORS.purple }}
+                      >
+                        {player.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate" style={{ color: COLORS.text }}>
+                        {player.name}
+                      </div>
+                      <div className="text-xs" style={{ color: COLORS.textDim }}>
+                        {player.sessions} sessions
+                      </div>
+                    </div>
+
+                    {/* Reliability Score */}
+                    <div className="text-right">
+                      <div
+                        className="text-base font-semibold tabular-nums"
+                        style={{
+                          color: player.reliability >= 90
+                            ? COLORS.green
+                            : player.reliability >= 75
+                            ? COLORS.purple
+                            : COLORS.textMuted
+                        }}
+                      >
+                        {player.reliability}%
+                      </div>
+                      <div className="text-[10px] uppercase tracking-wider" style={{ color: COLORS.textDim }}>
+                        fiabilite
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+              )}
             </div>
           </motion.div>
+
+          {/* Footer Spacing */}
+          <div className="h-4" />
         </motion.div>
       </div>
     </div>

@@ -3,7 +3,7 @@
  * Premium, Dark, Minimal - Friends management
  */
 
-import { ArrowLeft, UserPlus, Users, Clock, Check, X, Search, MoreHorizontal, ChevronRight } from 'lucide-react';
+import { ArrowLeft, UserPlus, Users, Clock, Check, X, Search, MoreHorizontal, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 
@@ -147,33 +147,44 @@ export function FriendsScreen({ onNavigate, showToast }: FriendsScreenProps) {
             </div>
           </motion.div>
 
-          {/* Tabs - Linear style */}
-          <motion.div variants={itemVariants} className="flex gap-2 mb-6">
-            {tabs.map((tab) => (
-              <motion.button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-2 rounded-lg text-[13px] font-medium whitespace-nowrap transition-all flex items-center gap-2 ${
-                  activeTab === tab.key
-                    ? 'bg-[rgba(94,109,210,0.15)] text-[#8b93ff] border border-[rgba(94,109,210,0.3)]'
-                    : 'bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] text-[#8b8d90] hover:border-[rgba(255,255,255,0.1)] hover:text-[#f7f8f8]'
-                }`}
-                whileHover={{ y: -1 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                {tab.label}
-                {tab.count > 0 && (
-                  <span className={`text-[11px] px-1.5 py-0.5 rounded-md ${
+          {/* Tabs - Linear style with pill indicator */}
+          <motion.div variants={itemVariants} className="mb-6">
+            <div className="flex gap-1 p-1 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]">
+              {tabs.map((tab) => (
+                <motion.button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`flex-1 px-3 py-2 rounded-lg text-[13px] font-medium whitespace-nowrap transition-all flex items-center justify-center gap-2 ${
                     activeTab === tab.key
-                      ? 'bg-[rgba(139,147,255,0.2)] text-[#8b93ff]'
-                      : 'bg-[rgba(255,255,255,0.06)] text-[#5e6063]'
-                  }`}>
-                    {tab.count}
-                  </span>
-                )}
-              </motion.button>
-            ))}
+                      ? 'bg-[rgba(94,109,210,0.2)] text-[#8b93ff]'
+                      : 'text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.04)]'
+                  }`}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {tab.label}
+                  {tab.count > 0 && (
+                    <span className={`text-[10px] min-w-[18px] h-[18px] flex items-center justify-center rounded-full ${
+                      activeTab === tab.key
+                        ? 'bg-[#8b93ff] text-[#08090a]'
+                        : 'bg-[rgba(255,255,255,0.08)] text-[#5e6063]'
+                    }`}>
+                      {tab.count}
+                    </span>
+                  )}
+                </motion.button>
+              ))}
+            </div>
           </motion.div>
+
+          {/* Online friends indicator */}
+          {activeTab === 'friends' && onlineCount > 0 && (
+            <motion.div variants={itemVariants} className="mb-4">
+              <div className="flex items-center gap-2 text-[12px] text-[#8b8d90]">
+                <div className="w-2 h-2 rounded-full bg-[#4ade80] animate-pulse" />
+                <span><span className="text-[#4ade80] font-medium">{onlineCount}</span> ami{onlineCount > 1 ? 's' : ''} en ligne</span>
+              </div>
+            </motion.div>
+          )}
 
           {/* Content */}
           <AnimatePresence mode="wait">
@@ -227,13 +238,53 @@ export function FriendsScreen({ onNavigate, showToast }: FriendsScreenProps) {
                         {friend.reliabilityScore}%
                       </span>
 
-                      {/* More button */}
-                      <button className="w-8 h-8 rounded-lg flex items-center justify-center text-[#5e6063] hover:bg-[rgba(255,255,255,0.06)] hover:text-[#8b8d90] transition-all opacity-0 group-hover:opacity-100">
-                        <MoreHorizontal className="w-4 h-4" strokeWidth={1.5} />
-                      </button>
+                      {/* Actions */}
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-[#5e6063] hover:bg-[rgba(94,109,210,0.15)] hover:text-[#8b93ff] transition-all"
+                          title="Envoyer un message"
+                        >
+                          <MessageCircle className="w-4 h-4" strokeWidth={1.5} />
+                        </button>
+                        <button
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-[#5e6063] hover:bg-[rgba(255,255,255,0.06)] hover:text-[#8b8d90] transition-all"
+                          title="Plus d'options"
+                        >
+                          <MoreHorizontal className="w-4 h-4" strokeWidth={1.5} />
+                        </button>
+                      </div>
                     </div>
                   </motion.div>
                 ))}
+
+                {/* Empty state for friends */}
+                {friends.length === 0 && (
+                  <motion.div
+                    variants={itemVariants}
+                    className="p-6 md:p-8 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]"
+                  >
+                    <div className="text-center max-w-[280px] mx-auto">
+                      <div className="w-12 h-12 rounded-xl bg-[rgba(94,109,210,0.15)] flex items-center justify-center mx-auto mb-4">
+                        <Users className="w-6 h-6 text-[#8b93ff]" strokeWidth={1.5} />
+                      </div>
+                      <h3 className="text-[15px] font-semibold text-[#f7f8f8] mb-2">
+                        Aucun ami pour le moment
+                      </h3>
+                      <p className="text-[13px] text-[#8b8d90] mb-4">
+                        Recherche des joueurs pour commencer a construire ta squad
+                      </p>
+                      <motion.button
+                        onClick={() => onNavigate('search-players')}
+                        className="px-4 py-2 rounded-lg bg-[#5e6dd2] text-white text-[13px] font-medium hover:bg-[#6a79db] transition-colors"
+                        whileHover={{ y: -1 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <UserPlus className="w-4 h-4 inline mr-2" strokeWidth={1.5} />
+                        Rechercher des joueurs
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                )}
               </motion.div>
             )}
 

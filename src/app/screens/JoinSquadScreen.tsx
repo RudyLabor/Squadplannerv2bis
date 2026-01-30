@@ -1,7 +1,6 @@
-import { ArrowLeft, Users, Check, AlertCircle, Sparkles } from 'lucide-react';
+import { ArrowLeft, Users, Ticket, Sparkles, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Input, Button, IconButton } from '@/design-system';
 import { squadsAPI } from '@/utils/api';
 
 interface JoinSquadScreenProps {
@@ -9,26 +8,10 @@ interface JoinSquadScreenProps {
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
-  }
-};
-
 export function JoinSquadScreen({ onNavigate, showToast }: JoinSquadScreenProps) {
   const [inviteCode, setInviteCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
   const handleJoin = async () => {
     if (!inviteCode.trim()) {
@@ -52,141 +35,162 @@ export function JoinSquadScreen({ onNavigate, showToast }: JoinSquadScreenProps)
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && inviteCode.trim()) {
+      handleJoin();
+    }
+  };
+
   return (
-    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-[var(--color-primary-50)] via-purple-50 to-pink-50 relative overflow-hidden">
-      {/* Background decorations - Static for performance */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-[var(--color-primary-400)]/20 to-purple-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 right-0 w-64 h-64 bg-gradient-to-br from-emerald-400/15 to-teal-400/15 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-[#08090a] pb-24 pt-safe">
+      {/* Subtle gradient overlay */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#5e6dd2]/5 via-transparent to-transparent" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-[#5e6dd2]/[0.03] rounded-full blur-3xl" />
       </div>
 
-      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
+      <div className="relative z-10 px-4 py-6 max-w-lg mx-auto">
+        {/* Header */}
         <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-3 mb-8"
         >
-          {/* Header */}
-          <motion.div variants={itemVariants} className="flex items-center gap-3 mb-10">
-            <IconButton
-              variant="secondary"
-              size="md"
-              icon={<ArrowLeft className="w-5 h-5" strokeWidth={2} />}
-              onClick={() => onNavigate('home')}
-              aria-label="Retour"
-            />
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-[var(--color-primary-600)] to-purple-600 bg-clip-text text-transparent">
-                Rejoindre une squad
-              </h1>
-            </div>
-            <motion.div
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--color-primary-500)] to-purple-600 flex items-center justify-center shadow-lg shadow-[var(--color-primary-500)]/30"
-              whileHover={{ scale: 1.05, rotate: 5 }}
-            >
-              <Users className="w-6 h-6 text-white" strokeWidth={2} />
-            </motion.div>
-          </motion.div>
-
-          {/* Hero Section */}
-          <motion.div variants={itemVariants} className="text-center py-6 mb-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-[var(--color-primary-500)] to-purple-600 mb-4 shadow-xl shadow-[var(--color-primary-500)]/30">
-              <Users className="w-10 h-10 text-white" strokeWidth={1.5} />
-            </div>
-            <h2 className="text-xl font-bold tracking-tight text-[var(--fg-primary)] mb-2">
-              Rejoins ton équipe
-            </h2>
-            <p className="text-[var(--fg-secondary)] text-sm max-w-md mx-auto">
-              Entre le code d'invitation fourni par un membre de la squad
+          <button
+            onClick={() => onNavigate('home')}
+            className="w-10 h-10 rounded-xl bg-white/[0.05] border border-white/[0.06] flex items-center justify-center text-[#9ca3af] hover:text-white hover:bg-white/[0.08] transition-all duration-200"
+          >
+            <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
+          </button>
+          <div className="flex-1">
+            <h1 className="text-lg font-semibold text-white tracking-tight">
+              Rejoindre une squad
+            </h1>
+            <p className="text-sm text-[#6b7280]">
+              Entre le code d'invitation
             </p>
-          </motion.div>
+          </div>
+        </motion.div>
+
+        {/* Main Content */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="space-y-6"
+        >
+          {/* Icon Hero */}
+          <div className="flex flex-col items-center py-8">
+            <div className="relative">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#5e6dd2] to-[#7c3aed] flex items-center justify-center shadow-lg shadow-[#5e6dd2]/20">
+                <Users className="w-10 h-10 text-white" strokeWidth={1.5} />
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-lg bg-[#10b981] flex items-center justify-center border-2 border-[#08090a]">
+                <Ticket className="w-4 h-4 text-white" strokeWidth={2} />
+              </div>
+            </div>
+            <h2 className="mt-5 text-xl font-semibold text-white">
+              Rejoins ton equipe
+            </h2>
+            <p className="mt-2 text-sm text-[#6b7280] text-center max-w-xs">
+              Utilise le code fourni par un membre de ta squad pour les rejoindre
+            </p>
+          </div>
+
+          {/* Code Input Card */}
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5">
+            <label className="block text-sm font-medium text-[#9ca3af] mb-3">
+              Code d'invitation
+            </label>
+            <div className={`relative rounded-xl transition-all duration-200 ${
+              isFocused
+                ? 'ring-2 ring-[#5e6dd2]/50 ring-offset-2 ring-offset-[#08090a]'
+                : ''
+            }`}>
+              <input
+                type="text"
+                value={inviteCode}
+                onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                onKeyDown={handleKeyDown}
+                placeholder="ABC123"
+                className="w-full h-14 px-4 bg-[#0f1011] border border-white/[0.08] rounded-xl text-white text-center text-xl font-mono tracking-[0.4em] placeholder:text-[#3f3f46] placeholder:tracking-[0.4em] focus:outline-none focus:border-[#5e6dd2]/50 transition-colors"
+              />
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#5e6dd2]/0 via-[#5e6dd2]/5 to-[#5e6dd2]/0 pointer-events-none" />
+            </div>
+
+            {/* Helper text */}
+            <p className="mt-3 text-xs text-[#4b5563] flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-[#5e6dd2]" />
+              Le code contient 6 caracteres alphanumeriques
+            </p>
+          </div>
 
           {/* Info Card */}
-          <motion.div
-            variants={itemVariants}
-            className="bg-gradient-to-br from-amber-100/80 to-orange-100/80 backdrop-blur-sm rounded-2xl p-5 mb-8 border border-amber-200/50"
-          >
-            <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-md">
-                <AlertCircle className="w-5 h-5 text-white" strokeWidth={2} />
+          <div className="bg-[#1c1917]/50 border border-[#78350f]/30 rounded-xl p-4">
+            <div className="flex gap-3">
+              <div className="w-9 h-9 rounded-lg bg-[#78350f]/30 flex items-center justify-center flex-shrink-0">
+                <AlertCircle className="w-5 h-5 text-[#fbbf24]" strokeWidth={1.5} />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-amber-800 mb-1">
-                  Code d'invitation requis
+                <h3 className="text-sm font-medium text-[#fbbf24]">
+                  Pas de code ?
                 </h3>
-                <p className="text-sm text-amber-700">
-                  Demandez le code à un membre de la squad ou utilisez le lien d'invitation.
+                <p className="mt-1 text-sm text-[#a3a3a3]">
+                  Demande le code d'invitation a un membre de la squad ou utilise le lien partage.
                 </p>
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Invite Code Input */}
-          <motion.div variants={itemVariants} className="mb-8">
-            <label className="text-sm text-[var(--fg-primary)] mb-3 block font-bold">
-              Code d'invitation
-            </label>
-            <Input
-              value={inviteCode}
-              onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-              placeholder="Ex: ABC123"
-              size="lg"
-              className="text-center text-lg font-bold tracking-[0.3em]"
-            />
-          </motion.div>
-
-          {/* Check Button */}
-          <motion.div variants={itemVariants}>
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={handleJoin}
-              disabled={!inviteCode.trim() || isLoading}
-              className="w-full"
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <motion.div
-                    className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                  />
-                  Verification...
-                </div>
-              ) : (
-                <span className="flex items-center justify-center gap-2">
-                  <Check className="w-5 h-5" strokeWidth={2} />
-                  Verifier le code
-                </span>
-              )}
-            </Button>
-          </motion.div>
-
-          {/* Tips */}
-          <motion.div
-            variants={itemVariants}
-            className="mt-8 bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl p-5 border border-[var(--border-subtle)] shadow-lg"
+          {/* Join Button */}
+          <motion.button
+            onClick={handleJoin}
+            disabled={!inviteCode.trim() || isLoading}
+            whileHover={{ scale: inviteCode.trim() && !isLoading ? 1.01 : 1 }}
+            whileTap={{ scale: inviteCode.trim() && !isLoading ? 0.98 : 1 }}
+            className={`w-full h-12 rounded-xl font-medium text-sm transition-all duration-200 flex items-center justify-center gap-2 ${
+              inviteCode.trim() && !isLoading
+                ? 'bg-[#5e6dd2] text-white hover:bg-[#6b7be0] shadow-lg shadow-[#5e6dd2]/25'
+                : 'bg-white/[0.05] text-[#6b7280] cursor-not-allowed'
+            }`}
           >
-            <div className="flex items-center gap-2 mb-3">
-              <Sparkles className="w-5 h-5 text-[var(--color-primary-500)]" />
-              <h3 className="font-bold tracking-tight text-[var(--fg-primary)]">Conseils</h3>
+            {isLoading ? (
+              <>
+                <motion.div
+                  className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                />
+                Verification...
+              </>
+            ) : (
+              <>
+                <Users className="w-4 h-4" strokeWidth={2} />
+                Rejoindre la squad
+              </>
+            )}
+          </motion.button>
+
+          {/* Tips Section */}
+          <div className="pt-4">
+            <h3 className="text-xs font-medium text-[#6b7280] uppercase tracking-wider mb-3">
+              Conseils
+            </h3>
+            <div className="space-y-2">
+              {[
+                'Le code est insensible a la casse',
+                'Les codes expirent apres 7 jours',
+                'Une squad peut avoir plusieurs codes actifs'
+              ].map((tip, index) => (
+                <div key={index} className="flex items-center gap-2.5 text-sm text-[#9ca3af]">
+                  <span className="w-1 h-1 rounded-full bg-[#5e6dd2]" />
+                  {tip}
+                </div>
+              ))}
             </div>
-            <ul className="text-sm text-[var(--fg-secondary)] space-y-2">
-              <li className="flex items-start gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary-500)] mt-2 flex-shrink-0" />
-                <span>Le code est composé de lettres et de chiffres (ex: ABC123)</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary-500)] mt-2 flex-shrink-0" />
-                <span>Les codes sont sensibles à la casse</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary-500)] mt-2 flex-shrink-0" />
-                <span>Demandez un nouveau code si celui-ci ne fonctionne pas</span>
-              </li>
-            </ul>
-          </motion.div>
+          </div>
         </motion.div>
       </div>
     </div>

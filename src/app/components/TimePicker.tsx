@@ -1,3 +1,8 @@
+/**
+ * TIME PICKER - LINEAR DARK DESIGN
+ * Clean, minimal time picker with dark theme
+ */
+
 import { Clock, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -32,8 +37,8 @@ export function TimePicker({ isOpen, onClose, onSelect, selectedTime }: TimePick
   const quickTimes = [
     { label: 'Matin', time: '10:00', icon: '🌅' },
     { label: 'Midi', time: '12:00', icon: '☀️' },
-    { label: 'Après-midi', time: '15:00', icon: '🌤️' },
-    { label: 'Soirée', time: '19:00', icon: '🌆' },
+    { label: 'Aprem', time: '15:00', icon: '🌤️' },
+    { label: 'Soir', time: '19:00', icon: '🌆' },
     { label: 'Nuit', time: '21:00', icon: '🌙' },
   ];
 
@@ -45,7 +50,7 @@ export function TimePicker({ isOpen, onClose, onSelect, selectedTime }: TimePick
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+        className="fixed inset-0 bg-[rgba(0,0,0,0.7)] backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
         onClick={onClose}
       >
         <motion.div
@@ -54,74 +59,79 @@ export function TimePicker({ isOpen, onClose, onSelect, selectedTime }: TimePick
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 30, stiffness: 300 }}
           onClick={(e) => e.stopPropagation()}
-          className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md shadow-2xl overflow-hidden"
+          className="bg-[#101012] border-t sm:border border-[rgba(255,255,255,0.08)] rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-[var(--border-subtle)]">
+          <div className="flex items-center justify-between p-5 border-b border-[rgba(255,255,255,0.06)]">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--secondary-500)] to-[var(--secondary-600)] flex items-center justify-center">
-                <Clock className="w-5 h-5 text-white" strokeWidth={2} />
+              <div className="w-10 h-10 rounded-xl bg-[rgba(96,165,250,0.15)] flex items-center justify-center">
+                <Clock className="w-5 h-5 text-[#60a5fa]" strokeWidth={1.5} />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-[var(--fg-primary)] tracking-tight">
+                <h2 className="text-[16px] font-semibold text-[#f7f8f8]">
                   Choisir une heure
                 </h2>
-                <p className="text-xs text-[var(--fg-tertiary)] mt-0.5">
+                <p className="text-[12px] text-[#5e6063] mt-0.5">
                   {tempHour}:{tempMinute}
                 </p>
               </div>
             </div>
-            <button
+            <motion.button
               onClick={onClose}
-              className="w-10 h-10 rounded-xl bg-[var(--bg-subtle)] hover:bg-[var(--bg-muted)] flex items-center justify-center transition-colors"
+              className="w-9 h-9 rounded-lg bg-[rgba(255,255,255,0.04)] flex items-center justify-center text-[#8b8d90] hover:bg-[rgba(255,255,255,0.08)] hover:text-[#f7f8f8] transition-colors"
+              whileTap={{ scale: 0.95 }}
             >
-              <X className="w-5 h-5 text-[var(--fg-secondary)]" strokeWidth={2} />
-            </button>
+              <X className="w-4 h-4" strokeWidth={1.5} />
+            </motion.button>
           </div>
 
-          <div className="p-6">
+          <div className="p-5">
             {/* Quick Times */}
-            <div className="mb-6">
-              <label className="text-xs font-semibold text-[var(--fg-tertiary)] mb-3 block">
-                Créneaux rapides
+            <div className="mb-5">
+              <label className="text-[10px] font-medium text-[#5e6063] uppercase tracking-wider mb-3 block">
+                Creneaux rapides
               </label>
               <div className="grid grid-cols-5 gap-2">
                 {quickTimes.map(({ label, time, icon }) => {
                   const [hour, minute] = time.split(':');
                   const isSelected = tempHour === hour && tempMinute === minute;
-                  
+
                   return (
-                    <button
+                    <motion.button
                       key={time}
                       onClick={() => {
                         setTempHour(hour);
                         setTempMinute(minute);
                       }}
-                      className={`p-3 rounded-xl text-center transition-all duration-200 ${
+                      className={`p-2.5 rounded-xl text-center transition-all ${
                         isSelected
-                          ? 'bg-gradient-to-br from-[var(--secondary-500)] to-[var(--secondary-600)] text-white shadow-lg shadow-[var(--secondary-500)]/20'
-                          : 'bg-[var(--bg-subtle)] text-[var(--fg-secondary)] hover:bg-[var(--bg-muted)] hover:shadow-sm'
+                          ? 'bg-[rgba(94,109,210,0.2)] border border-[rgba(94,109,210,0.4)]'
+                          : 'bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)]'
                       }`}
+                      whileHover={{ y: -1 }}
+                      whileTap={{ scale: 0.98 }}
                     >
-                      <div className="text-lg mb-1">{icon}</div>
-                      <div className="text-xs font-semibold">{label}</div>
-                      <div className={`text-xs mt-1 ${isSelected ? 'text-white/90' : 'text-[var(--fg-tertiary)]'}`}>
+                      <div className="text-base mb-0.5">{icon}</div>
+                      <div className={`text-[10px] font-medium ${isSelected ? 'text-[#8b93ff]' : 'text-[#f7f8f8]'}`}>
+                        {label}
+                      </div>
+                      <div className={`text-[10px] mt-0.5 ${isSelected ? 'text-[#8b93ff]/70' : 'text-[#5e6063]'}`}>
                         {time}
                       </div>
-                    </button>
+                    </motion.button>
                   );
                 })}
               </div>
             </div>
 
             {/* Digital Clock Display */}
-            <div className="mb-6 py-8 bg-gradient-to-br from-[var(--secondary-50)] to-white rounded-2xl border-[0.5px] border-[var(--secondary-200)]">
+            <div className="mb-5 py-6 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl">
               <div className="text-center">
-                <div className="text-5xl font-semibold text-[var(--fg-primary)] tracking-tight">
-                  {tempHour}<span className="text-[var(--fg-tertiary)] animate-pulse">:</span>{tempMinute}
+                <div className="text-4xl font-semibold text-[#f7f8f8] tracking-tight font-mono">
+                  {tempHour}<span className="text-[#5e6063] animate-pulse">:</span>{tempMinute}
                 </div>
-                <div className="text-sm text-[var(--fg-tertiary)] mt-2">
-                  {parseInt(tempHour) < 12 ? 'Matin' : parseInt(tempHour) < 18 ? 'Après-midi' : 'Soirée'}
+                <div className="text-[12px] text-[#5e6063] mt-2">
+                  {parseInt(tempHour) < 12 ? 'Matin' : parseInt(tempHour) < 18 ? 'Apres-midi' : 'Soiree'}
                 </div>
               </div>
             </div>
@@ -130,23 +140,24 @@ export function TimePicker({ isOpen, onClose, onSelect, selectedTime }: TimePick
             <div className="grid grid-cols-2 gap-4">
               {/* Hours */}
               <div>
-                <label className="text-xs font-semibold text-[var(--fg-tertiary)] mb-2 block">
+                <label className="text-[10px] font-medium text-[#5e6063] uppercase tracking-wider mb-2 block">
                   Heures
                 </label>
-                <div className="h-48 overflow-y-auto hide-scrollbar bg-[var(--bg-subtle)] rounded-xl p-2">
+                <div className="h-44 overflow-y-auto scrollbar-thin scrollbar-thumb-[rgba(255,255,255,0.1)] scrollbar-track-transparent bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-2">
                   <div className="space-y-1">
                     {hours.map((hour) => (
-                      <button
+                      <motion.button
                         key={hour}
                         onClick={() => setTempHour(hour)}
-                        className={`w-full py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                        className={`w-full py-2 px-3 rounded-lg text-[13px] font-medium transition-all ${
                           tempHour === hour
-                            ? 'bg-gradient-to-br from-[var(--secondary-500)] to-[var(--secondary-600)] text-white shadow-md'
-                            : 'bg-transparent text-[var(--fg-secondary)] hover:bg-white hover:shadow-sm'
+                            ? 'bg-[rgba(94,109,210,0.2)] text-[#8b93ff] border border-[rgba(94,109,210,0.3)]'
+                            : 'bg-transparent text-[#8b8d90] hover:bg-[rgba(255,255,255,0.04)] hover:text-[#f7f8f8]'
                         }`}
+                        whileTap={{ scale: 0.98 }}
                       >
                         {hour}h
-                      </button>
+                      </motion.button>
                     ))}
                   </div>
                 </div>
@@ -154,23 +165,24 @@ export function TimePicker({ isOpen, onClose, onSelect, selectedTime }: TimePick
 
               {/* Minutes */}
               <div>
-                <label className="text-xs font-semibold text-[var(--fg-tertiary)] mb-2 block">
+                <label className="text-[10px] font-medium text-[#5e6063] uppercase tracking-wider mb-2 block">
                   Minutes
                 </label>
-                <div className="h-48 overflow-y-auto hide-scrollbar bg-[var(--bg-subtle)] rounded-xl p-2">
+                <div className="h-44 overflow-y-auto scrollbar-thin scrollbar-thumb-[rgba(255,255,255,0.1)] scrollbar-track-transparent bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-2">
                   <div className="space-y-1">
                     {minutes.map((minute) => (
-                      <button
+                      <motion.button
                         key={minute}
                         onClick={() => setTempMinute(minute)}
-                        className={`w-full py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                        className={`w-full py-2 px-3 rounded-lg text-[13px] font-medium transition-all ${
                           tempMinute === minute
-                            ? 'bg-gradient-to-br from-[var(--secondary-500)] to-[var(--secondary-600)] text-white shadow-md'
-                            : 'bg-transparent text-[var(--fg-secondary)] hover:bg-white hover:shadow-sm'
+                            ? 'bg-[rgba(94,109,210,0.2)] text-[#8b93ff] border border-[rgba(94,109,210,0.3)]'
+                            : 'bg-transparent text-[#8b8d90] hover:bg-[rgba(255,255,255,0.04)] hover:text-[#f7f8f8]'
                         }`}
+                        whileTap={{ scale: 0.98 }}
                       >
                         {minute}
-                      </button>
+                      </motion.button>
                     ))}
                   </div>
                 </div>
@@ -179,20 +191,24 @@ export function TimePicker({ isOpen, onClose, onSelect, selectedTime }: TimePick
           </div>
 
           {/* Footer */}
-          <div className="p-6 border-t border-[var(--border-subtle)] bg-gradient-to-br from-[var(--secondary-50)] to-white">
+          <div className="p-5 border-t border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)]">
             <div className="flex gap-3">
-              <button
+              <motion.button
                 onClick={onClose}
-                className="flex-1 h-12 rounded-xl bg-[var(--bg-subtle)] text-[var(--fg-secondary)] text-sm font-semibold hover:bg-[var(--bg-muted)] transition-colors"
+                className="flex-1 h-11 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-[#8b8d90] text-[13px] font-semibold hover:bg-[rgba(255,255,255,0.06)] hover:text-[#f7f8f8] transition-all"
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.98 }}
               >
                 Annuler
-              </button>
-              <button
+              </motion.button>
+              <motion.button
                 onClick={handleConfirm}
-                className="flex-1 h-12 rounded-xl bg-gradient-to-br from-[var(--secondary-500)] to-[var(--secondary-600)] text-white text-sm font-semibold shadow-lg shadow-[var(--secondary-500)]/20 hover:shadow-xl hover:shadow-[var(--secondary-500)]/30 transition-all duration-200"
+                className="flex-1 h-11 rounded-xl bg-[#5e6dd2] text-white text-[13px] font-semibold shadow-lg shadow-[#5e6dd2]/20 hover:bg-[#6a79db] transition-all"
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.98 }}
               >
                 Confirmer
-              </button>
+              </motion.button>
             </div>
           </div>
         </motion.div>

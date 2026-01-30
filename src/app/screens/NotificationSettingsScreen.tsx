@@ -1,9 +1,8 @@
-import { ArrowLeft, Mail, Smartphone, Save, Bell, BellOff, AlertCircle, Sparkles, Zap, Clock, Users } from 'lucide-react';
+import { ArrowLeft, Mail, Smartphone, Save, Bell, BellOff, AlertCircle, Zap, Clock, Users, Settings, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '@/app/contexts/UserContext';
 import { pushNotifications } from '@/utils/push-notifications';
-import { Button, Card, IconButton } from '@/design-system';
 
 interface NotificationSettingsScreenProps {
   onNavigate: (screen: string) => void;
@@ -14,51 +13,104 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
+    transition: { staggerChildren: 0.06, delayChildren: 0.1 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
+    transition: { type: "spring", stiffness: 400, damping: 28 }
   }
 };
 
+// Linear-style Toggle Switch
 interface ToggleSwitchProps {
   enabled: boolean;
   onToggle: () => void;
 }
 
-function PremiumToggleSwitch({ enabled, onToggle }: ToggleSwitchProps) {
+function LinearToggle({ enabled, onToggle }: ToggleSwitchProps) {
   return (
-    <motion.button
+    <button
       onClick={onToggle}
-      className={`relative w-14 h-8 rounded-full transition-all duration-300 flex-shrink-0 ${
+      className={`relative w-11 h-6 rounded-full transition-all duration-200 flex-shrink-0 ${
         enabled
-          ? 'bg-gradient-to-r from-[var(--color-primary-500)] to-purple-500 shadow-lg shadow-[var(--color-primary-500)]/30'
-          : 'bg-[var(--fg-tertiary)]'
+          ? 'bg-[#5e6ad2]'
+          : 'bg-[#26282d]'
       }`}
-      whileTap={{ scale: 0.95 }}
+      style={{
+        boxShadow: enabled
+          ? '0 0 0 1px rgba(94, 106, 210, 0.3), inset 0 1px 1px rgba(0,0,0,0.1)'
+          : 'inset 0 1px 2px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.04)'
+      }}
     >
       <motion.div
-        className="absolute top-1 w-6 h-6 bg-[var(--bg-elevated)] rounded-full shadow-md flex items-center justify-center"
-        animate={{ x: enabled ? 28 : 4 }}
+        className="absolute top-[2px] w-5 h-5 bg-white rounded-full shadow-md"
+        animate={{ x: enabled ? 22 : 2 }}
         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+        style={{
+          boxShadow: '0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2)'
+        }}
+      />
+    </button>
+  );
+}
+
+// Section Header Component
+interface SectionHeaderProps {
+  icon: React.ReactNode;
+  iconBg: string;
+  title: string;
+  subtitle?: string;
+}
+
+function SectionHeader({ icon, iconBg, title, subtitle }: SectionHeaderProps) {
+  return (
+    <div className="flex items-center gap-3 mb-4">
+      <div
+        className="w-9 h-9 rounded-lg flex items-center justify-center"
+        style={{ backgroundColor: iconBg }}
       >
-        {enabled && (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.1 }}
-          >
-            <Sparkles className="w-3 h-3 text-[var(--color-primary-500)]" />
-          </motion.div>
-        )}
-      </motion.div>
-    </motion.button>
+        {icon}
+      </div>
+      <div>
+        <h2 className="text-[15px] font-semibold text-[#f2f2f2]">{title}</h2>
+        {subtitle && <p className="text-[13px] text-[#6b6f76]">{subtitle}</p>}
+      </div>
+    </div>
+  );
+}
+
+// Setting Row Component
+interface SettingRowProps {
+  icon: React.ReactNode;
+  iconColor: string;
+  title: string;
+  description: string;
+  enabled: boolean;
+  onToggle: () => void;
+}
+
+function SettingRow({ icon, iconColor, title, description, enabled, onToggle }: SettingRowProps) {
+  return (
+    <div className="flex items-center justify-between py-3 group">
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div
+          className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-transform duration-200 group-hover:scale-105"
+          style={{ backgroundColor: `${iconColor}15` }}
+        >
+          <div style={{ color: iconColor }}>{icon}</div>
+        </div>
+        <div className="min-w-0">
+          <div className="text-[14px] font-medium text-[#e8e8e8] truncate">{title}</div>
+          <div className="text-[12px] text-[#6b6f76] truncate">{description}</div>
+        </div>
+      </div>
+      <LinearToggle enabled={enabled} onToggle={onToggle} />
+    </div>
   );
 }
 
@@ -73,6 +125,7 @@ export function NotificationSettingsScreen({ onNavigate, showToast }: Notificati
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushSupported, setPushSupported] = useState(true);
   const [checkingPush, setCheckingPush] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     checkPushStatus();
@@ -101,11 +154,11 @@ export function NotificationSettingsScreen({ onNavigate, showToast }: Notificati
 
       if (permission === 'granted') {
         setPushEnabled(true);
-        showToast('Notifications push activées !', 'success');
+        showToast('Notifications push activees !', 'success');
       } else if (permission === 'denied') {
-        showToast('Permission refusée. Vérifiez les paramètres de votre navigateur.', 'error');
+        showToast('Permission refusee. Verifiez les parametres de votre navigateur.', 'error');
       } else {
-        showToast('Permission refusée', 'info');
+        showToast('Permission refusee', 'info');
       }
     } catch (error: any) {
       console.error('[Notification Settings] Enable push error:', error);
@@ -117,17 +170,17 @@ export function NotificationSettingsScreen({ onNavigate, showToast }: Notificati
     try {
       await pushNotifications.unsubscribe();
       setPushEnabled(false);
-      showToast('Notifications push désactivées', 'info');
+      showToast('Notifications push desactivees', 'info');
     } catch (error) {
       console.error('[Notification Settings] Disable push error:', error);
-      showToast('Erreur lors de la désactivation', 'error');
+      showToast('Erreur lors de la desactivation', 'error');
     }
   };
 
   const handleTestPush = async () => {
     try {
       await pushNotifications.sendTestNotification();
-      showToast('Notification de test envoyée !', 'success');
+      showToast('Notification de test envoyee !', 'success');
     } catch (error) {
       console.error('[Notification Settings] Test push error:', error);
       showToast('Erreur lors du test', 'error');
@@ -140,98 +193,101 @@ export function NotificationSettingsScreen({ onNavigate, showToast }: Notificati
 
   const handleSave = async () => {
     try {
+      setSaving(true);
       await updateUserProfile({
         notificationSettings: settings
       });
-      showToast('Préférences sauvegardées sur votre profil', 'success');
+      showToast('Preferences sauvegardees', 'success');
       setTimeout(() => onNavigate('profile'), 500);
     } catch (error) {
       showToast('Erreur lors de la sauvegarde', 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-[var(--color-primary-50)] via-purple-50 to-pink-50 relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-[var(--color-primary-400)]/20 to-purple-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
+    <div className="min-h-screen pb-24 pt-safe" style={{ backgroundColor: '#08090a' }}>
+      <div className="px-4 py-6 max-w-2xl mx-auto">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           {/* Header */}
-          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
-            <IconButton
-              icon={<ArrowLeft className="w-5 h-5" strokeWidth={2} />}
+          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
+            <button
               onClick={() => onNavigate('profile')}
-              variant="ghost"
-              aria-label="Retour au profil"
-              className="w-12 h-12 rounded-2xl bg-[var(--bg-elevated)]/80 backdrop-blur-sm border border-[var(--border-subtle)] shadow-lg hover:shadow-xl transition-all"
-            />
+              className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 hover:bg-[#1a1b1e] active:scale-95"
+              style={{
+                backgroundColor: '#111214',
+                border: '1px solid rgba(255,255,255,0.06)'
+              }}
+            >
+              <ArrowLeft className="w-5 h-5 text-[#9b9ca0]" strokeWidth={1.5} />
+            </button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-[var(--color-primary-600)] to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-xl font-semibold text-[#f2f2f2] tracking-tight">
                 Notifications
               </h1>
-              <p className="text-sm text-[var(--fg-secondary)] font-medium">
-                Gérez vos rappels et alertes
+              <p className="text-[13px] text-[#6b6f76] mt-0.5">
+                Gerez vos rappels et alertes
               </p>
             </div>
-            <motion.div
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--color-primary-500)] to-purple-500 flex items-center justify-center shadow-lg"
-              whileHover={{ scale: 1.05, rotate: 5 }}
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{ backgroundColor: 'rgba(94, 106, 210, 0.15)' }}
             >
-              <Bell className="w-6 h-6 text-white" strokeWidth={2} />
-            </motion.div>
+              <Bell className="w-5 h-5 text-[#5e6ad2]" strokeWidth={1.5} />
+            </div>
           </motion.div>
 
-          {/* Web Push Status Section */}
+          {/* Push Status Card */}
           <AnimatePresence mode="wait">
             {pushSupported ? (
               <motion.div
                 key="push-supported"
                 variants={itemVariants}
-                className={`rounded-2xl p-6 mb-6 border shadow-lg ${
-                  pushEnabled
-                    ? 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200/50'
-                    : 'bg-gradient-to-br from-[var(--color-primary-50)] to-purple-50 border-[var(--color-primary-200)]/50'
-                }`}
+                className="rounded-xl p-5 mb-6"
+                style={{
+                  backgroundColor: '#111214',
+                  border: '1px solid rgba(255,255,255,0.06)'
+                }}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <motion.div
-                      className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-md ${
-                        pushEnabled
-                          ? 'bg-gradient-to-br from-emerald-500 to-teal-500'
-                          : 'bg-gradient-to-br from-[var(--color-primary-500)] to-purple-500'
-                      }`}
-                      whileHover={{ scale: 1.1, rotate: 5 }}
+                    <div
+                      className="w-11 h-11 rounded-xl flex items-center justify-center"
+                      style={{
+                        backgroundColor: pushEnabled ? 'rgba(52, 199, 89, 0.15)' : 'rgba(94, 106, 210, 0.15)'
+                      }}
                     >
                       {pushEnabled ? (
-                        <Bell className="w-6 h-6 text-white" strokeWidth={2} />
+                        <Bell className="w-5 h-5 text-[#34c759]" strokeWidth={1.5} />
                       ) : (
-                        <BellOff className="w-6 h-6 text-white" strokeWidth={2} />
+                        <BellOff className="w-5 h-5 text-[#5e6ad2]" strokeWidth={1.5} />
                       )}
-                    </motion.div>
+                    </div>
                     <div>
-                      <h3 className="text-base font-bold tracking-tight text-[var(--fg-primary)]">
-                        {pushEnabled ? 'Notifications Push Activées' : 'Notifications Push'}
+                      <h3 className="text-[15px] font-semibold text-[#f2f2f2]">
+                        {pushEnabled ? 'Push actives' : 'Notifications Push'}
                       </h3>
-                      <p className="text-sm text-[var(--fg-secondary)] font-medium">
-                        {checkingPush ? 'Vérification...' : pushEnabled ? 'Vous recevrez des notifications' : 'Activez pour recevoir des alertes'}
+                      <p className="text-[13px] text-[#6b6f76] mt-0.5">
+                        {checkingPush ? 'Verification...' : pushEnabled ? 'Vous recevrez des alertes' : 'Activez pour recevoir des alertes'}
                       </p>
                     </div>
                   </div>
                   {pushEnabled && (
                     <motion.span
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="px-3 py-1 bg-emerald-500 text-white text-xs font-bold rounded-full"
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="px-2.5 py-1 text-[11px] font-semibold rounded-full flex items-center gap-1"
+                      style={{
+                        backgroundColor: 'rgba(52, 199, 89, 0.15)',
+                        color: '#34c759'
+                      }}
                     >
+                      <Check className="w-3 h-3" />
                       Actif
                     </motion.span>
                   )}
@@ -240,38 +296,57 @@ export function NotificationSettingsScreen({ onNavigate, showToast }: Notificati
                 <div className="flex gap-2">
                   {pushEnabled ? (
                     <>
-                      <Button
-                        variant="secondary"
-                        size="md"
+                      <button
                         onClick={handleTestPush}
-                        icon={<Bell className="w-4 h-4" />}
-                        className="flex-1"
+                        className="flex-1 h-10 rounded-lg text-[13px] font-medium transition-all duration-200 hover:brightness-110 active:scale-[0.98] flex items-center justify-center gap-2"
+                        style={{
+                          backgroundColor: '#1a1b1e',
+                          color: '#9b9ca0',
+                          border: '1px solid rgba(255,255,255,0.06)'
+                        }}
                       >
-                        Test
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="md"
+                        <Bell className="w-4 h-4" />
+                        Tester
+                      </button>
+                      <button
                         onClick={handleDisablePush}
-                        icon={<BellOff className="w-4 h-4" />}
-                        className="flex-1"
+                        className="flex-1 h-10 rounded-lg text-[13px] font-medium transition-all duration-200 hover:brightness-110 active:scale-[0.98] flex items-center justify-center gap-2"
+                        style={{
+                          backgroundColor: 'rgba(255, 69, 58, 0.1)',
+                          color: '#ff453a',
+                          border: '1px solid rgba(255, 69, 58, 0.2)'
+                        }}
                       >
-                        Désactiver
-                      </Button>
+                        <BellOff className="w-4 h-4" />
+                        Desactiver
+                      </button>
                     </>
                   ) : (
-                    <Button
-                      variant="primary"
-                      size="lg"
+                    <button
                       onClick={handleEnablePush}
                       disabled={checkingPush}
-                      loading={checkingPush}
-                      icon={<Bell className="w-4 h-4" />}
-                      fullWidth
-                      className="bg-gradient-to-r from-[var(--color-primary-500)] to-purple-500 shadow-lg shadow-[var(--color-primary-500)]/30"
+                      className="w-full h-11 rounded-lg text-[14px] font-medium transition-all duration-200 hover:brightness-110 active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+                      style={{
+                        backgroundColor: '#5e6ad2',
+                        color: '#fff'
+                      }}
                     >
-                      {checkingPush ? 'Vérification...' : 'Activer les Notifications Push'}
-                    </Button>
+                      {checkingPush ? (
+                        <>
+                          <motion.div
+                            className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                          />
+                          Verification...
+                        </>
+                      ) : (
+                        <>
+                          <Bell className="w-4 h-4" />
+                          Activer les notifications Push
+                        </>
+                      )}
+                    </button>
                   )}
                 </div>
               </motion.div>
@@ -279,18 +354,25 @@ export function NotificationSettingsScreen({ onNavigate, showToast }: Notificati
               <motion.div
                 key="push-not-supported"
                 variants={itemVariants}
-                className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 mb-6 border border-amber-200/50 shadow-lg"
+                className="rounded-xl p-5 mb-6"
+                style={{
+                  backgroundColor: 'rgba(255, 159, 10, 0.08)',
+                  border: '1px solid rgba(255, 159, 10, 0.2)'
+                }}
               >
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center flex-shrink-0">
-                    <AlertCircle className="w-5 h-5 text-white" strokeWidth={2} />
+                <div className="flex items-start gap-3">
+                  <div
+                    className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: 'rgba(255, 159, 10, 0.15)' }}
+                  >
+                    <AlertCircle className="w-5 h-5 text-[#ff9f0a]" strokeWidth={1.5} />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold tracking-tight text-amber-900 mb-1">
-                      Notifications Push non disponibles
+                    <h3 className="text-[14px] font-semibold text-[#ff9f0a] mb-1">
+                      Push non disponibles
                     </h3>
-                    <p className="text-sm text-amber-700 font-medium">
-                      Votre navigateur ne supporte pas les notifications push ou elles sont désactivées dans les paramètres système.
+                    <p className="text-[13px] text-[#9b9ca0] leading-relaxed">
+                      Votre navigateur ne supporte pas les notifications push ou elles sont desactivees.
                     </p>
                   </div>
                 </div>
@@ -298,112 +380,109 @@ export function NotificationSettingsScreen({ onNavigate, showToast }: Notificati
             )}
           </AnimatePresence>
 
-          {/* Push Section */}
-          <Card variant="elevated" padding="lg" className="mb-6 bg-[var(--bg-elevated)]/80 backdrop-blur-sm border-[var(--border-subtle)]">
-            <div className="flex items-center gap-4 mb-6">
-              <motion.div
-                className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-primary-500)] to-purple-500 flex items-center justify-center shadow-md"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-              >
-                <Smartphone className="w-6 h-6 text-white" strokeWidth={2} />
-              </motion.div>
-              <h2 className="text-lg font-bold tracking-tight text-[var(--fg-primary)]">Notifications Push</h2>
-            </div>
+          {/* Push Notifications Section */}
+          <motion.div
+            variants={itemVariants}
+            className="rounded-xl p-5 mb-4"
+            style={{
+              backgroundColor: '#111214',
+              border: '1px solid rgba(255,255,255,0.06)'
+            }}
+          >
+            <SectionHeader
+              icon={<Smartphone className="w-4 h-4 text-[#5e6ad2]" strokeWidth={1.5} />}
+              iconBg="rgba(94, 106, 210, 0.15)"
+              title="Notifications Push"
+              subtitle="Rappels sur votre appareil"
+            />
 
-            <div className="space-y-5">
-              {/* 24h Reminder */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center">
-                    <Clock className="w-5 h-5 text-amber-600" strokeWidth={2} />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-[var(--fg-primary)]">Rappel J-1 (24h)</div>
-                    <div className="text-xs text-[var(--fg-secondary)] font-medium">Recevoir une alerte la veille</div>
-                  </div>
-                </div>
-                <PremiumToggleSwitch
-                  enabled={settings.pushReminder24h}
-                  onToggle={() => handleToggle('pushReminder24h')}
-                />
-              </div>
+            <div className="divide-y divide-[#1a1b1e]">
+              <SettingRow
+                icon={<Clock className="w-4 h-4" strokeWidth={1.5} />}
+                iconColor="#ff9f0a"
+                title="Rappel J-1 (24h)"
+                description="Alerte la veille de la session"
+                enabled={settings.pushReminder24h}
+                onToggle={() => handleToggle('pushReminder24h')}
+              />
 
-              {/* 1h Reminder */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center">
-                    <Zap className="w-5 h-5 text-red-600" strokeWidth={2} />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-[var(--fg-primary)]">Rappel H-1 (1h)</div>
-                    <div className="text-xs text-[var(--fg-secondary)] font-medium">Dernier rappel avant le début</div>
-                  </div>
-                </div>
-                <PremiumToggleSwitch
-                  enabled={settings.pushReminder1h}
-                  onToggle={() => handleToggle('pushReminder1h')}
-                />
-              </div>
+              <SettingRow
+                icon={<Zap className="w-4 h-4" strokeWidth={1.5} />}
+                iconColor="#ff453a"
+                title="Rappel H-1 (1h)"
+                description="Dernier rappel avant le debut"
+                enabled={settings.pushReminder1h}
+                onToggle={() => handleToggle('pushReminder1h')}
+              />
 
-              {/* Smart Nudges */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[var(--color-primary-100)] to-purple-100 flex items-center justify-center">
-                    <Users className="w-5 h-5 text-[var(--color-primary-600)]" strokeWidth={2} />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-[var(--fg-primary)]">Smart Nudges</div>
-                    <div className="text-xs text-[var(--fg-secondary)] font-medium">Alertes "Il manque un joueur !"</div>
-                  </div>
-                </div>
-                <PremiumToggleSwitch
-                  enabled={settings.smartNudges}
-                  onToggle={() => handleToggle('smartNudges')}
-                />
-              </div>
-            </div>
-          </Card>
-
-          {/* Email Section */}
-          <Card variant="elevated" padding="lg" className="mb-6 bg-[var(--bg-elevated)]/80 backdrop-blur-sm border-[var(--border-subtle)]">
-            <div className="flex items-center gap-4 mb-6">
-              <motion.div
-                className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center shadow-md"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-              >
-                <Mail className="w-6 h-6 text-white" strokeWidth={2} />
-              </motion.div>
-              <h2 className="text-lg font-bold tracking-tight text-[var(--fg-primary)]">Email</h2>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
-                  <Mail className="w-5 h-5 text-blue-600" strokeWidth={2} />
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-[var(--fg-primary)]">Récapitulatif Session</div>
-                  <div className="text-xs text-[var(--fg-secondary)] font-medium">Détails envoyés 24h avant</div>
-                </div>
-              </div>
-              <PremiumToggleSwitch
-                enabled={settings.emailReminder24h}
-                onToggle={() => handleToggle('emailReminder24h')}
+              <SettingRow
+                icon={<Users className="w-4 h-4" strokeWidth={1.5} />}
+                iconColor="#5e6ad2"
+                title="Smart Nudges"
+                description="Alertes 'Il manque un joueur !'"
+                enabled={settings.smartNudges}
+                onToggle={() => handleToggle('smartNudges')}
               />
             </div>
-          </Card>
+          </motion.div>
+
+          {/* Email Section */}
+          <motion.div
+            variants={itemVariants}
+            className="rounded-xl p-5 mb-6"
+            style={{
+              backgroundColor: '#111214',
+              border: '1px solid rgba(255,255,255,0.06)'
+            }}
+          >
+            <SectionHeader
+              icon={<Mail className="w-4 h-4 text-[#bf5af2]" strokeWidth={1.5} />}
+              iconBg="rgba(191, 90, 242, 0.15)"
+              title="Email"
+              subtitle="Recapitulatifs par email"
+            />
+
+            <SettingRow
+              icon={<Mail className="w-4 h-4" strokeWidth={1.5} />}
+              iconColor="#30d158"
+              title="Recapitulatif Session"
+              description="Details envoyes 24h avant"
+              enabled={settings.emailReminder24h}
+              onToggle={() => handleToggle('emailReminder24h')}
+            />
+          </motion.div>
 
           {/* Save Button */}
-          <Button
-            variant="primary"
-            size="lg"
+          <motion.button
+            variants={itemVariants}
             onClick={handleSave}
-            icon={<Save className="w-5 h-5" strokeWidth={2} />}
-            fullWidth
-            className="bg-gradient-to-r from-[var(--color-primary-500)] to-purple-500 shadow-xl shadow-[var(--color-primary-500)]/30 h-14 rounded-2xl font-bold"
+            disabled={saving}
+            className="w-full h-12 rounded-xl text-[15px] font-semibold transition-all duration-200 hover:brightness-110 active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+            style={{
+              backgroundColor: '#5e6ad2',
+              color: '#fff'
+            }}
+            whileTap={{ scale: 0.98 }}
           >
-            Enregistrer les préférences
-          </Button>
+            {saving ? (
+              <>
+                <motion.div
+                  className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                />
+                Sauvegarde...
+              </>
+            ) : (
+              <>
+                <Save className="w-5 h-5" strokeWidth={1.5} />
+                Enregistrer les preferences
+              </>
+            )}
+          </motion.button>
+
+          {/* Bottom Spacer for mobile nav */}
+          <div className="h-6" />
         </motion.div>
       </div>
     </div>

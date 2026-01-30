@@ -1,13 +1,8 @@
 // @ts-nocheck
 /**
- * 🎯 RSVP SCREEN - Écran dédié aux réponses de session
- * Phase 0/2 Critical Feature - Permet aux membres de répondre aux sessions
- *
- * Features:
- * - Cards membres avec photo et statut visuel (✅⏳❌)
- * - Boutons d'action rapides
- * - Jauge de complétion visuelle (3/5 confirmés)
- * - Temps réel via Supabase
+ * RSVP SCREEN - Linear Dark Design
+ * Design system: Linear.app inspired
+ * Background: #08090a, Semantic colors for RSVP buttons
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -30,12 +25,10 @@ import {
   AlertCircle,
   CheckCircle2,
   Timer,
-  Sparkles,
 } from 'lucide-react';
 import { sessionsAPI } from '@/app/services/api';
 import { supabase } from '@/lib/supabase';
 import { useUser } from '@/app/contexts/UserContext';
-import { Button, Card, Badge, SkeletonPage } from '@/design-system';
 
 interface RSVP {
   id: string;
@@ -79,23 +72,6 @@ interface RSVPScreenProps {
   showToast?: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
-  }
-};
-
 export function RSVPScreen({ onNavigate, showToast }: RSVPScreenProps) {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
@@ -107,7 +83,7 @@ export function RSVPScreen({ onNavigate, showToast }: RSVPScreenProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentUserRSVP, setCurrentUserRSVP] = useState<'yes' | 'no' | 'maybe' | null>(null);
 
-  // Stats calculées
+  // Stats calculees
   const yesCount = session?.rsvps.filter(r => r.response === 'yes').length || 0;
   const noCount = session?.rsvps.filter(r => r.response === 'no').length || 0;
   const maybeCount = session?.rsvps.filter(r => r.response === 'maybe').length || 0;
@@ -125,10 +101,8 @@ export function RSVPScreen({ onNavigate, showToast }: RSVPScreenProps) {
       setError(null);
 
       const { session: data } = await sessionsAPI.getById(sessionId);
-      // Type assertion to handle Supabase relation typing
       setSession(data as unknown as Session);
 
-      // Trouver le RSVP de l'utilisateur actuel
       const rsvps = (data as any)?.rsvps as any[] | null;
       if (userProfile?.id && rsvps) {
         const userRSVP = rsvps.find((r: any) => r.user?.id === userProfile.id);
@@ -146,7 +120,7 @@ export function RSVPScreen({ onNavigate, showToast }: RSVPScreenProps) {
     loadSession();
   }, [loadSession]);
 
-  // Real-time subscription pour les RSVPs
+  // Real-time subscription
   useEffect(() => {
     if (!sessionId) return;
 
@@ -161,7 +135,6 @@ export function RSVPScreen({ onNavigate, showToast }: RSVPScreenProps) {
           filter: `session_id=eq.${sessionId}`,
         },
         () => {
-          // Refresh data on any RSVP change
           loadSession();
         }
       )
@@ -182,17 +155,16 @@ export function RSVPScreen({ onNavigate, showToast }: RSVPScreenProps) {
       setCurrentUserRSVP(response);
 
       const messages = {
-        yes: 'Présence confirmée !',
-        no: 'Absence enregistrée',
-        maybe: 'Réponse enregistrée : peut-être',
+        yes: 'Presence confirmee !',
+        no: 'Absence enregistree',
+        maybe: 'Reponse enregistree : peut-etre',
       };
       showToast?.(messages[response], 'success');
 
-      // Refresh session data
       await loadSession();
     } catch (err: any) {
       console.error('Error submitting RSVP:', err);
-      showToast?.(err.message || 'Erreur lors de la réponse', 'error');
+      showToast?.(err.message || 'Erreur lors de la reponse', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -223,42 +195,83 @@ export function RSVPScreen({ onNavigate, showToast }: RSVPScreenProps) {
     };
   };
 
-  // Grouper les RSVPs par réponse
+  // Grouper les RSVPs par reponse
   const groupedRSVPs = {
     yes: session?.rsvps.filter(r => r.response === 'yes') || [],
     maybe: session?.rsvps.filter(r => r.response === 'maybe') || [],
     no: session?.rsvps.filter(r => r.response === 'no') || [],
   };
 
+  // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-[var(--bg-base)]">
-        <SkeletonPage />
+      <div className="min-h-screen bg-[#08090a]">
+        <div className="px-4 py-6 max-w-2xl mx-auto">
+          {/* Header skeleton */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-lg bg-[#18191b] animate-pulse" />
+            <div className="flex-1">
+              <div className="h-5 w-40 bg-[#18191b] rounded animate-pulse mb-2" />
+              <div className="h-4 w-24 bg-[#18191b] rounded animate-pulse" />
+            </div>
+          </div>
+          {/* Card skeleton */}
+          <div className="bg-[#101113] border border-[rgba(255,255,255,0.08)] rounded-xl p-5 mb-4">
+            <div className="flex items-start gap-4 mb-4">
+              <div className="w-12 h-12 rounded-lg bg-[#18191b] animate-pulse" />
+              <div className="flex-1">
+                <div className="h-5 w-48 bg-[#18191b] rounded animate-pulse mb-2" />
+                <div className="h-4 w-32 bg-[#18191b] rounded animate-pulse" />
+              </div>
+            </div>
+          </div>
+          {/* Progress skeleton */}
+          <div className="bg-[#101113] border border-[rgba(255,255,255,0.08)] rounded-xl p-5 mb-4">
+            <div className="h-3 bg-[#18191b] rounded-full animate-pulse mb-4" />
+            <div className="flex gap-6">
+              <div className="h-8 w-20 bg-[#18191b] rounded animate-pulse" />
+              <div className="h-8 w-20 bg-[#18191b] rounded animate-pulse" />
+              <div className="h-8 w-20 bg-[#18191b] rounded animate-pulse" />
+            </div>
+          </div>
+          {/* Buttons skeleton */}
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="h-24 bg-[#101113] border border-[rgba(255,255,255,0.08)] rounded-xl animate-pulse" />
+            <div className="h-24 bg-[#101113] border border-[rgba(255,255,255,0.08)] rounded-xl animate-pulse" />
+            <div className="h-24 bg-[#101113] border border-[rgba(255,255,255,0.08)] rounded-xl animate-pulse" />
+          </div>
+        </div>
       </div>
     );
   }
 
+  // Error state
   if (error || !session) {
     return (
-      <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#08090a] flex items-center justify-center p-4">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-sm w-full"
         >
-          <Card variant="elevated" padding="xl" className="text-center max-w-md bg-[var(--bg-elevated)]/80 backdrop-blur-sm border-[var(--border-subtle)]/50 shadow-xl">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--color-error-500)] to-orange-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[var(--color-error-500)]/30">
-              <AlertCircle className="w-8 h-8 text-white" strokeWidth={2} />
+          <div className="bg-[#101113] border border-[rgba(255,255,255,0.08)] rounded-xl p-6 text-center">
+            <div className="w-14 h-14 rounded-xl bg-[rgba(255,85,85,0.1)] border border-[rgba(255,85,85,0.2)] flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-7 h-7 text-[#ff5555]" />
             </div>
-            <h2 className="text-lg font-bold tracking-tight text-[var(--fg-primary)] mb-2">
+            <h2 className="text-lg font-semibold text-[#f7f8f8] mb-2" style={{ fontWeight: 510 }}>
               Session introuvable
             </h2>
-            <p className="text-sm text-[var(--fg-secondary)] font-medium mb-6">
-              {error || 'Cette session n\'existe pas ou a ete supprimee.'}
+            <p className="text-sm text-[#8a8f98] mb-6">
+              {error || "Cette session n'existe pas ou a ete supprimee."}
             </p>
-            <Button onClick={handleBack} variant="primary" fullWidth>
+            <button
+              onClick={handleBack}
+              className="w-full h-10 bg-[#5e6dd2] hover:bg-[#6977dc] text-white font-medium rounded-lg transition-all duration-150"
+              style={{ fontWeight: 510 }}
+            >
               Retour
-            </Button>
-          </Card>
+            </button>
+          </div>
         </motion.div>
       </div>
     );
@@ -267,307 +280,254 @@ export function RSVPScreen({ onNavigate, showToast }: RSVPScreenProps) {
   const { date, time } = formatDateTime(session.scheduled_date, session.scheduled_time);
 
   return (
-    <div className="min-h-screen pb-32 pt-safe bg-[var(--bg-base)] relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-[var(--color-success-400)]/20 to-teal-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-[var(--color-primary-400)]/20 to-purple-400/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 right-0 w-64 h-64 bg-gradient-to-br from-[var(--color-warning-400)]/15 to-orange-400/15 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10 px-4 py-6 max-w-2xl mx-auto">
+    <div className="min-h-screen pb-32 bg-[#08090a]">
+      <div className="px-4 py-6 max-w-2xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 15, filter: "blur(5px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ duration: 0.35 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
         >
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            {/* Header */}
-            <motion.div variants={itemVariants} className="flex items-center gap-3 mb-6">
-              <motion.button
-                onClick={handleBack}
-                className="w-12 h-12 rounded-2xl bg-[var(--bg-elevated)]/80 backdrop-blur-sm border border-[var(--border-subtle)]/50 flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <ArrowLeft className="w-5 h-5 text-[var(--fg-primary)]" strokeWidth={2} />
-              </motion.button>
-              <div className="flex-1">
-                <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-[var(--color-primary-600)] to-purple-600 bg-clip-text text-transparent">
-                  Repondre a la session
-                </h1>
-                <p className="text-sm text-[var(--fg-secondary)] font-medium">
-                  {session.squad.name}
-                </p>
-              </div>
-              <motion.button
-                onClick={loadSession}
-                className="w-10 h-10 rounded-xl bg-[var(--bg-elevated)]/80 backdrop-blur-sm border border-[var(--border-subtle)]/50 flex items-center justify-center shadow-md hover:shadow-lg transition-all"
-                whileHover={{ scale: 1.1, rotate: 180 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <RefreshCw className="w-4 h-4 text-[var(--fg-secondary)]" />
-              </motion.button>
-            </motion.div>
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-6">
+            <motion.button
+              onClick={handleBack}
+              className="w-10 h-10 rounded-lg bg-[#101113] border border-[rgba(255,255,255,0.08)] flex items-center justify-center hover:bg-[#18191b] hover:border-[rgba(255,255,255,0.12)] transition-all duration-150"
+              whileTap={{ scale: 0.95 }}
+            >
+              <ArrowLeft className="w-5 h-5 text-[#8a8f98]" />
+            </motion.button>
+            <div className="flex-1">
+              <h1 className="text-lg font-semibold text-[#f7f8f8] tracking-tight" style={{ fontWeight: 510 }}>
+                Repondre a la session
+              </h1>
+              <p className="text-sm text-[#8a8f98]">
+                {session.squad.name}
+              </p>
+            </div>
+            <motion.button
+              onClick={loadSession}
+              className="w-9 h-9 rounded-lg bg-[#101113] border border-[rgba(255,255,255,0.08)] flex items-center justify-center hover:bg-[#18191b] hover:border-[rgba(255,255,255,0.12)] transition-all duration-150"
+              whileTap={{ scale: 0.95 }}
+              whileHover={{ rotate: 180 }}
+              transition={{ duration: 0.3 }}
+            >
+              <RefreshCw className="w-4 h-4 text-[#5d6066]" />
+            </motion.button>
+          </div>
 
           {/* Session Info Card */}
-          <motion.div variants={itemVariants}>
-            <Card variant="elevated" padding="lg" className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm border-[var(--border-subtle)]/50 shadow-lg mb-6">
-              <div className="flex items-start gap-4 mb-4">
-                <motion.div
-                  className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[var(--color-primary-500)] to-purple-600 flex items-center justify-center shadow-lg shadow-[var(--color-primary-500)]/30"
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                >
-                  <Gamepad2 className="w-7 h-7 text-white" />
-                </motion.div>
-                <div className="flex-1">
-                  <h2 className="text-lg font-bold tracking-tight text-[var(--fg-primary)] mb-1">
-                    {session.title}
-                  </h2>
-                  <p className="text-sm text-[var(--fg-secondary)] font-medium">
-                    {session.squad.game}
-                  </p>
-                </div>
+          <div className="bg-[#101113] border border-[rgba(255,255,255,0.08)] rounded-xl p-5 mb-4">
+            <div className="flex items-start gap-4 mb-4">
+              <div className="w-12 h-12 rounded-lg bg-[rgba(94,109,210,0.1)] border border-[rgba(94,109,210,0.2)] flex items-center justify-center">
+                <Gamepad2 className="w-6 h-6 text-[#5e6dd2]" />
               </div>
-
-              {session.description && (
-                <p className="text-sm text-[var(--fg-secondary)] font-medium mb-4 leading-relaxed">
-                  {session.description}
+              <div className="flex-1 min-w-0">
+                <h2 className="text-base font-semibold text-[#f7f8f8] truncate" style={{ fontWeight: 510 }}>
+                  {session.title}
+                </h2>
+                <p className="text-sm text-[#8a8f98]">
+                  {session.squad.game}
                 </p>
-              )}
-
-              <div className="flex flex-wrap gap-3">
-                <div className="flex items-center gap-2 px-3 py-2 bg-[var(--color-primary-50)] rounded-xl">
-                  <Calendar className="w-4 h-4 text-[var(--color-primary-500)]" />
-                  <span className="text-sm font-semibold text-[var(--color-primary-700)]">{date}</span>
-                </div>
-                <div className="flex items-center gap-2 px-3 py-2 bg-purple-50 rounded-xl">
-                  <Clock className="w-4 h-4 text-purple-500" />
-                  <span className="text-sm font-semibold text-purple-700">{time}</span>
-                </div>
-                {session.duration && (
-                  <div className="flex items-center gap-2 px-3 py-2 bg-pink-50 rounded-xl">
-                    <Timer className="w-4 h-4 text-pink-500" />
-                    <span className="text-sm font-semibold text-pink-700">{session.duration}</span>
-                  </div>
-                )}
               </div>
-            </Card>
-          </motion.div>
+            </div>
 
-          {/* Jauge de completion */}
-          <motion.div
-            variants={itemVariants}
-            className={`rounded-2xl p-5 mb-6 shadow-xl relative overflow-hidden ${
-              isComplete
-                ? 'bg-gradient-to-br from-[var(--color-success-500)] to-teal-500 shadow-[var(--color-success-500)]/30'
-                : 'bg-gradient-to-br from-[var(--color-warning-500)] to-orange-500 shadow-[var(--color-warning-500)]/30'
-            }`}
-          >
-            {/* Decorative elements */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
-
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-base font-bold text-white">
-                  Progression
-                </h3>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm font-bold text-white">
-                  <Users className="w-4 h-4" />
-                  <span className="text-sm">{yesCount}/{requiredPlayers}</span>
-                </div>
-              </div>
-
-              {/* Progress Bar */}
-              <div className="relative h-3 bg-white/20 rounded-full overflow-hidden mb-3">
-                <motion.div
-                  className="absolute inset-y-0 left-0 rounded-full bg-white"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.min(completionRate, 100)}%` }}
-                  transition={{ duration: 0.6, ease: 'easeOut' }}
-                />
-              </div>
-
-              <p className="text-sm font-medium text-white/90">
-                {isComplete ? (
-                  <span className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4" />
-                    Session complète ! Prêts à jouer
-                  </span>
-                ) : (
-                  <span>Encore {requiredPlayers - yesCount} joueur{requiredPlayers - yesCount > 1 ? 's' : ''} pour compléter la session</span>
-                )}
+            {session.description && (
+              <p className="text-sm text-[#8a8f98] mb-4 leading-relaxed">
+                {session.description}
               </p>
+            )}
 
-              {/* Stats mini */}
-              <div className="flex gap-4 mt-4 pt-4 border-t border-white/20">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-                    <Check className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-white/70">Confirmés</p>
-                    <p className="text-sm font-bold text-white">{yesCount}</p>
-                  </div>
+            <div className="flex flex-wrap gap-2">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#18191b] rounded-lg border border-[rgba(255,255,255,0.04)]">
+                <Calendar className="w-3.5 h-3.5 text-[#5e6dd2]" />
+                <span className="text-xs font-medium text-[#8a8f98]" style={{ fontWeight: 510 }}>{date}</span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#18191b] rounded-lg border border-[rgba(255,255,255,0.04)]">
+                <Clock className="w-3.5 h-3.5 text-[#945cf2]" />
+                <span className="text-xs font-medium text-[#8a8f98]" style={{ fontWeight: 510 }}>{time}</span>
+              </div>
+              {session.duration && (
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#18191b] rounded-lg border border-[rgba(255,255,255,0.04)]">
+                  <Timer className="w-3.5 h-3.5 text-[#ff8c42]" />
+                  <span className="text-xs font-medium text-[#8a8f98]" style={{ fontWeight: 510 }}>{session.duration}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-                    <HelpCircle className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-white/70">Peut-être</p>
-                    <p className="text-sm font-bold text-white">{maybeCount}</p>
-                  </div>
+              )}
+            </div>
+          </div>
+
+          {/* Progress Section */}
+          <div className="bg-[#101113] border border-[rgba(255,255,255,0.08)] rounded-xl p-5 mb-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-[#f7f8f8]" style={{ fontWeight: 510 }}>
+                Progression
+              </h3>
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-[#18191b]">
+                <Users className="w-3.5 h-3.5 text-[#5d6066]" />
+                <span className="text-xs font-semibold text-[#f7f8f8]" style={{ fontWeight: 510 }}>
+                  {yesCount}/{requiredPlayers}
+                </span>
+              </div>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="relative h-2 bg-[#18191b] rounded-full overflow-hidden mb-3">
+              <motion.div
+                className={`absolute inset-y-0 left-0 rounded-full ${isComplete ? 'bg-[#25bc68]' : 'bg-[#5e6dd2]'}`}
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min(completionRate, 100)}%` }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+              />
+            </div>
+
+            <p className="text-xs text-[#8a8f98] mb-4">
+              {isComplete ? (
+                <span className="flex items-center gap-1.5 text-[#25bc68]">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  Session complete ! Prets a jouer
+                </span>
+              ) : (
+                <span>Encore {requiredPlayers - yesCount} joueur{requiredPlayers - yesCount > 1 ? 's' : ''} pour completer la session</span>
+              )}
+            </p>
+
+            {/* Stats */}
+            <div className="flex gap-4 pt-4 border-t border-[rgba(255,255,255,0.04)]">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-md bg-[rgba(37,188,104,0.1)] flex items-center justify-center">
+                  <Check className="w-3.5 h-3.5 text-[#25bc68]" />
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-                    <X className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-white/70">Absents</p>
-                    <p className="text-sm font-bold text-white">{noCount}</p>
-                  </div>
+                <div>
+                  <p className="text-[10px] text-[#5d6066] uppercase tracking-wide">Confirmes</p>
+                  <p className="text-sm font-semibold text-[#f7f8f8]" style={{ fontWeight: 510 }}>{yesCount}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-md bg-[rgba(255,140,66,0.1)] flex items-center justify-center">
+                  <HelpCircle className="w-3.5 h-3.5 text-[#ff8c42]" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-[#5d6066] uppercase tracking-wide">Peut-etre</p>
+                  <p className="text-sm font-semibold text-[#f7f8f8]" style={{ fontWeight: 510 }}>{maybeCount}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-md bg-[rgba(255,85,85,0.1)] flex items-center justify-center">
+                  <X className="w-3.5 h-3.5 text-[#ff5555]" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-[#5d6066] uppercase tracking-wide">Absents</p>
+                  <p className="text-sm font-semibold text-[#f7f8f8]" style={{ fontWeight: 510 }}>{noCount}</p>
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Boutons d'action rapide */}
-          <motion.div
-            variants={itemVariants}
-            className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl p-5 border border-[var(--border-subtle)]/50 shadow-lg mb-6"
-          >
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="w-5 h-5 text-[var(--color-primary-500)]" />
-              <h3 className="text-base font-bold tracking-tight text-[var(--fg-primary)]">
-                Ta reponse
-              </h3>
-            </div>
+          {/* RSVP Buttons */}
+          <div className="bg-[#101113] border border-[rgba(255,255,255,0.08)] rounded-xl p-5 mb-4">
+            <h3 className="text-sm font-semibold text-[#f7f8f8] mb-4" style={{ fontWeight: 510 }}>
+              Ta reponse
+            </h3>
 
             <div className="grid grid-cols-3 gap-3">
+              {/* Partant - Vert */}
               <motion.button
                 onClick={() => handleRSVP('yes')}
                 disabled={isSubmitting}
-                className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all ${
+                className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border transition-all duration-150 ${
                   currentUserRSVP === 'yes'
-                    ? 'bg-[var(--color-success-50)] border-[var(--color-success-500)] ring-2 ring-[var(--color-success-200)]'
-                    : 'bg-[var(--bg-elevated)]/80 border-[var(--border-subtle)] hover:border-[var(--color-success-300)] hover:bg-[var(--color-success-50)]'
+                    ? 'bg-[rgba(37,188,104,0.15)] border-[rgba(37,188,104,0.4)]'
+                    : 'bg-[#18191b] border-[rgba(255,255,255,0.08)] hover:border-[rgba(37,188,104,0.3)] hover:bg-[rgba(37,188,104,0.05)]'
                 }`}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileTap={{ scale: 0.97 }}
               >
                 {isSubmitting && currentUserRSVP !== 'yes' ? (
-                  <Loader2 className="w-8 h-8 animate-spin text-[var(--fg-tertiary)]" />
+                  <Loader2 className="w-6 h-6 animate-spin text-[#5d6066]" />
                 ) : (
                   <>
-                    <motion.div
-                      className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-md ${
-                        currentUserRSVP === 'yes'
-                          ? 'bg-gradient-to-br from-[var(--color-success-500)] to-teal-500 shadow-[var(--color-success-500)]/30'
-                          : 'bg-[var(--color-success-100)]'
-                      }`}
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                    >
-                      <Check className={`w-6 h-6 ${
-                        currentUserRSVP === 'yes' ? 'text-white' : 'text-[var(--color-success-600)]'
-                      }`} strokeWidth={2.5} />
-                    </motion.div>
-                    <span className={`text-sm font-bold ${
-                      currentUserRSVP === 'yes' ? 'text-[var(--color-success-700)]' : 'text-[var(--fg-primary)]'
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      currentUserRSVP === 'yes'
+                        ? 'bg-[#25bc68]'
+                        : 'bg-[rgba(37,188,104,0.1)] border border-[rgba(37,188,104,0.2)]'
                     }`}>
+                      <Check className={`w-5 h-5 ${currentUserRSVP === 'yes' ? 'text-white' : 'text-[#25bc68]'}`} strokeWidth={2.5} />
+                    </div>
+                    <span className={`text-sm font-medium ${
+                      currentUserRSVP === 'yes' ? 'text-[#25bc68]' : 'text-[#8a8f98]'
+                    }`} style={{ fontWeight: 510 }}>
                       Partant
                     </span>
                   </>
                 )}
               </motion.button>
 
+              {/* Peut-etre - Orange */}
               <motion.button
                 onClick={() => handleRSVP('maybe')}
                 disabled={isSubmitting}
-                className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all ${
+                className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border transition-all duration-150 ${
                   currentUserRSVP === 'maybe'
-                    ? 'bg-[var(--color-warning-50)] border-[var(--color-warning-500)] ring-2 ring-[var(--color-warning-200)]'
-                    : 'bg-[var(--bg-elevated)]/80 border-[var(--border-subtle)] hover:border-[var(--color-warning-300)] hover:bg-[var(--color-warning-50)]'
+                    ? 'bg-[rgba(255,140,66,0.15)] border-[rgba(255,140,66,0.4)]'
+                    : 'bg-[#18191b] border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,140,66,0.3)] hover:bg-[rgba(255,140,66,0.05)]'
                 }`}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileTap={{ scale: 0.97 }}
               >
-                <motion.div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-md ${
-                    currentUserRSVP === 'maybe'
-                      ? 'bg-gradient-to-br from-[var(--color-warning-500)] to-orange-500 shadow-[var(--color-warning-500)]/30'
-                      : 'bg-[var(--color-warning-100)]'
-                  }`}
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                >
-                  <HelpCircle className={`w-6 h-6 ${
-                    currentUserRSVP === 'maybe' ? 'text-white' : 'text-[var(--color-warning-600)]'
-                  }`} strokeWidth={2.5} />
-                </motion.div>
-                <span className={`text-sm font-bold ${
-                  currentUserRSVP === 'maybe' ? 'text-[var(--color-warning-700)]' : 'text-[var(--fg-primary)]'
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                  currentUserRSVP === 'maybe'
+                    ? 'bg-[#ff8c42]'
+                    : 'bg-[rgba(255,140,66,0.1)] border border-[rgba(255,140,66,0.2)]'
                 }`}>
+                  <HelpCircle className={`w-5 h-5 ${currentUserRSVP === 'maybe' ? 'text-white' : 'text-[#ff8c42]'}`} strokeWidth={2.5} />
+                </div>
+                <span className={`text-sm font-medium ${
+                  currentUserRSVP === 'maybe' ? 'text-[#ff8c42]' : 'text-[#8a8f98]'
+                }`} style={{ fontWeight: 510 }}>
                   Peut-etre
                 </span>
               </motion.button>
 
+              {/* Absent - Rouge */}
               <motion.button
                 onClick={() => handleRSVP('no')}
                 disabled={isSubmitting}
-                className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all ${
+                className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border transition-all duration-150 ${
                   currentUserRSVP === 'no'
-                    ? 'bg-[var(--color-error-50)] border-[var(--color-error-500)] ring-2 ring-[var(--color-error-200)]'
-                    : 'bg-[var(--bg-elevated)]/80 border-[var(--border-subtle)] hover:border-[var(--color-error-300)] hover:bg-[var(--color-error-50)]'
+                    ? 'bg-[rgba(255,85,85,0.15)] border-[rgba(255,85,85,0.4)]'
+                    : 'bg-[#18191b] border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,85,85,0.3)] hover:bg-[rgba(255,85,85,0.05)]'
                 }`}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileTap={{ scale: 0.97 }}
               >
-                <motion.div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-md ${
-                    currentUserRSVP === 'no'
-                      ? 'bg-gradient-to-br from-[var(--color-error-500)] to-orange-500 shadow-[var(--color-error-500)]/30'
-                      : 'bg-[var(--color-error-100)]'
-                  }`}
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                >
-                  <X className={`w-6 h-6 ${
-                    currentUserRSVP === 'no' ? 'text-white' : 'text-[var(--color-error-600)]'
-                  }`} strokeWidth={2.5} />
-                </motion.div>
-                <span className={`text-sm font-bold ${
-                  currentUserRSVP === 'no' ? 'text-[var(--color-error-700)]' : 'text-[var(--fg-primary)]'
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                  currentUserRSVP === 'no'
+                    ? 'bg-[#ff5555]'
+                    : 'bg-[rgba(255,85,85,0.1)] border border-[rgba(255,85,85,0.2)]'
                 }`}>
+                  <X className={`w-5 h-5 ${currentUserRSVP === 'no' ? 'text-white' : 'text-[#ff5555]'}`} strokeWidth={2.5} />
+                </div>
+                <span className={`text-sm font-medium ${
+                  currentUserRSVP === 'no' ? 'text-[#ff5555]' : 'text-[#8a8f98]'
+                }`} style={{ fontWeight: 510 }}>
                   Absent
                 </span>
               </motion.button>
             </div>
 
             {currentUserRSVP && (
-              <p className="text-xs text-center text-[var(--fg-secondary)] font-medium mt-3">
+              <p className="text-xs text-center text-[#5d6066] mt-3">
                 Clique sur un autre bouton pour modifier ta reponse
               </p>
             )}
-          </motion.div>
+          </div>
 
-          {/* Liste des membres par statut */}
-          <div className="space-y-4">
-
+          {/* Members List */}
+          <div className="space-y-3">
             {/* Confirmes */}
             {groupedRSVPs.yes.length > 0 && (
-              <motion.div
-                variants={itemVariants}
-                className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl p-5 border border-[var(--border-subtle)]/50 shadow-lg"
-              >
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-success-500)] to-teal-500 flex items-center justify-center shadow-md">
-                    <Check className="w-4 h-4 text-white" strokeWidth={2.5} />
+              <div className="bg-[#101113] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-6 h-6 rounded-md bg-[rgba(37,188,104,0.1)] flex items-center justify-center">
+                    <Check className="w-3.5 h-3.5 text-[#25bc68]" strokeWidth={2.5} />
                   </div>
-                  <h4 className="font-bold tracking-tight text-[var(--fg-primary)]">
+                  <h4 className="text-sm font-semibold text-[#f7f8f8]" style={{ fontWeight: 510 }}>
                     Confirmes ({groupedRSVPs.yes.length})
                   </h4>
                 </div>
@@ -578,20 +538,17 @@ export function RSVPScreen({ onNavigate, showToast }: RSVPScreenProps) {
                     ))}
                   </AnimatePresence>
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {/* Peut-etre */}
             {groupedRSVPs.maybe.length > 0 && (
-              <motion.div
-                variants={itemVariants}
-                className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl p-5 border border-[var(--border-subtle)]/50 shadow-lg"
-              >
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-warning-500)] to-orange-500 flex items-center justify-center shadow-md">
-                    <HelpCircle className="w-4 h-4 text-white" strokeWidth={2.5} />
+              <div className="bg-[#101113] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-6 h-6 rounded-md bg-[rgba(255,140,66,0.1)] flex items-center justify-center">
+                    <HelpCircle className="w-3.5 h-3.5 text-[#ff8c42]" strokeWidth={2.5} />
                   </div>
-                  <h4 className="font-bold tracking-tight text-[var(--fg-primary)]">
+                  <h4 className="text-sm font-semibold text-[#f7f8f8]" style={{ fontWeight: 510 }}>
                     Peut-etre ({groupedRSVPs.maybe.length})
                   </h4>
                 </div>
@@ -602,20 +559,17 @@ export function RSVPScreen({ onNavigate, showToast }: RSVPScreenProps) {
                     ))}
                   </AnimatePresence>
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {/* Absents */}
             {groupedRSVPs.no.length > 0 && (
-              <motion.div
-                variants={itemVariants}
-                className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl p-5 border border-[var(--border-subtle)]/50 shadow-lg"
-              >
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-error-500)] to-orange-500 flex items-center justify-center shadow-md">
-                    <X className="w-4 h-4 text-white" strokeWidth={2.5} />
+              <div className="bg-[#101113] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-6 h-6 rounded-md bg-[rgba(255,85,85,0.1)] flex items-center justify-center">
+                    <X className="w-3.5 h-3.5 text-[#ff5555]" strokeWidth={2.5} />
                   </div>
-                  <h4 className="font-bold tracking-tight text-[var(--fg-primary)]">
+                  <h4 className="text-sm font-semibold text-[#f7f8f8]" style={{ fontWeight: 510 }}>
                     Absents ({groupedRSVPs.no.length})
                   </h4>
                 </div>
@@ -626,85 +580,91 @@ export function RSVPScreen({ onNavigate, showToast }: RSVPScreenProps) {
                     ))}
                   </AnimatePresence>
                 </div>
-              </motion.div>
+              </div>
             )}
 
-            {/* Pas de reponses */}
+            {/* Empty state */}
             {totalResponses === 0 && (
-              <motion.div
-                variants={itemVariants}
-                className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl p-8 border border-[var(--border-subtle)]/50 shadow-lg text-center"
-              >
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--bg-subtle)] to-slate-200 flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-8 h-8 text-[var(--fg-secondary)]" />
+              <div className="bg-[#101113] border border-[rgba(255,255,255,0.08)] rounded-xl p-8 text-center">
+                <div className="w-14 h-14 rounded-xl bg-[#18191b] border border-[rgba(255,255,255,0.08)] flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-7 h-7 text-[#5d6066]" />
                 </div>
-                <p className="text-[var(--fg-primary)] font-semibold mb-2">
+                <p className="text-sm font-medium text-[#f7f8f8] mb-1" style={{ fontWeight: 510 }}>
                   Aucune reponse pour le moment
                 </p>
-                <p className="text-sm text-[var(--fg-secondary)]">
+                <p className="text-xs text-[#5d6066]">
                   Sois le premier a repondre !
                 </p>
-              </motion.div>
+              </div>
             )}
           </div>
 
-          {/* Actions secondaires */}
-          <motion.div variants={itemVariants} className="mt-6 flex gap-3">
+          {/* Secondary Actions */}
+          <div className="mt-4 flex gap-3">
             <motion.button
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-[var(--bg-elevated)]/80 backdrop-blur-sm border border-[var(--border-subtle)]/50 text-[var(--fg-secondary)] font-semibold hover:shadow-lg transition-all"
-              whileHover={{ scale: 1.02 }}
+              className="flex-1 flex items-center justify-center gap-2 h-10 rounded-lg bg-[#18191b] border border-[rgba(255,255,255,0.08)] text-[#8a8f98] text-sm font-medium hover:bg-[#101113] hover:border-[rgba(255,255,255,0.12)] transition-all duration-150"
+              style={{ fontWeight: 510 }}
               whileTap={{ scale: 0.98 }}
             >
               <Share2 className="w-4 h-4" />
               Partager
             </motion.button>
             <motion.button
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-[var(--bg-elevated)]/80 backdrop-blur-sm border border-[var(--border-subtle)]/50 text-[var(--fg-secondary)] font-semibold hover:shadow-lg transition-all"
-              whileHover={{ scale: 1.02 }}
+              className="flex-1 flex items-center justify-center gap-2 h-10 rounded-lg bg-[#18191b] border border-[rgba(255,255,255,0.08)] text-[#8a8f98] text-sm font-medium hover:bg-[#101113] hover:border-[rgba(255,255,255,0.12)] transition-all duration-150"
+              style={{ fontWeight: 510 }}
               whileTap={{ scale: 0.98 }}
             >
               <Bell className="w-4 h-4" />
               Rappel
             </motion.button>
-          </motion.div>
-          </motion.div>
+          </div>
         </motion.div>
       </div>
     </div>
   );
 }
 
-// Composant Card membre RSVP
+// Member Card Component
 interface RSVPMemberCardProps {
   rsvp: RSVP;
   variant: 'yes' | 'no' | 'maybe';
 }
 
 function RSVPMemberCard({ rsvp, variant }: RSVPMemberCardProps) {
-  const bgColors = {
-    yes: 'bg-[var(--color-success-50)]',
-    no: 'bg-[var(--color-error-50)]',
-    maybe: 'bg-[var(--color-warning-50)]',
+  const colors = {
+    yes: {
+      bg: 'bg-[rgba(37,188,104,0.05)]',
+      border: 'border-[rgba(37,188,104,0.1)]',
+      badge: 'bg-[#25bc68]',
+      icon: <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />,
+    },
+    maybe: {
+      bg: 'bg-[rgba(255,140,66,0.05)]',
+      border: 'border-[rgba(255,140,66,0.1)]',
+      badge: 'bg-[#ff8c42]',
+      icon: <HelpCircle className="w-2.5 h-2.5 text-white" strokeWidth={3} />,
+    },
+    no: {
+      bg: 'bg-[rgba(255,85,85,0.05)]',
+      border: 'border-[rgba(255,85,85,0.1)]',
+      badge: 'bg-[#ff5555]',
+      icon: <X className="w-2.5 h-2.5 text-white" strokeWidth={3} />,
+    },
   };
 
-  const badgeGradients = {
-    yes: 'from-[var(--color-success-500)] to-teal-500',
-    no: 'from-[var(--color-error-500)] to-orange-500',
-    maybe: 'from-[var(--color-warning-500)] to-orange-500',
-  };
+  const style = colors[variant];
 
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: -10 }}
+      initial={{ opacity: 0, y: -5 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      className={`flex items-center gap-3 p-3 rounded-xl ${bgColors[variant]}`}
-      whileHover={{ scale: 1.02 }}
+      exit={{ opacity: 0, x: -10 }}
+      className={`flex items-center gap-3 p-3 rounded-lg ${style.bg} border ${style.border}`}
     >
-      {/* Avatar avec badge */}
+      {/* Avatar */}
       <div className="relative">
-        <div className="w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-[var(--color-primary-500)] to-purple-500">
+        <div className="w-10 h-10 rounded-lg overflow-hidden bg-[#18191b]">
           {rsvp.user.avatar_url ? (
             <img
               src={rsvp.user.avatar_url}
@@ -712,24 +672,22 @@ function RSVPMemberCard({ rsvp, variant }: RSVPMemberCardProps) {
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-white font-bold text-lg">
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#5e6dd2] to-[#945cf2] text-white font-semibold text-sm">
               {rsvp.user.display_name?.charAt(0).toUpperCase()}
             </div>
           )}
         </div>
-        <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-br ${badgeGradients[variant]} flex items-center justify-center shadow-md`}>
-          {variant === 'yes' && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
-          {variant === 'no' && <X className="w-3 h-3 text-white" strokeWidth={3} />}
-          {variant === 'maybe' && <HelpCircle className="w-3 h-3 text-white" strokeWidth={3} />}
+        <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full ${style.badge} flex items-center justify-center ring-2 ring-[#101113]`}>
+          {style.icon}
         </div>
       </div>
 
-      {/* Info utilisateur */}
+      {/* Info */}
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-[var(--fg-primary)] truncate">
+        <p className="text-sm font-medium text-[#f7f8f8] truncate" style={{ fontWeight: 510 }}>
           {rsvp.user.display_name}
         </p>
-        <p className="text-xs text-[var(--fg-secondary)]">
+        <p className="text-xs text-[#5d6066]">
           {new Date(rsvp.responded_at).toLocaleDateString('fr-FR', {
             day: 'numeric',
             month: 'short',
@@ -739,11 +697,11 @@ function RSVPMemberCard({ rsvp, variant }: RSVPMemberCardProps) {
         </p>
       </div>
 
-      {/* Score de fiabilite */}
+      {/* Reliability Score */}
       {rsvp.user.reliability_score !== undefined && rsvp.user.reliability_score > 0 && (
-        <div className="flex items-center gap-1 px-2.5 py-1.5 bg-[var(--bg-elevated)] rounded-lg border border-[var(--border-subtle)] shadow-sm">
-          <TrendingUp className="w-3.5 h-3.5 text-[var(--color-warning-500)]" />
-          <span className="text-xs font-bold text-[var(--fg-primary)]">
+        <div className="flex items-center gap-1 px-2 py-1 bg-[#18191b] rounded-md border border-[rgba(255,255,255,0.04)]">
+          <TrendingUp className="w-3 h-3 text-[#ff8c42]" />
+          <span className="text-xs font-semibold text-[#f7f8f8]" style={{ fontWeight: 510 }}>
             {Math.round(rsvp.user.reliability_score)}%
           </span>
         </div>
