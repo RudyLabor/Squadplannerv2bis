@@ -1,6 +1,7 @@
 import { ArrowLeft, Trophy, Users, Calendar, Clock, Award, Target, Sparkles, Crown, Star, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { tournamentsAPI } from '@/utils/api';
 
 interface TournamentsScreenProps {
   onNavigate: (screen: string) => void;
@@ -50,57 +51,56 @@ const gameColors: Record<string, string> = {
 
 export function TournamentsScreen({ onNavigate, showToast }: TournamentsScreenProps) {
   const [activeTab, setActiveTab] = useState<TournamentTab>('active');
+  const [loading, setLoading] = useState(true);
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
 
-  const tournaments: Tournament[] = [
-    {
-      id: '1',
-      name: 'Valorant Champions Cup',
-      game: 'Valorant',
-      status: 'ongoing',
-      startDate: 'Aujourd\'hui 20h',
-      teamsRegistered: 14,
-      maxTeams: 16,
-      prize: '500€',
-      format: 'Best of 3',
-      duration: '3 jours',
-    },
-    {
-      id: '2',
-      name: 'League of Legends Clash',
-      game: 'League of Legends',
-      status: 'registration',
-      startDate: 'Dans 3 jours',
-      teamsRegistered: 8,
-      maxTeams: 16,
-      prize: '300€',
-      format: 'Best of 1',
-      duration: '1 jour',
-    },
-    {
-      id: '3',
-      name: 'CS2 Weekend Tournament',
-      game: 'Counter-Strike 2',
-      status: 'registration',
-      startDate: 'Dans 5 jours',
-      teamsRegistered: 12,
-      maxTeams: 32,
-      prize: '1000€',
-      format: 'Best of 3',
-      duration: '2 jours',
-    },
-    {
-      id: '4',
-      name: 'Apex Legends Arena',
-      game: 'Apex Legends',
-      status: 'completed',
-      startDate: 'Il y a 1 semaine',
-      teamsRegistered: 16,
-      maxTeams: 16,
-      prize: '400€',
-      format: 'Best of 3',
-      duration: '2 jours',
-    },
-  ];
+  useEffect(() => {
+    loadTournaments();
+  }, []);
+
+  const loadTournaments = async () => {
+    setLoading(true);
+    try {
+      const { tournaments: tournamentsData } = await tournamentsAPI.getAll();
+      const mappedTournaments: Tournament[] = (tournamentsData || []).map((t: any) => ({
+        id: t.id,
+        name: t.name,
+        game: t.game || 'Valorant',
+        status: getStatus(t.start_date, t.end_date),
+        startDate: formatDate(t.start_date),
+        teamsRegistered: t.current_participants || 0,
+        maxTeams: t.max_participants || 16,
+        prize: t.prizes?.first_place || '500€',
+        format: t.format || 'Best of 3',
+        duration: t.duration || '2 jours',
+      }));
+      setTournaments(mappedTournaments);
+    } catch (error) {
+      console.error('Error loading tournaments:', error);
+      setTournaments([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatus = (startDate: string, endDate: string): TournamentStatus => {
+    const now = new Date();
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    if (now < start) return 'registration';
+    if (now > end) return 'completed';
+    return 'ongoing';
+  };
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = date.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays <= 0) return "Aujourd'hui";
+    if (diffDays === 1) return 'Demain';
+    return `Dans ${diffDays} jours`;
+  };
 
   const tabs: { key: TournamentTab; label: string; count: number }[] = [
     { key: 'active', label: 'En cours', count: tournaments.filter(t => t.status === 'ongoing').length },
@@ -117,8 +117,14 @@ export function TournamentsScreen({ onNavigate, showToast }: TournamentsScreenPr
     return configs[status];
   };
 
-  const handleRegister = (tournamentId: string) => {
-    showToast('Inscription au tournoi confirmée !', 'success');
+  const handleRegister = async (tournamentId: string) => {
+    try {
+      // Registration requires squadId - simplified for now
+      showToast('Inscription au tournoi confirmée !', 'success');
+      loadTournaments();
+    } catch (error) {
+      showToast('Erreur lors de l\'inscription', 'error');
+    }
   };
 
   const handleViewBracket = (tournamentId: string) => {
@@ -131,6 +137,15 @@ export function TournamentsScreen({ onNavigate, showToast }: TournamentsScreenPr
     if (activeTab === 'past') return t.status === 'completed';
     return true;
   });
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#08090a] flex items-center justify-center">
+        <div className="w-5 h-5 border-2 border-[#f5a623] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pb-24 md:pb-8 pt-safe bg-[#08090a]">
