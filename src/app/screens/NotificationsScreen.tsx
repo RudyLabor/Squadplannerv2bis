@@ -197,13 +197,13 @@ export function NotificationsScreen({ onNavigate, showToast }: NotificationsScre
       prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
     );
     setUnreadCount(prev => Math.max(0, prev - 1));
-    showToast('Notification marquee comme lue', 'success');
+    showToast('Notification marquée comme lue', 'success');
   };
 
   const handleMarkAllAsRead = async () => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     setUnreadCount(0);
-    showToast('Toutes les notifications marquees comme lues', 'success');
+    showToast('Toutes les notifications marquées comme lues', 'success');
   };
 
   // Loading state
@@ -346,7 +346,7 @@ export function NotificationsScreen({ onNavigate, showToast }: NotificationsScre
               whileTap={{ scale: 0.98 }}
             >
               <Settings className="w-4 h-4" strokeWidth={1.5} />
-              Gerer les preferences
+              Gérer les préférences
             </motion.button>
           </motion.div>
         )}

@@ -271,7 +271,7 @@ export function FriendsScreen({ onNavigate, showToast }: FriendsScreenProps) {
                         Aucun ami pour le moment
                       </h3>
                       <p className="text-[13px] md:text-[14px] text-[#8b8d90] mb-6 leading-relaxed">
-                        Recherche des joueurs pour commencer a construire ta squad.
+                        Recherche des joueurs pour commencer à construire ta squad.
                       </p>
                       <motion.button
                         onClick={() => onNavigate('search-players')}
