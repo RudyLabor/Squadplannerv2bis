@@ -97,7 +97,7 @@ export function SignupScreen({ onNavigate, onSignup, showToast }: SignupScreenPr
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-[#08090a]">
       {/* Subtle background gradient */}
-      <div className="fixed inset-0 bg-gradient-to-b from-[#5e6ad2]/[0.02] via-transparent to-transparent pointer-events-none" />
+      <div className="fixed inset-0 bg-gradient-to-b from-[#5e6dd2]/[0.02] via-transparent to-transparent pointer-events-none" />
 
       <motion.div
         variants={containerVariants}
@@ -144,7 +144,7 @@ export function SignupScreen({ onNavigate, onSignup, showToast }: SignupScreenPr
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Votre pseudo gaming"
-                    className="w-full h-12 pl-12 pr-4 rounded-xl bg-[#101012] border border-[#27282b] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6ad2] focus:bg-[#141518] focus:outline-none transition-all duration-150"
+                    className="w-full h-12 pl-12 pr-4 rounded-xl bg-[#101012] border border-[#27282b] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6dd2] focus:bg-[#18191b] focus:outline-none transition-all duration-150"
                   />
                 </div>
               </div>
@@ -161,7 +161,7 @@ export function SignupScreen({ onNavigate, onSignup, showToast }: SignupScreenPr
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="votre@email.com"
-                    className="w-full h-12 pl-12 pr-4 rounded-xl bg-[#101012] border border-[#27282b] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6ad2] focus:bg-[#141518] focus:outline-none transition-all duration-150"
+                    className="w-full h-12 pl-12 pr-4 rounded-xl bg-[#101012] border border-[#27282b] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6dd2] focus:bg-[#18191b] focus:outline-none transition-all duration-150"
                   />
                 </div>
               </div>
@@ -178,7 +178,7 @@ export function SignupScreen({ onNavigate, onSignup, showToast }: SignupScreenPr
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Min. 6 caractères"
-                    className="w-full h-12 pl-12 pr-12 rounded-xl bg-[#101012] border border-[#27282b] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6ad2] focus:bg-[#141518] focus:outline-none transition-all duration-150"
+                    className="w-full h-12 pl-12 pr-12 rounded-xl bg-[#101012] border border-[#27282b] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6dd2] focus:bg-[#18191b] focus:outline-none transition-all duration-150"
                   />
                   <button
                     type="button"
@@ -203,7 +203,7 @@ export function SignupScreen({ onNavigate, onSignup, showToast }: SignupScreenPr
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Répétez le mot de passe"
                     onKeyDown={(e) => e.key === 'Enter' && handleSignup()}
-                    className="w-full h-12 pl-12 pr-12 rounded-xl bg-[#101012] border border-[#27282b] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6ad2] focus:bg-[#141518] focus:outline-none transition-all duration-150"
+                    className="w-full h-12 pl-12 pr-12 rounded-xl bg-[#101012] border border-[#27282b] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6dd2] focus:bg-[#18191b] focus:outline-none transition-all duration-150"
                   />
                   {confirmPassword && (
                     <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -244,7 +244,7 @@ export function SignupScreen({ onNavigate, onSignup, showToast }: SignupScreenPr
               <motion.button
                 onClick={handleSignup}
                 disabled={isLoading || !passwordChecks.length || (confirmPassword && !passwordChecks.match)}
-                className="w-full h-12 flex items-center justify-center gap-2.5 rounded-xl bg-[#5e6ad2] text-white text-[14px] font-semibold hover:bg-[#6872d9] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#5e6ad2]/20 transition-colors"
+                className="w-full h-12 flex items-center justify-center gap-2.5 rounded-xl bg-[#5e6dd2] text-white text-[14px] font-semibold hover:bg-[#6872d9] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#5e6dd2]/20 transition-colors"
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -276,7 +276,7 @@ export function SignupScreen({ onNavigate, onSignup, showToast }: SignupScreenPr
             Déjà un compte ?{' '}
             <motion.button
               onClick={() => onNavigate?.('login')}
-              className="text-[#5e6ad2] hover:text-[#7c85e0] font-medium transition-colors"
+              className="text-[#5e6dd2] hover:text-[#7c85e0] font-medium transition-colors"
               whileHover={{ x: 2 }}
             >
               Se connecter →
