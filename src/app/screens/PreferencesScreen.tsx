@@ -178,24 +178,24 @@ export function PreferencesScreen({ onNavigate, showToast }: PreferencesScreenPr
           animate="visible"
         >
           {/* Header - Linear style */}
-          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
+          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
             <motion.button
               onClick={() => onNavigate('profile')}
-              className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.06)] transition-all"
+              className="w-9 h-9 rounded-lg bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.1)] transition-all duration-150"
               whileHover={{ x: -2 }}
               whileTap={{ scale: 0.95 }}
             >
-              <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
+              <ArrowLeft className="w-[18px] h-[18px]" strokeWidth={1.5} />
             </motion.button>
             <div className="flex-1">
-              <h1 className="text-[22px] md:text-[24px] font-semibold text-[#f7f8f8]">
-                Préférences
+              <h1 className="text-[18px] md:text-[20px] font-semibold text-[#f7f8f8] tracking-[-0.02em]">
+                Preferences
               </h1>
-              <p className="text-[13px] text-[#5e6063]">
-                Personnalisez votre expérience
+              <p className="text-[13px] text-[#5e6063] mt-0.5">
+                Personnalisez votre experience
               </p>
             </div>
-            <div className="w-11 h-11 rounded-xl bg-[rgba(94,109,210,0.1)] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-[rgba(94,109,210,0.1)] flex items-center justify-center">
               <Settings2 className="w-5 h-5 text-[#5e6dd2]" strokeWidth={1.5} />
             </div>
           </motion.div>
@@ -273,12 +273,14 @@ export function PreferencesScreen({ onNavigate, showToast }: PreferencesScreenPr
                   className={`relative w-11 h-6 rounded-full transition-all duration-200 flex-shrink-0 ${
                     preferences.animations
                       ? 'bg-[#5e6dd2]'
-                      : 'bg-[rgba(255,255,255,0.1)]'
+                      : 'bg-[#26282d]'
                   }`}
                 >
                   <motion.div
-                    className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm"
-                    animate={{ x: preferences.animations ? 24 : 4 }}
+                    className={`absolute top-0.5 w-5 h-5 rounded-full shadow-sm ${
+                      preferences.animations ? 'bg-white' : 'bg-[#6b6f76]'
+                    }`}
+                    animate={{ x: preferences.animations ? 22 : 2 }}
                     transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
                   />
                 </button>

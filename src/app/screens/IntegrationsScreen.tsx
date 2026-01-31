@@ -346,12 +346,14 @@ export function IntegrationsScreen({ onNavigate, showToast, useMockData = false 
         >
           {/* Header */}
           <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
-            <button
+            <motion.button
               onClick={() => onNavigate('profile')}
-              className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center hover:bg-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.12)] transition-all duration-200"
+              className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center hover:bg-[rgba(255,255,255,0.05)] transition-colors"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              <ArrowLeft className="w-5 h-5 text-[#8b8d90]" />
-            </button>
+              <ArrowLeft className="w-5 h-5 text-[#8b8d90]" strokeWidth={1.5} />
+            </motion.button>
             <div className="flex-1">
               <h1 className="text-xl font-semibold text-[#f7f8f8]">Integrations</h1>
               <p className="text-[13px] text-[#8b8d90] mt-0.5">

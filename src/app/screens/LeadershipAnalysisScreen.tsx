@@ -76,7 +76,7 @@ export function LeadershipAnalysisScreen({ onNavigate, showToast }: LeadershipAn
   const getScoreBg = (score: number) => {
     if (score >= 80) return 'bg-emerald-500/10 border-emerald-500/20';
     if (score >= 60) return 'bg-amber-500/10 border-amber-500/20';
-    return 'bg-[rgba(255,255,255,0.05)] border-[rgba(255,255,255,0.08)]';
+    return 'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)]';
   };
 
   return (
@@ -91,7 +91,7 @@ export function LeadershipAnalysisScreen({ onNavigate, showToast }: LeadershipAn
           <motion.div variants={itemVariants} className="flex items-center gap-3 mb-8">
             <motion.button
               onClick={() => onNavigate?.('intelligence')}
-              className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.08)] transition-all"
+              className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.08)] transition-all"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -108,7 +108,7 @@ export function LeadershipAnalysisScreen({ onNavigate, showToast }: LeadershipAn
             <motion.button
               onClick={loadLeaders}
               disabled={isLoading}
-              className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.08)] transition-all disabled:opacity-50"
+              className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.08)] transition-all disabled:opacity-50"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -146,7 +146,7 @@ export function LeadershipAnalysisScreen({ onNavigate, showToast }: LeadershipAn
               variants={itemVariants}
               className="flex flex-col items-center justify-center py-20"
             >
-              <div className="w-12 h-12 rounded-xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center mb-4">
                 <Loader2 className="w-6 h-6 text-[#5e6dd2] animate-spin" />
               </div>
               <p className="text-[#8b8d90] font-medium">Analyse en cours...</p>
@@ -215,7 +215,7 @@ export function LeadershipAnalysisScreen({ onNavigate, showToast }: LeadershipAn
                             </div>
                             <div className="flex flex-wrap gap-1.5">
                               {leader.qualities.slice(0, 4).map((quality, idx) => (
-                                <span key={idx} className="px-2 py-1 bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] text-[#8b8d90] text-xs font-medium rounded-md flex items-center gap-1">
+                                <span key={idx} className="px-2 py-1 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] text-[#8b8d90] text-xs font-medium rounded-md flex items-center gap-1">
                                   <span>{quality.icon}</span>
                                   {quality.name}
                                 </span>
@@ -297,7 +297,7 @@ export function LeadershipAnalysisScreen({ onNavigate, showToast }: LeadershipAn
               {/* Empty State */}
               {leaders.length === 0 && (
                 <motion.div variants={itemVariants} className="text-center py-16">
-                  <div className="w-16 h-16 rounded-2xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center mx-auto mb-4">
                     <Users className="w-8 h-8 text-[#5e6063]" />
                   </div>
                   <h3 className="text-lg font-semibold text-[#f7f8f8] mb-2">Pas encore de donnees</h3>

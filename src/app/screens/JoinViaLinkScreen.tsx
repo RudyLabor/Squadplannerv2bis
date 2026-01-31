@@ -12,24 +12,24 @@ import { squadsAPI } from '@/app/services/api';
 // Linear dark design tokens
 const colors = {
   bg: {
-    primary: '#0a0a0b',
-    secondary: '#141415',
-    tertiary: '#1a1a1c',
-    elevated: '#1e1e20',
+    primary: '#08090a',
+    secondary: 'rgba(255,255,255,0.02)',
+    tertiary: 'rgba(255,255,255,0.04)',
+    elevated: 'rgba(255,255,255,0.06)',
   },
   fg: {
-    primary: '#f5f5f5',
+    primary: '#f7f8f8',
     secondary: '#8b8d90',
-    tertiary: '#5c5e61',
+    tertiary: '#5e6063',
   },
   accent: {
-    primary: '#5e6ad2',
+    primary: '#5e6dd2',
     success: '#4ade80',
     error: '#ef4444',
   },
   border: {
     subtle: 'rgba(255, 255, 255, 0.06)',
-    default: 'rgba(255, 255, 255, 0.1)',
+    default: 'rgba(255, 255, 255, 0.08)',
   }
 };
 

@@ -75,14 +75,13 @@ function InputField({ label, icon, type = 'text', value, onChange, placeholder, 
           placeholder={placeholder}
           className={`
             w-full h-11 ${icon ? 'pl-10' : 'pl-3.5'} pr-3.5
-            bg-[rgba(255,255,255,0.03)]
-            border border-[rgba(255,255,255,0.06)]
-            rounded-lg
+            bg-[rgba(255,255,255,0.04)]
+            border border-[rgba(255,255,255,0.08)]
+            rounded-xl
             text-[14px] text-[#f7f8f8]
-            placeholder:text-[#4a4b4d]
-            hover:bg-[rgba(255,255,255,0.05)]
-            hover:border-[rgba(255,255,255,0.1)]
-            focus:bg-[rgba(255,255,255,0.04)]
+            placeholder:text-[#5e6063]
+            hover:bg-[rgba(255,255,255,0.06)]
+            hover:border-[rgba(255,255,255,0.12)]
             focus:border-[rgba(94,109,210,0.5)]
             focus:ring-2 focus:ring-[rgba(94,109,210,0.15)]
             focus:outline-none
@@ -119,13 +118,12 @@ function SelectField({ label, icon, value, onChange, options }: SelectFieldProps
           onChange={(e) => onChange(e.target.value)}
           className={`
             w-full h-11 ${icon ? 'pl-10' : 'pl-3.5'} pr-10
-            bg-[rgba(255,255,255,0.03)]
-            border border-[rgba(255,255,255,0.06)]
-            rounded-lg
+            bg-[rgba(255,255,255,0.04)]
+            border border-[rgba(255,255,255,0.08)]
+            rounded-xl
             text-[14px] text-[#f7f8f8]
-            hover:bg-[rgba(255,255,255,0.05)]
-            hover:border-[rgba(255,255,255,0.1)]
-            focus:bg-[rgba(255,255,255,0.04)]
+            hover:bg-[rgba(255,255,255,0.06)]
+            hover:border-[rgba(255,255,255,0.12)]
             focus:border-[rgba(94,109,210,0.5)]
             focus:ring-2 focus:ring-[rgba(94,109,210,0.15)]
             focus:outline-none
@@ -441,14 +439,13 @@ export function EditProfileScreen({ onNavigate, showToast }: EditProfileScreenPr
                     rows={3}
                     className="
                       w-full p-3.5
-                      bg-[rgba(255,255,255,0.03)]
-                      border border-[rgba(255,255,255,0.06)]
-                      rounded-lg
+                      bg-[rgba(255,255,255,0.04)]
+                      border border-[rgba(255,255,255,0.08)]
+                      rounded-xl
                       text-[14px] text-[#f7f8f8]
-                      placeholder:text-[#4a4b4d]
-                      hover:bg-[rgba(255,255,255,0.05)]
-                      hover:border-[rgba(255,255,255,0.1)]
-                      focus:bg-[rgba(255,255,255,0.04)]
+                      placeholder:text-[#5e6063]
+                      hover:bg-[rgba(255,255,255,0.06)]
+                      hover:border-[rgba(255,255,255,0.12)]
                       focus:border-[rgba(94,109,210,0.5)]
                       focus:ring-2 focus:ring-[rgba(94,109,210,0.15)]
                       focus:outline-none
@@ -487,13 +484,12 @@ export function EditProfileScreen({ onNavigate, showToast }: EditProfileScreenPr
                       onChange={(e) => handleChange('birthday', e.target.value)}
                       className="
                         w-full h-11 pl-10 pr-3.5
-                        bg-[rgba(255,255,255,0.03)]
-                        border border-[rgba(255,255,255,0.06)]
-                        rounded-lg
+                        bg-[rgba(255,255,255,0.04)]
+                        border border-[rgba(255,255,255,0.08)]
+                        rounded-xl
                         text-[14px] text-[#f7f8f8]
-                        hover:bg-[rgba(255,255,255,0.05)]
-                        hover:border-[rgba(255,255,255,0.1)]
-                        focus:bg-[rgba(255,255,255,0.04)]
+                        hover:bg-[rgba(255,255,255,0.06)]
+                        hover:border-[rgba(255,255,255,0.12)]
                         focus:border-[rgba(94,109,210,0.5)]
                         focus:ring-2 focus:ring-[rgba(94,109,210,0.15)]
                         focus:outline-none

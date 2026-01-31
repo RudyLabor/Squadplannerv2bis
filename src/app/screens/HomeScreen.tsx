@@ -317,41 +317,33 @@ function HeroSessionBlock({
     return () => clearInterval(interval);
   }, [session]);
 
-  // Empty state - Premium illustration
+  // Empty state - Standardized design
   if (!session) {
     return (
       <motion.div
         variants={heroVariants}
-        className="relative p-8 md:p-10 rounded-3xl bg-gradient-to-b from-[#18191b] to-[#101012] border border-[rgba(255,255,255,0.08)] overflow-hidden"
+        className="p-6 md:p-8 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]"
       >
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#5e6dd2]/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#8b5cf6]/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="text-center max-w-[320px] mx-auto">
+          {/* Icon - Colored */}
+          <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-[rgba(245,166,35,0.1)] flex items-center justify-center mx-auto mb-5">
+            <Calendar className="w-6 h-6 md:w-7 md:h-7 text-[#f5a623]" strokeWidth={1.5} />
+          </div>
 
-        <div className="relative text-center py-6 md:py-8">
-          {/* Animated illustration */}
-          <motion.div
-            className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-gradient-to-br from-[#27282b] to-[#1f2023] flex items-center justify-center mx-auto mb-8 border border-[rgba(255,255,255,0.05)]"
-            animate={{ y: [0, -4, 0] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <Calendar className="w-10 h-10 md:w-12 md:h-12 text-[#5e6063]" strokeWidth={1.2} />
-          </motion.div>
-
-          <h2 className="text-[22px] md:text-[26px] font-bold text-[#f7f8f8] mb-3">
+          <h2 className="text-[15px] md:text-[16px] font-semibold text-[#f7f8f8] mb-2">
             Aucune session prévue
           </h2>
-          <p className="text-[15px] md:text-[16px] text-[#8b8d90] mb-8 max-w-[320px] mx-auto leading-relaxed">
-            C'est le moment parfait pour planifier ta prochaine session avec ta squad
+          <p className="text-[13px] md:text-[14px] text-[#8b8d90] mb-6 leading-relaxed">
+            C'est le moment parfait pour planifier ta prochaine session avec ta squad.
           </p>
 
           <motion.button
             onClick={onPlanSession}
-            className="inline-flex items-center justify-center gap-3 h-14 md:h-16 px-8 md:px-10 rounded-2xl bg-[#5e6dd2] text-white text-[16px] md:text-[17px] font-semibold shadow-lg shadow-[#5e6dd2]/25 hover:bg-[#6a79db] hover:shadow-xl hover:shadow-[#5e6dd2]/30 transition-all duration-200"
-            whileHover={{ y: -2, scale: 1.02 }}
+            className="inline-flex items-center justify-center gap-2.5 w-full h-12 rounded-xl bg-[#5e6dd2] text-white text-[14px] font-semibold shadow-lg shadow-[#5e6dd2]/20 hover:bg-[#6a79db] transition-colors"
+            whileHover={{ y: -1 }}
             whileTap={{ scale: 0.98 }}
           >
-            <Plus className="w-5 h-5 md:w-6 md:h-6" strokeWidth={2} />
+            <Plus className="w-5 h-5" strokeWidth={2} />
             Planifier une session
           </motion.button>
         </div>
@@ -933,25 +925,27 @@ export function HomeScreen({ onNavigate, onCommandOpen }: HomeScreenProps) {
             </div>
           ) : (
             <motion.div
-              className="p-8 md:p-12 rounded-3xl bg-gradient-to-b from-[#18191b] to-[#101012] border border-[rgba(255,255,255,0.06)] text-center"
+              className="p-6 md:p-8 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] text-center"
               whileHover={{ borderColor: "rgba(255,255,255,0.1)" }}
             >
-              <div className="w-16 h-16 md:w-20 md:h-20 rounded-3xl bg-[#1f2023] flex items-center justify-center mx-auto mb-6">
-                <Users className="w-8 h-8 md:w-10 md:h-10 text-[#5e6063]" strokeWidth={1.2} />
+              <div className="text-center max-w-[320px] mx-auto">
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-[rgba(94,109,210,0.1)] flex items-center justify-center mx-auto mb-5">
+                  <Users className="w-6 h-6 md:w-7 md:h-7 text-[#5e6dd2]" strokeWidth={1.5} />
+                </div>
+                <h3 className="text-[15px] md:text-[16px] font-semibold text-[#f7f8f8] mb-2">Pas encore de squad</h3>
+                <p className="text-[13px] md:text-[14px] text-[#8b8d90] mb-6 leading-relaxed">
+                  Crée ou rejoins une squad pour organiser tes sessions de jeu.
+                </p>
+                <motion.button
+                  onClick={() => onNavigate("create-squad")}
+                  className="inline-flex items-center justify-center gap-2.5 w-full h-12 rounded-xl bg-[#5e6dd2] text-white text-[14px] font-semibold shadow-lg shadow-[#5e6dd2]/20 hover:bg-[#6a79db] transition-colors"
+                  whileHover={{ y: -1 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Plus className="w-5 h-5" strokeWidth={2} />
+                  Créer une squad
+                </motion.button>
               </div>
-              <h3 className="text-[18px] md:text-[20px] font-bold text-[#f7f8f8] mb-2">Pas encore de squad</h3>
-              <p className="text-[14px] md:text-[15px] text-[#8b8d90] mb-8 max-w-[300px] mx-auto leading-relaxed">
-                Crée ou rejoins une squad pour organiser tes sessions de jeu
-              </p>
-              <motion.button
-                onClick={() => onNavigate("create-squad")}
-                className="inline-flex items-center gap-2.5 h-12 px-7 rounded-xl bg-[#5e6dd2] text-white text-[15px] font-semibold shadow-lg shadow-[#5e6dd2]/20 hover:bg-[#6a79db] transition-colors"
-                whileHover={{ y: -2, scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Plus className="w-5 h-5" strokeWidth={2} />
-                Créer une squad
-              </motion.button>
             </motion.div>
           )}
         </motion.div>

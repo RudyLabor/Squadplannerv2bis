@@ -135,7 +135,7 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="votre@email.com"
                     onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                    className="w-full h-12 pl-12 pr-4 rounded-xl bg-[#101012] border border-[#27282b] text-[14px] text-[#f7f8f8] placeholder:text-[#5e6063] focus:border-[#5e6dd2] focus:bg-[#18191b] focus:outline-none transition-all duration-150"
+                    className="w-full h-12 pl-12 pr-4 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-[14px] text-[#f7f8f8] placeholder:text-[#5e6063] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all duration-150"
                   />
                 </div>
               </div>
@@ -153,7 +153,7 @@ export function LoginScreen({ onNavigate, onLogin, showToast }: LoginScreenProps
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                    className="w-full h-12 pl-12 pr-12 rounded-xl bg-[#101012] border border-[#27282b] text-[14px] text-[#f7f8f8] placeholder:text-[#5e6063] focus:border-[#5e6dd2] focus:bg-[#18191b] focus:outline-none transition-all duration-150"
+                    className="w-full h-12 pl-12 pr-12 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-[14px] text-[#f7f8f8] placeholder:text-[#5e6063] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all duration-150"
                   />
                   <button
                     type="button"

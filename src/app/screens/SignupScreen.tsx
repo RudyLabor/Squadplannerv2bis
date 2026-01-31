@@ -144,7 +144,7 @@ export function SignupScreen({ onNavigate, onSignup, showToast }: SignupScreenPr
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Votre pseudo gaming"
-                    className="w-full h-12 pl-12 pr-4 rounded-xl bg-[#101012] border border-[#27282b] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6dd2] focus:bg-[#18191b] focus:outline-none transition-all duration-150"
+                    className="w-full h-12 pl-12 pr-4 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-[14px] text-[#f7f8f8] placeholder:text-[#5e6063] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all duration-150"
                   />
                 </div>
               </div>
@@ -161,7 +161,7 @@ export function SignupScreen({ onNavigate, onSignup, showToast }: SignupScreenPr
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="votre@email.com"
-                    className="w-full h-12 pl-12 pr-4 rounded-xl bg-[#101012] border border-[#27282b] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6dd2] focus:bg-[#18191b] focus:outline-none transition-all duration-150"
+                    className="w-full h-12 pl-12 pr-4 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-[14px] text-[#f7f8f8] placeholder:text-[#5e6063] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all duration-150"
                   />
                 </div>
               </div>
@@ -177,8 +177,8 @@ export function SignupScreen({ onNavigate, onSignup, showToast }: SignupScreenPr
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Min. 6 caractères"
-                    className="w-full h-12 pl-12 pr-12 rounded-xl bg-[#101012] border border-[#27282b] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6dd2] focus:bg-[#18191b] focus:outline-none transition-all duration-150"
+                    placeholder="Min. 6 caracteres"
+                    className="w-full h-12 pl-12 pr-12 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-[14px] text-[#f7f8f8] placeholder:text-[#5e6063] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all duration-150"
                   />
                   <button
                     type="button"
@@ -201,9 +201,9 @@ export function SignupScreen({ onNavigate, onSignup, showToast }: SignupScreenPr
                     type={showPassword ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Répétez le mot de passe"
+                    placeholder="Repetez le mot de passe"
                     onKeyDown={(e) => e.key === 'Enter' && handleSignup()}
-                    className="w-full h-12 pl-12 pr-12 rounded-xl bg-[#101012] border border-[#27282b] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6dd2] focus:bg-[#18191b] focus:outline-none transition-all duration-150"
+                    className="w-full h-12 pl-12 pr-12 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-[14px] text-[#f7f8f8] placeholder:text-[#5e6063] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all duration-150"
                   />
                   {confirmPassword && (
                     <div className="absolute right-4 top-1/2 -translate-y-1/2">

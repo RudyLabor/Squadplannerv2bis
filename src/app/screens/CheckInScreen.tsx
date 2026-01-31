@@ -202,7 +202,7 @@ export function CheckInScreen({ onNavigate, showToast, useMockData = false, data
   const totalExpected = session.confirmedSlot?.responses?.filter((r: any) => r.response === 'yes').length || 0;
 
   return (
-    <div className="min-h-screen pb-24 pt-safe bg-[#08090a] relative">
+    <div className="min-h-screen pb-24 md:pb-8 pt-safe bg-[#08090a] relative">
       <div className="px-4 py-6 max-w-2xl mx-auto">
         <motion.div
           variants={containerVariants}
@@ -225,8 +225,8 @@ export function CheckInScreen({ onNavigate, showToast, useMockData = false, data
                 {session.squadName}
               </p>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-[#5e5ce6]/10 border border-[#5e5ce6]/20 flex items-center justify-center">
-              <Clock className="w-5 h-5 text-[#5e5ce6]" />
+            <div className="w-10 h-10 rounded-lg bg-[#f5a623]/10 border border-[#f5a623]/20 flex items-center justify-center">
+              <Clock className="w-5 h-5 text-[#f5a623]" />
             </div>
           </motion.div>
 
@@ -236,8 +236,8 @@ export function CheckInScreen({ onNavigate, showToast, useMockData = false, data
             className="bg-[#1a1b1e] border border-[#2a2b2e] rounded-xl p-5 mb-6"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[#5e5ce6]/10 border border-[#5e5ce6]/20 flex items-center justify-center">
-                <Clock className="w-6 h-6 text-[#5e5ce6]" />
+              <div className="w-12 h-12 rounded-xl bg-[#f5a623]/10 border border-[#f5a623]/20 flex items-center justify-center">
+                <Clock className="w-6 h-6 text-[#f5a623]" />
               </div>
               <div>
                 <p className="text-xs text-[#8b8b8b] font-medium uppercase tracking-wider mb-1">
@@ -365,7 +365,7 @@ export function CheckInScreen({ onNavigate, showToast, useMockData = false, data
           {!userStatus && (
             <motion.div variants={itemVariants} className="space-y-3">
               <div className="flex items-center gap-2 mb-4">
-                <Users className="w-4 h-4 text-[#5e5ce6]" />
+                <Users className="w-4 h-4 text-[#f5a623]" />
                 <h2 className="text-sm font-medium text-white">
                   Confirmez votre presence
                 </h2>
@@ -515,7 +515,7 @@ export function CheckInScreen({ onNavigate, showToast, useMockData = false, data
                   className="space-y-3"
                 >
                   <div className="flex items-center gap-2 mb-3">
-                    <Gamepad2 className="w-4 h-4 text-[#5e5ce6]" />
+                    <Gamepad2 className="w-4 h-4 text-[#f5a623]" />
                     <h3 className="text-sm font-medium text-white">
                       Lancer le jeu
                     </h3>

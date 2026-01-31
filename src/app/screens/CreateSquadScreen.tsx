@@ -145,7 +145,7 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
   return (
     <div className="min-h-screen bg-[#08090a] pb-24 md:pb-8">
       <motion.div
-        className="max-w-lg mx-auto px-4 md:px-6 py-6"
+        className="max-w-2xl mx-auto px-4 md:px-6 py-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -154,190 +154,185 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
         <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
           <motion.button
             onClick={() => onNavigate("squads")}
-            className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center text-[#8b8d90] hover:bg-[rgba(255,255,255,0.06)] hover:text-[#f7f8f8] transition-all"
+            className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center text-[#8b8d90] hover:bg-[rgba(255,255,255,0.04)] hover:text-[#f7f8f8] hover:border-[rgba(255,255,255,0.1)] transition-all"
             whileHover={{ x: -2 }}
             whileTap={{ scale: 0.95 }}
           >
             <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
           </motion.button>
           <div className="flex-1">
-            <h1 className="text-[24px] md:text-[28px] font-semibold text-[#f7f8f8]">
+            <h1 className="text-[22px] md:text-[26px] font-semibold text-[#f7f8f8] tracking-tight">
               Nouvelle Squad
             </h1>
-            <p className="text-[13px] text-[#5e6063]">
-              Crée ton équipe
+            <p className="text-[13px] text-[#5e6063] mt-0.5">
+              Crée ton équipe de joueurs
             </p>
           </div>
-          <div className="w-11 h-11 rounded-xl bg-[rgba(94,109,210,0.1)] flex items-center justify-center">
+          <div className="w-11 h-11 rounded-xl bg-[rgba(94,109,210,0.1)] border border-[rgba(94,109,210,0.15)] flex items-center justify-center">
             <Users className="w-5 h-5 text-[#5e6dd2]" strokeWidth={1.5} />
           </div>
         </motion.div>
 
-        {/* Progress indicator - Linear style */}
-        <motion.div variants={itemVariants} className="mb-8">
-          <div className="flex items-center gap-2 mb-2">
+        {/* Main Form Card - Linear dark style (informations de base) */}
+        <motion.div
+          variants={itemVariants}
+          className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-2xl p-5 mb-6"
+        >
+          {/* Progress indicator */}
+          <div className="flex items-center gap-2 mb-5 pb-4 border-b border-[rgba(255,255,255,0.06)]">
             <div className="flex items-center gap-1.5">
               <div className={`w-2 h-2 rounded-full transition-colors duration-200 ${name.trim().length >= 2 ? 'bg-[#4ade80]' : 'bg-[rgba(255,255,255,0.1)]'}`} />
               <div className={`w-2 h-2 rounded-full transition-colors duration-200 ${selectedGame ? 'bg-[#4ade80]' : 'bg-[rgba(255,255,255,0.1)]'}`} />
             </div>
             <span className="text-[12px] text-[#5e6063] ml-auto">
               {isValid ? (
-                <span className="text-[#4ade80]">Prêt à créer</span>
+                <span className="text-[#4ade80]">Pret a creer</span>
               ) : (
                 `${2 - requiredFieldsCount} champ${2 - requiredFieldsCount > 1 ? 's' : ''} requis`
               )}
             </span>
           </div>
-          <div className="h-1 bg-[rgba(255,255,255,0.06)] rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-[#5e6dd2] rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${requiredFieldsCount * 50}%` }}
-              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-            />
-          </div>
-        </motion.div>
 
-        {/* Squad Name - Linear style */}
-        <motion.div variants={itemVariants} className="mb-6">
-          <label className="flex items-center gap-2 text-[11px] font-medium text-[#5e6063] mb-2 uppercase tracking-wider">
-            <Users className="w-3.5 h-3.5 text-[#8b93ff]" strokeWidth={1.5} />
-            Nom de la Squad
-          </label>
-          <div className="relative">
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value.slice(0, 30))}
-              placeholder="Ex : Les Légendes"
-              className="w-full h-12 px-4 bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-xl text-[14px] font-medium text-[#f7f8f8] placeholder:text-[#5e6063] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all"
-            />
-            <AnimatePresence>
-              {name.trim().length >= 2 && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 bg-[#4ade80] rounded-full flex items-center justify-center"
-                >
-                  <Check className="w-3 h-3 text-[#08090a]" strokeWidth={2} />
-                </motion.div>
+          {/* Squad Name */}
+          <div className="mb-5">
+            <label className="block text-[11px] font-medium text-[#5e6063] uppercase tracking-wider mb-2">
+              <span className="flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-[#8b93ff]" strokeWidth={1.5} />
+                Nom de la Squad
+              </span>
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value.slice(0, 30))}
+                placeholder="Ex : Les Legendes"
+                className="w-full h-12 px-4 bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-xl text-[14px] font-medium text-[#f7f8f8] placeholder:text-[#5e6063] hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] focus:border-[rgba(94,109,210,0.5)] focus:ring-2 focus:ring-[rgba(94,109,210,0.15)] focus:outline-none transition-all"
+              />
+              <AnimatePresence>
+                {name.trim().length >= 2 && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 bg-[#4ade80] rounded-full flex items-center justify-center"
+                  >
+                    <Check className="w-3 h-3 text-[#08090a]" strokeWidth={2} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            <div className="flex justify-between mt-2 px-1">
+              <span className="text-[11px] text-[#5e6063]">Un nom memorable</span>
+              <span className={`text-[11px] transition-colors ${name.length > 25 ? 'text-[#f5a623]' : 'text-[#5e6063]'}`}>
+                {name.length}/30
+              </span>
+            </div>
+          </div>
+
+          {/* Game Picker */}
+          <div>
+            <label className="block text-[11px] font-medium text-[#5e6063] uppercase tracking-wider mb-2">
+              <span className="flex items-center gap-1.5">
+                <Gamepad2 className="w-3.5 h-3.5 text-[#5e6dd2]" strokeWidth={1.5} />
+                Jeu Principal
+              </span>
+            </label>
+            <motion.button
+              onClick={() => setShowGamePicker(true)}
+              className={`w-full h-14 rounded-xl flex items-center px-4 transition-all ${
+                selectedGameData
+                  ? 'bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.12)]'
+                  : 'bg-[rgba(255,255,255,0.04)] border border-dashed border-[rgba(255,255,255,0.1)] hover:border-[rgba(94,109,210,0.3)] hover:bg-[rgba(255,255,255,0.06)]'
+              }`}
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.99 }}
+            >
+              {selectedGameData ? (
+                <div className="flex items-center gap-3 w-full">
+                  <div className="w-10 h-10 rounded-lg bg-[rgba(94,109,210,0.1)] flex items-center justify-center">
+                    <span className="text-xl">{selectedGameData.icon}</span>
+                  </div>
+                  <div className="flex-1 text-left">
+                    <span className="text-[14px] font-medium text-[#f7f8f8] block">
+                      {selectedGameData.name}
+                    </span>
+                    <span className="text-[11px] text-[#5e6063]">Cliquer pour changer</span>
+                  </div>
+                  <Check className="w-4 h-4 text-[#5e6dd2]" strokeWidth={2} />
+                </div>
+              ) : (
+                <div className="flex items-center gap-3 w-full">
+                  <div className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.04)] flex items-center justify-center">
+                    <Gamepad2 className="w-5 h-5 text-[#5e6063]" strokeWidth={1.5} />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <span className="text-[14px] text-[#8b8d90] block">Selectionner un jeu</span>
+                    <span className="text-[11px] text-[#5e6063]">Requis</span>
+                  </div>
+                </div>
               )}
-            </AnimatePresence>
+            </motion.button>
           </div>
-          <div className="flex justify-between mt-2 px-1">
-            <span className="text-[11px] text-[#5e6063]">Un nom mémorable</span>
-            <span className={`text-[11px] transition-colors ${name.length > 25 ? 'text-[#f5a623]' : 'text-[#5e6063]'}`}>
-              {name.length}/30
+        </motion.div>
+
+        {/* Preferences Card - Linear dark style */}
+        <motion.div
+          variants={itemVariants}
+          className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-2xl p-5 mb-6"
+        >
+          <label className="block text-[11px] font-medium text-[#5e6063] uppercase tracking-wider mb-3">
+            <span className="flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-[#f5a623]" strokeWidth={1.5} />
+              Preferences (optionnel)
             </span>
+          </label>
+
+          {/* Preferred Days */}
+          <div className="mb-4">
+            <span className="text-[10px] text-[#5e6063] font-medium block mb-2 uppercase">Jours preferes</span>
+            <div className="flex gap-2">
+              {DAYS.map((day) => {
+                const isSelected = selectedDays.includes(day.id);
+                return (
+                  <motion.button
+                    key={day.id}
+                    onClick={() => toggleDay(day.id)}
+                    className={`flex-1 h-10 rounded-xl text-[13px] font-medium transition-all ${
+                      isSelected
+                        ? "bg-[rgba(94,109,210,0.12)] text-[#8b93ff] border border-[rgba(94,109,210,0.25)]"
+                        : "bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.06)] text-[#8b8d90] hover:border-[rgba(255,255,255,0.1)] hover:text-[#f7f8f8]"
+                    }`}
+                    whileHover={{ y: -1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {day.label}
+                  </motion.button>
+                );
+              })}
+            </div>
           </div>
-        </motion.div>
 
-        {/* Game Picker Button - Linear style */}
-        <motion.div variants={itemVariants} className="mb-6">
-          <label className="flex items-center gap-2 text-[11px] font-medium text-[#5e6063] mb-2 uppercase tracking-wider">
-            <Gamepad2 className="w-3.5 h-3.5 text-[#5e6dd2]" strokeWidth={1.5} />
-            Jeu Principal
-          </label>
-          <motion.button
-            onClick={() => setShowGamePicker(true)}
-            className={`w-full h-16 rounded-xl flex items-center px-4 transition-all ${
-              selectedGameData
-                ? 'bg-[rgba(94,109,210,0.08)] border border-[rgba(94,109,210,0.25)]'
-                : 'bg-[rgba(255,255,255,0.02)] border border-dashed border-[rgba(255,255,255,0.1)] hover:border-[rgba(94,109,210,0.3)] hover:bg-[rgba(255,255,255,0.04)]'
-            }`}
-            whileHover={{ y: -1 }}
-            whileTap={{ scale: 0.99 }}
-          >
-            {selectedGameData ? (
-              <div className="flex items-center gap-3 w-full">
-                <div className="w-10 h-10 rounded-lg bg-[rgba(94,109,210,0.1)] flex items-center justify-center">
-                  <span className="text-xl">{selectedGameData.icon}</span>
-                </div>
-                <div className="flex-1 text-left">
-                  <span className="text-[14px] font-medium text-[#f7f8f8] block">
-                    {selectedGameData.name}
-                  </span>
-                  <span className="text-[11px] text-[#5e6063]">Cliquer pour changer</span>
-                </div>
-                <Check className="w-4 h-4 text-[#5e6dd2]" strokeWidth={2} />
-              </div>
-            ) : (
-              <div className="flex items-center gap-3 w-full">
-                <div className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.04)] flex items-center justify-center">
-                  <Gamepad2 className="w-5 h-5 text-[#5e6063]" strokeWidth={1.5} />
-                </div>
-                <div className="flex-1 text-left">
-                  <span className="text-[14px] text-[#8b8d90] block">Sélectionner un jeu</span>
-                  <span className="text-[11px] text-[#5e6063]">Requis</span>
-                </div>
-              </div>
-            )}
-          </motion.button>
-        </motion.div>
-
-        {/* Preferred Days - Linear style */}
-        <motion.div variants={itemVariants} className="mb-6">
-          <label className="flex items-center gap-2 text-[11px] font-medium text-[#5e6063] mb-2 uppercase tracking-wider">
-            <Calendar className="w-3.5 h-3.5 text-[#f5a623]" strokeWidth={1.5} />
-            Jours préférés
-            <span className="text-[#5e6063] font-normal lowercase">(optionnel)</span>
-          </label>
-          <div className="flex gap-2">
-            {DAYS.map((day) => {
-              const isSelected = selectedDays.includes(day.id);
-              return (
+          {/* Session Duration */}
+          <div>
+            <span className="text-[10px] text-[#5e6063] font-medium block mb-2 uppercase">Duree typique</span>
+            <div className="flex gap-2">
+              {DURATIONS.map((d) => (
                 <motion.button
-                  key={day.id}
-                  onClick={() => toggleDay(day.id)}
-                  className={`flex-1 h-10 rounded-lg text-[13px] font-medium transition-all ${
-                    isSelected
-                      ? "bg-[rgba(94,109,210,0.15)] text-[#8b93ff] border border-[rgba(94,109,210,0.3)]"
-                      : "bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] text-[#8b8d90] hover:border-[rgba(255,255,255,0.1)] hover:text-[#f7f8f8]"
+                  key={d.value}
+                  onClick={() => setDuration(d.value)}
+                  className={`flex-1 h-10 rounded-xl text-[13px] font-medium transition-all ${
+                    duration === d.value
+                      ? "bg-[rgba(94,109,210,0.12)] text-[#8b93ff] border border-[rgba(94,109,210,0.25)]"
+                      : "bg-[rgba(255,255,255,0.04)] text-[#8b8d90] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.1)] hover:text-[#f7f8f8]"
                   }`}
                   whileHover={{ y: -1 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  {day.label}
-                </motion.button>
-              );
-            })}
-          </div>
-        </motion.div>
-
-        {/* Session Duration - Linear style */}
-        <motion.div variants={itemVariants} className="mb-10">
-          <label className="flex items-center gap-2 text-[11px] font-medium text-[#5e6063] mb-2 uppercase tracking-wider">
-            <Clock className="w-3.5 h-3.5 text-[#60a5fa]" strokeWidth={1.5} />
-            Durée typique
-            <span className="text-[#5e6063] font-normal lowercase">(optionnel)</span>
-          </label>
-          <div className="grid grid-cols-4 gap-2">
-            {DURATIONS.map((d) => (
-              <motion.button
-                key={d.value}
-                onClick={() => setDuration(d.value)}
-                className={`relative p-3 rounded-xl text-center transition-all duration-100 ${
-                  duration === d.value
-                    ? "bg-[rgba(94,109,210,0.1)] border border-[rgba(94,109,210,0.3)]"
-                    : "bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.04)]"
-                }`}
-                whileHover={{ y: -1 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <span className={`block text-[16px] font-semibold ${duration === d.value ? 'text-[#f7f8f8]' : 'text-[#8b8d90]'}`}>
                   {d.label}
-                </span>
-                <span className={`block text-[10px] mt-0.5 ${duration === d.value ? 'text-[#8b93ff]' : 'text-[#5e6063]'}`}>
-                  {d.desc}
-                </span>
-                {d.default && duration !== d.value && (
-                  <span className="absolute -top-1 -right-1 text-[8px] bg-[rgba(94,109,210,0.2)] text-[#8b93ff] px-1.5 py-0.5 rounded-full font-medium">
-                    Défaut
-                  </span>
-                )}
-              </motion.button>
-            ))}
+                </motion.button>
+              ))}
+            </div>
           </div>
         </motion.div>
 
@@ -346,20 +341,20 @@ export function CreateSquadScreen({ onNavigate, showToast }: CreateSquadScreenPr
           <motion.button
             onClick={handleCreate}
             disabled={isCreating || !isValid}
-            className={`w-full h-14 flex items-center justify-center gap-2.5 rounded-xl text-[14px] font-semibold transition-all duration-100 ${
+            className={`w-full h-12 flex items-center justify-center gap-2.5 rounded-xl text-[14px] font-semibold transition-all ${
               isValid
                 ? "bg-[#5e6dd2] text-white hover:bg-[#6a79db] shadow-lg shadow-[#5e6dd2]/20"
                 : "bg-[rgba(255,255,255,0.04)] text-[#5e6063] border border-[rgba(255,255,255,0.06)] cursor-not-allowed"
             }`}
-            whileHover={isValid ? { y: -2 } : {}}
+            whileHover={isValid ? { y: -1 } : {}}
             whileTap={isValid ? { scale: 0.98 } : {}}
           >
             {isCreating ? (
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
               <>
                 <Users className="w-5 h-5" strokeWidth={1.5} />
-                Créer la Squad
+                Creer la Squad
               </>
             )}
           </motion.button>

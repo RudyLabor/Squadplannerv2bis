@@ -401,7 +401,7 @@ export function ProposeSessionScreen({
               isFormValid
                 ? "bg-[#5e6dd2] text-white hover:bg-[#6a79db] shadow-lg shadow-[#5e6dd2]/20"
                 : "bg-[rgba(255,255,255,0.04)] text-[#5e6063] border border-[rgba(255,255,255,0.06)] cursor-not-allowed"
-            } disabled:opacity-50`}
+            }`}
             whileHover={isFormValid ? { y: -1 } : {}}
             whileTap={isFormValid ? { scale: 0.98 } : {}}
           >

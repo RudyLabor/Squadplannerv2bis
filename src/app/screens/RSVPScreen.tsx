@@ -280,7 +280,7 @@ export function RSVPScreen({ onNavigate, showToast }: RSVPScreenProps) {
   const { date, time } = formatDateTime(session.scheduled_date, session.scheduled_time);
 
   return (
-    <div className="min-h-screen pb-32 bg-[#08090a]">
+    <div className="min-h-screen pb-24 md:pb-8 bg-[#08090a]">
       <div className="px-4 py-6 max-w-2xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -318,8 +318,8 @@ export function RSVPScreen({ onNavigate, showToast }: RSVPScreenProps) {
           {/* Session Info Card */}
           <div className="bg-[#101113] border border-[rgba(255,255,255,0.08)] rounded-xl p-5 mb-4">
             <div className="flex items-start gap-4 mb-4">
-              <div className="w-12 h-12 rounded-lg bg-[rgba(94,109,210,0.1)] border border-[rgba(94,109,210,0.2)] flex items-center justify-center">
-                <Gamepad2 className="w-6 h-6 text-[#5e6dd2]" />
+              <div className="w-12 h-12 rounded-lg bg-[rgba(245,166,35,0.1)] border border-[rgba(245,166,35,0.2)] flex items-center justify-center">
+                <Gamepad2 className="w-6 h-6 text-[#f5a623]" />
               </div>
               <div className="flex-1 min-w-0">
                 <h2 className="text-base font-semibold text-[#f7f8f8] truncate" style={{ fontWeight: 510 }}>

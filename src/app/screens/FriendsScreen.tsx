@@ -263,23 +263,23 @@ export function FriendsScreen({ onNavigate, showToast }: FriendsScreenProps) {
                     variants={itemVariants}
                     className="p-6 md:p-8 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]"
                   >
-                    <div className="text-center max-w-[280px] mx-auto">
-                      <div className="w-12 h-12 rounded-xl bg-[rgba(94,109,210,0.15)] flex items-center justify-center mx-auto mb-4">
-                        <Users className="w-6 h-6 text-[#8b93ff]" strokeWidth={1.5} />
+                    <div className="text-center max-w-[320px] mx-auto">
+                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-[rgba(94,109,210,0.1)] flex items-center justify-center mx-auto mb-5">
+                        <Users className="w-6 h-6 md:w-7 md:h-7 text-[#5e6dd2]" strokeWidth={1.5} />
                       </div>
-                      <h3 className="text-[15px] font-semibold text-[#f7f8f8] mb-2">
+                      <h3 className="text-[15px] md:text-[16px] font-semibold text-[#f7f8f8] mb-2">
                         Aucun ami pour le moment
                       </h3>
-                      <p className="text-[13px] text-[#8b8d90] mb-4">
-                        Recherche des joueurs pour commencer a construire ta squad
+                      <p className="text-[13px] md:text-[14px] text-[#8b8d90] mb-6 leading-relaxed">
+                        Recherche des joueurs pour commencer a construire ta squad.
                       </p>
                       <motion.button
                         onClick={() => onNavigate('search-players')}
-                        className="px-4 py-2 rounded-lg bg-[#5e6dd2] text-white text-[13px] font-medium hover:bg-[#6a79db] transition-colors"
+                        className="inline-flex items-center justify-center gap-2.5 w-full h-12 rounded-xl bg-[#5e6dd2] text-white text-[14px] font-semibold hover:bg-[#6a79db] shadow-lg shadow-[#5e6dd2]/20 transition-colors"
                         whileHover={{ y: -1 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        <UserPlus className="w-4 h-4 inline mr-2" strokeWidth={1.5} />
+                        <UserPlus className="w-5 h-5" strokeWidth={2} />
                         Rechercher des joueurs
                       </motion.button>
                     </div>
@@ -343,15 +343,15 @@ export function FriendsScreen({ onNavigate, showToast }: FriendsScreenProps) {
                     variants={itemVariants}
                     className="p-6 md:p-8 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]"
                   >
-                    <div className="text-center max-w-[280px] mx-auto">
-                      <div className="w-12 h-12 rounded-xl bg-[rgba(255,255,255,0.04)] flex items-center justify-center mx-auto mb-4">
-                        <Clock className="w-6 h-6 text-[#5e6063]" strokeWidth={1.5} />
+                    <div className="text-center max-w-[320px] mx-auto">
+                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-[rgba(245,166,35,0.1)] flex items-center justify-center mx-auto mb-5">
+                        <Clock className="w-6 h-6 md:w-7 md:h-7 text-[#f5a623]" strokeWidth={1.5} />
                       </div>
-                      <h3 className="text-[15px] font-semibold text-[#f7f8f8] mb-2">
+                      <h3 className="text-[15px] md:text-[16px] font-semibold text-[#f7f8f8] mb-2">
                         Aucune invitation
                       </h3>
-                      <p className="text-[13px] text-[#8b8d90]">
-                        Tu n'as pas d'invitations en attente
+                      <p className="text-[13px] md:text-[14px] text-[#8b8d90] leading-relaxed">
+                        Tu n'as pas d'invitations en attente.
                       </p>
                     </div>
                   </motion.div>

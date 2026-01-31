@@ -109,8 +109,8 @@ export function LeaderboardScreen({ onNavigate, showToast, useMockData = false }
   const restOfPlayers = players.slice(3);
 
   return (
-    <div className="min-h-screen pb-24 pt-safe bg-[#08090a]">
-      <div className="px-4 py-6 max-w-2xl mx-auto">
+    <div className="min-h-screen pb-24 md:pb-8 bg-[#08090a]">
+      <div className="px-4 md:px-6 py-6 max-w-2xl mx-auto">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -120,7 +120,7 @@ export function LeaderboardScreen({ onNavigate, showToast, useMockData = false }
           <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
             <motion.button
               onClick={() => onNavigate('home')}
-              className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center hover:bg-[rgba(255,255,255,0.05)] transition-colors"
+              className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center hover:bg-[rgba(255,255,255,0.05)] transition-colors"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -134,7 +134,7 @@ export function LeaderboardScreen({ onNavigate, showToast, useMockData = false }
                 Les meilleurs joueurs
               </p>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-[rgba(245,166,35,0.1)] border border-[rgba(245,166,35,0.2)] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-[rgba(245,166,35,0.1)] border border-[rgba(245,166,35,0.2)] flex items-center justify-center">
               <Trophy className="w-5 h-5 text-[#f5a623]" strokeWidth={1.5} />
             </div>
           </motion.div>

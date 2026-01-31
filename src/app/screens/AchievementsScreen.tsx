@@ -189,7 +189,7 @@ export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreen
   };
 
   return (
-    <div className="min-h-screen bg-[#08090a] pb-24 md:pb-8">
+    <div className="min-h-screen bg-[#08090a] pb-24 md:pb-8 pt-safe">
       <div className="px-4 py-6 max-w-2xl mx-auto">
         <motion.div
           variants={containerVariants}
@@ -197,7 +197,7 @@ export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreen
           animate="visible"
         >
           {/* Header */}
-          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
+          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
             <motion.button
               onClick={() => onNavigate('profile')}
               className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center hover:bg-[rgba(255,255,255,0.05)] transition-colors"

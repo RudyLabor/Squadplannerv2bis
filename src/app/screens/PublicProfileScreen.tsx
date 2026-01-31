@@ -47,26 +47,37 @@ const itemVariants = {
 };
 
 // ============================================
-// SECONDARY STAT - Smaller with icon
+// SECONDARY STAT - Compact version harmonized with StatCard style
 // ============================================
 function SecondaryStat({
   value,
   label,
   icon: Icon,
-  iconColor = "text-[#5e6dd2]"
+  accentColor = "#5e6dd2"
 }: {
   value: string | number;
   label: string;
   icon?: any;
-  iconColor?: string;
+  accentColor?: string;
 }) {
   return (
     <div className="text-center">
-      {Icon && <Icon className={`w-4 h-4 ${iconColor} opacity-50 mx-auto mb-1`} strokeWidth={1.5} />}
+      <div
+        className="w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-2 transition-all duration-150"
+        style={{ backgroundColor: `${accentColor}15` }}
+      >
+        {Icon && (
+          <Icon
+            className="w-5 h-5 transition-colors"
+            style={{ color: accentColor }}
+            strokeWidth={1.5}
+          />
+        )}
+      </div>
       <p className="text-[18px] font-semibold text-[#f7f8f8] tabular-nums leading-none mb-0.5">
         {value}
       </p>
-      <span className="text-[11px] text-[#5e6063]">{label}</span>
+      <span className="text-[11px] text-[rgba(255,255,255,0.4)] uppercase tracking-wide">{label}</span>
     </div>
   );
 }
@@ -340,25 +351,25 @@ export function PublicProfileScreen({ onNavigate, showToast }: PublicProfileScre
                 value={mockUser.totalSessions}
                 label="Sessions"
                 icon={Calendar}
-                iconColor="text-[#60a5fa]"
+                accentColor="#60a5fa"
               />
               <SecondaryStat
                 value={`${mockUser.attendance}%`}
                 label="Présence"
                 icon={Clock}
-                iconColor="text-[#4ade80]"
+                accentColor="#4ade80"
               />
               <SecondaryStat
                 value={mockUser.squads}
                 label="Squads"
                 icon={Gamepad2}
-                iconColor="text-[#5e6dd2]"
+                accentColor="#5e6dd2"
               />
               <SecondaryStat
                 value={mockUser.friends}
                 label="Amis"
                 icon={Users}
-                iconColor="text-[#8b93ff]"
+                accentColor="#8b5cf6"
               />
             </div>
           </div>

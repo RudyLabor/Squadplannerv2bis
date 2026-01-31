@@ -80,7 +80,7 @@ export function EsportTeamScreen({ onNavigate }: EsportTeamScreenProps) {
           <motion.div variants={itemVariants} className="flex items-center gap-3 mb-6">
             <motion.button
               onClick={() => onNavigate?.('home')}
-              className="w-10 h-10 rounded-xl bg-[#1a1a1c] border border-[#27282b] flex items-center justify-center text-[#8b8d90] hover:text-white hover:bg-[#232326] transition-all"
+              className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-[#8a8f98] hover:text-white hover:bg-white/[0.06] transition-all"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -90,7 +90,7 @@ export function EsportTeamScreen({ onNavigate }: EsportTeamScreenProps) {
               <h1 className="text-xl font-semibold text-white tracking-tight">
                 Equipe Esport
               </h1>
-              <p className="text-sm text-[#5e6063]">
+              <p className="text-sm text-[#8a8f98]">
                 Gestion professionnelle
               </p>
             </div>
@@ -106,7 +106,7 @@ export function EsportTeamScreen({ onNavigate }: EsportTeamScreenProps) {
           {/* Team Hero Card */}
           <motion.div
             variants={itemVariants}
-            className="bg-[#111113] border border-[#1e1f22] rounded-2xl p-5 mb-4"
+            className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 mb-4"
           >
             <div className="flex items-center gap-4 mb-4">
               <div
@@ -117,7 +117,7 @@ export function EsportTeamScreen({ onNavigate }: EsportTeamScreenProps) {
               </div>
               <div className="flex-1">
                 <h2 className="text-lg font-semibold text-white">{team.name}</h2>
-                <p className="text-sm text-[#8b8d90]">{team.game}</p>
+                <p className="text-sm text-[#8a8f98]">{team.game}</p>
                 <div className="flex items-center gap-2 mt-1">
                   <span
                     className="px-2 py-0.5 rounded-md text-xs font-medium"
@@ -135,17 +135,17 @@ export function EsportTeamScreen({ onNavigate }: EsportTeamScreenProps) {
 
             {/* Team Stats Grid */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-[#0c0c0e] border border-[#1e1f22] rounded-xl p-3 text-center">
+              <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-center">
                 <div className="text-xl font-bold text-white">{team.members}</div>
-                <div className="text-xs text-[#5e6063]">Joueurs</div>
+                <div className="text-xs text-[#8a8f98]">Joueurs</div>
               </div>
-              <div className="bg-[#0c0c0e] border border-[#1e1f22] rounded-xl p-3 text-center">
+              <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-center">
                 <div className="text-xl font-bold text-white">{team.upcomingMatches}</div>
-                <div className="text-xs text-[#5e6063]">Matchs</div>
+                <div className="text-xs text-[#8a8f98]">Matchs</div>
               </div>
-              <div className="bg-[#0c0c0e] border border-[#1e1f22] rounded-xl p-3 text-center">
+              <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-center">
                 <div className="text-xl font-bold text-emerald-400">{team.winRate}%</div>
-                <div className="text-xs text-[#5e6063]">Win Rate</div>
+                <div className="text-xs text-[#8a8f98]">Win Rate</div>
               </div>
             </div>
           </motion.div>
@@ -168,9 +168,9 @@ export function EsportTeamScreen({ onNavigate }: EsportTeamScreenProps) {
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-white text-sm">Mode B2B Active</h3>
-                <p className="text-xs text-[#8b8d90]">Fonctionnalites professionnelles disponibles</p>
+                <p className="text-xs text-[#8a8f98]">Fonctionnalites professionnelles disponibles</p>
               </div>
-              <ChevronRight className="w-4 h-4 text-[#5e6063]" />
+              <ChevronRight className="w-4 h-4 text-[#8a8f98]" />
             </div>
           </motion.div>
 
@@ -179,11 +179,11 @@ export function EsportTeamScreen({ onNavigate }: EsportTeamScreenProps) {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4" style={{ color: ESPORT_COLOR }} strokeWidth={1.5} />
-                <h3 className="text-sm font-medium text-[#8b8d90] uppercase tracking-wider">
+                <h3 className="text-sm font-medium text-[#8a8f98] uppercase tracking-wider">
                   Roster
                 </h3>
               </div>
-              <span className="text-xs text-[#5e6063]">{roster.length} joueurs</span>
+              <span className="text-xs text-[#8a8f98]">{roster.length} joueurs</span>
             </div>
 
             <div className="space-y-2">
@@ -191,7 +191,7 @@ export function EsportTeamScreen({ onNavigate }: EsportTeamScreenProps) {
                 <motion.div
                   key={i}
                   variants={itemVariants}
-                  className="bg-[#111113] border border-[#1e1f22] rounded-xl p-3.5 hover:bg-[#151517] hover:border-[#27282b] transition-all cursor-pointer"
+                  className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3.5 hover:bg-white/[0.04] hover:border-white/[0.1] transition-all cursor-pointer"
                   whileHover={{ x: 2 }}
                 >
                   <div className="flex items-center justify-between">
@@ -203,7 +203,7 @@ export function EsportTeamScreen({ onNavigate }: EsportTeamScreenProps) {
                           <Gamepad2 className="w-5 h-5 text-white" strokeWidth={1.5} />
                         </div>
                         {player.isLeader && (
-                          <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center border-2 border-[#111113]">
+                          <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center border-2 border-[#08090a]">
                             <Crown className="w-2.5 h-2.5 text-white" strokeWidth={2.5} />
                           </div>
                         )}
@@ -215,7 +215,7 @@ export function EsportTeamScreen({ onNavigate }: EsportTeamScreenProps) {
                             {player.role}
                           </span>
                         </div>
-                        <p className="text-xs text-[#5e6063] mt-0.5">{player.rank}</p>
+                        <p className="text-xs text-[#8a8f98] mt-0.5">{player.rank}</p>
                       </div>
                     </div>
                     <div className="text-right">
@@ -228,7 +228,7 @@ export function EsportTeamScreen({ onNavigate }: EsportTeamScreenProps) {
                       }`}>
                         {player.availability}%
                       </div>
-                      <div className="text-[10px] text-[#5e6063]">Disponible</div>
+                      <div className="text-[10px] text-[#8a8f98]">Disponible</div>
                     </div>
                   </div>
                 </motion.div>
@@ -250,7 +250,7 @@ export function EsportTeamScreen({ onNavigate }: EsportTeamScreenProps) {
             </motion.button>
             <motion.button
               onClick={() => onNavigate?.('tournaments')}
-              className="h-12 bg-[#111113] border border-[#27282b] text-[#f7f8f8] rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2 hover:bg-[#1a1a1c] hover:border-[#333438]"
+              className="h-12 bg-white/[0.03] border border-white/[0.06] text-white rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2 hover:bg-white/[0.06] hover:border-white/[0.1]"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -262,7 +262,7 @@ export function EsportTeamScreen({ onNavigate }: EsportTeamScreenProps) {
           {/* Upcoming Match Card */}
           <motion.div
             variants={itemVariants}
-            className="bg-[#111113] border border-[#1e1f22] rounded-xl p-4 mb-4"
+            className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4 mb-4"
           >
             <div className="flex items-center gap-2 mb-3">
               <Calendar className="w-4 h-4" style={{ color: ESPORT_COLOR }} strokeWidth={1.5} />
@@ -271,7 +271,7 @@ export function EsportTeamScreen({ onNavigate }: EsportTeamScreenProps) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white font-medium">vs Team Liquid</p>
-                <p className="text-xs text-[#5e6063] mt-0.5">Demain, 20h00</p>
+                <p className="text-xs text-[#8a8f98] mt-0.5">Demain, 20h00</p>
               </div>
               <span
                 className="px-3 py-1.5 rounded-lg text-xs font-medium"
@@ -285,7 +285,7 @@ export function EsportTeamScreen({ onNavigate }: EsportTeamScreenProps) {
           {/* Analytics Banner */}
           <motion.div
             variants={itemVariants}
-            className="bg-[#111113] border border-[#1e1f22] rounded-xl p-4"
+            className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4"
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center">
@@ -299,7 +299,7 @@ export function EsportTeamScreen({ onNavigate }: EsportTeamScreenProps) {
                     +12%
                   </span>
                 </div>
-                <p className="text-xs text-[#5e6063] mt-0.5">
+                <p className="text-xs text-[#8a8f98] mt-0.5">
                   Suivez les performances de votre equipe
                 </p>
               </div>

@@ -75,10 +75,10 @@ export function AcademyScreen({ onNavigate, showToast }: AcademyScreenProps) {
 
   const getLevelColor = (level: string) => {
     switch (level) {
-      case 'beginner': return 'text-emerald-400';
-      case 'intermediate': return 'text-amber-400';
-      case 'advanced': return 'text-rose-400';
-      default: return 'text-[#8a8f98]';
+      case 'beginner': return 'text-[#4ade80]';
+      case 'intermediate': return 'text-[#f5a623]';
+      case 'advanced': return 'text-[#f87171]';
+      default: return 'text-[#8b8d90]';
     }
   };
 
@@ -108,69 +108,68 @@ export function AcademyScreen({ onNavigate, showToast }: AcademyScreenProps) {
           animate="visible"
         >
           {/* Header */}
-          <motion.div variants={itemVariants} className="flex items-center gap-3 mb-8">
+          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
             <motion.button
               onClick={() => onNavigate?.('home')}
-              className="w-10 h-10 rounded-xl bg-[#1a1a1a]/60 border border-[#2a2a2a] flex items-center justify-center hover:bg-[#222] transition-colors"
+              className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center hover:bg-[rgba(255,255,255,0.06)] transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <ArrowLeft className="w-5 h-5 text-[#8a8f98]" />
+              <ArrowLeft className="w-5 h-5 text-[#8b8d90]" strokeWidth={1.5} />
             </motion.button>
             <div className="flex-1">
-              <h1 className="text-xl font-semibold text-[#f5f5f5] tracking-tight">
+              <h1 className="text-xl font-semibold text-[#f7f8f8] tracking-tight">
                 Academie
               </h1>
-              <p className="text-sm text-[#6b7280]">
+              <p className="text-sm text-[#5e6063]">
                 Formation & Talents
               </p>
             </div>
-            <motion.div
-              className="w-10 h-10 rounded-xl bg-[#5e6dd2]/15 border border-[#5e6dd2]/30 flex items-center justify-center"
-              whileHover={{ scale: 1.05 }}
+            <div
+              className="w-11 h-11 rounded-xl bg-[rgba(94,109,210,0.15)] flex items-center justify-center"
             >
-              <GraduationCap className="w-5 h-5 text-[#5e6dd2]" />
-            </motion.div>
+              <GraduationCap className="w-5 h-5 text-[#5e6dd2]" strokeWidth={1.5} />
+            </div>
           </motion.div>
 
           {/* Stats Row */}
           <motion.div variants={itemVariants} className="grid grid-cols-3 gap-3 mb-6">
-            <div className="bg-[#111]/80 border border-[#1e1e1e] rounded-xl p-4 text-center">
-              <div className="w-9 h-9 rounded-lg bg-[#5e6dd2]/15 flex items-center justify-center mx-auto mb-2">
-                <BookOpen className="w-4 h-4 text-[#5e6dd2]" />
+            <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4 text-center hover:bg-[rgba(255,255,255,0.04)] transition-all">
+              <div className="w-9 h-9 rounded-lg bg-[rgba(94,109,210,0.15)] flex items-center justify-center mx-auto mb-2">
+                <BookOpen className="w-4 h-4 text-[#5e6dd2]" strokeWidth={1.5} />
               </div>
-              <div className="text-2xl font-bold text-[#f5f5f5]">{stats?.totalModules || modules.length}</div>
-              <div className="text-xs text-[#6b7280]">Modules</div>
+              <div className="text-2xl font-semibold text-[#f7f8f8]">{stats?.totalModules || modules.length}</div>
+              <div className="text-xs text-[#5e6063]">Modules</div>
             </div>
-            <div className="bg-[#111]/80 border border-[#1e1e1e] rounded-xl p-4 text-center">
-              <div className="w-9 h-9 rounded-lg bg-[#22c55e]/15 flex items-center justify-center mx-auto mb-2">
-                <Users className="w-4 h-4 text-[#22c55e]" />
+            <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4 text-center hover:bg-[rgba(255,255,255,0.04)] transition-all">
+              <div className="w-9 h-9 rounded-lg bg-[rgba(74,222,128,0.15)] flex items-center justify-center mx-auto mb-2">
+                <Users className="w-4 h-4 text-[#4ade80]" strokeWidth={1.5} />
               </div>
-              <div className="text-2xl font-bold text-[#f5f5f5]">{stats?.totalStudents || students.length}</div>
-              <div className="text-xs text-[#6b7280]">Eleves</div>
+              <div className="text-2xl font-semibold text-[#f7f8f8]">{stats?.totalStudents || students.length}</div>
+              <div className="text-xs text-[#5e6063]">Eleves</div>
             </div>
-            <div className="bg-[#111]/80 border border-[#1e1e1e] rounded-xl p-4 text-center">
-              <div className="w-9 h-9 rounded-lg bg-[#f59e0b]/15 flex items-center justify-center mx-auto mb-2">
-                <Award className="w-4 h-4 text-[#f59e0b]" />
+            <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4 text-center hover:bg-[rgba(255,255,255,0.04)] transition-all">
+              <div className="w-9 h-9 rounded-lg bg-[rgba(245,166,35,0.15)] flex items-center justify-center mx-auto mb-2">
+                <Award className="w-4 h-4 text-[#f5a623]" strokeWidth={1.5} />
               </div>
-              <div className="text-2xl font-bold text-[#f5f5f5]">{stats?.averageProgress || 72}%</div>
-              <div className="text-xs text-[#6b7280]">Progression</div>
+              <div className="text-2xl font-semibold text-[#f7f8f8]">{stats?.averageProgress || 72}%</div>
+              <div className="text-xs text-[#5e6063]">Progression</div>
             </div>
           </motion.div>
 
           {/* Tab Selector */}
           <motion.div variants={itemVariants} className="mb-6">
-            <div className="bg-[#111]/60 border border-[#1e1e1e] rounded-xl p-1 flex gap-1">
+            <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-1 flex gap-1">
               <button
                 onClick={() => setSelectedTab('modules')}
                 className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
                   selectedTab === 'modules'
-                    ? 'bg-[#1a1a1a] text-[#f5f5f5] border border-[#2a2a2a]'
-                    : 'text-[#6b7280] hover:text-[#8a8f98]'
+                    ? 'bg-[rgba(255,255,255,0.08)] text-[#f7f8f8]'
+                    : 'text-[#5e6063] hover:text-[#8b8d90] hover:bg-[rgba(255,255,255,0.03)]'
                 }`}
               >
                 <span className="flex items-center justify-center gap-2">
-                  <BookOpen className="w-4 h-4" />
+                  <BookOpen className="w-4 h-4" strokeWidth={1.5} />
                   Modules
                 </span>
               </button>
@@ -178,12 +177,12 @@ export function AcademyScreen({ onNavigate, showToast }: AcademyScreenProps) {
                 onClick={() => setSelectedTab('students')}
                 className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
                   selectedTab === 'students'
-                    ? 'bg-[#1a1a1a] text-[#f5f5f5] border border-[#2a2a2a]'
-                    : 'text-[#6b7280] hover:text-[#8a8f98]'
+                    ? 'bg-[rgba(255,255,255,0.08)] text-[#f7f8f8]'
+                    : 'text-[#5e6063] hover:text-[#8b8d90] hover:bg-[rgba(255,255,255,0.03)]'
                 }`}
               >
                 <span className="flex items-center justify-center gap-2">
-                  <Users className="w-4 h-4" />
+                  <Users className="w-4 h-4" strokeWidth={1.5} />
                   Eleves
                 </span>
               </button>
@@ -203,38 +202,38 @@ export function AcademyScreen({ onNavigate, showToast }: AcademyScreenProps) {
                     whileTap={{ scale: 0.99 }}
                   >
                     <div
-                      className="bg-[#111]/80 border border-[#1e1e1e] hover:border-[#2a2a2a] rounded-xl p-4 cursor-pointer transition-all group"
+                      className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)] rounded-xl p-4 cursor-pointer transition-all group"
                       onClick={() => showToast?.(`Module "${module.title}" bientot disponible`, 'info')}
                     >
                       <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-[#5e6dd2]/15 border border-[#5e6dd2]/30 flex items-center justify-center flex-shrink-0">
-                          <Icon className="w-6 h-6 text-[#5e6dd2]" />
+                        <div className="w-12 h-12 rounded-xl bg-[rgba(94,109,210,0.15)] flex items-center justify-center flex-shrink-0">
+                          <Icon className="w-6 h-6 text-[#5e6dd2]" strokeWidth={1.5} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2 mb-1">
-                            <h4 className="font-semibold text-[#f5f5f5] truncate">{module.title}</h4>
-                            <ChevronRight className="w-4 h-4 text-[#4a4a4a] flex-shrink-0 group-hover:text-[#6b7280] transition-colors" />
+                            <h4 className="font-semibold text-[#f7f8f8] truncate">{module.title}</h4>
+                            <ChevronRight className="w-4 h-4 text-[#5e6063] flex-shrink-0 group-hover:text-[#8b8d90] transition-colors" strokeWidth={1.5} />
                           </div>
-                          <p className="text-sm text-[#6b7280] line-clamp-2 mb-3">{module.description}</p>
-                          <div className="flex items-center gap-4 text-xs text-[#4a4a4a]">
+                          <p className="text-sm text-[#8b8d90] line-clamp-2 mb-3">{module.description}</p>
+                          <div className="flex items-center gap-4 text-xs text-[#5e6063]">
                             <span className="flex items-center gap-1.5">
-                              <Play className="w-3.5 h-3.5" />
+                              <Play className="w-3.5 h-3.5" strokeWidth={1.5} />
                               {module.lessons} lecons
                             </span>
                             <span className="flex items-center gap-1.5">
-                              <Clock className="w-3.5 h-3.5" />
+                              <Clock className="w-3.5 h-3.5" strokeWidth={1.5} />
                               {module.duration}
                             </span>
                           </div>
                         </div>
                       </div>
                       {module.completed > 0 && (
-                        <div className="mt-4 pt-3 border-t border-[#1e1e1e]">
+                        <div className="mt-4 pt-3 border-t border-[rgba(255,255,255,0.06)]">
                           <div className="flex items-center justify-between text-xs mb-2">
-                            <span className="text-[#6b7280]">Progression</span>
+                            <span className="text-[#8b8d90]">Progression</span>
                             <span className="font-medium text-[#5e6dd2]">{module.completed}%</span>
                           </div>
-                          <div className="h-1.5 bg-[#1a1a1a] rounded-full overflow-hidden">
+                          <div className="h-1.5 bg-[rgba(255,255,255,0.04)] rounded-full overflow-hidden">
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${module.completed}%` }}
@@ -258,9 +257,9 @@ export function AcademyScreen({ onNavigate, showToast }: AcademyScreenProps) {
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
                 >
-                  <div className="bg-[#111]/80 border border-[#1e1e1e] hover:border-[#2a2a2a] rounded-xl p-4 cursor-pointer transition-all">
+                  <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)] rounded-xl p-4 cursor-pointer transition-all">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-11 h-11 rounded-full bg-[#5e6dd2]/15 border border-[#5e6dd2]/30 flex items-center justify-center text-[#5e6dd2] font-semibold overflow-hidden flex-shrink-0">
+                      <div className="w-11 h-11 rounded-xl bg-[rgba(94,109,210,0.15)] flex items-center justify-center text-[#8b93ff] font-semibold overflow-hidden flex-shrink-0">
                         {student.avatarUrl ? (
                           <img src={student.avatarUrl} alt="" className="w-full h-full object-cover" />
                         ) : (
@@ -268,24 +267,24 @@ export function AcademyScreen({ onNavigate, showToast }: AcademyScreenProps) {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-[#f5f5f5] truncate">{student.name}</h4>
+                        <h4 className="font-semibold text-[#f7f8f8] truncate">{student.name}</h4>
                         <div className="flex items-center gap-2 text-xs">
                           <span className={getLevelColor(student.level)}>{getLevelLabel(student.level)}</span>
-                          <span className="text-[#3a3a3a]">|</span>
-                          <span className="text-[#6b7280]">Coach: {student.coach}</span>
+                          <span className="text-[#5e6063]">|</span>
+                          <span className="text-[#8b8d90]">Coach: {student.coach}</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#5e6dd2]/15 border border-[#5e6dd2]/30">
-                        <Star className="w-3 h-3 text-[#5e6dd2]" />
+                      <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[rgba(94,109,210,0.15)]">
+                        <Star className="w-3 h-3 text-[#5e6dd2]" strokeWidth={1.5} />
                         <span className="text-sm font-semibold text-[#5e6dd2]">{student.progress}%</span>
                       </div>
                     </div>
-                    <div className="h-1.5 bg-[#1a1a1a] rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-[rgba(255,255,255,0.04)] rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${student.progress}%` }}
                         transition={{ duration: 0.8, ease: "easeOut", delay: i * 0.1 }}
-                        className="h-full bg-gradient-to-r from-[#5e6dd2] to-[#818cf8] rounded-full"
+                        className="h-full bg-[#5e6dd2] rounded-full"
                       />
                     </div>
                   </div>
@@ -297,48 +296,51 @@ export function AcademyScreen({ onNavigate, showToast }: AcademyScreenProps) {
           {/* Quick Actions */}
           <motion.div variants={itemVariants} className="grid grid-cols-2 gap-3 mt-6">
             <motion.button
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => onNavigate?.('coaching-tools')}
-              className="bg-[#111]/80 border border-[#1e1e1e] hover:border-[#2a2a2a] rounded-xl p-4 text-center transition-all"
+              className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)] rounded-xl p-4 text-center transition-all"
             >
-              <div className="w-10 h-10 rounded-xl bg-[#f59e0b]/15 border border-[#f59e0b]/30 flex items-center justify-center mx-auto mb-2">
-                <Award className="w-5 h-5 text-[#f59e0b]" />
+              <div className="w-10 h-10 rounded-xl bg-[rgba(245,166,35,0.15)] flex items-center justify-center mx-auto mb-2">
+                <Award className="w-5 h-5 text-[#f5a623]" strokeWidth={1.5} />
               </div>
-              <span className="text-sm font-medium text-[#f5f5f5]">Outils Coaching</span>
-              <p className="text-xs text-[#4a4a4a] mt-0.5">Methodes et ressources</p>
+              <span className="text-sm font-medium text-[#f7f8f8]">Outils Coaching</span>
+              <p className="text-xs text-[#5e6063] mt-0.5">Methodes et ressources</p>
             </motion.button>
             <motion.button
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => showToast?.('Fonctionnalite bientot disponible', 'info')}
-              className="bg-[#111]/80 border border-[#1e1e1e] hover:border-[#2a2a2a] rounded-xl p-4 text-center transition-all"
+              className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)] rounded-xl p-4 text-center transition-all"
             >
-              <div className="w-10 h-10 rounded-xl bg-[#22c55e]/15 border border-[#22c55e]/30 flex items-center justify-center mx-auto mb-2">
-                <Users className="w-5 h-5 text-[#22c55e]" />
+              <div className="w-10 h-10 rounded-xl bg-[rgba(74,222,128,0.15)] flex items-center justify-center mx-auto mb-2">
+                <Users className="w-5 h-5 text-[#4ade80]" strokeWidth={1.5} />
               </div>
-              <span className="text-sm font-medium text-[#f5f5f5]">Mes Eleves</span>
-              <p className="text-xs text-[#4a4a4a] mt-0.5">Suivi personnalise</p>
+              <span className="text-sm font-medium text-[#f7f8f8]">Mes Eleves</span>
+              <p className="text-xs text-[#5e6063] mt-0.5">Suivi personnalise</p>
             </motion.button>
           </motion.div>
 
           {/* Featured Course Banner */}
           <motion.div variants={itemVariants} className="mt-6">
-            <div className="bg-gradient-to-br from-[#5e6dd2]/20 to-[#818cf8]/10 border border-[#5e6dd2]/30 rounded-xl p-4">
+            <motion.div
+              className="bg-[rgba(94,109,210,0.08)] border border-[rgba(94,109,210,0.2)] hover:bg-[rgba(94,109,210,0.12)] rounded-xl p-4 cursor-pointer transition-all"
+              whileHover={{ y: -2 }}
+            >
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-xl bg-[#5e6dd2]/20 border border-[#5e6dd2]/40 flex items-center justify-center flex-shrink-0">
-                  <GraduationCap className="w-7 h-7 text-[#5e6dd2]" />
+                <div className="w-14 h-14 rounded-xl bg-[rgba(94,109,210,0.15)] flex items-center justify-center flex-shrink-0">
+                  <GraduationCap className="w-7 h-7 text-[#5e6dd2]" strokeWidth={1.5} />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="px-2 py-0.5 bg-[#5e6dd2]/20 text-[#818cf8] text-xs font-medium rounded-md">Nouveau</span>
+                    <span className="px-2 py-0.5 bg-[rgba(94,109,210,0.2)] text-[#8b93ff] text-xs font-medium rounded-md">Nouveau</span>
                   </div>
-                  <h4 className="font-semibold text-[#f5f5f5] mb-0.5">Masterclass Leadership</h4>
-                  <p className="text-xs text-[#6b7280]">Developpez vos competences de coach esport</p>
+                  <h4 className="font-semibold text-[#f7f8f8] mb-0.5">Masterclass Leadership</h4>
+                  <p className="text-xs text-[#8b8d90]">Developpez vos competences de coach esport</p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-[#5e6dd2]" />
+                <ChevronRight className="w-5 h-5 text-[#5e6dd2]" strokeWidth={1.5} />
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         </motion.div>
       </div>

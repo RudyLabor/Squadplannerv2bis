@@ -37,32 +37,45 @@ const itemVariants = {
 };
 
 // ============================================
-// STAT CARD - Linear style with colored icons
+// STAT CARD - Harmonized with HomeScreen style
 // ============================================
 function StatCard({
   value,
   label,
   icon: Icon,
-  iconColor = "text-[#f5a623]"
+  accentColor = "#f5a623"
 }: {
   value: string | number;
   label: string;
   icon?: any;
-  iconColor?: string;
+  accentColor?: string;
 }) {
   return (
     <motion.div
-      className="p-4 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.04)] transition-all duration-100 group cursor-default"
+      className="relative p-4 md:p-5 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)] transition-all duration-200 group cursor-default overflow-hidden"
       whileHover={{ y: -2 }}
-      transition={{ duration: 0.1 }}
+      transition={{ duration: 0.15 }}
     >
-      <div className="flex items-center gap-2 mb-1">
-        {Icon && <Icon className={`w-4 h-4 ${iconColor} opacity-60`} strokeWidth={1.5} />}
-        <p className="text-[24px] md:text-[28px] font-semibold text-[#f7f8f8] tabular-nums leading-none">
+      <div className="relative">
+        <div className="flex items-center justify-between mb-3">
+          <div
+            className="w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-150"
+            style={{ backgroundColor: `${accentColor}15` }}
+          >
+            {Icon && (
+              <Icon
+                className="w-5 h-5 transition-colors"
+                style={{ color: accentColor }}
+                strokeWidth={1.5}
+              />
+            )}
+          </div>
+        </div>
+        <p className="text-[28px] md:text-[32px] font-semibold text-[#f7f8f8] tabular-nums leading-none tracking-tight mb-0.5">
           {value}
         </p>
+        <span className="text-[12px] md:text-[13px] text-[rgba(255,255,255,0.4)] uppercase tracking-wide">{label}</span>
       </div>
-      <span className="text-[12px] md:text-[13px] text-[#5e6063] block">{label}</span>
     </motion.div>
   );
 }
@@ -428,9 +441,9 @@ export function VoteSessionScreen({ onNavigate, showToast }: VoteSessionScreenPr
         {/* Stats */}
         <motion.div variants={itemVariants} className="mb-6">
           <div className="grid grid-cols-3 gap-3">
-            <StatCard value={session.slots.length} label="Créneaux" icon={Calendar} iconColor="text-[#f5a623]" />
-            <StatCard value={hasVotedCount} label="Participants" icon={Users} iconColor="text-[#60a5fa]" />
-            <StatCard value={yesVotes} label="Présents" icon={CheckCircle} iconColor="text-[#4ade80]" />
+            <StatCard value={session.slots.length} label="Créneaux" icon={Calendar} accentColor="#f5a623" />
+            <StatCard value={hasVotedCount} label="Participants" icon={Users} accentColor="#60a5fa" />
+            <StatCard value={yesVotes} label="Présents" icon={CheckCircle} accentColor="#4ade80" />
           </div>
           <OrangeDivider className="mt-6" />
         </motion.div>

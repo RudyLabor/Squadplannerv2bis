@@ -42,24 +42,29 @@ interface StatCardProps {
   icon: React.ElementType;
   value: string | number;
   label: string;
-  iconColor: string;
+  accentColor: string;
 }
 
-function StatCard({ icon: Icon, value, label, iconColor }: StatCardProps) {
+function StatCard({ icon: Icon, value, label, accentColor }: StatCardProps) {
   return (
     <motion.div
       variants={itemVariants}
-      className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4 hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)] transition-all"
+      className="relative p-4 md:p-5 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)] transition-all duration-200 group cursor-default overflow-hidden"
       whileHover={{ y: -2 }}
+      transition={{ duration: 0.15 }}
     >
-      <div
-        className="w-10 h-10 rounded-lg flex items-center justify-center mb-3"
-        style={{ backgroundColor: `${iconColor}15` }}
-      >
-        <Icon className="w-5 h-5" style={{ color: iconColor }} strokeWidth={1.5} />
+      <div className="relative">
+        <div className="flex items-center justify-between mb-3">
+          <div
+            className="w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-150"
+            style={{ backgroundColor: `${accentColor}15` }}
+          >
+            <Icon className="w-5 h-5 transition-colors" style={{ color: accentColor }} strokeWidth={1.5} />
+          </div>
+        </div>
+        <p className="text-[28px] md:text-[32px] font-semibold text-[#f7f8f8] tabular-nums leading-none tracking-tight mb-0.5">{value}</p>
+        <span className="text-[12px] md:text-[13px] text-[rgba(255,255,255,0.4)] uppercase tracking-wide">{label}</span>
       </div>
-      <div className="text-[20px] font-semibold text-[#f7f8f8] mb-0.5">{value}</div>
-      <div className="text-[12px] text-[#5e6063]">{label}</div>
     </motion.div>
   );
 }

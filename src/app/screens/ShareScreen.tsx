@@ -117,7 +117,7 @@ export function ShareScreen({ onNavigate, showToast }: ShareScreenProps) {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <ArrowLeft className="w-5 h-5 text-[#8b8d90]" />
+              <ArrowLeft className="w-5 h-5 text-[#8b8d90]" strokeWidth={1.5} />
             </motion.button>
             <div className="flex-1">
               <h1 className="text-xl font-semibold text-[#f7f8f8]">
@@ -128,7 +128,7 @@ export function ShareScreen({ onNavigate, showToast }: ShareScreenProps) {
               </p>
             </div>
             <div className="w-10 h-10 rounded-lg bg-[#5e6dd2] flex items-center justify-center">
-              <Share2 className="w-5 h-5 text-white" />
+              <Share2 className="w-5 h-5 text-white" strokeWidth={1.5} />
             </div>
           </motion.div>
 

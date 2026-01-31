@@ -158,7 +158,7 @@ function AppContent() {
   // Derived states
   const activeTab = location.pathname.split('/')[1] || 'home';
   const isAuthPage = ['/login', '/signup', '/'].includes(location.pathname);
-  const showMainNav = ['/home', '/squads', '/sessions', '/profile'].some(path => location.pathname.startsWith(path));
+  const showMainNav = ['/home', '/squads', '/sessions', '/profile', '/leaderboard'].some(path => location.pathname.startsWith(path));
 
   // Shim to keep existing screens working
   const handleNavigate = (screen: string, data?: any) => {

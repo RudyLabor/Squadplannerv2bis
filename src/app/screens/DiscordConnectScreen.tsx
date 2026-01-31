@@ -158,17 +158,17 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
           <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
             <motion.button
               onClick={() => onNavigate('integrations')}
-              className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all"
+              className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center hover:bg-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.1)] transition-all"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <ArrowLeft className="w-5 h-5 text-gray-400" strokeWidth={2} />
+              <ArrowLeft className="w-5 h-5 text-[#8b8d90]" strokeWidth={2} />
             </motion.button>
             <div className="flex-1">
-              <h1 className="text-xl font-semibold text-white">
+              <h1 className="text-xl font-semibold text-[#f7f8f8]">
                 Discord
               </h1>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-[#5e6063]">
                 Connectez votre compte Discord
               </p>
             </div>
@@ -195,11 +195,11 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
                       <img
                         src={discordUser.avatar_url}
                         alt="Discord Avatar"
-                        className="w-14 h-14 rounded-xl object-cover border border-white/10"
+                        className="w-14 h-14 rounded-xl object-cover border border-[rgba(255,255,255,0.06)]"
                       />
                     ) : (
-                      <div className="w-14 h-14 rounded-xl bg-[#5865F2] flex items-center justify-center border border-white/10">
-                        <User className="w-7 h-7 text-white" />
+                      <div className="w-14 h-14 rounded-xl bg-[#5865F2] flex items-center justify-center border border-[rgba(255,255,255,0.06)]">
+                        <User className="w-7 h-7 text-[#f7f8f8]" />
                       </div>
                     )}
                     <motion.div
@@ -212,8 +212,8 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
                     </motion.div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-emerald-400">Connecté</p>
-                    <p className="text-sm text-gray-400 truncate">{discordUser.username}</p>
+                    <p className="font-semibold text-emerald-400">Connecte</p>
+                    <p className="text-sm text-[#8b8d90] truncate">{discordUser.username}</p>
                   </div>
                   <motion.button
                     onClick={handleDisconnect}
@@ -247,10 +247,10 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
                 </svg>
               </motion.div>
 
-              <h2 className="text-2xl font-bold text-white mb-2">
+              <h2 className="text-2xl font-bold text-[#f7f8f8] mb-2">
                 {isConnected ? 'Discord Connecté' : 'Connecter Discord'}
               </h2>
-              <p className="text-gray-400 mb-6 max-w-sm mx-auto text-sm leading-relaxed">
+              <p className="text-[#8b8d90] mb-6 max-w-sm mx-auto text-sm leading-relaxed">
                 {isConnected
                   ? 'Votre compte Discord est lié. Vous pouvez maintenant utiliser les fonctionnalités avancées.'
                   : 'Connectez votre compte Discord pour synchroniser vos sessions et recevoir des notifications.'}
@@ -260,7 +260,7 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
                 <motion.button
                   onClick={handleConnect}
                   disabled={connecting || loading}
-                  className="w-full h-12 bg-[#5865F2] hover:bg-[#4752C4] text-white font-medium text-sm rounded-xl disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
+                  className="w-full h-12 bg-[#5865F2] hover:bg-[#4752C4] text-[#f7f8f8] font-medium text-sm rounded-xl disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
                 >
@@ -284,9 +284,9 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
 
           {/* Features */}
           <motion.div variants={itemVariants} className="mb-6">
-            <h3 className="text-sm font-medium text-gray-400 mb-4 flex items-center gap-2 uppercase tracking-wider">
+            <h3 className="text-sm font-medium text-[#5e6063] mb-4 flex items-center gap-2 uppercase tracking-wider">
               <Sparkles className="w-4 h-4 text-[#5865F2]" />
-              Fonctionnalités
+              Fonctionnalites
             </h3>
             <div className="space-y-3">
               {features.map((feature, index) => {
@@ -299,7 +299,7 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
                     className={`p-4 rounded-xl border transition-all ${
                       isConnected
                         ? 'bg-emerald-500/5 border-emerald-500/20'
-                        : 'bg-white/[0.02] border-white/[0.06] hover:bg-white/[0.04] hover:border-white/10'
+                        : 'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.1)]'
                     }`}
                   >
                     <div className="flex gap-4">
@@ -311,7 +311,7 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
                         <Icon className="w-5 h-5" strokeWidth={2} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-white flex items-center gap-2 text-sm">
+                        <h4 className="font-medium text-[#f7f8f8] flex items-center gap-2 text-sm">
                           {feature.title}
                           {isConnected && (
                             <motion.div
@@ -323,7 +323,7 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
                             </motion.div>
                           )}
                         </h4>
-                        <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                        <p className="text-xs text-[#5e6063] mt-1 leading-relaxed">
                           {feature.description}
                         </p>
                       </div>
@@ -343,12 +343,12 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
               >
-                <h3 className="text-sm font-medium text-gray-400 mb-4 flex items-center gap-2 uppercase tracking-wider">
+                <h3 className="text-sm font-medium text-[#5e6063] mb-4 flex items-center gap-2 uppercase tracking-wider">
                   <Gamepad2 className="w-4 h-4 text-[#5865F2]" />
                   Bot Discord (Optionnel)
                 </h3>
                 <motion.div
-                  className="rounded-xl p-5 border border-white/[0.06] bg-white/[0.02]"
+                  className="rounded-xl p-5 border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)]"
                   whileHover={{ borderColor: 'rgba(255,255,255,0.1)' }}
                 >
                   <div className="flex items-center gap-4 mb-4">
