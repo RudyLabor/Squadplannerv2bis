@@ -1,4 +1,4 @@
-import { ArrowLeft, Sparkles, Calendar, TrendingUp, CheckCircle2, Zap, Brain, Target, Star } from 'lucide-react';
+import { ArrowLeft, Sparkles, Calendar, TrendingUp, CheckCircle2, Zap, Brain, Target, Star, Clock, Users } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { sessionsAPI } from '@/utils/api';
@@ -29,90 +29,92 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
+    transition: { staggerChildren: 0.08, delayChildren: 0.1 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
+    transition: { type: "spring", stiffness: 400, damping: 28 }
   }
 };
 
-function PremiumSuggestionCard({ suggestion, index, onSelect }: { suggestion: Suggestion; index: number; onSelect: () => void }) {
-  const getRankGradient = (rank: number) => {
-    if (rank === 0) return 'from-amber-500 to-yellow-500';
-    if (rank === 1) return 'from-gray-400 to-gray-500';
-    return 'from-orange-400 to-amber-500';
+function SuggestionCard({ suggestion, index, onSelect }: { suggestion: Suggestion; index: number; onSelect: () => void }) {
+  const getRankBadge = (rank: number) => {
+    if (rank === 0) return { bg: 'bg-amber-500/20', border: 'border-amber-500/30', text: 'text-amber-400', label: '#1' };
+    if (rank === 1) return { bg: 'bg-[rgba(255,255,255,0.05)]', border: 'border-[rgba(255,255,255,0.1)]', text: 'text-[#8b8d90]', label: '#2' };
+    return { bg: 'bg-orange-500/20', border: 'border-orange-500/30', text: 'text-orange-400', label: '#3' };
   };
 
-  const getRankIcon = (rank: number) => {
-    if (rank === 0) return '🥇';
-    if (rank === 1) return '🥈';
-    return '🥉';
-  };
+  const rank = getRankBadge(index);
 
   return (
     <motion.div
       variants={itemVariants}
-      custom={index}
-      className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-white/50 shadow-lg hover:shadow-xl transition-all duration-300"
-      whileHover={{ scale: 1.01, y: -2 }}
+      className="bg-[rgba(255,255,255,0.02)] backdrop-blur-sm rounded-xl p-4 border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.1)] transition-all duration-200"
+      whileHover={{ scale: 1.01 }}
     >
-      {/* Header */}
+      {/* Header with rank */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <motion.div
-            className={`w-12 h-12 rounded-xl bg-gradient-to-br ${getRankGradient(index)} flex items-center justify-center text-xl shadow-lg`}
-            whileHover={{ scale: 1.1, rotate: 5 }}
-          >
-            {getRankIcon(index)}
-          </motion.div>
+          <div className={`w-10 h-10 rounded-lg ${rank.bg} border ${rank.border} flex items-center justify-center`}>
+            <span className={`text-sm font-bold ${rank.text}`}>{rank.label}</span>
+          </div>
           <div>
-            <h3 className="text-lg font-bold text-gray-800">
+            <h3 className="text-base font-semibold text-[#f7f8f8]">
               {suggestion.title}
             </h3>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-[#5e6063] mt-0.5">
               {suggestion.description}
             </p>
           </div>
         </div>
+        {index === 0 && (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="flex items-center gap-1 px-2 py-1 rounded-md bg-amber-500/10 border border-amber-500/20"
+          >
+            <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+            <span className="text-[10px] font-medium text-amber-400">Top Pick</span>
+          </motion.div>
+        )}
       </div>
 
-      {/* Stats */}
+      {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-3 border border-emerald-100">
-          <div className="flex items-center gap-2 mb-1">
-            <TrendingUp className="w-4 h-4 text-emerald-500" strokeWidth={2} />
-            <span className="text-xs font-semibold text-emerald-700">Confiance</span>
+        <div className="bg-[rgba(255,255,255,0.03)] rounded-lg p-3 border border-[rgba(255,255,255,0.04)]">
+          <div className="flex items-center gap-2 mb-1.5">
+            <TrendingUp className="w-3.5 h-3.5 text-emerald-400" strokeWidth={2} />
+            <span className="text-[10px] font-medium text-[#8b8d90] uppercase tracking-wide">Confiance</span>
           </div>
-          <div className="text-2xl font-bold text-emerald-600">
+          <div className="text-xl font-bold text-emerald-400">
             {suggestion.confidence}%
           </div>
         </div>
-        <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-3 border border-indigo-100">
-          <div className="flex items-center gap-2 mb-1">
-            <CheckCircle2 className="w-4 h-4 text-indigo-500" strokeWidth={2} />
-            <span className="text-xs font-semibold text-indigo-700">Sessions</span>
+        <div className="bg-[rgba(255,255,255,0.03)] rounded-lg p-3 border border-[rgba(255,255,255,0.04)]">
+          <div className="flex items-center gap-2 mb-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#5e6dd2]" strokeWidth={2} />
+            <span className="text-[10px] font-medium text-[#8b8d90] uppercase tracking-wide">Sessions</span>
           </div>
-          <div className="text-2xl font-bold text-indigo-600">
+          <div className="text-xl font-bold text-[#5e6dd2]">
             {suggestion.sessionsCount}
           </div>
         </div>
       </div>
 
-      {/* CTA */}
+      {/* CTA Button */}
       <motion.button
         onClick={onSelect}
-        className="w-full h-11 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold text-sm shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2"
-        whileHover={{ scale: 1.02, y: -2 }}
+        className="w-full h-10 rounded-lg bg-[#5e6dd2] hover:bg-[#6a79db] text-white font-medium text-sm flex items-center justify-center gap-2 transition-colors"
+        whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.98 }}
       >
         <Calendar className="w-4 h-4" strokeWidth={2} />
-        Créer cette session
+        Creer cette session
       </motion.button>
     </motion.div>
   );
@@ -127,16 +129,19 @@ export function SmartSuggestionsScreen({ onNavigate, showToast, data, useMockDat
   }, [data?.squadId]);
 
   const loadSuggestions = async () => {
-    if (!data?.squadId && !useMockData) return;
+    if (!data?.squadId && !useMockData) {
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     try {
       if (useMockData) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 1200));
         setSuggestions([
-          { id: '1', day: 2, dayName: 'Mardi', hour: 21, time: '21:00', score: 98, confidence: 95, sessionsCount: 12, title: 'Mardi Tryhard', description: 'Créneau historique le plus performant' },
-          { id: '2', day: 4, dayName: 'Jeudi', hour: 20, time: '20:00', score: 85, confidence: 82, sessionsCount: 8, title: 'Jeudi Soirée', description: 'Bon taux de réponse avant le week-end' },
-          { id: '3', day: 0, dayName: 'Dimanche', hour: 14, time: '14:00', score: 75, confidence: 70, sessionsCount: 5, title: 'Dimanche Après-midi', description: 'Idéal pour les sessions longues' }
+          { id: '1', day: 2, dayName: 'Mardi', hour: 21, time: '21:00', score: 98, confidence: 95, sessionsCount: 12, title: 'Mardi Tryhard', description: 'Creneau historique le plus performant' },
+          { id: '2', day: 4, dayName: 'Jeudi', hour: 20, time: '20:00', score: 85, confidence: 82, sessionsCount: 8, title: 'Jeudi Soiree', description: 'Bon taux de reponse avant le week-end' },
+          { id: '3', day: 0, dayName: 'Dimanche', hour: 14, time: '14:00', score: 75, confidence: 70, sessionsCount: 5, title: 'Dimanche Apres-midi', description: 'Ideal pour les sessions longues' }
         ]);
       } else {
         const { sessions } = await sessionsAPI.getSessions(data?.squadId);
@@ -182,7 +187,7 @@ export function SmartSuggestionsScreen({ onNavigate, showToast, data, useMockDat
               confidence,
               sessionsCount: stat.count,
               title: `${dayNames[stat.day]} ${stat.hour}h`,
-              description: `${stat.confirmed} sessions réussies sur ${stat.count} essais`
+              description: `${stat.confirmed} sessions reussies sur ${stat.count} essais`
             };
           })
           .filter(s => s.sessionsCount >= 1)
@@ -208,43 +213,36 @@ export function SmartSuggestionsScreen({ onNavigate, showToast, data, useMockDat
   };
 
   return (
-    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-gradient-to-br from-cyan-400/15 to-blue-400/15 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
+    <div className="min-h-screen pb-24 md:pb-8 pt-safe bg-[#08090a]">
+      <div className="px-4 py-6 max-w-2xl mx-auto">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           {/* Header */}
-          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
+          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
             <motion.button
               onClick={() => onNavigate('home')}
-              className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+              className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center hover:bg-[rgba(255,255,255,0.08)] transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
+              <ArrowLeft className="w-5 h-5 text-[#8b8d90]" strokeWidth={2} />
             </motion.button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-xl font-semibold text-[#f7f8f8]">
                 Suggestions IA
               </h1>
-              <p className="text-sm text-gray-500 font-medium mt-0.5">
-                Basées sur l'historique de votre squad
+              <p className="text-sm text-[#5e6063] mt-0.5">
+                Basees sur l'historique de votre squad
               </p>
             </div>
             <motion.div
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg"
-              whileHover={{ scale: 1.05, rotate: 5 }}
+              className="w-10 h-10 rounded-lg bg-[#5e6dd2]/20 border border-[#5e6dd2]/30 flex items-center justify-center"
+              whileHover={{ scale: 1.05 }}
             >
-              <Brain className="w-6 h-6 text-white" strokeWidth={2} />
+              <Brain className="w-5 h-5 text-[#5e6dd2]" strokeWidth={2} />
             </motion.div>
           </motion.div>
 
@@ -256,21 +254,21 @@ export function SmartSuggestionsScreen({ onNavigate, showToast, data, useMockDat
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="text-center py-16"
+                className="text-center py-20"
               >
-                <div className="relative w-20 h-20 mx-auto mb-6">
+                <div className="relative w-16 h-16 mx-auto mb-6">
                   <motion.div
-                    className="absolute inset-0 rounded-full border-4 border-indigo-200"
-                    style={{ borderTopColor: 'transparent' }}
+                    className="absolute inset-0 rounded-full border-2 border-[#5e6dd2]/30"
+                    style={{ borderTopColor: '#5e6dd2' }}
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                   />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Brain className="w-8 h-8 text-indigo-500" />
+                    <Brain className="w-6 h-6 text-[#5e6dd2]" />
                   </div>
                 </div>
-                <p className="text-gray-600 font-semibold">Analyse en cours...</p>
-                <p className="text-gray-400 text-sm mt-1">L'IA analyse vos sessions passées</p>
+                <p className="text-[#f7f8f8] font-medium">Analyse IA en cours...</p>
+                <p className="text-[#5e6063] text-sm mt-1">L'IA analyse vos sessions passees</p>
               </motion.div>
             ) : suggestions.length === 0 ? (
               <motion.div
@@ -278,16 +276,16 @@ export function SmartSuggestionsScreen({ onNavigate, showToast, data, useMockDat
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="text-center py-16"
+                className="text-center py-20"
               >
-                <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-indigo-500/30">
-                  <Sparkles className="w-12 h-12 text-white" strokeWidth={1.5} />
+                <div className="w-16 h-16 rounded-2xl bg-[#5e6dd2]/20 border border-[#5e6dd2]/30 flex items-center justify-center mx-auto mb-6">
+                  <Sparkles className="w-8 h-8 text-[#5e6dd2]" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">
+                <h3 className="text-lg font-semibold text-[#f7f8f8] mb-2">
                   Pas encore de suggestions
                 </h3>
-                <p className="text-gray-500 text-sm max-w-xs mx-auto">
-                  Jouez plus de sessions pour débloquer les suggestions intelligentes
+                <p className="text-[#5e6063] text-sm max-w-xs mx-auto">
+                  Jouez plus de sessions pour debloquer les suggestions intelligentes
                 </p>
               </motion.div>
             ) : (
@@ -299,21 +297,18 @@ export function SmartSuggestionsScreen({ onNavigate, showToast, data, useMockDat
               >
                 {/* Info Banner */}
                 <motion.div variants={itemVariants} className="mb-6">
-                  <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-white/50 shadow-lg">
-                    <div className="flex items-start gap-4">
-                      <motion.div
-                        className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center flex-shrink-0"
-                        whileHover={{ scale: 1.1, rotate: 5 }}
-                      >
-                        <Target className="w-6 h-6 text-white" strokeWidth={2} />
-                      </motion.div>
+                  <div className="bg-[rgba(255,255,255,0.02)] rounded-xl p-4 border border-[rgba(255,255,255,0.06)]">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center flex-shrink-0">
+                        <Target className="w-5 h-5 text-amber-400" strokeWidth={2} />
+                      </div>
                       <div>
-                        <h3 className="text-sm font-bold text-gray-800 mb-1 flex items-center gap-2">
-                          Top 3 Créneaux Recommandés
-                          <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                        <h3 className="text-sm font-medium text-[#f7f8f8] mb-0.5 flex items-center gap-2">
+                          Top 3 Creneaux Recommandes
+                          <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
                         </h3>
-                        <p className="text-xs text-gray-500 leading-relaxed">
-                          Ces créneaux ont historiquement le meilleur taux de participation dans votre squad
+                        <p className="text-xs text-[#5e6063] leading-relaxed">
+                          Ces creneaux ont historiquement le meilleur taux de participation dans votre squad
                         </p>
                       </div>
                     </div>
@@ -323,7 +318,7 @@ export function SmartSuggestionsScreen({ onNavigate, showToast, data, useMockDat
                 {/* Suggestions List */}
                 <div className="space-y-4">
                   {suggestions.map((suggestion, index) => (
-                    <PremiumSuggestionCard
+                    <SuggestionCard
                       key={suggestion.id}
                       suggestion={suggestion}
                       index={index}
@@ -337,17 +332,17 @@ export function SmartSuggestionsScreen({ onNavigate, showToast, data, useMockDat
                   variants={itemVariants}
                   className="mt-6"
                 >
-                  <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-2xl p-4 border border-indigo-200/50">
+                  <div className="bg-[#5e6dd2]/10 rounded-xl p-4 border border-[#5e6dd2]/20">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
-                        <Zap className="w-5 h-5 text-white" strokeWidth={2} />
+                      <div className="w-9 h-9 rounded-lg bg-[#5e6dd2]/20 border border-[#5e6dd2]/30 flex items-center justify-center">
+                        <Zap className="w-4 h-4 text-[#5e6dd2]" strokeWidth={2} />
                       </div>
                       <div className="flex-1">
-                        <p className="text-xs font-semibold text-indigo-800">
-                          Propulsé par l'Intelligence Artificielle
+                        <p className="text-xs font-medium text-[#f7f8f8]">
+                          Propulse par l'Intelligence Artificielle
                         </p>
-                        <p className="text-[10px] text-indigo-600 mt-0.5">
-                          Analyse comportementale et prédiction de disponibilité
+                        <p className="text-[10px] text-[#5e6063] mt-0.5">
+                          Analyse comportementale et prediction de disponibilite
                         </p>
                       </div>
                     </div>

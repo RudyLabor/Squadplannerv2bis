@@ -1,4 +1,4 @@
-import { ArrowLeft, Calendar, TrendingUp, Sparkles, MousePointer, Zap, Users, Heart } from 'lucide-react';
+import { ArrowLeft, Calendar, TrendingUp, Sparkles, MousePointer, Zap, Users, Heart, Clock, BarChart3 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { sessionsAPI } from '@/utils/api';
@@ -44,7 +44,11 @@ export function AvailabilityHeatmapScreen({ onNavigate, showToast, data, useMock
   }, [data?.squadId]);
 
   const loadHeatmap = async () => {
-    if (!data?.squadId && !useMockData) return;
+    if (!data?.squadId && !useMockData) {
+      setLoading(false);
+      setHeatmap(Array(7).fill(null).map(() => Array(24).fill(0)));
+      return;
+    }
 
     setLoading(true);
     try {
@@ -129,11 +133,11 @@ export function AvailabilityHeatmapScreen({ onNavigate, showToast, data, useMock
   };
 
   const getColor = (value: number) => {
-    if (value === 0) return 'bg-gray-100';
-    if (value < 25) return 'bg-red-200';
-    if (value < 50) return 'bg-amber-300';
-    if (value < 75) return 'bg-emerald-300';
-    return 'bg-emerald-500';
+    if (value === 0) return 'bg-[rgba(255,255,255,0.02)]';
+    if (value < 25) return 'bg-red-500/20';
+    if (value < 50) return 'bg-amber-500/30';
+    if (value < 75) return 'bg-emerald-500/40';
+    return 'bg-emerald-500/70';
   };
 
   const handleCellClick = (day: number, hour: number, value: number) => {
@@ -147,43 +151,39 @@ export function AvailabilityHeatmapScreen({ onNavigate, showToast, data, useMock
   };
 
   return (
-    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 right-0 w-64 h-64 bg-gradient-to-br from-emerald-400/15 to-teal-400/15 rounded-full blur-3xl" />
-      </div>
+    <div className="min-h-screen pb-24 md:pb-8 pt-safe bg-[#08090a] relative overflow-hidden">
+      {/* Subtle gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#60a5fa]/5 via-transparent to-transparent pointer-events-none" />
 
-      <div className="relative z-10 px-4 py-8 max-w-4xl mx-auto">
+      <div className="relative z-10 px-4 py-6 max-w-4xl mx-auto">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           {/* Header */}
-          <motion.div variants={itemVariants} className="flex items-center gap-3 mb-8">
+          <motion.div variants={itemVariants} className="flex items-center gap-3 mb-6">
             <motion.button
               onClick={() => onNavigate('home')}
-              className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+              className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center hover:bg-[rgba(255,255,255,0.05)] transition-all"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
+              <ArrowLeft className="w-5 h-5 text-[#8b8d90]" strokeWidth={1.5} />
             </motion.button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-xl font-semibold text-[#f7f8f8]">
                 Heatmap Disponibilité
               </h1>
-              <p className="text-sm text-gray-500 font-medium">
+              <p className="text-sm text-[#5e6063]">
                 {sessionsCount} session{sessionsCount > 1 ? 's' : ''} analysée{sessionsCount > 1 ? 's' : ''}
               </p>
             </div>
             <motion.div
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30"
-              whileHover={{ scale: 1.05, rotate: 5 }}
+              className="w-10 h-10 rounded-xl bg-[#60a5fa]/10 flex items-center justify-center"
+              whileHover={{ scale: 1.05 }}
             >
-              <Calendar className="w-6 h-6 text-white" strokeWidth={2} />
+              <Clock className="w-5 h-5 text-[#60a5fa]" strokeWidth={1.5} />
             </motion.div>
           </motion.div>
 
@@ -191,72 +191,71 @@ export function AvailabilityHeatmapScreen({ onNavigate, showToast, data, useMock
             <motion.div variants={itemVariants} className="text-center py-20">
               {/* Loader animation - keep infinite */}
               <motion.div
-                className="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-500 to-purple-600 mx-auto mb-4 flex items-center justify-center shadow-xl shadow-indigo-500/30"
+                className="w-16 h-16 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] mx-auto mb-4 flex items-center justify-center"
                 animate={{ rotate: 360 }}
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
               >
-                <TrendingUp className="w-10 h-10 text-white" strokeWidth={2} />
+                <TrendingUp className="w-8 h-8 text-[#60a5fa]" strokeWidth={1.5} />
               </motion.div>
-              <p className="text-gray-500 font-medium">Analyse IA en cours...</p>
+              <p className="text-[#8b8d90] text-sm">Analyse IA en cours...</p>
             </motion.div>
           ) : (
             <>
               {/* Info Banner */}
               <motion.div
                 variants={itemVariants}
-                className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-5 mb-6 shadow-xl shadow-indigo-500/30 relative overflow-hidden"
+                className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4 mb-5"
               >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-                <div className="relative z-10 flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-                    <TrendingUp className="w-6 h-6 text-white" strokeWidth={2} />
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-[#60a5fa]/10 flex items-center justify-center flex-shrink-0">
+                    <BarChart3 className="w-5 h-5 text-[#60a5fa]" strokeWidth={1.5} />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-white mb-1">
-                      Visualisation des Créneaux Efficaces
+                    <h3 className="text-sm font-medium text-[#f7f8f8] mb-1">
+                      Visualisation des Créneaux
                     </h3>
-                    <p className="text-sm text-white/80 font-medium">
-                      Les cases vertes = créneaux avec forte participation. Cliquez pour créer une session.
+                    <p className="text-xs text-[#5e6063] leading-relaxed">
+                      Les cases vertes indiquent une forte participation. Cliquez pour créer une session.
                     </p>
                   </div>
                 </div>
               </motion.div>
 
               {/* Legend */}
-              <motion.div variants={itemVariants} className="flex items-center justify-center gap-4 mb-6 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-lg bg-gray-100 border border-gray-200"></div>
-                  <span className="text-xs text-gray-500 font-medium">Aucune</span>
+              <motion.div variants={itemVariants} className="flex items-center justify-center gap-3 mb-5 flex-wrap">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-4 h-4 rounded bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]"></div>
+                  <span className="text-[10px] text-[#5e6063]">Aucune</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-lg bg-red-200"></div>
-                  <span className="text-xs text-gray-500 font-medium">Faible</span>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-4 h-4 rounded bg-red-500/20"></div>
+                  <span className="text-[10px] text-[#5e6063]">Faible</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-lg bg-amber-300"></div>
-                  <span className="text-xs text-gray-500 font-medium">Moyen</span>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-4 h-4 rounded bg-amber-500/30"></div>
+                  <span className="text-[10px] text-[#5e6063]">Moyen</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-lg bg-emerald-300"></div>
-                  <span className="text-xs text-gray-500 font-medium">Bon</span>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-4 h-4 rounded bg-emerald-500/40"></div>
+                  <span className="text-[10px] text-[#5e6063]">Bon</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-lg bg-emerald-500"></div>
-                  <span className="text-xs text-gray-500 font-medium">Excellent</span>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-4 h-4 rounded bg-emerald-500/70"></div>
+                  <span className="text-[10px] text-[#5e6063]">Excellent</span>
                 </div>
               </motion.div>
 
               {/* Heatmap Grid */}
               <motion.div
                 variants={itemVariants}
-                className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/50 shadow-lg overflow-x-auto"
+                className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4 overflow-x-auto"
               >
                 <div className="min-w-[600px]">
                   {/* Days Header */}
                   <div className="grid grid-cols-[auto_repeat(7,1fr)] gap-1 mb-2">
-                    <div className="w-12"></div>
+                    <div className="w-10"></div>
                     {days.map((day, index) => (
-                      <div key={index} className="text-center text-xs font-bold text-gray-700 py-2">
+                      <div key={index} className="text-center text-[10px] font-medium text-[#8b8d90] py-1.5">
                         {day}
                       </div>
                     ))}
@@ -264,8 +263,8 @@ export function AvailabilityHeatmapScreen({ onNavigate, showToast, data, useMock
 
                   {/* Heatmap Rows */}
                   {hours.map((hour, hourIndex) => (
-                    <div key={hourIndex} className="grid grid-cols-[auto_repeat(7,1fr)] gap-1 mb-1">
-                      <div className="w-12 flex items-center justify-end pr-2 text-xs text-gray-400 font-medium">
+                    <div key={hourIndex} className="grid grid-cols-[auto_repeat(7,1fr)] gap-1 mb-0.5">
+                      <div className="w-10 flex items-center justify-end pr-2 text-[10px] text-[#5e6063]">
                         {hour}
                       </div>
 
@@ -277,9 +276,9 @@ export function AvailabilityHeatmapScreen({ onNavigate, showToast, data, useMock
                             onClick={() => handleCellClick(dayIndex, hourIndex, value)}
                             whileHover={{ scale: value > 0 ? 1.15 : 1 }}
                             whileTap={{ scale: value > 0 ? 0.95 : 1 }}
-                            className={`aspect-square rounded-lg ${getColor(value)} ${
-                              value > 0 ? 'cursor-pointer hover:ring-2 hover:ring-indigo-500 hover:ring-offset-1' : 'cursor-default'
-                            } transition-all duration-150 shadow-sm`}
+                            className={`aspect-square rounded ${getColor(value)} ${
+                              value > 0 ? 'cursor-pointer hover:ring-1 hover:ring-[#60a5fa]/50' : 'cursor-default'
+                            } transition-all duration-150 border border-[rgba(255,255,255,0.03)]`}
                             title={value > 0 ? `${value}% d'efficacité` : 'Aucune donnée'}
                           />
                         );
@@ -293,47 +292,44 @@ export function AvailabilityHeatmapScreen({ onNavigate, showToast, data, useMock
               {topSlots.length > 0 && (
                 <motion.div
                   variants={itemVariants}
-                  className="mt-6 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl p-5 shadow-xl shadow-purple-500/30 relative overflow-hidden"
+                  className="mt-5 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4"
                 >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-                  <div className="relative z-10">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                        <Zap className="w-5 h-5 text-white" strokeWidth={2} />
-                      </div>
-                      <div>
-                        <h3 className="text-base font-bold text-white">Suggestions IA</h3>
-                        <p className="text-xs text-white/70">Top 3 créneaux optimaux</p>
-                      </div>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-lg bg-[#a78bfa]/10 flex items-center justify-center">
+                      <Zap className="w-5 h-5 text-[#a78bfa]" strokeWidth={1.5} />
                     </div>
-                    <div className="space-y-2">
-                      {topSlots.map((slot, index) => (
-                        <motion.button
-                          key={index}
-                          onClick={() => handleCellClick(slot.day, slot.hour, slot.score)}
-                          className="w-full bg-white/10 backdrop-blur-sm rounded-xl p-3 flex items-center justify-between hover:bg-white/20 transition-all"
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${
-                              index === 0 ? 'bg-yellow-400 text-yellow-900' :
-                              index === 1 ? 'bg-gray-300 text-gray-700' :
-                              'bg-orange-400 text-orange-900'
-                            }`}>
-                              #{index + 1}
-                            </div>
-                            <div className="text-left">
-                              <p className="text-white font-semibold text-sm">
-                                {days[slot.day]} à {String(slot.hour).padStart(2, '0')}h00
-                              </p>
-                              <p className="text-white/60 text-xs">{Math.round(slot.score)}% d'efficacité</p>
-                            </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-[#f7f8f8]">Suggestions IA</h3>
+                      <p className="text-xs text-[#5e6063]">Top 3 créneaux optimaux</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    {topSlots.map((slot, index) => (
+                      <motion.button
+                        key={index}
+                        onClick={() => handleCellClick(slot.day, slot.hour, slot.score)}
+                        className="w-full bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-lg p-3 flex items-center justify-between hover:bg-[rgba(255,255,255,0.04)] transition-all"
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-semibold ${
+                            index === 0 ? 'bg-[#fbbf24]/20 text-[#fbbf24]' :
+                            index === 1 ? 'bg-[#9ca3af]/20 text-[#9ca3af]' :
+                            'bg-[#f97316]/20 text-[#f97316]'
+                          }`}>
+                            #{index + 1}
                           </div>
-                          <div className="text-white/80 text-xs">Créer →</div>
-                        </motion.button>
-                      ))}
-                    </div>
+                          <div className="text-left">
+                            <p className="text-[#f7f8f8] font-medium text-sm">
+                              {days[slot.day]} à {String(slot.hour).padStart(2, '0')}h00
+                            </p>
+                            <p className="text-[#5e6063] text-xs">{Math.round(slot.score)}% d'efficacité</p>
+                          </div>
+                        </div>
+                        <span className="text-[#8b8d90] text-xs">Créer →</span>
+                      </motion.button>
+                    ))}
                   </div>
                 </motion.div>
               )}
@@ -341,39 +337,39 @@ export function AvailabilityHeatmapScreen({ onNavigate, showToast, data, useMock
               {/* Cohesion Score */}
               <motion.div
                 variants={itemVariants}
-                className="mt-6 bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-white/50 shadow-lg"
+                className="mt-5 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center shadow-lg shadow-pink-500/30">
-                      <Heart className="w-6 h-6 text-white" strokeWidth={2} />
+                    <div className="w-10 h-10 rounded-lg bg-[#f472b6]/10 flex items-center justify-center">
+                      <Heart className="w-5 h-5 text-[#f472b6]" strokeWidth={1.5} />
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-gray-800">Score de Cohésion</h3>
-                      <p className="text-xs text-gray-500">Santé de l'équipe</p>
+                      <h3 className="text-sm font-medium text-[#f7f8f8]">Score de Cohésion</h3>
+                      <p className="text-xs text-[#5e6063]">Santé de l'équipe</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className={`text-3xl font-black ${
-                      cohesionScore >= 70 ? 'text-emerald-500' :
-                      cohesionScore >= 50 ? 'text-amber-500' :
-                      'text-red-500'
+                    <div className={`text-2xl font-bold ${
+                      cohesionScore >= 70 ? 'text-[#34d399]' :
+                      cohesionScore >= 50 ? 'text-[#fbbf24]' :
+                      'text-[#f87171]'
                     }`}>
                       {cohesionScore}%
                     </div>
-                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                    <div className="flex items-center gap-1 text-xs text-[#5e6063]">
                       <Users className="w-3 h-3" />
                       <span>Équipe active</span>
                     </div>
                   </div>
                 </div>
                 <div className="mt-4">
-                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-[rgba(255,255,255,0.05)] rounded-full overflow-hidden">
                     <motion.div
                       className={`h-full rounded-full ${
-                        cohesionScore >= 70 ? 'bg-gradient-to-r from-emerald-400 to-teal-500' :
-                        cohesionScore >= 50 ? 'bg-gradient-to-r from-amber-400 to-orange-500' :
-                        'bg-gradient-to-r from-red-400 to-rose-500'
+                        cohesionScore >= 70 ? 'bg-[#34d399]' :
+                        cohesionScore >= 50 ? 'bg-[#fbbf24]' :
+                        'bg-[#f87171]'
                       }`}
                       initial={{ width: 0 }}
                       animate={{ width: `${cohesionScore}%` }}
@@ -386,21 +382,21 @@ export function AvailabilityHeatmapScreen({ onNavigate, showToast, data, useMock
               {/* Help Banner */}
               <motion.div
                 variants={itemVariants}
-                className="mt-6 bg-gradient-to-br from-amber-100/80 to-orange-100/80 backdrop-blur-sm rounded-2xl p-4 border border-amber-200/50"
+                className="mt-5 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-md">
-                    <MousePointer className="w-5 h-5 text-white" strokeWidth={2} />
+                  <div className="w-10 h-10 rounded-lg bg-[#fbbf24]/10 flex items-center justify-center">
+                    <MousePointer className="w-5 h-5 text-[#fbbf24]" strokeWidth={1.5} />
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs font-bold text-amber-800">
+                    <p className="text-sm font-medium text-[#f7f8f8]">
                       Astuce : Cliquez sur une case verte
                     </p>
-                    <p className="text-[10px] text-amber-600 mt-0.5">
+                    <p className="text-xs text-[#5e6063] mt-0.5">
                       Pour créer une session au meilleur créneau
                     </p>
                   </div>
-                  <Sparkles className="w-5 h-5 text-amber-500" />
+                  <Sparkles className="w-5 h-5 text-[#fbbf24]" strokeWidth={1.5} />
                 </div>
               </motion.div>
             </>

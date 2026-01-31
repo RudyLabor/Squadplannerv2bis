@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Calendar, TrendingUp, Award, Trophy, Clock, Target, ChevronRight, Sparkles, Gift, Star, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { communityAPI, type Season } from '@/utils/community-api';
-import { Card, Button, SkeletonPage } from '@/design-system';
+import { communityAPI } from '@/utils/community-api';
 
 interface SeasonsScreenProps {
   onNavigate?: (screen: string, params?: Record<string, unknown>) => void;
@@ -13,16 +12,16 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
+    transition: { staggerChildren: 0.06, delayChildren: 0.1 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
+    transition: { type: "spring", stiffness: 400, damping: 28 }
   }
 };
 
@@ -66,23 +65,19 @@ export function SeasonsScreen({ onNavigate, showToast }: SeasonsScreenProps) {
       ]);
 
       if (seasonData) {
-        // Calculate days left
         const endDate = new Date(seasonData.end_date);
         const now = new Date();
         const daysLeft = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
 
-        // Format dates
         const formatDate = (dateStr: string) => {
           const date = new Date(dateStr);
           const months = ['Janv', 'Fev', 'Mars', 'Avr', 'Mai', 'Juin', 'Juil', 'Aout', 'Sept', 'Oct', 'Nov', 'Dec'];
           return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
         };
 
-        // Calculate progress based on points (e.g., target of 5000 points per season)
         const userPoints = userProgress?.points || 0;
         const progressPercent = Math.min(100, Math.round((userPoints / 5000) * 100));
 
-        // Calculate rewards unlocked based on progress
         const rewards = [
           { name: 'Badge Exclusif', icon: Award, unlocked: progressPercent >= 25 },
           { name: 'Skin Avatar', icon: Star, unlocked: progressPercent >= 50 },
@@ -103,13 +98,12 @@ export function SeasonsScreen({ onNavigate, showToast }: SeasonsScreenProps) {
         });
       }
 
-      // Format past seasons
       const formattedPastSeasons: PastSeason[] = pastData.map((s: any) => ({
         name: s.name,
         rank: s.finalRank || 0,
         points: s.totalPoints || 0,
         reward: s.rewardEarned || 'Participation',
-        rewardIcon: s.finalRank === 1 ? '🏆' : s.finalRank <= 3 ? '🥈' : '🎖️',
+        rewardIcon: s.finalRank === 1 ? '1' : s.finalRank <= 3 ? '2' : '3',
       }));
       setPastSeasons(formattedPastSeasons);
     } catch (error) {
@@ -121,24 +115,28 @@ export function SeasonsScreen({ onNavigate, showToast }: SeasonsScreenProps) {
   };
 
   if (isLoading) {
-    return <SkeletonPage />;
+    return (
+      <div className="min-h-screen bg-[#08090a] flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex flex-col items-center gap-3"
+        >
+          <div className="w-8 h-8 border-2 border-blue-400/30 border-t-blue-400 rounded-full animate-spin" />
+          <span className="text-[#8a8f98] text-sm">Chargement...</span>
+        </motion.div>
+      </div>
+    );
   }
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15, filter: "blur(5px)" }}
-      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      transition={{ duration: 0.35 }}
-      className="min-h-screen pb-24 pt-safe bg-[var(--bg-base)] relative overflow-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="min-h-screen bg-[#08090a] pb-24 md:pb-8"
     >
-      {/* Background decorations - Static for performance */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-rose-400/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 right-0 w-64 h-64 bg-gradient-to-br from-amber-400/10 to-orange-400/10 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto px-4 py-6">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -148,170 +146,157 @@ export function SeasonsScreen({ onNavigate, showToast }: SeasonsScreenProps) {
           <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
             <motion.button
               onClick={() => onNavigate?.('home')}
-              className="w-12 h-12 rounded-2xl bg-[var(--bg-elevated)] backdrop-blur-sm border border-[var(--border-subtle)] flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+              className="w-10 h-10 rounded-xl bg-[#1a1a1a]/60 border border-[#2a2a2a] flex items-center justify-center hover:bg-[#2a2a2a]/60 transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <ArrowLeft className="w-5 h-5 text-[var(--fg-secondary)]" strokeWidth={2} />
+              <ArrowLeft className="w-5 h-5 text-[#8a8f98]" strokeWidth={1.5} />
             </motion.button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-xl font-semibold text-[#f5f5f5] tracking-tight">
                 Saisons
               </h1>
-              <p className="text-sm text-[var(--fg-secondary)] font-medium mt-0.5">
+              <p className="text-sm text-[#8a8f98]">
                 Progression trimestrielle
               </p>
             </div>
             <motion.button
               onClick={loadData}
               disabled={isLoading}
-              className="w-10 h-10 rounded-xl bg-[var(--bg-elevated)] backdrop-blur-sm border border-[var(--border-subtle)] flex items-center justify-center shadow-lg"
+              className="w-10 h-10 rounded-xl bg-[#1a1a1a]/60 border border-[#2a2a2a] flex items-center justify-center hover:bg-[#2a2a2a]/60 transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <RefreshCw className={`w-4 h-4 text-[var(--fg-secondary)] ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 text-[#8a8f98] ${isLoading ? 'animate-spin' : ''}`} />
             </motion.button>
-            <motion.div
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/30"
-              whileHover={{ scale: 1.05, rotate: 5 }}
-            >
-              <Calendar className="w-6 h-6 text-white" strokeWidth={2} />
-            </motion.div>
-          </motion.div>
-
-          {/* Hero Section */}
-          <motion.div variants={itemVariants} className="text-center py-6 mb-6">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-500 to-purple-600 mb-4 shadow-xl shadow-indigo-500/30">
-              <Calendar className="w-10 h-10 text-white" strokeWidth={1.5} />
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+              <Calendar className="w-5 h-5 text-[#60a5fa]" strokeWidth={1.5} />
             </div>
-            <h2 className="text-2xl font-bold tracking-tight text-[var(--fg-primary)] mb-2">
-              Saisons Competitives
-            </h2>
-            <p className="text-sm text-[var(--fg-secondary)] max-w-md mx-auto">
-              Progression trimestrielle avec recompenses exclusives
-            </p>
           </motion.div>
 
           {/* Current Season Card */}
           {currentSeason && (
             <motion.div
               variants={itemVariants}
-              whileHover={{ scale: 1.02 }}
+              className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/10 via-[#1a1a1a]/40 to-[#1a1a1a]/60 border border-blue-500/20 p-6 mb-6"
             >
-              <Card className="relative overflow-hidden p-6 mb-6 bg-gradient-to-br from-indigo-500 to-purple-600 border-0 shadow-xl shadow-indigo-500/30">
-                {/* Decorative elements */}
-                <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
-                <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+              {/* Subtle glow */}
+              <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
 
-                <div className="relative z-10">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <div className="text-white/80 text-sm font-semibold mb-1 flex items-center gap-2">
-                        <Sparkles className="w-4 h-4" />
+              <div className="relative z-10">
+                <div className="flex items-start justify-between mb-5">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Sparkles className="w-4 h-4 text-[#60a5fa]" />
+                      <span className="text-xs font-medium text-[#60a5fa] uppercase tracking-wider">
                         Saison en cours
-                      </div>
-                      <h3 className="text-3xl font-bold tracking-tight text-white mb-1">{currentSeason.name}</h3>
-                      <div className="flex items-center gap-2 text-white/90 text-sm font-medium">
-                        <Clock className="w-4 h-4" />
-                        <span>{currentSeason.startDate} - {currentSeason.endDate}</span>
-                      </div>
-                    </div>
-                    <motion.div
-                      className="flex flex-col items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-xl"
-                      whileHover={{ scale: 1.05 }}
-                    >
-                      <div className="text-white text-2xl font-bold tracking-tight">#{currentSeason.rank}</div>
-                      <div className="text-white/80 text-sm font-medium">Rang actuel</div>
-                    </motion.div>
-                  </div>
-
-                  {/* Progress Section */}
-                  <div className="bg-white/15 backdrop-blur-sm rounded-2xl p-4 mb-4">
-                    <div className="flex items-center justify-between mb-3 text-white text-sm font-semibold">
-                      <span className="flex items-center gap-2">
-                        <TrendingUp className="w-4 h-4" />
-                        Progression de la saison
-                      </span>
-                      <span className="bg-white/20 px-3 py-1 rounded-lg text-sm">
-                        {currentSeason.daysLeft} jours restants
                       </span>
                     </div>
-                    <div className="h-4 bg-white/20 rounded-full overflow-hidden mb-2">
-                      <motion.div
-                        className="h-full bg-white rounded-full"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${currentSeason.progress}%` }}
-                        transition={{ duration: 1.5, ease: 'easeOut' }}
-                      />
-                    </div>
-                    <div className="text-center text-white/90 text-sm font-medium">
-                      {currentSeason.progress}% complete
+                    <h3 className="text-2xl font-bold text-[#f5f5f5] tracking-tight mb-2">
+                      {currentSeason.name}
+                    </h3>
+                    <div className="flex items-center gap-2 text-[#8a8f98] text-sm">
+                      <Clock className="w-4 h-4" />
+                      <span>{currentSeason.startDate} - {currentSeason.endDate}</span>
                     </div>
                   </div>
-
-                  {/* Season Rewards */}
-                  <div className="flex items-center justify-between gap-2">
-                    {currentSeason.rewards.map((reward, index) => {
-                      const Icon = reward.icon;
-                      return (
-                        <motion.div
-                          key={index}
-                          className={`flex-1 flex flex-col items-center p-3 rounded-xl ${
-                            reward.unlocked
-                              ? 'bg-white/20 backdrop-blur-sm'
-                              : 'bg-white/10 opacity-60'
-                          }`}
-                          whileHover={reward.unlocked ? { scale: 1.05 } : {}}
-                        >
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-2 ${
-                            reward.unlocked ? 'bg-white/30' : 'bg-white/10'
-                          }`}>
-                            <Icon className="w-5 h-5 text-white" strokeWidth={2} />
-                          </div>
-                          <span className="text-sm text-white/90 font-medium text-center">{reward.name}</span>
-                          {reward.unlocked && (
-                            <span className="text-sm text-white/70 font-medium mt-1">Debloque</span>
-                          )}
-                        </motion.div>
-                      );
-                    })}
+                  <div className="flex flex-col items-center px-4 py-3 bg-[#1a1a1a]/60 border border-[#2a2a2a] rounded-xl">
+                    <div className="text-2xl font-bold text-[#f5f5f5]">#{currentSeason.rank}</div>
+                    <div className="text-xs text-[#8a8f98]">Rang actuel</div>
                   </div>
                 </div>
-              </Card>
+
+                {/* Progress Section */}
+                <div className="bg-[#1a1a1a]/40 border border-[#2a2a2a] rounded-xl p-4 mb-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="flex items-center gap-2 text-sm font-medium text-[#f5f5f5]">
+                      <TrendingUp className="w-4 h-4 text-[#60a5fa]" />
+                      Progression
+                    </span>
+                    <span className="text-xs font-medium text-[#8a8f98] bg-[#2a2a2a]/60 px-2 py-1 rounded-lg">
+                      {currentSeason.daysLeft} jours restants
+                    </span>
+                  </div>
+                  <div className="h-2 bg-[#2a2a2a] rounded-full overflow-hidden mb-2">
+                    <motion.div
+                      className="h-full bg-gradient-to-r from-[#60a5fa] to-blue-400 rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${currentSeason.progress}%` }}
+                      transition={{ duration: 1.2, ease: 'easeOut' }}
+                    />
+                  </div>
+                  <div className="text-right text-sm text-[#8a8f98]">
+                    {currentSeason.progress}% complete
+                  </div>
+                </div>
+
+                {/* Season Rewards */}
+                <div className="grid grid-cols-3 gap-3">
+                  {currentSeason.rewards.map((reward, index) => {
+                    const Icon = reward.icon;
+                    return (
+                      <motion.div
+                        key={index}
+                        className={`flex flex-col items-center p-3 rounded-xl border transition-all ${
+                          reward.unlocked
+                            ? 'bg-blue-500/10 border-blue-500/30'
+                            : 'bg-[#1a1a1a]/40 border-[#2a2a2a] opacity-50'
+                        }`}
+                        whileHover={reward.unlocked ? { scale: 1.02 } : {}}
+                      >
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-2 ${
+                          reward.unlocked ? 'bg-blue-500/20' : 'bg-[#2a2a2a]/60'
+                        }`}>
+                          <Icon className={`w-5 h-5 ${reward.unlocked ? 'text-[#60a5fa]' : 'text-[#5a5a5a]'}`} strokeWidth={1.5} />
+                        </div>
+                        <span className={`text-xs text-center font-medium ${reward.unlocked ? 'text-[#f5f5f5]' : 'text-[#5a5a5a]'}`}>
+                          {reward.name}
+                        </span>
+                        {reward.unlocked && (
+                          <span className="text-xs text-[#60a5fa] mt-1">Debloque</span>
+                        )}
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
             </motion.div>
           )}
 
           {/* Stats Row */}
           {currentSeason && (
             <motion.div variants={itemVariants} className="grid grid-cols-3 gap-3 mb-6">
-              <motion.div whileHover={{ scale: 1.02 }}>
-                <Card className="p-4 bg-gradient-to-br from-emerald-500 to-teal-500 border-0 shadow-lg shadow-emerald-500/30">
-                  <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center mb-2">
-                    <Trophy className="w-4 h-4 text-white" strokeWidth={2} />
-                  </div>
-                  <div className="text-xl font-bold tracking-tight text-white">{currentSeason.points.toLocaleString()}</div>
-                  <div className="text-sm text-white/80 font-medium">Points</div>
-                </Card>
+              <motion.div
+                className="p-4 rounded-xl bg-[#1a1a1a]/40 border border-[#2a2a2a] hover:border-emerald-500/30 transition-colors"
+                whileHover={{ scale: 1.02 }}
+              >
+                <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center mb-3">
+                  <Trophy className="w-4 h-4 text-emerald-400" strokeWidth={1.5} />
+                </div>
+                <div className="text-lg font-bold text-[#f5f5f5]">{currentSeason.points.toLocaleString()}</div>
+                <div className="text-xs text-[#8a8f98]">Points</div>
               </motion.div>
 
-              <motion.div whileHover={{ scale: 1.02 }}>
-                <Card className="p-4 bg-gradient-to-br from-amber-500 to-orange-500 border-0 shadow-lg shadow-amber-500/30">
-                  <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center mb-2">
-                    <Target className="w-4 h-4 text-white" strokeWidth={2} />
-                  </div>
-                  <div className="text-xl font-bold tracking-tight text-white">{currentSeason.challengesCompleted}</div>
-                  <div className="text-sm text-white/80 font-medium">Defis</div>
-                </Card>
+              <motion.div
+                className="p-4 rounded-xl bg-[#1a1a1a]/40 border border-[#2a2a2a] hover:border-amber-500/30 transition-colors"
+                whileHover={{ scale: 1.02 }}
+              >
+                <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center mb-3">
+                  <Target className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
+                </div>
+                <div className="text-lg font-bold text-[#f5f5f5]">{currentSeason.challengesCompleted}</div>
+                <div className="text-xs text-[#8a8f98]">Defis</div>
               </motion.div>
 
-              <motion.div whileHover={{ scale: 1.02 }}>
-                <Card className="p-4 bg-gradient-to-br from-rose-500 to-pink-500 border-0 shadow-lg shadow-rose-500/30">
-                  <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center mb-2">
-                    <Gift className="w-4 h-4 text-white" strokeWidth={2} />
-                  </div>
-                  <div className="text-xl font-bold tracking-tight text-white">{currentSeason.rewardsUnlocked}</div>
-                  <div className="text-sm text-white/80 font-medium">Recompenses</div>
-                </Card>
+              <motion.div
+                className="p-4 rounded-xl bg-[#1a1a1a]/40 border border-[#2a2a2a] hover:border-rose-500/30 transition-colors"
+                whileHover={{ scale: 1.02 }}
+              >
+                <div className="w-9 h-9 rounded-lg bg-rose-500/10 flex items-center justify-center mb-3">
+                  <Gift className="w-4 h-4 text-rose-400" strokeWidth={1.5} />
+                </div>
+                <div className="text-lg font-bold text-[#f5f5f5]">{currentSeason.rewardsUnlocked}</div>
+                <div className="text-xs text-[#8a8f98]">Recompenses</div>
               </motion.div>
             </motion.div>
           )}
@@ -319,88 +304,82 @@ export function SeasonsScreen({ onNavigate, showToast }: SeasonsScreenProps) {
           {/* Past Seasons */}
           <motion.div variants={itemVariants} className="mb-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center shadow-md">
-                <Clock className="w-5 h-5 text-white" strokeWidth={2} />
+              <div className="w-9 h-9 rounded-lg bg-[#1a1a1a]/60 border border-[#2a2a2a] flex items-center justify-center">
+                <Clock className="w-4 h-4 text-[#8a8f98]" strokeWidth={1.5} />
               </div>
-              <h3 className="text-lg font-bold tracking-tight text-[var(--fg-primary)]">
+              <h3 className="text-base font-semibold text-[#f5f5f5]">
                 Saisons precedentes
               </h3>
             </div>
-            <div className="space-y-3">
-              {pastSeasons.map((season, index) => (
-                <motion.div
-                  key={index}
-                  variants={itemVariants}
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <Card className="p-4 hover:shadow-xl transition-all duration-300" interactive>
-                    <div className="flex items-center gap-4">
-                      {/* Season Icon */}
-                      <motion.div
-                        className="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center shadow-lg"
-                        whileHover={{ scale: 1.1, rotate: 5 }}
-                      >
-                        <Calendar className="w-7 h-7 text-white" strokeWidth={2} />
-                      </motion.div>
 
-                      {/* Info */}
+            <div className="space-y-3">
+              {pastSeasons.length > 0 ? (
+                pastSeasons.map((season, index) => (
+                  <motion.div
+                    key={index}
+                    variants={itemVariants}
+                    className="p-4 rounded-xl bg-[#1a1a1a]/40 border border-[#2a2a2a] hover:border-[#3a3a3a] transition-all"
+                    whileHover={{ scale: 1.01 }}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-[#2a2a2a]/60 flex items-center justify-center">
+                        <Calendar className="w-6 h-6 text-[#8a8f98]" strokeWidth={1.5} />
+                      </div>
+
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-bold tracking-tight text-[var(--fg-primary)]">{season.name}</h4>
-                          <span className="px-2 py-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-sm font-bold rounded-lg">
+                          <h4 className="font-semibold text-[#f5f5f5]">{season.name}</h4>
+                          <span className="px-2 py-0.5 bg-blue-500/10 text-[#60a5fa] text-xs font-semibold rounded-lg border border-blue-500/20">
                             #{season.rank}
                           </span>
                         </div>
-                        <div className="flex items-center gap-3 text-sm text-[var(--fg-secondary)] font-medium">
+                        <div className="flex items-center gap-3 text-sm text-[#8a8f98]">
                           <span>{season.points.toLocaleString()} points</span>
-                          <span>•</span>
-                          <span className="flex items-center gap-1">
-                            <span>{season.rewardIcon}</span>
-                            {season.reward}
-                          </span>
+                          <span className="w-1 h-1 rounded-full bg-[#3a3a3a]" />
+                          <span>{season.reward}</span>
                         </div>
                       </div>
 
-                      {/* Arrow */}
                       <motion.button
-                        className="w-10 h-10 rounded-xl bg-[var(--bg-base)] flex items-center justify-center hover:bg-[var(--bg-elevated)] transition-colors"
+                        className="w-9 h-9 rounded-lg bg-[#2a2a2a]/40 flex items-center justify-center hover:bg-[#3a3a3a]/40 transition-colors"
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
                       >
-                        <ChevronRight className="w-5 h-5 text-[var(--fg-secondary)]" strokeWidth={2} />
+                        <ChevronRight className="w-4 h-4 text-[#8a8f98]" strokeWidth={1.5} />
                       </motion.button>
                     </div>
-                  </Card>
-                </motion.div>
-              ))}
+                  </motion.div>
+                ))
+              ) : (
+                <div className="p-6 rounded-xl bg-[#1a1a1a]/40 border border-[#2a2a2a] text-center">
+                  <Calendar className="w-10 h-10 text-[#5a5a5a] mx-auto mb-3" strokeWidth={1.5} />
+                  <p className="text-[#8a8f98] text-sm">Aucune saison precedente</p>
+                </div>
+              )}
             </div>
           </motion.div>
 
           {/* Info Banner */}
           <motion.div
             variants={itemVariants}
-            whileHover={{ scale: 1.02 }}
+            className="relative overflow-hidden rounded-xl bg-[#1a1a1a]/40 border border-[#2a2a2a] p-5"
           >
-            <Card className="relative overflow-hidden p-5 bg-gradient-to-br from-amber-500 to-orange-500 border-0 shadow-xl">
-              {/* Decorative elements */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
 
-              <div className="relative z-10 flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-                  <Gift className="w-6 h-6 text-white" strokeWidth={2} />
+            <div className="relative z-10 flex items-start gap-4">
+              <div className="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
+                <Gift className="w-5 h-5 text-amber-400" strokeWidth={1.5} />
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-semibold text-[#f5f5f5] mb-1">
+                  Recompenses de fin de saison
                 </div>
-                <div className="flex-1">
-                  <div className="text-base font-bold tracking-tight text-white mb-1">
-                    Recompenses de fin de saison
-                  </div>
-                  <div className="text-sm text-white/90 font-medium leading-relaxed">
-                    Monte dans le classement pour debloquer des recompenses exclusives :
-                    badges, titres, skins et bien plus encore !
-                  </div>
+                <div className="text-sm text-[#8a8f98] leading-relaxed">
+                  Monte dans le classement pour debloquer des recompenses exclusives :
+                  badges, titres, skins et bien plus encore !
                 </div>
               </div>
-            </Card>
+            </div>
           </motion.div>
         </motion.div>
       </div>

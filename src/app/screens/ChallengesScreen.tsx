@@ -25,32 +25,32 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
+    transition: { staggerChildren: 0.06, delayChildren: 0.1 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
+    transition: { type: "spring", stiffness: 400, damping: 28 }
   }
 };
 
-const difficultyConfig: Record<Challenge['difficulty'], { gradient: string; label: string; icon: React.ElementType; color: string }> = {
-  easy: { gradient: 'from-emerald-500 to-teal-500', label: 'Facile', icon: Star, color: 'text-emerald-500' },
-  medium: { gradient: 'from-amber-500 to-orange-500', label: 'Moyen', icon: Flame, color: 'text-amber-500' },
-  hard: { gradient: 'from-red-500 to-pink-500', label: 'Difficile', icon: Zap, color: 'text-red-500' },
+const difficultyConfig: Record<Challenge['difficulty'], { color: string; bgColor: string; label: string; icon: React.ElementType }> = {
+  easy: { color: 'text-emerald-400', bgColor: 'bg-emerald-500/10', label: 'Facile', icon: Star },
+  medium: { color: 'text-[#f5a623]', bgColor: 'bg-[#f5a623]/10', label: 'Moyen', icon: Flame },
+  hard: { color: 'text-red-400', bgColor: 'bg-red-500/10', label: 'Difficile', icon: Zap },
 };
 
-interface PremiumChallengeCardProps {
+interface ChallengeCardProps {
   challenge: Challenge;
   index: number;
   onClaim: () => void;
 }
 
-function PremiumChallengeCard({ challenge, index, onClaim }: PremiumChallengeCardProps) {
+function ChallengeCard({ challenge, index, onClaim }: ChallengeCardProps) {
   const progressPercent = challenge.total > 0 ? Math.round((challenge.progress / challenge.total) * 100) : 0;
   const config = difficultyConfig[challenge.difficulty];
   const DifficultyIcon = config.icon;
@@ -60,26 +60,20 @@ function PremiumChallengeCard({ challenge, index, onClaim }: PremiumChallengeCar
       variants={itemVariants}
       custom={index}
       layout
-      className={`relative overflow-hidden rounded-2xl ${
+      className={`relative rounded-xl border transition-all duration-200 ${
         challenge.completed
-          ? 'bg-gradient-to-br from-emerald-50 to-teal-50'
-          : 'bg-white/80'
-      } backdrop-blur-sm border ${
-        challenge.completed
-          ? 'border-emerald-200/50'
-          : 'border-white/50'
-      } shadow-lg transition-all duration-300`}
-      whileHover={{ scale: 1.01, y: -2 }}
+          ? 'bg-emerald-500/5 border-emerald-500/20'
+          : 'bg-white/[0.02] border-white/[0.06] hover:bg-white/[0.04] hover:border-white/[0.08]'
+      }`}
+      whileHover={{ scale: 1.01 }}
     >
-      {/* Removed shine animation for performance */}
-
-      <div className="relative p-5">
+      <div className="p-4">
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 mb-4">
+        <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className={`text-lg font-bold ${
-                challenge.completed ? 'text-emerald-700' : 'text-gray-800'
+            <div className="flex items-center gap-2 mb-1.5">
+              <h3 className={`text-[15px] font-semibold ${
+                challenge.completed ? 'text-emerald-400' : 'text-white'
               }`}>
                 {challenge.name}
               </h3>
@@ -89,20 +83,20 @@ function PremiumChallengeCard({ challenge, index, onClaim }: PremiumChallengeCar
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 500 }}
                 >
-                  <CheckCircle className="w-5 h-5 text-emerald-500" strokeWidth={2.5} />
+                  <CheckCircle className="w-4 h-4 text-emerald-400" strokeWidth={2.5} />
                 </motion.div>
               )}
             </div>
-            <p className="text-sm text-gray-500 font-medium mb-3">
+            <p className="text-[13px] text-[#8a8f98] mb-2.5 leading-relaxed">
               {challenge.description}
             </p>
-            <div className="flex items-center gap-3">
-              <span className={`px-2.5 py-1 rounded-lg text-xs font-bold bg-gradient-to-r ${config.gradient} text-white flex items-center gap-1`}>
+            <div className="flex items-center gap-2.5">
+              <span className={`px-2 py-0.5 rounded-md text-[11px] font-medium ${config.bgColor} ${config.color} flex items-center gap-1`}>
                 <DifficultyIcon className="w-3 h-3" />
                 {config.label}
               </span>
-              <div className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
-                <Clock className="w-3.5 h-3.5" strokeWidth={2} />
+              <div className="flex items-center gap-1 text-[11px] text-[#6b7280]">
+                <Clock className="w-3 h-3" strokeWidth={2} />
                 {challenge.expiresIn}
               </div>
             </div>
@@ -110,59 +104,56 @@ function PremiumChallengeCard({ challenge, index, onClaim }: PremiumChallengeCar
 
           {/* Icon */}
           <motion.div
-            className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${
+            className={`w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0 ${
               challenge.completed
-                ? 'bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30'
-                : 'bg-gradient-to-br from-indigo-100 to-purple-100'
+                ? 'bg-emerald-500/10'
+                : 'bg-[#f5a623]/10'
             }`}
-            whileHover={{ scale: 1.1, rotate: 5 }}
+            whileHover={{ scale: 1.05 }}
           >
-            <Target className={`w-7 h-7 ${
-              challenge.completed ? 'text-white' : 'text-indigo-500'
+            <Target className={`w-5 h-5 ${
+              challenge.completed ? 'text-emerald-400' : 'text-[#f5a623]'
             }`} strokeWidth={2} />
           </motion.div>
         </div>
 
         {/* Reward Banner */}
-        <motion.div
-          className={`flex items-center gap-2 mb-4 p-3 rounded-xl ${
-            challenge.completed
-              ? 'bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-200/50'
-              : 'bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-200/50'
-          }`}
-          whileHover={{ scale: 1.01 }}
-        >
-          <Award className={`w-5 h-5 ${challenge.completed ? 'text-amber-500' : 'text-indigo-500'} flex-shrink-0`} strokeWidth={2} />
-          <span className={`text-sm font-semibold ${challenge.completed ? 'text-amber-700' : 'text-indigo-700'}`}>
+        <div className={`flex items-center gap-2 mb-3 p-2.5 rounded-lg ${
+          challenge.completed
+            ? 'bg-[#f5a623]/10 border border-[#f5a623]/20'
+            : 'bg-white/[0.02] border border-white/[0.04]'
+        }`}>
+          <Award className={`w-4 h-4 flex-shrink-0 ${challenge.completed ? 'text-[#f5a623]' : 'text-[#f5a623]'}`} strokeWidth={2} />
+          <span className={`text-[13px] font-medium ${challenge.completed ? 'text-[#f5a623]' : 'text-[#8a8f98]'}`}>
             {challenge.reward}
           </span>
-        </motion.div>
+        </div>
 
         {/* Progress / Claim Button */}
         {challenge.completed ? (
           <motion.button
             onClick={onClaim}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-sm shadow-lg shadow-amber-500/30 flex items-center justify-center gap-2"
-            whileHover={{ scale: 1.02, y: -1 }}
+            className="w-full py-2.5 rounded-lg bg-[#f5a623] text-[#08090a] font-semibold text-[13px] flex items-center justify-center gap-2"
+            whileHover={{ scale: 1.02, backgroundColor: '#f5b03d' }}
             whileTap={{ scale: 0.98 }}
           >
             <Trophy className="w-4 h-4" strokeWidth={2} />
-            Réclamer la récompense
+            Reclamer la recompense
             <Sparkles className="w-4 h-4" />
           </motion.button>
         ) : (
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-700 font-bold">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[13px] text-white font-medium">
                 {challenge.progress}/{challenge.total}
               </span>
-              <span className="text-sm text-gray-400 font-medium">
+              <span className="text-[12px] text-[#6b7280]">
                 {progressPercent}%
               </span>
             </div>
-            <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
               <motion.div
-                className={`h-full bg-gradient-to-r ${config.gradient} rounded-full`}
+                className="h-full bg-[#f5a623] rounded-full"
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPercent}%` }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
@@ -182,7 +173,7 @@ export function ChallengesScreen({ onNavigate, showToast }: ChallengesScreenProp
     {
       id: 'w1',
       name: 'Marathon de Sessions',
-      description: 'Participe à 5 sessions cette semaine',
+      description: 'Participe a 5 sessions cette semaine',
       reward: '100 XP + Badge',
       progress: 3,
       total: 5,
@@ -192,9 +183,9 @@ export function ChallengesScreen({ onNavigate, showToast }: ChallengesScreenProp
     },
     {
       id: 'w2',
-      name: 'Fiabilité Parfaite',
-      description: 'Ne manque aucune session confirmée',
-      reward: '200 XP + Badge Spécial',
+      name: 'Fiabilite Parfaite',
+      description: 'Ne manque aucune session confirmee',
+      reward: '200 XP + Badge Special',
       progress: 4,
       total: 4,
       completed: true,
@@ -218,7 +209,7 @@ export function ChallengesScreen({ onNavigate, showToast }: ChallengesScreenProp
     {
       id: 'm1',
       name: 'Organisateur Pro',
-      description: 'Crée 10 sessions ce mois',
+      description: 'Cree 10 sessions ce mois',
       reward: '500 XP + Titre "Organisateur"',
       progress: 6,
       total: 10,
@@ -228,9 +219,9 @@ export function ChallengesScreen({ onNavigate, showToast }: ChallengesScreenProp
     },
     {
       id: 'm2',
-      name: 'Légende de Squad',
-      description: 'Atteins 95+ de fiabilité',
-      reward: '300 XP + Badge Légendaire',
+      name: 'Legende de Squad',
+      description: 'Atteins 95+ de fiabilite',
+      reward: '300 XP + Badge Legendaire',
       progress: 88,
       total: 95,
       completed: false,
@@ -240,7 +231,7 @@ export function ChallengesScreen({ onNavigate, showToast }: ChallengesScreenProp
     {
       id: 'm3',
       name: 'Champion de Jeux',
-      description: 'Joue à 3 jeux différents',
+      description: 'Joue a 3 jeux differents',
       reward: '200 XP',
       progress: 3,
       total: 3,
@@ -252,64 +243,57 @@ export function ChallengesScreen({ onNavigate, showToast }: ChallengesScreenProp
 
   const challenges = activePeriod === 'weekly' ? weeklyChallenges : monthlyChallenges;
   const completedCount = challenges.filter(c => c.completed).length;
+  const totalProgress = challenges.length > 0 ? Math.round((completedCount / challenges.length) * 100) : 0;
 
   const handleClaimReward = (challengeId: string) => {
-    showToast('Récompense réclamée ! 🎉', 'success');
+    showToast('Recompense reclamee !', 'success');
   };
 
   return (
-    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-gradient-to-br from-emerald-400/15 to-teal-400/15 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
+    <div className="min-h-screen pb-24 md:pb-8 pt-safe bg-[#08090a]">
+      <div className="px-4 py-6 max-w-2xl mx-auto">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           {/* Header */}
-          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
+          <motion.div variants={itemVariants} className="flex items-center gap-3 mb-6">
             <motion.button
               onClick={() => onNavigate('home')}
-              className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+              className="w-10 h-10 rounded-lg bg-white/[0.05] border border-white/[0.06] flex items-center justify-center hover:bg-white/[0.08] transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
+              <ArrowLeft className="w-5 h-5 text-[#8a8f98]" strokeWidth={2} />
             </motion.button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                Défis
+              <h1 className="text-xl font-semibold text-white">
+                Defis
               </h1>
-              <p className="text-sm text-gray-500 font-medium">
-                Relève des challenges et gagne des récompenses
+              <p className="text-[13px] text-[#6b7280]">
+                Releve des challenges et gagne des recompenses
               </p>
             </div>
             <motion.div
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg"
-              whileHover={{ scale: 1.05, rotate: 5 }}
+              className="w-10 h-10 rounded-lg bg-[#f5a623]/10 flex items-center justify-center"
+              whileHover={{ scale: 1.05 }}
             >
-              <Trophy className="w-6 h-6 text-white" strokeWidth={2} />
+              <Trophy className="w-5 h-5 text-[#f5a623]" strokeWidth={2} />
             </motion.div>
           </motion.div>
 
           {/* Period Tabs */}
-          <motion.div variants={itemVariants} className="flex gap-2 mb-6">
+          <motion.div variants={itemVariants} className="flex gap-1.5 p-1 bg-white/[0.03] rounded-lg border border-white/[0.06] mb-5">
             {(['weekly', 'monthly'] as ChallengePeriod[]).map((period) => (
               <motion.button
                 key={period}
                 onClick={() => setActivePeriod(period)}
-                className={`flex-1 h-12 rounded-xl font-semibold text-sm transition-all duration-200 ${
+                className={`flex-1 h-9 rounded-md font-medium text-[13px] transition-all duration-200 ${
                   activePeriod === period
-                    ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg shadow-indigo-500/30'
-                    : 'bg-white/80 backdrop-blur-sm text-gray-600 border border-white/50 hover:bg-white'
+                    ? 'bg-[#f5a623] text-[#08090a]'
+                    : 'text-[#8a8f98] hover:text-white hover:bg-white/[0.05]'
                 }`}
-                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 {period === 'weekly' ? 'Hebdomadaires' : 'Mensuels'}
@@ -320,30 +304,28 @@ export function ChallengesScreen({ onNavigate, showToast }: ChallengesScreenProp
           {/* Progress Card */}
           <motion.div
             variants={itemVariants}
-            className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-6 mb-6 shadow-xl shadow-indigo-500/20 relative overflow-hidden"
+            className="rounded-xl border border-[#f5a623]/20 bg-[#f5a623]/5 p-5 mb-5"
           >
-            {/* Removed shine animation for performance */}
-
-            <div className="relative flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <div className="text-white/80 text-sm font-medium mb-1">
+                <div className="text-[13px] text-[#8a8f98] mb-1">
                   Progression {activePeriod === 'weekly' ? 'hebdomadaire' : 'mensuelle'}
                 </div>
-                <div className="text-4xl font-black text-white">
-                  {completedCount}/{challenges.length}
+                <div className="text-3xl font-bold text-white">
+                  {completedCount}<span className="text-[#6b7280]">/{challenges.length}</span>
                 </div>
               </div>
-              <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <Trophy className="w-8 h-8 text-white" strokeWidth={2} />
+              <div className="w-14 h-14 rounded-xl bg-[#f5a623]/10 flex items-center justify-center">
+                <Trophy className="w-7 h-7 text-[#f5a623]" strokeWidth={2} />
               </div>
             </div>
 
             {/* Progress Bar */}
-            <div className="h-3 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
+            <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
               <motion.div
-                className="h-full bg-white rounded-full"
+                className="h-full bg-[#f5a623] rounded-full"
                 initial={{ width: 0 }}
-                animate={{ width: `${challenges.length > 0 ? (completedCount / challenges.length) * 100 : 0}%` }}
+                animate={{ width: `${totalProgress}%` }}
                 transition={{ duration: 1, ease: 'easeOut', delay: 0.3 }}
               />
             </div>
@@ -351,14 +333,22 @@ export function ChallengesScreen({ onNavigate, showToast }: ChallengesScreenProp
             {/* Bonus text */}
             {completedCount === challenges.length && (
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mt-4 flex items-center gap-2 text-white/90 text-sm font-medium"
+                className="mt-3 flex items-center gap-2 text-[#f5a623] text-[13px] font-medium"
               >
                 <Sparkles className="w-4 h-4" />
-                Tous les défis complétés ! Bonus XP débloqué !
+                Tous les defis completes ! Bonus XP debloque !
               </motion.div>
             )}
+          </motion.div>
+
+          {/* Section Title */}
+          <motion.div variants={itemVariants} className="flex items-center gap-2 mb-3">
+            <Target className="w-4 h-4 text-[#f5a623]" strokeWidth={2} />
+            <h2 className="text-[13px] font-medium text-[#8a8f98] uppercase tracking-wider">
+              {activePeriod === 'weekly' ? 'Defis de la semaine' : 'Defis du mois'}
+            </h2>
           </motion.div>
 
           {/* Challenges List */}
@@ -368,11 +358,11 @@ export function ChallengesScreen({ onNavigate, showToast }: ChallengesScreenProp
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              exit={{ opacity: 0, y: -20 }}
-              className="space-y-4"
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-3"
             >
               {challenges.map((challenge, index) => (
-                <PremiumChallengeCard
+                <ChallengeCard
                   key={challenge.id}
                   challenge={challenge}
                   index={index}
@@ -385,18 +375,18 @@ export function ChallengesScreen({ onNavigate, showToast }: ChallengesScreenProp
           {/* Info Banner */}
           <motion.div
             variants={itemVariants}
-            className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-white/50 mt-8 shadow-lg"
+            className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 mt-6"
           >
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0">
-                <TrendingUp className="w-6 h-6 text-white" strokeWidth={2} />
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-lg bg-[#f5a623]/10 flex items-center justify-center flex-shrink-0">
+                <TrendingUp className="w-5 h-5 text-[#f5a623]" strokeWidth={2} />
               </div>
               <div>
-                <h3 className="text-base font-bold text-gray-800 mb-1">
-                  De nouveaux défis chaque semaine
+                <h3 className="text-[14px] font-semibold text-white mb-1">
+                  De nouveaux defis chaque semaine
                 </h3>
-                <p className="text-sm text-gray-500 font-medium leading-relaxed">
-                  Complète les défis pour gagner de l'XP, débloquer des badges exclusifs et monter dans les classements.
+                <p className="text-[13px] text-[#6b7280] leading-relaxed">
+                  Complete les defis pour gagner de l'XP, debloquer des badges exclusifs et monter dans les classements.
                 </p>
               </div>
             </div>

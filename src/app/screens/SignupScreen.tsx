@@ -95,7 +95,7 @@ export function SignupScreen({ onNavigate, onSignup, showToast }: SignupScreenPr
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-[#0e0f11]">
+    <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-[#08090a]">
       {/* Subtle background gradient */}
       <div className="fixed inset-0 bg-gradient-to-b from-[#5e6ad2]/[0.02] via-transparent to-transparent pointer-events-none" />
 
@@ -130,7 +130,7 @@ export function SignupScreen({ onNavigate, onSignup, showToast }: SignupScreenPr
 
         {/* Signup Form Card */}
         <motion.div variants={itemVariants}>
-          <div className="p-6 md:p-8 rounded-2xl bg-gradient-to-b from-[#161719] to-[#131416] border border-[#1e2024] shadow-xl shadow-black/20">
+          <div className="p-6 md:p-8 rounded-2xl bg-gradient-to-b from-[#18191b] to-[#101012] border border-[#27282b] shadow-xl shadow-black/20">
             <div className="space-y-5">
               {/* Username Input */}
               <div>
@@ -144,7 +144,7 @@ export function SignupScreen({ onNavigate, onSignup, showToast }: SignupScreenPr
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Votre pseudo gaming"
-                    className="w-full h-12 pl-12 pr-4 rounded-xl bg-[#111214] border border-[#1e2024] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6ad2] focus:bg-[#141518] focus:outline-none transition-all duration-150"
+                    className="w-full h-12 pl-12 pr-4 rounded-xl bg-[#101012] border border-[#27282b] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6ad2] focus:bg-[#141518] focus:outline-none transition-all duration-150"
                   />
                 </div>
               </div>
@@ -161,7 +161,7 @@ export function SignupScreen({ onNavigate, onSignup, showToast }: SignupScreenPr
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="votre@email.com"
-                    className="w-full h-12 pl-12 pr-4 rounded-xl bg-[#111214] border border-[#1e2024] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6ad2] focus:bg-[#141518] focus:outline-none transition-all duration-150"
+                    className="w-full h-12 pl-12 pr-4 rounded-xl bg-[#101012] border border-[#27282b] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6ad2] focus:bg-[#141518] focus:outline-none transition-all duration-150"
                   />
                 </div>
               </div>
@@ -178,7 +178,7 @@ export function SignupScreen({ onNavigate, onSignup, showToast }: SignupScreenPr
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Min. 6 caractères"
-                    className="w-full h-12 pl-12 pr-12 rounded-xl bg-[#111214] border border-[#1e2024] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6ad2] focus:bg-[#141518] focus:outline-none transition-all duration-150"
+                    className="w-full h-12 pl-12 pr-12 rounded-xl bg-[#101012] border border-[#27282b] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6ad2] focus:bg-[#141518] focus:outline-none transition-all duration-150"
                   />
                   <button
                     type="button"
@@ -203,7 +203,7 @@ export function SignupScreen({ onNavigate, onSignup, showToast }: SignupScreenPr
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Répétez le mot de passe"
                     onKeyDown={(e) => e.key === 'Enter' && handleSignup()}
-                    className="w-full h-12 pl-12 pr-12 rounded-xl bg-[#111214] border border-[#1e2024] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6ad2] focus:bg-[#141518] focus:outline-none transition-all duration-150"
+                    className="w-full h-12 pl-12 pr-12 rounded-xl bg-[#101012] border border-[#27282b] text-[14px] text-[#ececed] placeholder:text-[#3a3b40] focus:border-[#5e6ad2] focus:bg-[#141518] focus:outline-none transition-all duration-150"
                   />
                   {confirmPassword && (
                     <div className="absolute right-4 top-1/2 -translate-y-1/2">

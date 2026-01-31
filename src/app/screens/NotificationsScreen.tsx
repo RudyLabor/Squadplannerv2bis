@@ -3,7 +3,7 @@
  * Premium, Dark, Minimal - Notifications list
  */
 
-import { ArrowLeft, Bell, Calendar, Trophy, AlertCircle, CheckCircle2, Clock, BellRing, Settings, Check } from 'lucide-react';
+import { ArrowLeft, Bell, Calendar, Trophy, AlertCircle, CheckCircle2, Clock, BellRing, Settings, Check, Inbox } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { notificationsAPI } from '@/utils/api';
@@ -30,7 +30,7 @@ interface Notification {
   readAt?: string;
 }
 
-// Linear-style animations
+// Linear-style animations (same as ProfileScreen)
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -77,7 +77,7 @@ function NotificationCard({ notification, onMarkAsRead, index }: NotificationCar
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffMins < 1) return "À l'instant";
+    if (diffMins < 1) return "A l'instant";
     if (diffMins < 60) return `Il y a ${diffMins}min`;
     if (diffHours < 24) return `Il y a ${diffHours}h`;
     return `Il y a ${diffDays}j`;
@@ -109,7 +109,7 @@ function NotificationCard({ notification, onMarkAsRead, index }: NotificationCar
         <div className="flex items-start gap-3">
           {/* Icon */}
           <div
-            className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors`}
+            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors"
             style={{ backgroundColor: config.bgColor }}
           >
             <Icon className={`w-5 h-5 ${config.iconColor}`} strokeWidth={1.5} />
@@ -194,13 +194,13 @@ export function NotificationsScreen({ onNavigate, showToast }: NotificationsScre
       prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
     );
     setUnreadCount(prev => Math.max(0, prev - 1));
-    showToast('Notification marquée comme lue', 'success');
+    showToast('Notification marquee comme lue', 'success');
   };
 
   const handleMarkAllAsRead = async () => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     setUnreadCount(0);
-    showToast('Toutes les notifications marquées comme lues', 'success');
+    showToast('Toutes les notifications marquees comme lues', 'success');
   };
 
   // Loading state
@@ -213,25 +213,26 @@ export function NotificationsScreen({ onNavigate, showToast }: NotificationsScre
   }
 
   return (
-    <div className="min-h-screen pb-24 md:pb-8 bg-[#08090a]">
-      <div className="px-4 md:px-6 py-6 max-w-2xl mx-auto">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {/* Header - Linear style */}
-          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
+    <div className="min-h-screen bg-[#08090a] pb-24 md:pb-8">
+      <motion.div
+        className="max-w-3xl mx-auto px-4 md:px-6 py-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Header - Linear style (same as ProfileScreen) */}
+        <motion.div variants={itemVariants} className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
             <motion.button
               onClick={() => onNavigate('home')}
-              className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.06)] transition-all"
+              className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.06)] transition-all"
               whileHover={{ x: -2 }}
               whileTap={{ scale: 0.95 }}
             >
               <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
             </motion.button>
-            <div className="flex-1">
-              <h1 className="text-[22px] md:text-[24px] font-semibold text-[#f7f8f8]">
+            <div>
+              <h1 className="text-[24px] md:text-[26px] font-semibold text-[#f7f8f8]">
                 Notifications
               </h1>
               {unreadCount > 0 && (
@@ -240,105 +241,113 @@ export function NotificationsScreen({ onNavigate, showToast }: NotificationsScre
                 </p>
               )}
             </div>
-            <div className="flex items-center gap-2">
-              <motion.button
-                onClick={() => onNavigate('notification-settings')}
-                className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.06)] transition-all"
-                whileHover={{ y: -1 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Settings className="w-5 h-5" strokeWidth={1.5} />
-              </motion.button>
-              <div className="w-11 h-11 rounded-xl bg-[rgba(94,109,210,0.1)] flex items-center justify-center relative">
-                <BellRing className="w-5 h-5 text-[#5e6dd2]" strokeWidth={1.5} />
-                {unreadCount > 0 && (
-                  <motion.div
-                    className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#f87171] flex items-center justify-center"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
-                  >
-                    <span className="text-[10px] font-bold text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
-                  </motion.div>
-                )}
-              </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <motion.button
+              onClick={() => onNavigate('notification-settings')}
+              className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.06)] transition-all"
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Settings className="w-5 h-5" strokeWidth={1.5} />
+            </motion.button>
+            <div className="w-11 h-11 rounded-xl bg-[rgba(94,109,210,0.1)] flex items-center justify-center relative">
+              <BellRing className="w-5 h-5 text-[#5e6dd2]" strokeWidth={1.5} />
+              {unreadCount > 0 && (
+                <motion.div
+                  className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#f87171] flex items-center justify-center"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
+                >
+                  <span className="text-[10px] font-bold text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
+                </motion.div>
+              )}
             </div>
-          </motion.div>
-
-          {/* Mark All as Read */}
-          {unreadCount > 1 && (
-            <motion.div variants={itemVariants} className="mb-4">
-              <motion.button
-                onClick={handleMarkAllAsRead}
-                className="w-full h-11 flex items-center justify-center gap-2 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-[#8b8d90] text-[13px] font-medium hover:bg-[rgba(255,255,255,0.06)] hover:text-[#f7f8f8] transition-all"
-                whileHover={{ y: -1 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <CheckCircle2 className="w-4 h-4" strokeWidth={1.5} />
-                Tout marquer comme lu
-              </motion.button>
-            </motion.div>
-          )}
-
-          {/* Content */}
-          <AnimatePresence mode="wait">
-            {notifications.length === 0 ? (
-              <motion.div
-                key="empty"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
-                className="p-6 md:p-8 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]"
-              >
-                <div className="text-center max-w-[280px] mx-auto">
-                  <div className="w-14 h-14 rounded-xl bg-[rgba(94,109,210,0.1)] flex items-center justify-center mx-auto mb-4">
-                    <Bell className="w-7 h-7 text-[#5e6dd2]" strokeWidth={1.5} />
-                  </div>
-                  <h3 className="text-[15px] font-semibold text-[#f7f8f8] mb-2">
-                    Aucune notification
-                  </h3>
-                  <p className="text-[13px] text-[#8b8d90] leading-relaxed">
-                    Tu recevras des notifications pour tes sessions et badges
-                  </p>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="notifications"
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                className="space-y-2"
-              >
-                {notifications.map((notification, index) => (
-                  <NotificationCard
-                    key={notification.id}
-                    notification={notification}
-                    onMarkAsRead={() => handleMarkAsRead(notification.id)}
-                    index={index}
-                  />
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Settings Link */}
-          {notifications.length > 0 && (
-            <motion.div variants={itemVariants} className="mt-6">
-              <motion.button
-                onClick={() => onNavigate('notification-settings')}
-                className="w-full h-12 flex items-center justify-center gap-2 rounded-xl bg-[rgba(94,109,210,0.08)] border border-[rgba(94,109,210,0.2)] text-[#8b93ff] text-[14px] font-medium hover:bg-[rgba(94,109,210,0.12)] transition-all"
-                whileHover={{ y: -1 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Settings className="w-4 h-4" strokeWidth={1.5} />
-                Gérer les préférences
-              </motion.button>
-            </motion.div>
-          )}
+          </div>
         </motion.div>
-      </div>
+
+        {/* Mark All as Read */}
+        {unreadCount > 1 && (
+          <motion.div variants={itemVariants} className="mb-4">
+            <motion.button
+              onClick={handleMarkAllAsRead}
+              className="w-full h-11 flex items-center justify-center gap-2 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-[#8b8d90] text-[13px] font-medium hover:bg-[rgba(255,255,255,0.06)] hover:text-[#f7f8f8] transition-all"
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <CheckCircle2 className="w-4 h-4" strokeWidth={1.5} />
+              Tout marquer comme lu
+            </motion.button>
+          </motion.div>
+        )}
+
+        {/* Content */}
+        <AnimatePresence mode="wait">
+          {notifications.length === 0 ? (
+            <motion.div
+              key="empty"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
+              className="p-6 md:p-8 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]"
+            >
+              <div className="text-center max-w-[280px] mx-auto">
+                <div className="w-14 h-14 rounded-xl bg-[rgba(94,109,210,0.1)] flex items-center justify-center mx-auto mb-4">
+                  <Inbox className="w-7 h-7 text-[#5e6dd2]" strokeWidth={1.5} />
+                </div>
+                <h3 className="text-[15px] font-semibold text-[#f7f8f8] mb-2">
+                  Aucune notification
+                </h3>
+                <p className="text-[13px] text-[#8b8d90] leading-relaxed mb-4">
+                  Tu recevras des notifications pour tes sessions et badges
+                </p>
+                <motion.button
+                  onClick={() => onNavigate('notification-settings')}
+                  className="text-[12px] font-medium text-[#5e6dd2] hover:text-[#8b93ff] transition-colors flex items-center gap-1 mx-auto"
+                  whileHover={{ x: 2 }}
+                >
+                  Configurer les notifications
+                  <ArrowLeft className="w-3 h-3 rotate-180" strokeWidth={2} />
+                </motion.button>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="notifications"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="space-y-2"
+            >
+              {notifications.map((notification, index) => (
+                <NotificationCard
+                  key={notification.id}
+                  notification={notification}
+                  onMarkAsRead={() => handleMarkAsRead(notification.id)}
+                  index={index}
+                />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Settings Link */}
+        {notifications.length > 0 && (
+          <motion.div variants={itemVariants} className="mt-6">
+            <motion.button
+              onClick={() => onNavigate('notification-settings')}
+              className="w-full h-12 flex items-center justify-center gap-2 rounded-xl bg-[rgba(94,109,210,0.08)] border border-[rgba(94,109,210,0.2)] text-[#8b93ff] text-[14px] font-medium hover:bg-[rgba(94,109,210,0.12)] transition-all"
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Settings className="w-4 h-4" strokeWidth={1.5} />
+              Gerer les preferences
+            </motion.button>
+          </motion.div>
+        )}
+      </motion.div>
     </div>
   );
 }

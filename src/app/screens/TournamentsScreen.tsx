@@ -1,4 +1,4 @@
-import { ArrowLeft, Trophy, Users, Calendar, Clock, Award, Target, Zap, Sparkles, Crown, Star } from 'lucide-react';
+import { ArrowLeft, Trophy, Users, Calendar, Clock, Award, Target, Sparkles, Crown, Star, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 
@@ -27,25 +27,25 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
+    transition: { staggerChildren: 0.06, delayChildren: 0.1 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
+    transition: { type: "spring", stiffness: 400, damping: 28 }
   }
 };
 
-const gameGradients: Record<string, string> = {
-  'Valorant': 'from-red-500 to-pink-500',
-  'League of Legends': 'from-amber-500 to-yellow-500',
-  'Counter-Strike 2': 'from-orange-500 to-amber-500',
-  'Apex Legends': 'from-red-600 to-orange-500',
-  'default': 'from-indigo-500 to-purple-500'
+const gameColors: Record<string, string> = {
+  'Valorant': '#ff4655',
+  'League of Legends': '#c89b3c',
+  'Counter-Strike 2': '#f5a623',
+  'Apex Legends': '#da292a',
+  'default': '#f5a623'
 };
 
 export function TournamentsScreen({ onNavigate, showToast }: TournamentsScreenProps) {
@@ -102,17 +102,17 @@ export function TournamentsScreen({ onNavigate, showToast }: TournamentsScreenPr
     },
   ];
 
-  const tabs: { key: TournamentTab; label: string }[] = [
-    { key: 'active', label: 'En cours' },
-    { key: 'upcoming', label: 'À venir' },
-    { key: 'past', label: 'Terminés' },
+  const tabs: { key: TournamentTab; label: string; count: number }[] = [
+    { key: 'active', label: 'En cours', count: tournaments.filter(t => t.status === 'ongoing').length },
+    { key: 'upcoming', label: 'À venir', count: tournaments.filter(t => t.status === 'registration').length },
+    { key: 'past', label: 'Terminés', count: tournaments.filter(t => t.status === 'completed').length },
   ];
 
-  const getStatusBadge = (status: TournamentStatus) => {
+  const getStatusConfig = (status: TournamentStatus) => {
     const configs = {
-      registration: { label: 'Inscriptions ouvertes', gradient: 'from-indigo-500 to-purple-500' },
-      ongoing: { label: 'En cours', gradient: 'from-emerald-500 to-teal-500' },
-      completed: { label: 'Terminé', gradient: 'from-gray-400 to-gray-500' },
+      registration: { label: 'Inscriptions ouvertes', color: '#f5a623', bgColor: 'rgba(245, 166, 35, 0.12)' },
+      ongoing: { label: 'En cours', color: '#00c853', bgColor: 'rgba(0, 200, 83, 0.12)' },
+      completed: { label: 'Terminé', color: '#6b7280', bgColor: 'rgba(107, 114, 128, 0.12)' },
     };
     return configs[status];
   };
@@ -133,116 +133,137 @@ export function TournamentsScreen({ onNavigate, showToast }: TournamentsScreenPr
   });
 
   return (
-    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-gradient-to-br from-pink-400/15 to-red-400/15 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
+    <div className="min-h-screen pb-24 md:pb-8 pt-safe bg-[#08090a]">
+      <div className="px-4 py-6 max-w-2xl mx-auto">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           {/* Header */}
-          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
+          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
             <motion.button
               onClick={() => onNavigate('home')}
-              className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+              className="w-10 h-10 rounded-xl bg-white/[0.05] border border-white/[0.06] flex items-center justify-center hover:bg-white/[0.08] transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
+              <ArrowLeft className="w-5 h-5 text-[#8a8f98]" strokeWidth={1.5} />
             </motion.button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+              <h1 className="text-xl font-semibold text-white tracking-tight">
                 Tournois
               </h1>
-              <p className="text-sm text-gray-500 font-medium mt-0.5">
+              <p className="text-sm text-[#6b7280] mt-0.5">
                 Affrontez d'autres squads
               </p>
             </div>
-            <motion.div
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg"
-              whileHover={{ scale: 1.05, rotate: 5 }}
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{ backgroundColor: 'rgba(245, 166, 35, 0.12)' }}
             >
-              <Trophy className="w-6 h-6 text-white" strokeWidth={2} />
-            </motion.div>
+              <Trophy className="w-5 h-5" style={{ color: '#f5a623' }} strokeWidth={1.5} />
+            </div>
           </motion.div>
 
           {/* Featured Banner */}
           <motion.div
             variants={itemVariants}
-            className="relative overflow-hidden rounded-3xl mb-6"
+            className="relative overflow-hidden rounded-2xl mb-6 border border-white/[0.06]"
+            style={{ background: 'linear-gradient(135deg, rgba(245, 166, 35, 0.15) 0%, rgba(245, 166, 35, 0.05) 100%)' }}
           >
-            <div className="bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 p-6 shadow-xl">
-
-              <div className="relative">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Crown className="w-5 h-5 text-yellow-200" strokeWidth={2} />
-                      <span className="text-white/90 text-sm font-semibold">
-                        Tournoi en vedette
-                      </span>
-                    </div>
-                    <h2 className="text-2xl font-bold text-white mb-2">
-                      Valorant Champions Cup
-                    </h2>
-                    <div className="flex items-center gap-2 text-sm text-white/90 font-medium">
-                      <Calendar className="w-4 h-4" strokeWidth={2} />
-                      Aujourd'hui 20h
-                    </div>
+            <div className="p-5">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Crown className="w-4 h-4" style={{ color: '#f5a623' }} strokeWidth={1.5} />
+                    <span className="text-xs font-medium" style={{ color: '#f5a623' }}>
+                      Tournoi en vedette
+                    </span>
                   </div>
-                  <motion.div
-                    className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center"
-                    whileHover={{ scale: 1.1, rotate: 10 }}
-                  >
-                    <Trophy className="w-8 h-8 text-white" strokeWidth={2} />
-                  </motion.div>
-                </div>
-
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm">
-                    <Award className="w-4 h-4 text-yellow-200" strokeWidth={2} />
-                    <span className="text-white text-sm font-bold">500€</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm">
-                    <Users className="w-4 h-4 text-white" strokeWidth={2} />
-                    <span className="text-white text-sm font-semibold">14/16 squads</span>
+                  <h2 className="text-lg font-semibold text-white mb-1">
+                    Valorant Champions Cup
+                  </h2>
+                  <div className="flex items-center gap-1.5 text-sm text-[#8a8f98]">
+                    <Calendar className="w-3.5 h-3.5" strokeWidth={1.5} />
+                    <span>Aujourd'hui 20h</span>
                   </div>
                 </div>
-
-                <motion.button
-                  onClick={() => handleRegister('1')}
-                  className="w-full h-12 rounded-xl bg-white text-orange-600 font-bold text-sm shadow-lg"
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
+                <div
+                  className="w-14 h-14 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: 'rgba(245, 166, 35, 0.2)' }}
                 >
-                  Inscrire ma squad (2 places restantes)
-                </motion.button>
+                  <Trophy className="w-7 h-7" style={{ color: '#f5a623' }} strokeWidth={1.5} />
+                </div>
               </div>
+
+              <div className="flex items-center gap-3 mb-4">
+                <div
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg"
+                  style={{ backgroundColor: 'rgba(245, 166, 35, 0.12)' }}
+                >
+                  <Award className="w-3.5 h-3.5" style={{ color: '#f5a623' }} strokeWidth={1.5} />
+                  <span className="text-xs font-semibold" style={{ color: '#f5a623' }}>500€</span>
+                </div>
+                <div
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg"
+                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.06)' }}
+                >
+                  <Users className="w-3.5 h-3.5 text-[#8a8f98]" strokeWidth={1.5} />
+                  <span className="text-xs font-medium text-[#8a8f98]">14/16 squads</span>
+                </div>
+              </div>
+
+              {/* Progress bar */}
+              <div className="mb-4">
+                <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{ backgroundColor: '#f5a623' }}
+                    initial={{ width: 0 }}
+                    animate={{ width: '87.5%' }}
+                    transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
+                  />
+                </div>
+              </div>
+
+              <motion.button
+                onClick={() => handleRegister('1')}
+                className="w-full h-11 rounded-xl font-medium text-sm transition-all"
+                style={{ backgroundColor: '#f5a623', color: '#08090a' }}
+                whileHover={{ scale: 1.02, opacity: 0.9 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Inscrire ma squad (2 places restantes)
+              </motion.button>
             </div>
           </motion.div>
 
           {/* Tabs */}
-          <motion.div variants={itemVariants} className="flex gap-2 mb-6">
+          <motion.div variants={itemVariants} className="flex gap-1 p-1 mb-6 bg-white/[0.03] rounded-xl border border-white/[0.06]">
             {tabs.map((tab) => (
               <motion.button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   activeTab === tab.key
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-orange-500/30'
-                    : 'bg-white/80 backdrop-blur-sm text-gray-600 border border-white/50 hover:border-orange-200'
+                    ? 'bg-white/[0.08] text-white'
+                    : 'text-[#6b7280] hover:text-[#8a8f98]'
                 }`}
-                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 {tab.label}
+                {tab.count > 0 && (
+                  <span
+                    className="px-1.5 py-0.5 rounded text-[10px] font-semibold"
+                    style={{
+                      backgroundColor: activeTab === tab.key ? 'rgba(245, 166, 35, 0.2)' : 'rgba(255, 255, 255, 0.06)',
+                      color: activeTab === tab.key ? '#f5a623' : '#6b7280'
+                    }}
+                  >
+                    {tab.count}
+                  </span>
+                )}
               </motion.button>
             ))}
           </motion.div>
@@ -255,93 +276,100 @@ export function TournamentsScreen({ onNavigate, showToast }: TournamentsScreenPr
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="space-y-4"
+                className="space-y-3"
               >
                 {filteredTournaments.map((tournament, index) => {
-                  const statusBadge = getStatusBadge(tournament.status);
+                  const statusConfig = getStatusConfig(tournament.status);
                   const registrationPercent = Math.round((tournament.teamsRegistered / tournament.maxTeams) * 100);
-                  const gameGradient = gameGradients[tournament.game] || gameGradients.default;
+                  const gameColor = gameColors[tournament.game] || gameColors.default;
 
                   return (
                     <motion.div
                       key={tournament.id}
                       variants={itemVariants}
                       custom={index}
-                      className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-white/50 shadow-lg hover:shadow-xl transition-all duration-300"
-                      whileHover={{ scale: 1.01, y: -2 }}
+                      className="bg-white/[0.02] backdrop-blur-sm rounded-xl p-4 border border-white/[0.06] hover:bg-white/[0.04] hover:border-white/[0.1] transition-all duration-200"
+                      whileHover={{ scale: 1.01 }}
                     >
                       {/* Header */}
-                      <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-start justify-between mb-3">
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="text-lg font-bold text-gray-800">
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <h3 className="text-[15px] font-semibold text-white truncate">
                               {tournament.name}
                             </h3>
                           </div>
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className={`px-2 py-0.5 rounded-lg bg-gradient-to-r ${gameGradient} text-white text-xs font-bold`}>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span
+                              className="px-2 py-0.5 rounded-md text-[11px] font-semibold"
+                              style={{ backgroundColor: `${gameColor}20`, color: gameColor }}
+                            >
                               {tournament.game}
                             </span>
+                            <span
+                              className="px-2 py-0.5 rounded-md text-[11px] font-medium"
+                              style={{ backgroundColor: statusConfig.bgColor, color: statusConfig.color }}
+                            >
+                              {statusConfig.label}
+                            </span>
                           </div>
-                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full bg-gradient-to-r ${statusBadge.gradient} text-white text-xs font-bold`}>
-                            {statusBadge.label}
-                          </span>
                         </div>
-                        <motion.div
-                          className={`w-14 h-14 rounded-xl bg-gradient-to-br ${gameGradient} flex items-center justify-center flex-shrink-0 shadow-lg`}
-                          whileHover={{ scale: 1.1, rotate: 5 }}
+                        <div
+                          className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ml-3"
+                          style={{ backgroundColor: `${gameColor}15` }}
                         >
-                          <Trophy className="w-7 h-7 text-white" strokeWidth={2} />
-                        </motion.div>
+                          <Trophy className="w-5 h-5" style={{ color: gameColor }} strokeWidth={1.5} />
+                        </div>
                       </div>
 
                       {/* Info Grid */}
-                      <div className="grid grid-cols-2 gap-3 mb-4">
-                        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-50">
-                          <Calendar className="w-4 h-4 text-gray-400" strokeWidth={2} />
-                          <span className="text-xs text-gray-600 font-medium">
+                      <div className="grid grid-cols-4 gap-2 mb-3">
+                        <div className="flex flex-col items-center p-2 rounded-lg bg-white/[0.03]">
+                          <Calendar className="w-3.5 h-3.5 text-[#6b7280] mb-1" strokeWidth={1.5} />
+                          <span className="text-[10px] text-[#8a8f98] text-center leading-tight">
                             {tournament.startDate}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-50">
-                          <Clock className="w-4 h-4 text-gray-400" strokeWidth={2} />
-                          <span className="text-xs text-gray-600 font-medium">
+                        <div className="flex flex-col items-center p-2 rounded-lg bg-white/[0.03]">
+                          <Clock className="w-3.5 h-3.5 text-[#6b7280] mb-1" strokeWidth={1.5} />
+                          <span className="text-[10px] text-[#8a8f98] text-center leading-tight">
                             {tournament.duration}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50">
-                          <Award className="w-4 h-4 text-amber-500" strokeWidth={2} />
-                          <span className="text-xs text-amber-700 font-semibold">
+                        <div className="flex flex-col items-center p-2 rounded-lg" style={{ backgroundColor: 'rgba(245, 166, 35, 0.08)' }}>
+                          <Award className="w-3.5 h-3.5 mb-1" style={{ color: '#f5a623' }} strokeWidth={1.5} />
+                          <span className="text-[10px] font-semibold" style={{ color: '#f5a623' }}>
                             {tournament.prize}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-50">
-                          <Target className="w-4 h-4 text-gray-400" strokeWidth={2} />
-                          <span className="text-xs text-gray-600 font-medium">
+                        <div className="flex flex-col items-center p-2 rounded-lg bg-white/[0.03]">
+                          <Target className="w-3.5 h-3.5 text-[#6b7280] mb-1" strokeWidth={1.5} />
+                          <span className="text-[10px] text-[#8a8f98] text-center leading-tight">
                             {tournament.format}
                           </span>
                         </div>
                       </div>
 
                       {/* Teams Progress */}
-                      <div className="mb-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <Users className="w-4 h-4 text-gray-400" strokeWidth={2} />
-                            <span className="text-xs text-gray-600 font-semibold">
+                      <div className="mb-3">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="flex items-center gap-1.5">
+                            <Users className="w-3.5 h-3.5 text-[#6b7280]" strokeWidth={1.5} />
+                            <span className="text-xs text-[#8a8f98]">
                               {tournament.teamsRegistered}/{tournament.maxTeams} squads
                             </span>
                           </div>
-                          <span className="text-xs text-gray-400 font-medium">
+                          <span className="text-xs text-[#6b7280]">
                             {registrationPercent}%
                           </span>
                         </div>
-                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
                           <motion.div
-                            className={`h-full bg-gradient-to-r ${gameGradient} rounded-full`}
+                            className="h-full rounded-full"
+                            style={{ backgroundColor: gameColor }}
                             initial={{ width: 0 }}
                             animate={{ width: `${registrationPercent}%` }}
-                            transition={{ duration: 0.8, ease: "easeOut" }}
+                            transition={{ duration: 0.6, ease: "easeOut", delay: index * 0.1 }}
                           />
                         </div>
                       </div>
@@ -350,31 +378,35 @@ export function TournamentsScreen({ onNavigate, showToast }: TournamentsScreenPr
                       {tournament.status === 'registration' && (
                         <motion.button
                           onClick={() => handleRegister(tournament.id)}
-                          className="w-full h-11 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold text-sm shadow-lg shadow-orange-500/30"
-                          whileHover={{ scale: 1.02, y: -2 }}
+                          className="w-full h-10 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-all"
+                          style={{ backgroundColor: '#f5a623', color: '#08090a' }}
+                          whileHover={{ scale: 1.02, opacity: 0.9 }}
                           whileTap={{ scale: 0.98 }}
                         >
                           Inscrire ma squad
+                          <ChevronRight className="w-4 h-4" strokeWidth={2} />
                         </motion.button>
                       )}
                       {tournament.status === 'ongoing' && (
                         <motion.button
                           onClick={() => handleViewBracket(tournament.id)}
-                          className="w-full h-11 rounded-xl bg-white border border-gray-200 text-gray-700 font-semibold text-sm hover:border-orange-300 hover:text-orange-600 transition-all"
+                          className="w-full h-10 rounded-lg font-medium text-sm flex items-center justify-center gap-2 bg-white/[0.06] text-white border border-white/[0.08] hover:bg-white/[0.1] transition-all"
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                         >
                           Voir le bracket
+                          <ChevronRight className="w-4 h-4" strokeWidth={2} />
                         </motion.button>
                       )}
                       {tournament.status === 'completed' && (
                         <motion.button
                           onClick={() => showToast('Résultats du tournoi', 'info')}
-                          className="w-full h-11 rounded-xl bg-gray-100 text-gray-500 font-semibold text-sm"
+                          className="w-full h-10 rounded-lg font-medium text-sm flex items-center justify-center gap-2 bg-white/[0.04] text-[#6b7280] border border-white/[0.06] hover:bg-white/[0.06] transition-all"
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                         >
                           Voir les résultats
+                          <ChevronRight className="w-4 h-4" strokeWidth={2} />
                         </motion.button>
                       )}
                     </motion.div>
@@ -390,14 +422,15 @@ export function TournamentsScreen({ onNavigate, showToast }: TournamentsScreenPr
                 className="text-center py-16"
               >
                 <div
-                  className="w-20 h-20 rounded-3xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-orange-500/30"
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                  style={{ backgroundColor: 'rgba(245, 166, 35, 0.12)' }}
                 >
-                  <Trophy className="w-10 h-10 text-white" strokeWidth={1.5} />
+                  <Trophy className="w-8 h-8" style={{ color: '#f5a623' }} strokeWidth={1.5} />
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">
+                <h3 className="text-base font-semibold text-white mb-1">
                   Aucun tournoi
                 </h3>
-                <p className="text-gray-500 text-sm max-w-xs mx-auto">
+                <p className="text-sm text-[#6b7280] max-w-xs mx-auto">
                   Les tournois apparaîtront ici
                 </p>
               </motion.div>
@@ -409,20 +442,26 @@ export function TournamentsScreen({ onNavigate, showToast }: TournamentsScreenPr
             variants={itemVariants}
             className="mt-6"
           >
-            <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-2xl p-4 border border-indigo-200/50">
+            <div
+              className="rounded-xl p-4 border border-white/[0.06]"
+              style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.03) 100%)' }}
+            >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-white" strokeWidth={2} />
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: 'rgba(139, 92, 246, 0.15)' }}
+                >
+                  <Sparkles className="w-5 h-5" style={{ color: '#8b5cf6' }} strokeWidth={1.5} />
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-semibold text-indigo-800">
+                  <p className="text-sm font-medium text-white">
                     Créer votre propre tournoi
                   </p>
-                  <p className="text-[10px] text-indigo-600 mt-0.5">
+                  <p className="text-xs text-[#6b7280] mt-0.5">
                     Disponible avec l'abonnement Premium
                   </p>
                 </div>
-                <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+                <Star className="w-5 h-5" style={{ color: '#f5a623', fill: '#f5a623' }} />
               </div>
             </div>
           </motion.div>

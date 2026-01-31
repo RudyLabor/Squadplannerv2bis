@@ -85,8 +85,20 @@ export function AutoCoachingScreen({ onNavigate, showToast }: AutoCoachingScreen
 
   if (!currentSquad) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
-        <p className="text-gray-500 font-medium">Sélectionnez un squad</p>
+      <div className="min-h-screen bg-[#08090a] flex items-center justify-center">
+        <div className="text-center p-6">
+          <div className="w-16 h-16 rounded-2xl bg-[rgba(94,109,210,0.1)] flex items-center justify-center mx-auto mb-4">
+            <Brain className="w-8 h-8 text-[#5e6dd2]" strokeWidth={1.5} />
+          </div>
+          <h2 className="text-[18px] font-semibold text-[#f7f8f8] mb-2">Aucun squad sélectionné</h2>
+          <p className="text-[14px] text-[#8b8d90] mb-6">Sélectionnez un squad pour accéder au coaching automatisé</p>
+          <button
+            onClick={() => onNavigate?.('squads')}
+            className="px-6 py-3 bg-[#5e6dd2] hover:bg-[#6a79db] text-white rounded-xl font-medium transition-colors"
+          >
+            Voir mes squads
+          </button>
+        </div>
       </div>
     );
   }
@@ -100,174 +112,166 @@ export function AutoCoachingScreen({ onNavigate, showToast }: AutoCoachingScreen
   const healthColors = getHealthColor(healthScore);
 
   return (
-    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 right-0 w-64 h-64 bg-gradient-to-br from-emerald-400/15 to-teal-400/15 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {/* Header */}
-          <motion.div variants={itemVariants} className="flex items-center gap-3 mb-8">
-            <motion.button
-              onClick={() => onNavigate?.('intelligence')}
-              className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
-            </motion.button>
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                Coaching Auto
-              </h1>
-              <p className="text-sm text-gray-500 font-medium">
-                Conseils IA personnalisés
-              </p>
-            </div>
-            <motion.div
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30"
-              whileHover={{ scale: 1.05, rotate: 5 }}
-            >
-              <Brain className="w-6 h-6 text-white" strokeWidth={2} />
-            </motion.div>
-          </motion.div>
-
-          {/* Hero Section */}
-          <motion.div variants={itemVariants} className="text-center py-6 mb-6">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-500 to-purple-600 mb-4 shadow-xl shadow-indigo-500/30">
-              <Brain className="w-10 h-10 text-white" strokeWidth={1.5} />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Coaching Automatisé</h2>
-            <p className="text-gray-500 text-sm max-w-md mx-auto">
-              Conseils personnalisés basés sur l'IA pour {currentSquad?.name}
+    <div className="min-h-screen pb-24 md:pb-8 bg-[#08090a]">
+      <motion.div
+        className="max-w-2xl mx-auto px-4 md:px-6 py-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Header - Linear style */}
+        <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
+          <motion.button
+            onClick={() => onNavigate?.('intelligence')}
+            className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center text-[#8b8d90] hover:bg-[rgba(255,255,255,0.06)] hover:text-[#f7f8f8] transition-all"
+            whileHover={{ x: -2 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
+          </motion.button>
+          <div className="flex-1">
+            <h1 className="text-[24px] md:text-[28px] font-semibold text-[#f7f8f8]">
+              Coaching Auto
+            </h1>
+            <p className="text-[13px] text-[#5e6063]">
+              Conseils IA pour {currentSquad?.name}
             </p>
-          </motion.div>
+          </div>
+          <div className="w-11 h-11 rounded-xl bg-[rgba(94,109,210,0.1)] flex items-center justify-center">
+            <Brain className="w-5 h-5 text-[#8b93ff]" strokeWidth={1.5} />
+          </div>
+        </motion.div>
 
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              {/* Loader animation - keep infinite */}
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              >
-                <Loader2 className="w-10 h-10 text-indigo-500" />
-              </motion.div>
-            </div>
-          ) : (
-            <>
-              {/* Health Score Card */}
-              <motion.div
-                variants={itemVariants}
-                className={`bg-gradient-to-br ${healthColors.gradient} rounded-2xl p-6 mb-6 shadow-xl ${healthColors.shadow} relative overflow-hidden`}
-              >
-                {/* Decorative elements */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
-
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold text-white">Santé du Squad</h3>
-                    <div className="px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-sm text-white text-lg font-bold">
-                      {healthScore}%
-                    </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <div className="w-6 h-6 border-2 border-[#5e6dd2]/30 border-t-[#5e6dd2] rounded-full animate-spin" />
+          </div>
+        ) : (
+          <>
+            {/* Health Score Card - Linear dark style */}
+            <motion.div
+              variants={itemVariants}
+              className="rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] p-5 mb-6"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                    healthScore >= 80 ? 'bg-[rgba(74,222,128,0.1)]' :
+                    healthScore >= 60 ? 'bg-[rgba(245,166,35,0.1)]' :
+                    'bg-[rgba(248,113,113,0.1)]'
+                  }`}>
+                    <TrendingUp className={`w-5 h-5 ${
+                      healthScore >= 80 ? 'text-[#4ade80]' :
+                      healthScore >= 60 ? 'text-[#f5a623]' :
+                      'text-[#f87171]'
+                    }`} strokeWidth={1.5} />
                   </div>
-                  <div className="w-full h-3 bg-white/30 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${healthScore}%` }}
-                      transition={{ duration: 1, ease: 'easeOut' }}
-                      className="h-full bg-white rounded-full"
-                    />
+                  <div>
+                    <h3 className="text-[15px] font-semibold text-[#f7f8f8]">Santé du Squad</h3>
+                    <p className="text-[12px] text-[#5e6063]">Score global de performance</p>
                   </div>
                 </div>
-              </motion.div>
-
-              {insights.length > 0 ? (
-                <motion.div variants={itemVariants}>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Sparkles className="w-5 h-5 text-amber-500" />
-                    <h3 className="text-sm font-bold text-gray-700">
-                      Recommandations ({insights.length})
-                    </h3>
-                  </div>
-                  <div className="space-y-4">
-                    {insights.map((insight, i) => {
-                      const Icon = getInsightIcon(insight.type);
-                      const styles = getPriorityStyles(insight.priority);
-                      return (
-                        <motion.div
-                          key={i}
-                          variants={itemVariants}
-                          className={`bg-gradient-to-br ${styles.bg} backdrop-blur-sm rounded-2xl p-5 border ${styles.border}`}
-                          whileHover={{ scale: 1.01, y: -2 }}
-                        >
-                          <div className="flex items-start gap-3 mb-3">
-                            <motion.div
-                              className="w-12 h-12 rounded-xl bg-white/80 flex items-center justify-center shadow-md"
-                              whileHover={{ scale: 1.1 }}
-                            >
-                              <Icon className={`w-6 h-6 ${styles.text}`} strokeWidth={2} />
-                            </motion.div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h4 className="font-bold text-gray-800">{insight.title}</h4>
-                                <span className={`px-2 py-0.5 text-xs font-bold rounded-lg ${styles.badge}`}>
-                                  {insight.priority === 'high' ? 'Urgent' : insight.priority === 'medium' ? 'Moyen' : 'Faible'}
-                                </span>
-                              </div>
-                              <p className="text-sm text-gray-600 mb-3">{insight.description}</p>
-                              {insight.recommendations && insight.recommendations.length > 0 && (
-                                <div className="space-y-2 mb-3">
-                                  {insight.recommendations.map((rec, idx) => (
-                                    <div key={idx} className="flex items-start gap-2">
-                                      <Lightbulb className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                                      <span className="text-sm text-gray-600">{rec}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          <motion.button
-                            onClick={() => showToast?.('Action notée ! Utilisez ces conseils pour améliorer votre squad.', 'success')}
-                            className="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl text-sm font-semibold shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all flex items-center justify-center gap-2"
-                            whileHover={{ scale: 1.01 }}
-                            whileTap={{ scale: 0.99 }}
-                          >
-                            <CheckCircle2 className="w-4 h-4" strokeWidth={2} />
-                            Prendre en compte
-                          </motion.button>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                </motion.div>
-              ) : (
+                <div className={`text-[28px] font-bold tabular-nums ${
+                  healthScore >= 80 ? 'text-[#4ade80]' :
+                  healthScore >= 60 ? 'text-[#f5a623]' :
+                  'text-[#f87171]'
+                }`}>
+                  {healthScore}%
+                </div>
+              </div>
+              <div className="h-2 bg-[rgba(255,255,255,0.05)] rounded-full overflow-hidden">
                 <motion.div
-                  variants={itemVariants}
-                  className="text-center py-12 bg-white/80 backdrop-blur-sm rounded-2xl border border-white/50 shadow-lg"
-                >
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 mb-4">
-                    <Target className="w-8 h-8 text-emerald-600" strokeWidth={2} />
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-800 mb-2">Tout va bien !</h3>
-                  <p className="text-sm text-gray-500 max-w-md mx-auto">
-                    Votre squad est en excellente santé. Continuez comme ça !
-                  </p>
-                </motion.div>
-              )}
-            </>
-          )}
-        </motion.div>
-      </div>
+                  initial={{ width: 0 }}
+                  animate={{ width: `${healthScore}%` }}
+                  transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+                  className={`h-full rounded-full ${
+                    healthScore >= 80 ? 'bg-[#4ade80]' :
+                    healthScore >= 60 ? 'bg-[#f5a623]' :
+                    'bg-[#f87171]'
+                  }`}
+                />
+              </div>
+            </motion.div>
+
+            {insights.length > 0 ? (
+              <motion.div variants={itemVariants}>
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="w-5 h-5 text-[#f5a623]" strokeWidth={1.5} />
+                  <h3 className="text-[15px] font-semibold text-[#f7f8f8]">
+                    Recommandations ({insights.length})
+                  </h3>
+                </div>
+                <div className="space-y-3">
+                  {insights.map((insight, i) => {
+                    const Icon = getInsightIcon(insight.type);
+                    const priorityColors = {
+                      high: { bg: 'bg-[rgba(248,113,113,0.1)]', border: 'border-[rgba(248,113,113,0.2)]', icon: 'text-[#f87171]', badge: 'bg-[rgba(248,113,113,0.15)] text-[#f87171]' },
+                      medium: { bg: 'bg-[rgba(245,166,35,0.1)]', border: 'border-[rgba(245,166,35,0.2)]', icon: 'text-[#f5a623]', badge: 'bg-[rgba(245,166,35,0.15)] text-[#f5a623]' },
+                      low: { bg: 'bg-[rgba(96,165,250,0.1)]', border: 'border-[rgba(96,165,250,0.2)]', icon: 'text-[#60a5fa]', badge: 'bg-[rgba(96,165,250,0.15)] text-[#60a5fa]' },
+                    };
+                    const colors = priorityColors[insight.priority] || priorityColors.low;
+
+                    return (
+                      <motion.div
+                        key={i}
+                        variants={itemVariants}
+                        className="rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] p-4 hover:bg-[rgba(255,255,255,0.04)] transition-colors"
+                        whileHover={{ y: -2 }}
+                      >
+                        <div className="flex items-start gap-3 mb-3">
+                          <div className={`w-10 h-10 rounded-lg ${colors.bg} flex items-center justify-center flex-shrink-0`}>
+                            <Icon className={`w-5 h-5 ${colors.icon}`} strokeWidth={1.5} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <h4 className="text-[14px] font-semibold text-[#f7f8f8]">{insight.title}</h4>
+                              <span className={`px-2 py-0.5 text-[10px] font-medium rounded-md uppercase ${colors.badge}`}>
+                                {insight.priority === 'high' ? 'Urgent' : insight.priority === 'medium' ? 'Moyen' : 'Faible'}
+                              </span>
+                            </div>
+                            <p className="text-[13px] text-[#8b8d90] mb-3">{insight.description}</p>
+                            {insight.recommendations && insight.recommendations.length > 0 && (
+                              <div className="space-y-2 mb-3">
+                                {insight.recommendations.map((rec, idx) => (
+                                  <div key={idx} className="flex items-start gap-2">
+                                    <Lightbulb className="w-4 h-4 text-[#f5a623] flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                                    <span className="text-[12px] text-[#8b8d90]">{rec}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <motion.button
+                          onClick={() => showToast?.('Action notée !', 'success')}
+                          className="w-full h-10 rounded-lg bg-[rgba(94,109,210,0.1)] text-[#8b93ff] text-[13px] font-medium flex items-center justify-center gap-2 hover:bg-[rgba(94,109,210,0.15)] transition-colors"
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <CheckCircle2 className="w-4 h-4" strokeWidth={1.5} />
+                          Prendre en compte
+                        </motion.button>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                variants={itemVariants}
+                className="text-center py-12 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]"
+              >
+                <div className="w-16 h-16 rounded-xl bg-[rgba(74,222,128,0.1)] flex items-center justify-center mx-auto mb-4">
+                  <Target className="w-8 h-8 text-[#4ade80]" strokeWidth={1.5} />
+                </div>
+                <h3 className="text-[16px] font-semibold text-[#f7f8f8] mb-2">Tout va bien !</h3>
+                <p className="text-[13px] text-[#8b8d90] max-w-md mx-auto">
+                  Votre squad est en excellente santé. Continuez comme ça !
+                </p>
+              </motion.div>
+            )}
+          </>
+        )}
+      </motion.div>
     </div>
   );
 }

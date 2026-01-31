@@ -1,6 +1,6 @@
 /**
- * ACHIEVEMENTS SCREEN - Premium UI v2.0
- * Framer Motion + Glassmorphism + Gradients
+ * ACHIEVEMENTS SCREEN - Linear Dark Design System
+ * Clean, minimal dark UI with subtle animations
  */
 
 import { ArrowLeft, Trophy, Lock, Check, Target, Flame, Zap, Award, Star, Crown, Shield, Share2, Sparkles } from 'lucide-react';
@@ -21,6 +21,7 @@ interface Achievement {
   description: string;
   icon: any;
   rarity: AchievementRarity;
+  category: AchievementCategory;
   progress: number;
   total: number;
   unlocked: boolean;
@@ -36,19 +37,40 @@ const containerVariants = {
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
+    transition: { type: "spring", stiffness: 400, damping: 28 }
   }
 };
 
+// Linear dark design - rarity colors
 const rarityConfig = {
-  common: { gradient: 'from-gray-400 to-gray-500', bg: 'bg-gray-100', text: 'text-gray-600' },
-  rare: { gradient: 'from-blue-500 to-cyan-500', bg: 'bg-blue-100', text: 'text-blue-600' },
-  epic: { gradient: 'from-purple-500 to-pink-500', bg: 'bg-purple-100', text: 'text-purple-600' },
-  legendary: { gradient: 'from-amber-500 to-orange-500', bg: 'bg-amber-100', text: 'text-amber-600' },
+  common: {
+    color: '#8b8d90',
+    bg: 'rgba(139, 141, 144, 0.1)',
+    border: 'rgba(139, 141, 144, 0.2)',
+    label: 'Common'
+  },
+  rare: {
+    color: '#3b82f6',
+    bg: 'rgba(59, 130, 246, 0.1)',
+    border: 'rgba(59, 130, 246, 0.2)',
+    label: 'Rare'
+  },
+  epic: {
+    color: '#a855f7',
+    bg: 'rgba(168, 85, 247, 0.1)',
+    border: 'rgba(168, 85, 247, 0.2)',
+    label: 'Epic'
+  },
+  legendary: {
+    color: '#f5a623',
+    bg: 'rgba(245, 166, 35, 0.1)',
+    border: 'rgba(245, 166, 35, 0.2)',
+    label: 'Legendary'
+  },
 };
 
 export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreenProps) {
@@ -61,6 +83,7 @@ export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreen
       description: 'Participe à ta première session',
       icon: Trophy,
       rarity: 'common',
+      category: 'sessions',
       progress: 1,
       total: 1,
       unlocked: true,
@@ -72,6 +95,7 @@ export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreen
       description: 'Complète 10 sessions sans absence',
       icon: Crown,
       rarity: 'legendary',
+      category: 'sessions',
       progress: 10,
       total: 10,
       unlocked: true,
@@ -83,6 +107,7 @@ export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreen
       description: 'Crée ta première squad',
       icon: Shield,
       rarity: 'rare',
+      category: 'squads',
       progress: 1,
       total: 1,
       unlocked: true,
@@ -94,6 +119,7 @@ export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreen
       description: 'Ajoute 5 amis',
       icon: Star,
       rarity: 'rare',
+      category: 'social',
       progress: 3,
       total: 5,
       unlocked: false,
@@ -104,6 +130,7 @@ export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreen
       description: 'Participe à 50 sessions',
       icon: Flame,
       rarity: 'epic',
+      category: 'sessions',
       progress: 28,
       total: 50,
       unlocked: false,
@@ -114,6 +141,7 @@ export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreen
       description: 'Organise 25 sessions',
       icon: Target,
       rarity: 'epic',
+      category: 'sessions',
       progress: 12,
       total: 25,
       unlocked: false,
@@ -124,6 +152,7 @@ export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreen
       description: '20 check-ins à l\'heure',
       icon: Zap,
       rarity: 'rare',
+      category: 'social',
       progress: 15,
       total: 20,
       unlocked: false,
@@ -134,6 +163,7 @@ export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreen
       description: 'Atteins le niveau 50',
       icon: Award,
       rarity: 'legendary',
+      category: 'squads',
       progress: 38,
       total: 50,
       unlocked: false,
@@ -142,10 +172,14 @@ export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreen
 
   const categories = [
     { key: 'all' as const, label: 'Tous', count: achievements.length },
-    { key: 'sessions' as const, label: 'Sessions', count: 4 },
-    { key: 'social' as const, label: 'Social', count: 2 },
-    { key: 'squads' as const, label: 'Squads', count: 2 },
+    { key: 'sessions' as const, label: 'Sessions', count: achievements.filter(a => a.category === 'sessions').length },
+    { key: 'social' as const, label: 'Social', count: achievements.filter(a => a.category === 'social').length },
+    { key: 'squads' as const, label: 'Squads', count: achievements.filter(a => a.category === 'squads').length },
   ];
+
+  const filteredAchievements = activeCategory === 'all'
+    ? achievements
+    : achievements.filter(a => a.category === activeCategory);
 
   const unlockedCount = achievements.filter(a => a.unlocked).length;
   const progressPercent = Math.round((unlockedCount / achievements.length) * 100);
@@ -155,14 +189,8 @@ export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreen
   };
 
   return (
-    <div className="min-h-screen pb-24 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
+    <div className="min-h-screen bg-[#08090a] pb-24 md:pb-8">
+      <div className="px-4 py-6 max-w-2xl mx-auto">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -172,60 +200,69 @@ export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreen
           <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
             <motion.button
               onClick={() => onNavigate('profile')}
-              className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+              className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center hover:bg-[rgba(255,255,255,0.05)] transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
+              <ArrowLeft className="w-5 h-5 text-[#8b8d90]" strokeWidth={1.5} />
             </motion.button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+              <h1 className="text-xl font-semibold text-[#f7f8f8]">
                 Trophées
               </h1>
-              <p className="text-sm text-gray-500 mt-0.5 font-medium">
+              <p className="text-sm text-[#5e6063] mt-0.5">
                 {unlockedCount}/{achievements.length} débloqués ({progressPercent}%)
               </p>
             </div>
-            <motion.div
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg"
-              whileHover={{ scale: 1.05, rotate: 5 }}
-            >
-              <Trophy className="w-6 h-6 text-white" strokeWidth={2} />
-            </motion.div>
+            <div className="w-10 h-10 rounded-xl bg-[rgba(245,166,35,0.1)] border border-[rgba(245,166,35,0.2)] flex items-center justify-center">
+              <Trophy className="w-5 h-5 text-[#f5a623]" strokeWidth={1.5} />
+            </div>
           </motion.div>
 
           {/* Progress Card */}
           <motion.div
             variants={itemVariants}
-            className="relative overflow-hidden rounded-3xl p-6 mb-8"
+            className="relative overflow-hidden rounded-2xl p-5 mb-6 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-500 via-orange-500 to-red-500" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-white/10" />
-            <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
-            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+            {/* Subtle gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[rgba(245,166,35,0.05)] to-transparent pointer-events-none" />
 
-            <div className="relative z-10 flex items-center justify-between mb-4">
-              <div>
-                <div className="text-white/90 text-sm font-medium mb-1">
-                  Progression globale
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <div className="text-[#8b8d90] text-sm mb-1">
+                    Progression globale
+                  </div>
+                  <div className="text-3xl font-bold text-[#f7f8f8]">
+                    {progressPercent}%
+                  </div>
                 </div>
-                <div className="text-4xl font-bold text-white">
-                  {progressPercent}%
+                <div className="w-14 h-14 rounded-xl bg-[rgba(245,166,35,0.1)] flex items-center justify-center">
+                  <Trophy className="w-7 h-7 text-[#f5a623]" strokeWidth={1.5} />
                 </div>
               </div>
-              <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <Trophy className="w-8 h-8 text-white" strokeWidth={2} />
-              </div>
-            </div>
 
-            {/* Progress Bar */}
-            <div className="h-3 bg-white/20 rounded-full overflow-hidden">
-              <motion.div
-                className="h-full bg-white rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${progressPercent}%` }}
-                transition={{ duration: 1, ease: 'easeOut', delay: 0.3 }}
-              />
+              {/* Progress Bar */}
+              <div className="h-2 bg-[rgba(255,255,255,0.06)] rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-[#f5a623] to-[#f5a623]/70 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progressPercent}%` }}
+                  transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
+                />
+              </div>
+
+              {/* Stats row */}
+              <div className="flex items-center gap-6 mt-4 pt-4 border-t border-[rgba(255,255,255,0.06)]">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-[#4ade80]" />
+                  <span className="text-sm text-[#8b8d90]">{unlockedCount} débloqués</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-[#5e6063]" />
+                  <span className="text-sm text-[#8b8d90]">{achievements.length - unlockedCount} en cours</span>
+                </div>
+              </div>
             </div>
           </motion.div>
 
@@ -235,10 +272,10 @@ export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreen
               <motion.button
                 key={cat.key}
                 onClick={() => setActiveCategory(cat.key)}
-                className={`px-5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
                   activeCategory === cat.key
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30'
-                    : 'bg-white/80 backdrop-blur-sm text-gray-600 border border-white/50'
+                    ? 'bg-[rgba(255,255,255,0.1)] text-[#f7f8f8] border border-[rgba(255,255,255,0.1)]'
+                    : 'bg-[rgba(255,255,255,0.02)] text-[#8b8d90] border border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.04)]'
                 }`}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -248,12 +285,12 @@ export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreen
             ))}
           </motion.div>
 
-          {/* Achievements Grid */}
+          {/* Achievements List */}
           <motion.div
             variants={containerVariants}
-            className="space-y-4"
+            className="space-y-3"
           >
-            {achievements.map((achievement, index) => {
+            {filteredAchievements.map((achievement, index) => {
               const Icon = achievement.icon;
               const config = rarityConfig[achievement.rarity];
               const achProgressPercent = (achievement.total && achievement.total > 0)
@@ -265,74 +302,88 @@ export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreen
                   key={achievement.id}
                   variants={itemVariants}
                   custom={index}
-                  className={`relative overflow-hidden rounded-2xl p-5 transition-all ${
-                    achievement.unlocked
-                      ? 'bg-white/90 backdrop-blur-sm border border-white/50 shadow-lg'
-                      : 'bg-white/60 backdrop-blur-sm border border-white/30 shadow-md'
+                  className={`relative overflow-hidden rounded-xl p-4 transition-all bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] ${
+                    achievement.unlocked ? 'hover:bg-[rgba(255,255,255,0.04)]' : 'opacity-80'
                   }`}
-                  whileHover={{ scale: 1.01, y: -2 }}
+                  whileHover={{ scale: 1.01 }}
                 >
-                  {/* Unlocked indicator line */}
+                  {/* Left accent for unlocked */}
                   {achievement.unlocked && (
-                    <div className={`absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b ${config.gradient}`} />
+                    <div
+                      className="absolute left-0 top-0 bottom-0 w-1 rounded-l-xl"
+                      style={{ backgroundColor: config.color }}
+                    />
                   )}
 
                   <div className="flex items-start gap-4">
                     {/* Icon */}
                     <div className="relative flex-shrink-0">
-                      <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${
-                        achievement.unlocked
-                          ? `bg-gradient-to-br ${config.gradient} shadow-md`
-                          : 'bg-gray-100'
-                      }`}>
-                        <Icon className={`w-7 h-7 ${achievement.unlocked ? 'text-white' : 'text-gray-400'}`} strokeWidth={2} />
+                      <div
+                        className="w-12 h-12 rounded-xl flex items-center justify-center"
+                        style={{
+                          backgroundColor: achievement.unlocked ? config.bg : 'rgba(255,255,255,0.02)',
+                          border: `1px solid ${achievement.unlocked ? config.border : 'rgba(255,255,255,0.06)'}`
+                        }}
+                      >
+                        <Icon
+                          className="w-6 h-6"
+                          style={{ color: achievement.unlocked ? config.color : '#5e6063' }}
+                          strokeWidth={1.5}
+                        />
                       </div>
                       {achievement.unlocked && (
                         <motion.div
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           transition={{ delay: 0.2 + index * 0.05, type: "spring" }}
-                          className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shadow-md"
+                          className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#4ade80] flex items-center justify-center"
                         >
-                          <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                          <Check className="w-3 h-3 text-[#08090a]" strokeWidth={3} />
                         </motion.div>
                       )}
                       {!achievement.unlocked && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Lock className="w-4 h-4 text-gray-400" strokeWidth={2} />
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[rgba(255,255,255,0.06)] flex items-center justify-center">
+                          <Lock className="w-2.5 h-2.5 text-[#5e6063]" strokeWidth={2} />
                         </div>
                       )}
                     </div>
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex items-start justify-between gap-2 mb-1">
                         <div>
-                          <div className={`text-sm font-semibold mb-1 ${
-                            achievement.unlocked ? 'text-gray-800' : 'text-gray-400'
+                          <div className={`text-sm font-medium ${
+                            achievement.unlocked ? 'text-[#f7f8f8]' : 'text-[#8b8d90]'
                           }`}>
                             {achievement.name}
                           </div>
-                          <div className="text-xs text-gray-500 font-medium">
+                          <div className="text-xs text-[#5e6063] mt-0.5">
                             {achievement.description}
                           </div>
                         </div>
                         {/* Rarity Badge */}
-                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${config.bg} ${config.text}`}>
-                          {achievement.rarity}
+                        <span
+                          className="px-2 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wider flex-shrink-0"
+                          style={{
+                            backgroundColor: config.bg,
+                            color: config.color,
+                            border: `1px solid ${config.border}`
+                          }}
+                        >
+                          {config.label}
                         </span>
                       </div>
 
                       {/* Progress or Unlocked Date */}
                       {achievement.unlocked ? (
                         <div className="flex items-center justify-between mt-3">
-                          <div className="text-xs text-emerald-500 font-semibold flex items-center gap-1">
+                          <div className="text-xs text-[#4ade80] font-medium flex items-center gap-1.5">
                             <Sparkles className="w-3.5 h-3.5" />
                             Débloqué {achievement.unlockedAt}
                           </div>
                           <motion.button
                             onClick={() => handleShare(achievement)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 ${config.bg} ${config.text}`}
+                            className="px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-[#8b8d90] hover:bg-[rgba(255,255,255,0.06)] hover:text-[#f7f8f8] transition-colors"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                           >
@@ -343,16 +394,17 @@ export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreen
                       ) : (
                         <div className="mt-3">
                           <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-xs text-gray-600 font-semibold">
+                            <span className="text-xs text-[#8b8d90] font-medium">
                               {achievement.progress}/{achievement.total}
                             </span>
-                            <span className="text-xs text-gray-400 font-medium">
+                            <span className="text-xs text-[#5e6063]">
                               {achProgressPercent}%
                             </span>
                           </div>
-                          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div className="h-1.5 bg-[rgba(255,255,255,0.06)] rounded-full overflow-hidden">
                             <motion.div
-                              className={`h-full rounded-full bg-gradient-to-r ${config.gradient}`}
+                              className="h-full rounded-full"
+                              style={{ backgroundColor: config.color }}
                               initial={{ width: 0 }}
                               animate={{ width: `${achProgressPercent}%` }}
                               transition={{ duration: 0.5, delay: 0.2 + index * 0.05 }}
@@ -366,6 +418,19 @@ export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreen
               );
             })}
           </motion.div>
+
+          {/* Empty state */}
+          {filteredAchievements.length === 0 && (
+            <motion.div
+              variants={itemVariants}
+              className="text-center py-12"
+            >
+              <div className="w-16 h-16 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center mx-auto mb-4">
+                <Trophy className="w-8 h-8 text-[#5e6063]" strokeWidth={1.5} />
+              </div>
+              <p className="text-[#8b8d90] text-sm">Aucun trophée dans cette catégorie</p>
+            </motion.div>
+          )}
         </motion.div>
       </div>
     </div>

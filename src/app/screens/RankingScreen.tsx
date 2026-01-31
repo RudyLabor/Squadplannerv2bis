@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Trophy, TrendingUp, Award, Target, Zap, Crown, Sparkles, CheckCircle, Lock, Loader2, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Trophy, TrendingUp, Award, Target, Zap, Crown, Sparkles, CheckCircle, Lock, Loader2, RefreshCw, Medal, Star, Flame } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { communityAPI, LEAGUE_TIERS } from '@/utils/community-api';
+import { communityAPI } from '@/utils/community-api';
 
 interface RankingScreenProps {
   onNavigate: (screen: string) => void;
@@ -13,25 +13,36 @@ type RankTier = 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'master'
 interface RankData {
   tier: RankTier;
   name: string;
-  gradient: string;
-  shadow: string;
+  color: string;
+  bgColor: string;
+  borderColor: string;
   minPoints: number;
+  icon: React.ElementType;
 }
 
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
+    transition: { staggerChildren: 0.06, delayChildren: 0.1 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
+    transition: { type: "spring", stiffness: 400, damping: 28 }
+  }
+};
+
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { type: "spring", stiffness: 400, damping: 28 }
   }
 };
 
@@ -41,13 +52,13 @@ export function RankingScreen({ onNavigate, showToast }: RankingScreenProps) {
   const [currentRank, setCurrentRank] = useState<RankTier>('bronze');
 
   const ranks: RankData[] = [
-    { tier: 'bronze', name: 'Bronze', gradient: 'from-amber-600 to-amber-700', shadow: 'shadow-amber-600/30', minPoints: 0 },
-    { tier: 'silver', name: 'Argent', gradient: 'from-gray-400 to-gray-500', shadow: 'shadow-gray-400/30', minPoints: 500 },
-    { tier: 'gold', name: 'Or', gradient: 'from-amber-400 to-yellow-500', shadow: 'shadow-amber-400/30', minPoints: 1000 },
-    { tier: 'platinum', name: 'Platine', gradient: 'from-cyan-400 to-teal-500', shadow: 'shadow-cyan-400/30', minPoints: 2000 },
-    { tier: 'diamond', name: 'Diamant', gradient: 'from-blue-400 to-cyan-400', shadow: 'shadow-blue-400/30', minPoints: 3500 },
-    { tier: 'master', name: 'Maître', gradient: 'from-purple-500 to-violet-600', shadow: 'shadow-purple-500/30', minPoints: 5000 },
-    { tier: 'legend', name: 'Légende', gradient: 'from-rose-500 to-pink-600', shadow: 'shadow-rose-500/30', minPoints: 7500 },
+    { tier: 'bronze', name: 'Bronze', color: '#cd7f32', bgColor: 'bg-[#cd7f32]/10', borderColor: 'border-[#cd7f32]/30', minPoints: 0, icon: Medal },
+    { tier: 'silver', name: 'Argent', color: '#c0c0c0', bgColor: 'bg-[#c0c0c0]/10', borderColor: 'border-[#c0c0c0]/30', minPoints: 500, icon: Medal },
+    { tier: 'gold', name: 'Or', color: '#ffd700', bgColor: 'bg-[#ffd700]/10', borderColor: 'border-[#ffd700]/30', minPoints: 1000, icon: Trophy },
+    { tier: 'platinum', name: 'Platine', color: '#00d4aa', bgColor: 'bg-[#00d4aa]/10', borderColor: 'border-[#00d4aa]/30', minPoints: 2000, icon: Star },
+    { tier: 'diamond', name: 'Diamant', color: '#00bfff', bgColor: 'bg-[#00bfff]/10', borderColor: 'border-[#00bfff]/30', minPoints: 3500, icon: Sparkles },
+    { tier: 'master', name: 'Maître', color: '#a855f7', bgColor: 'bg-[#a855f7]/10', borderColor: 'border-[#a855f7]/30', minPoints: 5000, icon: Crown },
+    { tier: 'legend', name: 'Légende', color: '#f43f5e', bgColor: 'bg-[#f43f5e]/10', borderColor: 'border-[#f43f5e]/30', minPoints: 7500, icon: Flame },
   ];
 
   const currentRankIndex = ranks.findIndex(r => r.tier === currentRank);
@@ -91,304 +102,344 @@ export function RankingScreen({ onNavigate, showToast }: RankingScreenProps) {
     }
   };
 
-  return (
-    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
-      {/* Background decorations - Static for performance (no infinite animations) */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-cyan-400/20 to-teal-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 left-1/2 w-64 h-64 bg-gradient-to-br from-amber-400/10 to-yellow-400/10 rounded-full blur-3xl" />
-      </div>
+  // Podium colors for top 3
+  const podiumColors = ['#ffd700', '#c0c0c0', '#cd7f32']; // Gold, Silver, Bronze
 
-      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
+  return (
+    <div className="min-h-screen pb-24 md:pb-8 pt-safe bg-[#08090a]">
+      <div className="px-4 py-6 max-w-2xl mx-auto">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           {/* Header */}
-          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
+          <motion.div variants={itemVariants} className="flex items-center gap-3 mb-6">
             <motion.button
               onClick={() => onNavigate('profile')}
-              className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+              className="w-10 h-10 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center hover:bg-[#222] hover:border-[#3a3a3a] transition-all"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
+              <ArrowLeft className="w-5 h-5 text-[#8a8a8a]" strokeWidth={1.5} />
             </motion.button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-teal-600 bg-clip-text text-transparent">
+              <h1 className="text-xl font-semibold text-white">
                 Mon Rang
               </h1>
-              <p className="text-sm text-gray-500 font-medium mt-0.5">
+              <p className="text-sm text-[#6a6a6a]">
                 Système de classement compétitif
               </p>
             </div>
             <motion.button
               onClick={loadData}
               disabled={isLoading}
-              className="w-10 h-10 rounded-xl bg-white/80 backdrop-blur-sm border border-white/50 flex items-center justify-center shadow-lg"
+              className="w-10 h-10 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center hover:bg-[#222] hover:border-[#3a3a3a] transition-all"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <RefreshCw className={`w-4 h-4 text-gray-500 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 text-[#6a6a6a] ${isLoading ? 'animate-spin' : ''}`} />
             </motion.button>
             <motion.div
-              className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${currentRankData?.gradient || 'from-amber-600 to-amber-700'} flex items-center justify-center shadow-lg ${currentRankData?.shadow || 'shadow-amber-600/30'}`}
-              whileHover={{ scale: 1.05, rotate: 5 }}
+              className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{ backgroundColor: `${currentRankData?.color || '#f5a623'}20` }}
+              whileHover={{ scale: 1.05 }}
             >
-              <Trophy className="w-6 h-6 text-white" strokeWidth={2} />
+              <Trophy className="w-5 h-5" style={{ color: '#f5a623' }} strokeWidth={1.5} />
             </motion.div>
           </motion.div>
 
           {/* Loading State */}
           {isLoading ? (
-            <div className="flex items-center justify-center py-20">
+            <motion.div
+              variants={scaleIn}
+              className="flex items-center justify-center py-20"
+            >
               <div className="text-center">
-                <Loader2 className="w-10 h-10 text-cyan-500 animate-spin mx-auto mb-4" />
-                <p className="text-gray-500 font-medium">Chargement...</p>
+                <div className="w-12 h-12 rounded-xl bg-[#f5a623]/10 flex items-center justify-center mx-auto mb-4">
+                  <Loader2 className="w-6 h-6 text-[#f5a623] animate-spin" />
+                </div>
+                <p className="text-[#6a6a6a] text-sm">Chargement...</p>
               </div>
-            </div>
+            </motion.div>
           ) : (
             <>
-          {/* Current Rank Card */}
-          {currentRankData && (
-          <motion.div
-            variants={itemVariants}
-            className={`relative overflow-hidden bg-gradient-to-br ${currentRankData.gradient} rounded-3xl p-6 mb-8 shadow-xl ${currentRankData.shadow}`}
-            whileHover={{ scale: 1.01 }}
-          >
-            {/* Decorative elements */}
-            <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+              {/* Current Rank Card - Podium Style */}
+              {currentRankData && (
+                <motion.div
+                  variants={scaleIn}
+                  className="relative overflow-hidden rounded-2xl border border-[#2a2a2a] bg-[#111]/80 p-6 mb-6"
+                >
+                  {/* Gradient overlay based on rank */}
+                  <div
+                    className="absolute inset-0 opacity-5"
+                    style={{ background: `radial-gradient(circle at top right, ${currentRankData.color}, transparent 70%)` }}
+                  />
 
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <div className="text-white/80 text-sm font-semibold mb-2 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4" />
-                    Ton rang actuel
-                  </div>
-                  <h2 className="text-4xl font-bold text-white mb-2">
-                    {currentRankData.name}
-                  </h2>
-                  <div className="text-white/90 text-xl font-bold">
-                    {currentPoints.toLocaleString()} points
-                  </div>
-                </div>
-                <div className="w-24 h-24 rounded-3xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
-                  <Trophy className="w-12 h-12 text-white" strokeWidth={1.5} />
-                </div>
-              </div>
-
-              {/* Progress to Next Rank */}
-              {nextRankData && (
-                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
-                  <div className="flex items-center justify-between mb-3 text-white text-sm font-semibold">
-                    <span className="flex items-center gap-2">
-                      <TrendingUp className="w-4 h-4" />
-                      Vers {nextRankData.name}
-                    </span>
-                    <span className="bg-white/20 px-3 py-1 rounded-lg text-xs">
-                      {pointsToNextRank} pts restants
-                    </span>
-                  </div>
-                  <div className="h-4 bg-white/20 rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full bg-white rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${progressToNextRank}%` }}
-                      transition={{ duration: 1.5, ease: 'easeOut' }}
-                    />
-                  </div>
-                  <div className="text-center text-white/80 text-xs font-medium mt-2">
-                    {Math.round(progressToNextRank)}% complété
-                  </div>
-                </div>
-              )}
-            </div>
-          </motion.div>
-          )}
-
-          {/* Rank Perks */}
-          <motion.div variants={itemVariants} className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-md">
-                <Award className="w-5 h-5 text-white" strokeWidth={2} />
-              </div>
-              <h3 className="text-lg font-bold text-gray-800">
-                Avantages de ton rang
-              </h3>
-            </div>
-            <div className="space-y-3">
-              {perks.map((perk, index) => {
-                const Icon = perk.icon;
-                return (
-                  <motion.div
-                    key={index}
-                    variants={itemVariants}
-                    className={`bg-white/80 backdrop-blur-sm rounded-2xl p-4 border transition-all duration-300 ${
-                      perk.unlocked
-                        ? 'border-emerald-200 shadow-lg hover:shadow-xl'
-                        : 'border-white/50 opacity-60'
-                    }`}
-                    whileHover={perk.unlocked ? { scale: 1.01, y: -2 } : {}}
-                  >
-                    <div className="flex items-center gap-4">
-                      <motion.div
-                        className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-md ${
-                          perk.unlocked
-                            ? 'bg-gradient-to-br from-emerald-500 to-teal-500'
-                            : 'bg-gray-200'
-                        }`}
-                        whileHover={perk.unlocked ? { scale: 1.1, rotate: 5 } : {}}
-                      >
-                        <Icon className={`w-6 h-6 ${perk.unlocked ? 'text-white' : 'text-gray-400'}`} strokeWidth={2} />
-                      </motion.div>
-                      <div className="flex-1">
-                        <div className={`text-sm font-bold ${
-                          perk.unlocked ? 'text-gray-800' : 'text-gray-400'
-                        }`}>
-                          {perk.label}
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-6">
+                      <div>
+                        <div className="text-[#6a6a6a] text-xs font-medium mb-2 flex items-center gap-2 uppercase tracking-wider">
+                          <Sparkles className="w-3.5 h-3.5" style={{ color: currentRankData.color }} />
+                          Ton rang actuel
                         </div>
-                        <div className={`text-xs font-medium ${
-                          perk.unlocked ? 'text-gray-500' : 'text-gray-400'
-                        }`}>
-                          {perk.description}
+                        <h2
+                          className="text-3xl font-bold mb-1"
+                          style={{ color: currentRankData.color }}
+                        >
+                          {currentRankData.name}
+                        </h2>
+                        <div className="text-white text-lg font-semibold">
+                          {currentPoints.toLocaleString()} <span className="text-[#6a6a6a] text-sm font-normal">points</span>
                         </div>
                       </div>
-                      {perk.unlocked ? (
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-100 rounded-xl">
-                          <CheckCircle className="w-4 h-4 text-emerald-600" strokeWidth={2} />
-                          <span className="text-xs font-bold text-emerald-600">Débloqué</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-xl">
-                          <Lock className="w-4 h-4 text-gray-400" strokeWidth={2} />
-                          <span className="text-xs font-bold text-gray-400">Verrouillé</span>
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </motion.div>
 
-          {/* All Ranks */}
-          <motion.div variants={itemVariants} className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-md">
-                <Crown className="w-5 h-5 text-white" strokeWidth={2} />
-              </div>
-              <h3 className="text-lg font-bold text-gray-800">
-                Tous les rangs
-              </h3>
-            </div>
-            <div className="space-y-3">
-              {ranks.map((rank, index) => {
-                const isCurrent = rank.tier === currentRank;
-                const isUnlocked = currentPoints >= rank.minPoints;
-
-                return (
-                  <motion.div
-                    key={rank.tier}
-                    variants={itemVariants}
-                    className={`bg-white/80 backdrop-blur-sm rounded-2xl p-4 border transition-all duration-300 ${
-                      isCurrent
-                        ? 'border-cyan-300 shadow-xl ring-2 ring-cyan-100'
-                        : isUnlocked
-                        ? 'border-white/50 shadow-lg hover:shadow-xl'
-                        : 'border-white/30 opacity-50'
-                    }`}
-                    whileHover={isUnlocked ? { scale: 1.01, y: -2 } : {}}
-                  >
-                    <div className="flex items-center gap-4">
-                      {/* Rank Icon */}
+                      {/* Podium Badge */}
                       <motion.div
-                        className={`w-14 h-14 rounded-xl bg-gradient-to-br ${rank.gradient} flex items-center justify-center flex-shrink-0 shadow-lg ${rank.shadow} ${
-                          !isUnlocked && 'grayscale opacity-50'
-                        }`}
-                        whileHover={isUnlocked ? { scale: 1.1, rotate: 5 } : {}}
+                        className="w-20 h-20 rounded-2xl flex items-center justify-center relative"
+                        style={{ backgroundColor: `${currentRankData.color}15`, border: `1px solid ${currentRankData.color}30` }}
+                        whileHover={{ scale: 1.05, rotate: 5 }}
                       >
-                        <Trophy className="w-7 h-7 text-white" strokeWidth={2} />
+                        {(() => {
+                          const RankIcon = currentRankData.icon;
+                          return <RankIcon className="w-10 h-10" style={{ color: currentRankData.color }} strokeWidth={1.5} />;
+                        })()}
                       </motion.div>
+                    </div>
 
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <div className={`text-lg font-bold ${isUnlocked ? 'text-gray-800' : 'text-gray-400'}`}>
-                            {rank.name}
+                    {/* Progress to Next Rank */}
+                    {nextRankData && (
+                      <div className="bg-[#0a0a0a] rounded-xl p-4 border border-[#1a1a1a]">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-[#8a8a8a] text-sm font-medium flex items-center gap-2">
+                            <TrendingUp className="w-4 h-4" style={{ color: nextRankData.color }} />
+                            Vers {nextRankData.name}
+                          </span>
+                          <span
+                            className="text-xs font-medium px-2.5 py-1 rounded-lg"
+                            style={{ backgroundColor: `${nextRankData.color}15`, color: nextRankData.color }}
+                          >
+                            {pointsToNextRank} pts restants
+                          </span>
+                        </div>
+                        <div className="h-2 bg-[#1a1a1a] rounded-full overflow-hidden">
+                          <motion.div
+                            className="h-full rounded-full"
+                            style={{ backgroundColor: currentRankData.color }}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${progressToNextRank}%` }}
+                            transition={{ duration: 1.2, ease: 'easeOut' }}
+                          />
+                        </div>
+                        <div className="text-center text-[#6a6a6a] text-xs mt-2">
+                          {Math.round(progressToNextRank)}% complété
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Rank Perks */}
+              <motion.div variants={itemVariants} className="mb-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center"
+                    style={{ backgroundColor: '#10b98115' }}
+                  >
+                    <Award className="w-4.5 h-4.5" style={{ color: '#10b981' }} strokeWidth={1.5} />
+                  </div>
+                  <h3 className="text-base font-semibold text-white">
+                    Avantages de ton rang
+                  </h3>
+                </div>
+                <div className="space-y-2">
+                  {perks.map((perk, index) => {
+                    const Icon = perk.icon;
+                    return (
+                      <motion.div
+                        key={index}
+                        variants={itemVariants}
+                        className={`rounded-xl p-3.5 border transition-all duration-200 ${
+                          perk.unlocked
+                            ? 'bg-[#111]/60 border-[#2a2a2a] hover:border-[#3a3a3a]'
+                            : 'bg-[#0a0a0a]/40 border-[#1a1a1a] opacity-50'
+                        }`}
+                        whileHover={perk.unlocked ? { x: 4 } : {}}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                            style={{
+                              backgroundColor: perk.unlocked ? '#10b98115' : '#1a1a1a',
+                            }}
+                          >
+                            <Icon
+                              className="w-5 h-5"
+                              style={{ color: perk.unlocked ? '#10b981' : '#4a4a4a' }}
+                              strokeWidth={1.5}
+                            />
                           </div>
-                          {isCurrent && (
-                            <span className="px-2.5 py-1 bg-gradient-to-r from-cyan-500 to-teal-500 text-white text-xs font-bold rounded-lg shadow-md">
-                              ACTUEL
-                            </span>
+                          <div className="flex-1 min-w-0">
+                            <div className={`text-sm font-medium ${
+                              perk.unlocked ? 'text-white' : 'text-[#4a4a4a]'
+                            }`}>
+                              {perk.label}
+                            </div>
+                            <div className={`text-xs ${
+                              perk.unlocked ? 'text-[#6a6a6a]' : 'text-[#3a3a3a]'
+                            }`}>
+                              {perk.description}
+                            </div>
+                          </div>
+                          {perk.unlocked ? (
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#10b981]/10 rounded-lg">
+                              <CheckCircle className="w-3.5 h-3.5 text-[#10b981]" strokeWidth={2} />
+                              <span className="text-xs font-medium text-[#10b981]">Actif</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#1a1a1a] rounded-lg">
+                              <Lock className="w-3.5 h-3.5 text-[#4a4a4a]" strokeWidth={2} />
+                              <span className="text-xs font-medium text-[#4a4a4a]">Bloqué</span>
+                            </div>
                           )}
                         </div>
-                        <div className="text-sm text-gray-500 font-medium">
-                          {rank.minPoints.toLocaleString()}+ points
-                        </div>
-                      </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </motion.div>
 
-                      {/* Status */}
-                      {isUnlocked ? (
-                        <motion.div
-                          className={`w-10 h-10 rounded-xl bg-gradient-to-br ${rank.gradient} flex items-center justify-center flex-shrink-0 shadow-md ${rank.shadow}`}
-                          whileHover={{ scale: 1.1 }}
-                        >
-                          <TrendingUp className="w-5 h-5 text-white" strokeWidth={2} />
-                        </motion.div>
-                      ) : (
-                        <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
-                          <Lock className="w-5 h-5 text-gray-400" strokeWidth={2} />
+              {/* All Ranks - Podium Style */}
+              <motion.div variants={itemVariants} className="mb-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center"
+                    style={{ backgroundColor: '#f5a62315' }}
+                  >
+                    <Crown className="w-4.5 h-4.5" style={{ color: '#f5a623' }} strokeWidth={1.5} />
+                  </div>
+                  <h3 className="text-base font-semibold text-white">
+                    Tous les rangs
+                  </h3>
+                </div>
+                <div className="space-y-2">
+                  {ranks.map((rank, index) => {
+                    const isCurrent = rank.tier === currentRank;
+                    const isUnlocked = currentPoints >= rank.minPoints;
+                    const RankIcon = rank.icon;
+
+                    return (
+                      <motion.div
+                        key={rank.tier}
+                        variants={itemVariants}
+                        className={`rounded-xl p-3.5 border transition-all duration-200 ${
+                          isCurrent
+                            ? 'bg-[#111]/80 border-[#f5a623]/30'
+                            : isUnlocked
+                            ? 'bg-[#111]/60 border-[#2a2a2a] hover:border-[#3a3a3a]'
+                            : 'bg-[#0a0a0a]/40 border-[#1a1a1a] opacity-40'
+                        }`}
+                        whileHover={isUnlocked ? { x: 4 } : {}}
+                        style={isCurrent ? { boxShadow: `0 0 20px ${rank.color}10` } : {}}
+                      >
+                        <div className="flex items-center gap-3">
+                          {/* Rank Icon */}
+                          <motion.div
+                            className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                              !isUnlocked && 'grayscale'
+                            }`}
+                            style={{
+                              backgroundColor: `${rank.color}15`,
+                              border: `1px solid ${rank.color}30`
+                            }}
+                            whileHover={isUnlocked ? { scale: 1.1, rotate: 5 } : {}}
+                          >
+                            <RankIcon
+                              className="w-6 h-6"
+                              style={{ color: isUnlocked ? rank.color : '#4a4a4a' }}
+                              strokeWidth={1.5}
+                            />
+                          </motion.div>
+
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <span
+                                className={`text-sm font-semibold ${isUnlocked ? '' : 'text-[#4a4a4a]'}`}
+                                style={isUnlocked ? { color: rank.color } : {}}
+                              >
+                                {rank.name}
+                              </span>
+                              {isCurrent && (
+                                <span
+                                  className="px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wide"
+                                  style={{ backgroundColor: '#f5a62320', color: '#f5a623' }}
+                                >
+                                  Actuel
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-xs text-[#6a6a6a]">
+                              {rank.minPoints.toLocaleString()}+ points requis
+                            </div>
+                          </div>
+
+                          {/* Status */}
+                          {isUnlocked ? (
+                            <div
+                              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                              style={{ backgroundColor: `${rank.color}15` }}
+                            >
+                              <CheckCircle className="w-4 h-4" style={{ color: rank.color }} strokeWidth={2} />
+                            </div>
+                          ) : (
+                            <div className="w-8 h-8 rounded-lg bg-[#1a1a1a] flex items-center justify-center flex-shrink-0">
+                              <Lock className="w-4 h-4 text-[#3a3a3a]" strokeWidth={2} />
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+
+              {/* Info Banner */}
+              <motion.div
+                variants={itemVariants}
+                className="rounded-xl border border-[#2a2a2a] bg-[#111]/60 p-4"
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: '#3b82f615' }}
+                  >
+                    <Target className="w-4.5 h-4.5" style={{ color: '#3b82f6' }} strokeWidth={1.5} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-semibold text-white mb-2">
+                      Comment gagner des points ?
                     </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </motion.div>
-
-          {/* Info Banner */}
-          <motion.div
-            variants={itemVariants}
-            className="relative overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-5 shadow-xl"
-          >
-            {/* Decorative elements */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
-
-            <div className="relative z-10 flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-                <Target className="w-6 h-6 text-white" strokeWidth={2} />
-              </div>
-              <div className="flex-1">
-                <div className="text-base font-bold text-white mb-2">
-                  Comment gagner des points ?
-                </div>
-                <div className="text-sm text-white/90 font-medium leading-relaxed space-y-1">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-white/80" />
-                    <span>Participe aux sessions (+50 pts)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-white/80" />
-                    <span>Maintiens un score de fiabilité élevé (+20 pts/semaine)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-white/80" />
-                    <span>Organise des sessions (+30 pts)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-white/80" />
-                    <span>Complète des défis (50-200 pts)</span>
+                    <div className="space-y-1.5">
+                      {[
+                        { text: 'Participe aux sessions', pts: '+50 pts' },
+                        { text: 'Score de fiabilité élevé', pts: '+20 pts/sem' },
+                        { text: 'Organise des sessions', pts: '+30 pts' },
+                        { text: 'Complète des défis', pts: '50-200 pts' },
+                      ].map((item, i) => (
+                        <div key={i} className="flex items-center justify-between text-xs">
+                          <span className="text-[#8a8a8a] flex items-center gap-2">
+                            <div className="w-1 h-1 rounded-full bg-[#3b82f6]" />
+                            {item.text}
+                          </span>
+                          <span className="text-[#3b82f6] font-medium">{item.pts}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </motion.div>
+              </motion.div>
             </>
           )}
         </motion.div>

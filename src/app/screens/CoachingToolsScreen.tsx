@@ -146,291 +146,297 @@ export function CoachingToolsScreen({ onNavigate, showToast }: CoachingToolsScre
   };
 
   return (
-    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl" />
-      </div>
+    <div className="min-h-screen pb-24 md:pb-8 bg-[#08090a]">
+      <motion.div
+        className="max-w-2xl mx-auto px-4 md:px-6 py-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Header - Linear style */}
+        <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
+          <motion.button
+            onClick={() => onNavigate('premium')}
+            className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center text-[#8b8d90] hover:bg-[rgba(255,255,255,0.06)] hover:text-[#f7f8f8] transition-all"
+            whileHover={{ x: -2 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
+          </motion.button>
+          <div className="flex-1">
+            <h1 className="text-[24px] md:text-[28px] font-semibold text-[#f7f8f8]">
+              Coaching Tools
+            </h1>
+            <p className="text-[13px] text-[#5e6063]">
+              Optimisez vos stratégies
+            </p>
+          </div>
+          <span className="px-2.5 py-1 rounded-lg bg-[rgba(245,166,35,0.15)] text-[#f5a623] text-[11px] font-semibold uppercase">
+            Premium
+          </span>
+        </motion.div>
 
-      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {/* Header */}
-          <motion.div variants={itemVariants} className="flex items-center gap-3 mb-8">
-            <motion.button
-              onClick={() => onNavigate('premium')}
-              className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+        {/* Tabs - Linear style */}
+        <motion.div variants={itemVariants} className="flex gap-1 p-1 rounded-lg bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] mb-6">
+          {[
+            { key: 'lineups', label: 'Lineups' },
+            { key: 'roles', label: 'Rôles' },
+            { key: 'drafts', label: 'Drafts' },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key as any)}
+              className={`flex-1 h-10 rounded-md text-[13px] font-medium transition-all ${
+                activeTab === tab.key
+                  ? 'bg-[rgba(94,109,210,0.15)] text-[#8b93ff] border border-[rgba(94,109,210,0.3)]'
+                  : 'text-[#8b8d90] hover:text-[#f7f8f8]'
+              }`}
             >
-              <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
+              {tab.label}
+            </button>
+          ))}
+        </motion.div>
+
+        {/* Lineups Tab - Linear style */}
+        {activeTab === 'lineups' && (
+          <motion.div variants={itemVariants}>
+            {/* Map Selector */}
+            <div className="mb-6">
+              <label className="block text-[11px] font-medium text-[#5e6063] uppercase tracking-wider mb-2">
+                Carte
+              </label>
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                {maps.map((map) => (
+                  <motion.button
+                    key={map}
+                    onClick={() => setSelectedMap(map)}
+                    className={`px-4 py-2 rounded-lg text-[13px] font-medium whitespace-nowrap transition-all ${
+                      selectedMap === map
+                        ? 'bg-[rgba(94,109,210,0.15)] text-[#8b93ff] border border-[rgba(94,109,210,0.3)]'
+                        : 'bg-[rgba(255,255,255,0.02)] text-[#8b8d90] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.1)] hover:text-[#f7f8f8]'
+                    }`}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    {map}
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+
+            {/* Lineups Grid */}
+            <div className="space-y-3 mb-6">
+              {lineups
+                .filter(lineup => lineup.map === selectedMap)
+                .map((lineup) => (
+                  <motion.div
+                    key={lineup.id}
+                    variants={itemVariants}
+                    className="rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] overflow-hidden hover:bg-[rgba(255,255,255,0.04)] transition-colors cursor-pointer"
+                    onClick={() => showToast('Détail lineup à venir', 'info')}
+                    whileHover={{ y: -2 }}
+                  >
+                    <div className="relative h-36">
+                      <ImageWithFallback
+                        src={lineup.imageUrl}
+                        alt={lineup.description}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#08090a] via-transparent to-transparent" />
+                      <div className="absolute top-3 right-3 px-2.5 py-1 rounded-md bg-[rgba(0,0,0,0.6)] text-[#f7f8f8] text-[11px] font-medium backdrop-blur-sm">
+                        {lineup.difficulty}
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-[rgba(94,109,210,0.15)] text-[#8b93ff]">
+                          {lineup.site}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-[rgba(245,166,35,0.15)] text-[#f5a623]">
+                          {lineup.agent}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-[rgba(74,222,128,0.15)] text-[#4ade80]">
+                          {lineup.type}
+                        </span>
+                      </div>
+                      <h3 className="text-[14px] font-semibold text-[#f7f8f8]">
+                        {lineup.description}
+                      </h3>
+                    </div>
+                  </motion.div>
+                ))}
+            </div>
+
+            <motion.button
+              onClick={() => showToast('Création lineup à venir', 'info')}
+              className="w-full h-11 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-[#8b8d90] text-[13px] font-medium flex items-center justify-center gap-2 hover:bg-[rgba(255,255,255,0.06)] hover:text-[#f7f8f8] transition-all"
+              whileTap={{ scale: 0.98 }}
+            >
+              <Plus className="w-4 h-4" strokeWidth={2} />
+              Ajouter un lineup
             </motion.button>
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                Coaching Tools
-              </h1>
-              <p className="text-sm text-gray-500 font-medium">
-                Optimisez vos stratégies
-              </p>
-            </div>
-            <div className="px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold shadow-lg shadow-amber-500/30">
-              PREMIUM
-            </div>
           </motion.div>
+        )}
 
-          {/* Tabs */}
-          <motion.div variants={itemVariants} className="flex gap-2 mb-8 bg-white/60 backdrop-blur-sm p-1.5 rounded-2xl border border-white/50">
-            {[
-              { key: 'lineups', label: 'Lineups' },
-              { key: 'roles', label: 'Rôles' },
-              { key: 'drafts', label: 'Drafts' },
-            ].map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key as any)}
-                className={`flex-1 h-11 rounded-xl font-semibold text-sm transition-all ${
-                  activeTab === tab.key
-                    ? 'bg-white text-gray-800 shadow-lg'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </motion.div>
+        {/* Roles Tab - Linear style */}
+        {activeTab === 'roles' && (
+          <motion.div variants={itemVariants}>
+            {/* Role Cards */}
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              {roles.map((role) => {
+                const roleColors: Record<Role, { bg: string; icon: string }> = {
+                  'Duelist': { bg: 'bg-[rgba(248,113,113,0.1)]', icon: 'text-[#f87171]' },
+                  'Controller': { bg: 'bg-[rgba(94,109,210,0.1)]', icon: 'text-[#8b93ff]' },
+                  'Initiator': { bg: 'bg-[rgba(245,166,35,0.1)]', icon: 'text-[#f5a623]' },
+                  'Sentinel': { bg: 'bg-[rgba(74,222,128,0.1)]', icon: 'text-[#4ade80]' },
+                };
+                const colors = roleColors[role.name];
 
-          {/* Lineups Tab */}
-          {activeTab === 'lineups' && (
-            <motion.div variants={itemVariants}>
-              {/* Map Selector */}
-              <div className="mb-6">
-                <label className="text-sm font-bold text-gray-700 mb-3 block">
-                  Carte
-                </label>
-                <div className="flex gap-2 overflow-x-auto pb-2">
-                  {maps.map((map) => (
-                    <motion.button
-                      key={map}
-                      onClick={() => setSelectedMap(map)}
-                      className={`px-4 py-2.5 rounded-xl font-semibold text-sm whitespace-nowrap transition-all ${
-                        selectedMap === map
-                          ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg shadow-indigo-500/30'
-                          : 'bg-white/80 text-gray-600 border border-white/50 hover:shadow-md'
-                      }`}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      {map}
-                    </motion.button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Lineups Grid */}
-              <div className="space-y-4 mb-6">
-                {lineups
-                  .filter(lineup => lineup.map === selectedMap)
-                  .map((lineup, index) => (
-                    <motion.div
-                      key={lineup.id}
-                      variants={itemVariants}
-                      className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/50 shadow-lg hover:shadow-xl transition-all cursor-pointer"
-                      onClick={() => showToast('Détail lineup à venir', 'info')}
-                      whileHover={{ scale: 1.01, y: -2 }}
-                    >
-                      <div className="relative h-40">
-                        <ImageWithFallback
-                          src={lineup.imageUrl}
-                          alt={lineup.description}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-black/70 text-white text-xs font-semibold backdrop-blur-sm">
-                          {lineup.difficulty}
-                        </div>
-                      </div>
-                      <div className="p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="px-2 py-0.5 rounded text-xs font-bold bg-indigo-100 text-indigo-600">
-                            {lineup.site}
-                          </span>
-                          <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-100 text-purple-600">
-                            {lineup.agent}
-                          </span>
-                          <span className="px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-600">
-                            {lineup.type}
-                          </span>
-                        </div>
-                        <h3 className="text-sm font-bold text-gray-800">
-                          {lineup.description}
-                        </h3>
-                      </div>
-                    </motion.div>
-                  ))}
-              </div>
-
-              <motion.button
-                onClick={() => showToast('Création lineup à venir', 'info')}
-                className="w-full h-12 bg-white/80 backdrop-blur-sm border border-white/50 hover:shadow-lg rounded-2xl font-semibold text-gray-700 flex items-center justify-center gap-2 transition-all"
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-              >
-                <Plus className="w-5 h-5" strokeWidth={2} />
-                Ajouter un lineup
-              </motion.button>
-            </motion.div>
-          )}
-
-          {/* Roles Tab */}
-          {activeTab === 'roles' && (
-            <motion.div variants={itemVariants}>
-              {/* Role Cards */}
-              <div className="grid grid-cols-2 gap-3 mb-8">
-                {roles.map((role, index) => (
+                return (
                   <motion.div
                     key={role.name}
                     variants={itemVariants}
-                    className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-white/50 shadow-lg"
-                    whileHover={{ scale: 1.02, y: -2 }}
+                    className="rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] p-4 hover:bg-[rgba(255,255,255,0.04)] transition-colors"
+                    whileHover={{ y: -2 }}
                   >
-                    <motion.div
-                      className={`w-12 h-12 rounded-xl bg-gradient-to-br ${role.gradient} flex items-center justify-center mb-3 shadow-lg ${role.shadow}`}
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                    >
-                      <role.icon className="w-6 h-6 text-white" strokeWidth={2} />
-                    </motion.div>
-                    <h3 className="text-base font-bold text-gray-800 mb-1">
+                    <div className={`w-10 h-10 rounded-lg ${colors.bg} flex items-center justify-center mb-3`}>
+                      <role.icon className={`w-5 h-5 ${colors.icon}`} strokeWidth={1.5} />
+                    </div>
+                    <h3 className="text-[14px] font-semibold text-[#f7f8f8] mb-1">
                       {role.name}
                     </h3>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-[12px] text-[#5e6063]">
                       {role.description}
                     </p>
                   </motion.div>
-                ))}
-              </div>
+                );
+              })}
+            </div>
 
-              {/* Squad Members with Roles */}
-              <div className="flex items-center gap-2 mb-4">
-                <Users className="w-5 h-5 text-indigo-500" />
-                <h3 className="text-sm font-bold text-gray-700">
-                  Assignments
-                </h3>
-              </div>
-              <div className="space-y-3">
-                {squadMembers.map((member, index) => {
-                  const roleStyle = getRoleStyle(member.assignedRole);
-                  return (
-                    <motion.div
-                      key={member.id}
-                      variants={itemVariants}
-                      className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-lg"
-                      whileHover={{ scale: 1.01, y: -2 }}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-xl overflow-hidden ring-2 ring-white shadow-lg flex-shrink-0">
-                          <ImageWithFallback
-                            src={member.avatar}
-                            alt={member.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="text-sm font-bold text-gray-800 mb-1">
-                            {member.name}
-                          </h4>
-                          <div className="flex items-center gap-2 mb-1">
-                            <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-gradient-to-r ${roleStyle.gradient} text-white`}>
-                              <roleStyle.icon className="w-3.5 h-3.5" strokeWidth={2} />
-                              <span className="text-xs font-bold">
-                                {member.assignedRole}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex gap-1.5">
-                            {member.mainAgents.map(agent => (
-                              <span key={agent} className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                                {agent}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-xs text-gray-400 mb-0.5">K/D</div>
-                          <div className="text-sm font-bold text-gray-800">{member.stats.kd}</div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
+            {/* Squad Members with Roles */}
+            <div className="flex items-center gap-2 mb-4">
+              <Users className="w-4 h-4 text-[#8b93ff]" strokeWidth={1.5} />
+              <h3 className="text-[14px] font-semibold text-[#f7f8f8]">
+                Assignments
+              </h3>
+            </div>
+            <div className="space-y-3">
+              {squadMembers.map((member) => {
+                const roleColors: Record<Role, { bg: string; text: string }> = {
+                  'Duelist': { bg: 'bg-[rgba(248,113,113,0.15)]', text: 'text-[#f87171]' },
+                  'Controller': { bg: 'bg-[rgba(94,109,210,0.15)]', text: 'text-[#8b93ff]' },
+                  'Initiator': { bg: 'bg-[rgba(245,166,35,0.15)]', text: 'text-[#f5a623]' },
+                  'Sentinel': { bg: 'bg-[rgba(74,222,128,0.15)]', text: 'text-[#4ade80]' },
+                };
+                const colors = roleColors[member.assignedRole];
+                const roleStyle = getRoleStyle(member.assignedRole);
 
-          {/* Drafts Tab */}
-          {activeTab === 'drafts' && (
-            <motion.div variants={itemVariants}>
-              <div className="space-y-4 mb-6">
-                {drafts.map((draft, index) => (
+                return (
                   <motion.div
-                    key={draft.id}
+                    key={member.id}
                     variants={itemVariants}
-                    className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-white/50 shadow-lg hover:shadow-xl transition-all cursor-pointer"
-                    onClick={() => showToast('Détail draft à venir', 'info')}
-                    whileHover={{ scale: 1.01, y: -2 }}
+                    className="rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] p-4 hover:bg-[rgba(255,255,255,0.04)] transition-colors"
+                    whileHover={{ y: -2 }}
                   >
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h3 className="text-base font-bold text-gray-800 mb-1">
-                          {draft.name}
-                        </h3>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs px-2 py-0.5 rounded bg-indigo-100 text-indigo-600 font-bold">
-                            {draft.map}
-                          </span>
-                          <span className="text-xs text-gray-400">•</span>
-                          <span className="text-xs text-gray-500 font-medium">
-                            {draft.playstyle}
-                          </span>
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-[rgba(255,255,255,0.05)] flex-shrink-0">
+                        <ImageWithFallback
+                          src={member.avatar}
+                          alt={member.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-[14px] font-semibold text-[#f7f8f8] mb-1">
+                          {member.name}
+                        </h4>
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md ${colors.bg}`}>
+                            <roleStyle.icon className={`w-3 h-3 ${colors.text}`} strokeWidth={2} />
+                            <span className={`text-[11px] font-medium ${colors.text}`}>
+                              {member.assignedRole}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex gap-1.5 flex-wrap">
+                          {member.mainAgents.map(agent => (
+                            <span key={agent} className="text-[11px] text-[#8b8d90] bg-[rgba(255,255,255,0.04)] px-2 py-0.5 rounded-md">
+                              {agent}
+                            </span>
+                          ))}
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-100">
-                        <Award className="w-4 h-4 text-amber-600" strokeWidth={2} />
-                        <span className="text-sm font-bold text-amber-600">
-                          {draft.rating}
+                      <div className="text-right">
+                        <div className="text-[10px] text-[#5e6063] uppercase mb-0.5">K/D</div>
+                        <div className="text-[15px] font-semibold text-[#f7f8f8] tabular-nums">{member.stats.kd}</div>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Drafts Tab - Linear style */}
+        {activeTab === 'drafts' && (
+          <motion.div variants={itemVariants}>
+            <div className="space-y-3 mb-6">
+              {drafts.map((draft) => (
+                <motion.div
+                  key={draft.id}
+                  variants={itemVariants}
+                  className="rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] p-4 hover:bg-[rgba(255,255,255,0.04)] transition-colors cursor-pointer"
+                  onClick={() => showToast('Détail draft à venir', 'info')}
+                  whileHover={{ y: -2 }}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="text-[15px] font-semibold text-[#f7f8f8] mb-1">
+                        {draft.name}
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] px-2 py-0.5 rounded-md bg-[rgba(94,109,210,0.15)] text-[#8b93ff] font-medium">
+                          {draft.map}
+                        </span>
+                        <span className="text-[12px] text-[#5e6063]">
+                          {draft.playstyle}
                         </span>
                       </div>
                     </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      {draft.agents.map((agent) => (
-                        <div
-                          key={agent}
-                          className="px-3 py-1.5 rounded-xl bg-gray-100 border border-gray-200 text-xs font-semibold text-gray-700"
-                        >
-                          {agent}
-                        </div>
-                      ))}
+                    <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[rgba(245,166,35,0.1)]">
+                      <Award className="w-4 h-4 text-[#f5a623]" strokeWidth={1.5} />
+                      <span className="text-[13px] font-semibold text-[#f5a623] tabular-nums">
+                        {draft.rating}
+                      </span>
                     </div>
-                  </motion.div>
-                ))}
-              </div>
+                  </div>
 
-              <motion.button
-                onClick={() => showToast('Création draft à venir', 'info')}
-                className="w-full h-12 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl font-semibold shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all flex items-center justify-center gap-2"
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-              >
-                <Plus className="w-5 h-5" strokeWidth={2} />
-                Créer une compo
-              </motion.button>
-            </motion.div>
-          )}
-        </motion.div>
-      </div>
+                  <div className="flex flex-wrap gap-2">
+                    {draft.agents.map((agent) => (
+                      <div
+                        key={agent}
+                        className="px-2.5 py-1 rounded-md bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.06)] text-[12px] font-medium text-[#f7f8f8]"
+                      >
+                        {agent}
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            <motion.button
+              onClick={() => showToast('Création draft à venir', 'info')}
+              className="w-full h-12 rounded-xl bg-[#5e6dd2] text-white text-[14px] font-semibold flex items-center justify-center gap-2 hover:bg-[#6a79db] shadow-lg shadow-[#5e6dd2]/20 transition-all"
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Plus className="w-5 h-5" strokeWidth={2} />
+              Créer une compo
+            </motion.button>
+          </motion.div>
+        )}
+      </motion.div>
     </div>
   );
 }

@@ -1,15 +1,54 @@
-// @ts-nocheck
 /**
- * JoinViaLinkScreen - Premium UI
+ * JOIN VIA LINK SCREEN - Linear Dark Design System
  * Handles deep link invitations (e.g., squadplanner.app/join/ABC123)
  */
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Users, Check, X } from 'lucide-react';
+import { Users, Check, X, ArrowLeft, Link2 } from 'lucide-react';
 import { squadsAPI } from '@/app/services/api';
-import { Button, Card } from '@/design-system';
+
+// Linear dark design tokens
+const colors = {
+  bg: {
+    primary: '#0a0a0b',
+    secondary: '#141415',
+    tertiary: '#1a1a1c',
+    elevated: '#1e1e20',
+  },
+  fg: {
+    primary: '#f5f5f5',
+    secondary: '#8b8d90',
+    tertiary: '#5c5e61',
+  },
+  accent: {
+    primary: '#5e6ad2',
+    success: '#4ade80',
+    error: '#ef4444',
+  },
+  border: {
+    subtle: 'rgba(255, 255, 255, 0.06)',
+    default: 'rgba(255, 255, 255, 0.1)',
+  }
+};
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 400, damping: 28 }
+  }
+};
 
 interface JoinViaLinkScreenProps {
   onNavigate: (screen: string, data?: any) => void;
@@ -59,110 +98,222 @@ export function JoinViaLinkScreen({ onNavigate, showToast }: JoinViaLinkScreenPr
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-[var(--color-primary-50)] via-purple-50 to-pink-50 relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-[var(--color-primary-400)]/20 to-purple-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 right-0 w-64 h-64 bg-gradient-to-br from-emerald-400/15 to-teal-400/15 rounded-full blur-3xl" />
-      </div>
-
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md relative z-10"
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ backgroundColor: colors.bg.primary }}
+    >
+      {/* Header */}
+      <motion.header
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="sticky top-0 z-50 px-4 py-3"
+        style={{
+          backgroundColor: `${colors.bg.primary}ee`,
+          backdropFilter: 'blur(12px)',
+          borderBottom: `1px solid ${colors.border.subtle}`
+        }}
       >
-        {status === 'loading' && (
-          <Card variant="elevated" padding="xl" className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-3xl text-center shadow-xl border-[var(--border-subtle)]/50">
-            <div className="relative w-20 h-20 mx-auto mb-6">
-              <motion.div
-                className="absolute inset-0 rounded-full border-4 border-[var(--color-primary-200)]"
-                style={{ borderTopColor: 'transparent' }}
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Users className="w-8 h-8 text-[var(--color-primary-500)]" />
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => onNavigate('home')}
+            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105"
+            style={{
+              backgroundColor: colors.bg.tertiary,
+              border: `1px solid ${colors.border.subtle}`
+            }}
+          >
+            <ArrowLeft size={18} style={{ color: colors.fg.secondary }} />
+          </button>
+          <div>
+            <h1
+              className="text-lg font-semibold tracking-tight"
+              style={{ color: colors.fg.primary }}
+            >
+              Rejoindre une Squad
+            </h1>
+            <p
+              className="text-xs"
+              style={{ color: colors.fg.tertiary }}
+            >
+              Invitation par lien
+            </p>
+          </div>
+        </div>
+      </motion.header>
+
+      {/* Content */}
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="w-full max-w-md"
+        >
+          {/* Loading State */}
+          {status === 'loading' && (
+            <motion.div
+              variants={itemVariants}
+              className="rounded-2xl p-8 text-center"
+              style={{
+                backgroundColor: colors.bg.secondary,
+                border: `1px solid ${colors.border.subtle}`
+              }}
+            >
+              <div className="relative w-20 h-20 mx-auto mb-6">
+                <motion.div
+                  className="absolute inset-0 rounded-full border-4"
+                  style={{
+                    borderColor: colors.bg.tertiary,
+                    borderTopColor: colors.accent.primary
+                  }}
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Users size={28} style={{ color: colors.accent.primary }} />
+                </div>
               </div>
-            </div>
-            <h2 className="text-xl font-bold tracking-tight text-[var(--fg-primary)] mb-2">
-              Rejoindre la squad...
-            </h2>
-            <p className="text-sm text-[var(--fg-secondary)] font-medium">
-              Verification du code d'invitation
-            </p>
-            <div className="mt-4 px-4 py-2 bg-gradient-to-br from-[var(--color-primary-50)] to-purple-50 rounded-xl inline-block border border-[var(--color-primary-200)]">
-              <code className="text-sm font-mono bg-gradient-to-r from-[var(--color-primary-600)] to-purple-600 bg-clip-text text-transparent font-bold">
-                {code}
-              </code>
-            </div>
-          </Card>
-        )}
-
-        {status === 'success' && squadInfo && (
-          <Card variant="elevated" padding="xl" className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-3xl text-center shadow-xl border-emerald-200">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className="w-20 h-20 rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-500 mx-auto mb-6 flex items-center justify-center shadow-lg shadow-emerald-500/30"
-            >
-              <Check className="w-10 h-10 text-white" strokeWidth={3} />
-            </motion.div>
-            <h2 className="text-xl font-bold tracking-tight text-[var(--fg-primary)] mb-2">
-              Bienvenue !
-            </h2>
-            <p className="text-sm text-[var(--fg-secondary)] font-medium mb-1">
-              Vous avez rejoint
-            </p>
-            <p className="text-lg font-bold bg-gradient-to-r from-[var(--color-primary-600)] to-purple-600 bg-clip-text text-transparent">
-              {squadInfo.name}
-            </p>
-            <p className="text-xs text-[var(--fg-tertiary)] font-medium mt-4">
-              Redirection en cours...
-            </p>
-          </Card>
-        )}
-
-        {status === 'error' && (
-          <Card variant="elevated" padding="xl" className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-3xl text-center shadow-xl border-red-200">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className="w-20 h-20 rounded-3xl bg-gradient-to-br from-red-500 to-orange-500 mx-auto mb-6 flex items-center justify-center shadow-lg shadow-red-500/30"
-            >
-              <X className="w-10 h-10 text-white" strokeWidth={2} />
-            </motion.div>
-            <h2 className="text-xl font-bold tracking-tight text-[var(--fg-primary)] mb-2">
-              Oups !
-            </h2>
-            <p className="text-sm text-[var(--fg-secondary)] font-medium mb-6">
-              {errorMessage}
-            </p>
-            <div className="space-y-3">
-              <Button
-                variant="primary"
-                fullWidth
-                size="lg"
-                onClick={() => onNavigate('join-squad')}
-                className="rounded-xl shadow-lg shadow-[var(--color-primary-500)]/30"
+              <h2
+                className="text-xl font-semibold tracking-tight mb-2"
+                style={{ color: colors.fg.primary }}
               >
-                Entrer un code manuellement
-              </Button>
-              <Button
-                variant="secondary"
-                fullWidth
-                size="lg"
-                onClick={() => onNavigate('home')}
-                className="rounded-xl"
+                Rejoindre la squad...
+              </h2>
+              <p
+                className="text-sm mb-4"
+                style={{ color: colors.fg.secondary }}
               >
-                Retour a l'accueil
-              </Button>
-            </div>
-          </Card>
-        )}
-      </motion.div>
+                Verification du code d'invitation
+              </p>
+              <div
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl"
+                style={{
+                  backgroundColor: colors.bg.tertiary,
+                  border: `1px solid ${colors.border.default}`
+                }}
+              >
+                <Link2 size={14} style={{ color: colors.fg.tertiary }} />
+                <code
+                  className="text-sm font-mono font-semibold"
+                  style={{ color: colors.accent.primary }}
+                >
+                  {code}
+                </code>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Success State */}
+          {status === 'success' && squadInfo && (
+            <motion.div
+              variants={itemVariants}
+              className="rounded-2xl p-8 text-center"
+              style={{
+                backgroundColor: colors.bg.secondary,
+                border: `1px solid rgba(74, 222, 128, 0.2)`
+              }}
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                className="w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center"
+                style={{
+                  background: `linear-gradient(135deg, ${colors.accent.success}, #22c55e)`,
+                  boxShadow: `0 8px 24px rgba(74, 222, 128, 0.3)`
+                }}
+              >
+                <Check size={36} color="white" strokeWidth={3} />
+              </motion.div>
+              <h2
+                className="text-xl font-semibold tracking-tight mb-2"
+                style={{ color: colors.fg.primary }}
+              >
+                Bienvenue !
+              </h2>
+              <p
+                className="text-sm mb-1"
+                style={{ color: colors.fg.secondary }}
+              >
+                Vous avez rejoint
+              </p>
+              <p
+                className="text-lg font-semibold"
+                style={{ color: colors.accent.success }}
+              >
+                {squadInfo.name}
+              </p>
+              <p
+                className="text-xs mt-4"
+                style={{ color: colors.fg.tertiary }}
+              >
+                Redirection en cours...
+              </p>
+            </motion.div>
+          )}
+
+          {/* Error State */}
+          {status === 'error' && (
+            <motion.div
+              variants={itemVariants}
+              className="rounded-2xl p-8 text-center"
+              style={{
+                backgroundColor: colors.bg.secondary,
+                border: `1px solid rgba(239, 68, 68, 0.2)`
+              }}
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                className="w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center"
+                style={{
+                  background: `linear-gradient(135deg, ${colors.accent.error}, #dc2626)`,
+                  boxShadow: `0 8px 24px rgba(239, 68, 68, 0.3)`
+                }}
+              >
+                <X size={36} color="white" strokeWidth={2} />
+              </motion.div>
+              <h2
+                className="text-xl font-semibold tracking-tight mb-2"
+                style={{ color: colors.fg.primary }}
+              >
+                Oups !
+              </h2>
+              <p
+                className="text-sm mb-6"
+                style={{ color: colors.fg.secondary }}
+              >
+                {errorMessage}
+              </p>
+              <div className="space-y-3">
+                <button
+                  onClick={() => onNavigate('join-squad')}
+                  className="w-full py-3 px-4 rounded-xl font-medium text-sm transition-all duration-200 hover:scale-[1.02]"
+                  style={{
+                    backgroundColor: colors.accent.primary,
+                    color: 'white',
+                    boxShadow: `0 4px 16px rgba(94, 106, 210, 0.3)`
+                  }}
+                >
+                  Entrer un code manuellement
+                </button>
+                <button
+                  onClick={() => onNavigate('home')}
+                  className="w-full py-3 px-4 rounded-xl font-medium text-sm transition-all duration-200 hover:scale-[1.02]"
+                  style={{
+                    backgroundColor: colors.bg.tertiary,
+                    color: colors.fg.secondary,
+                    border: `1px solid ${colors.border.default}`
+                  }}
+                >
+                  Retour a l'accueil
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
+      </div>
     </div>
   );
 }
