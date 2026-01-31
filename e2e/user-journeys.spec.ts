@@ -17,14 +17,33 @@ const TEST_USER = {
   password: 'SquadPlanner2026!',
 };
 
+const BETA_PASSWORD = 'ruudboy92';
+
 // Helper pour login
 async function login(page: Page) {
   await page.goto('/login');
   await page.waitForLoadState('networkidle');
-  await page.locator('input[type="email"], input[placeholder*="mail"]').first().fill(TEST_USER.email);
-  await page.locator('input[type="password"]').first().fill(TEST_USER.password);
-  await page.locator('button:has-text("Connexion"), button:has-text("Se connecter")').first().click();
+  await bypassBetaGate(page);
+  
+  // Wait for login form and fill credentials
+  await page.waitForSelector('input[type="email"]', { timeout: 10000 });
+  await page.fill('input[type="email"]', TEST_USER.email);
+  await page.fill('input[type="password"]', TEST_USER.password);
+  await page.click('button:has-text("Se connecter")');
   await page.waitForURL(/\/(home|squads)/, { timeout: 15000 });
+}
+
+// Helper pour bypass la gate Beta
+async function bypassBetaGate(page: Page) {
+  const betaInput = page.locator('input[placeholder*="beta"], input[placeholder*="passe"]').first();
+  if (await betaInput.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await betaInput.fill(BETA_PASSWORD);
+    const accessBtn = page.locator('button:has-text("Accéder")');
+    if (await accessBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await accessBtn.click();
+      await page.waitForLoadState('networkidle');
+    }
+  }
 }
 
 // Helper pour capturer les erreurs
@@ -313,14 +332,16 @@ test.describe('Section Authentification', () => {
     // Login
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
-    await expect(page.locator('input[type="email"], input[placeholder*="mail"]').first()).toBeVisible();
+    await bypassBetaGate(page);
+    await expect(page.locator('input[type="email"]').first()).toBeVisible();
     await expect(page.locator('input[type="password"]').first()).toBeVisible();
     console.log('Login OK');
 
     // Signup
     await page.goto('/signup');
     await page.waitForLoadState('networkidle');
-    await expect(page.locator('input[type="email"], input[placeholder*="mail"]').first()).toBeVisible();
+    await bypassBetaGate(page);
+    await expect(page.locator('input[type="email"]').first()).toBeVisible();
     console.log('Signup OK');
   });
 });
