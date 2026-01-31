@@ -1,6 +1,7 @@
 import { ArrowLeft, Target, Trophy, Clock, Zap, Award, TrendingUp, CheckCircle, Flame, Star, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { challengesAPI } from '@/utils/api';
 
 interface ChallengesScreenProps {
   onNavigate: (screen: string) => void;
@@ -138,7 +139,7 @@ function ChallengeCard({ challenge, index, onClaim }: ChallengeCardProps) {
             whileTap={{ scale: 0.98 }}
           >
             <Trophy className="w-4 h-4" strokeWidth={2} />
-            Reclamer la recompense
+            Réclamer la récompense
             <Sparkles className="w-4 h-4" />
           </motion.button>
         ) : (
@@ -168,87 +169,88 @@ function ChallengeCard({ challenge, index, onClaim }: ChallengeCardProps) {
 
 export function ChallengesScreen({ onNavigate, showToast }: ChallengesScreenProps) {
   const [activePeriod, setActivePeriod] = useState<ChallengePeriod>('weekly');
+  const [loading, setLoading] = useState(true);
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
 
-  const weeklyChallenges: Challenge[] = [
-    {
-      id: 'w1',
-      name: 'Marathon de Sessions',
-      description: 'Participe a 5 sessions cette semaine',
-      reward: '100 XP + Badge',
-      progress: 3,
-      total: 5,
-      completed: false,
-      expiresIn: 'Dans 2 jours',
-      difficulty: 'easy',
-    },
-    {
-      id: 'w2',
-      name: 'Fiabilite Parfaite',
-      description: 'Ne manque aucune session confirmee',
-      reward: '200 XP + Badge Special',
-      progress: 4,
-      total: 4,
-      completed: true,
-      expiresIn: 'Dans 2 jours',
-      difficulty: 'hard',
-    },
-    {
-      id: 'w3',
-      name: 'Social Butterfly',
-      description: 'Ajoute 3 nouveaux amis',
-      reward: '50 XP',
-      progress: 1,
-      total: 3,
-      completed: false,
-      expiresIn: 'Dans 2 jours',
-      difficulty: 'easy',
-    },
-  ];
+  useEffect(() => {
+    loadChallenges();
+  }, [activePeriod]);
 
-  const monthlyChallenges: Challenge[] = [
-    {
-      id: 'm1',
-      name: 'Organisateur Pro',
-      description: 'Cree 10 sessions ce mois',
-      reward: '500 XP + Titre "Organisateur"',
-      progress: 6,
-      total: 10,
-      completed: false,
-      expiresIn: 'Dans 15 jours',
-      difficulty: 'medium',
-    },
-    {
-      id: 'm2',
-      name: 'Legende de Squad',
-      description: 'Atteins 95+ de fiabilite',
-      reward: '300 XP + Badge Legendaire',
-      progress: 88,
-      total: 95,
-      completed: false,
-      expiresIn: 'Dans 15 jours',
-      difficulty: 'hard',
-    },
-    {
-      id: 'm3',
-      name: 'Champion de Jeux',
-      description: 'Joue a 3 jeux differents',
-      reward: '200 XP',
-      progress: 3,
-      total: 3,
-      completed: true,
-      expiresIn: 'Dans 15 jours',
-      difficulty: 'medium',
-    },
-  ];
+  const loadChallenges = async () => {
+    setLoading(true);
+    try {
+      // Get active challenges
+      const { challenges: activeChallenges } = await challengesAPI.getActive();
+      // Get user progress
+      const { progress: userProgress } = await challengesAPI.getUserProgress();
 
-  const challenges = activePeriod === 'weekly' ? weeklyChallenges : monthlyChallenges;
+      // Filter by period and map
+      const mappedChallenges: Challenge[] = (activeChallenges || [])
+        .filter((c: any) => {
+          if (activePeriod === 'weekly') return c.type === 'weekly' || c.type === 'daily';
+          return c.type === 'monthly' || c.type === 'seasonal';
+        })
+        .map((c: any) => {
+          const progress = userProgress?.find((p: any) => p.challenge_id === c.id);
+          return {
+            id: c.id,
+            name: c.name,
+            description: c.description,
+            reward: c.rewards?.xp ? `${c.rewards.xp} XP` : '100 XP',
+            progress: progress?.progress || 0,
+            total: progress?.total_required || c.objective?.target || 10,
+            completed: progress?.completed || false,
+            expiresIn: formatExpiry(c.end_date),
+            difficulty: getDifficulty(c.objective?.target),
+          };
+        });
+
+      setChallenges(mappedChallenges);
+    } catch (error) {
+      console.error('Error loading challenges:', error);
+      setChallenges([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatExpiry = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = date.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays <= 0) return 'Expiré';
+    if (diffDays === 1) return 'Demain';
+    return `Dans ${diffDays} jours`;
+  };
+
+  const getDifficulty = (target: number): 'easy' | 'medium' | 'hard' => {
+    if (!target || target <= 5) return 'easy';
+    if (target <= 15) return 'medium';
+    return 'hard';
+  };
+
+  const handleClaimReward = async (challengeId: string) => {
+    try {
+      await challengesAPI.claimReward(challengeId);
+      showToast('Récompense réclamée !', 'success');
+      loadChallenges();
+    } catch (error) {
+      showToast('Erreur lors de la réclamation', 'error');
+    }
+  };
+
   const completedCount = challenges.filter(c => c.completed).length;
   const totalProgress = challenges.length > 0 ? Math.round((completedCount / challenges.length) * 100) : 0;
 
-  const handleClaimReward = (challengeId: string) => {
-    showToast('Recompense reclamee !', 'success');
-  };
-
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#08090a] flex items-center justify-center">
+        <div className="w-5 h-5 border-2 border-[#f5a623] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen pb-24 md:pb-8 pt-safe bg-[#08090a]">
       <div className="px-4 py-6 max-w-2xl mx-auto">

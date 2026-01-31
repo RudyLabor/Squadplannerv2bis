@@ -1,11 +1,13 @@
 /**
  * FRIENDS SCREEN - LINEAR DESIGN SYSTEM
  * Premium, Dark, Minimal - Friends management
+ * CONNECTED TO SUPABASE API
  */
 
 import { ArrowLeft, UserPlus, Users, Clock, Check, X, Search, MoreHorizontal, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { friendshipsAPI } from '@/utils/api';
 
 interface FriendsScreenProps {
   onNavigate: (screen: string) => void;
@@ -53,34 +55,93 @@ const itemVariants = {
 export function FriendsScreen({ onNavigate, showToast }: FriendsScreenProps) {
   const [activeTab, setActiveTab] = useState<FriendTab>('friends');
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  
+  // State for API data
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
+  const [suggestions, setSuggestions] = useState<Friend[]>([]);
 
-  const friends: Friend[] = [
-    { id: '1', name: 'MaxGaming', avatar: '', isOnline: true, commonSquads: 3, reliabilityScore: 92 },
-    { id: '2', name: 'NightOwl', avatar: '', isOnline: true, commonSquads: 2, reliabilityScore: 88 },
-    { id: '3', name: 'ProPlayer', avatar: '', isOnline: false, lastSeen: 'Il y a 2h', commonSquads: 1, reliabilityScore: 95 },
-    { id: '4', name: 'ShadowKing', avatar: '', isOnline: false, lastSeen: 'Il y a 1j', commonSquads: 2, reliabilityScore: 76 },
-  ];
+  // Load friends data from API
+  useEffect(() => {
+    loadFriendsData();
+  }, []);
 
-  const pendingInvites: PendingInvite[] = [
-    { id: '1', name: 'DragonSlayer', avatar: '', mutualFriends: 3, sentAt: 'Il y a 2h' },
-    { id: '2', name: 'IceQueen', avatar: '', mutualFriends: 1, sentAt: 'Il y a 1j' },
-  ];
+  const loadFriendsData = async () => {
+    setLoading(true);
+    try {
+      // Load friends
+      const { friends: friendsData } = await friendshipsAPI.getFriends();
+      const mappedFriends: Friend[] = (friendsData || []).map((f: any) => ({
+        id: f.id,
+        name: f.friend?.username || f.friend?.display_name || 'Ami',
+        avatar: f.friend?.avatar_url || '',
+        isOnline: false, // Online status requires presence feature
+        lastSeen: undefined,
+        commonSquads: 0,
+        reliabilityScore: f.friend?.reliability_score || 100
+      }));
+      setFriends(mappedFriends);
 
-  const suggestions: Friend[] = [
-    { id: '1', name: 'ThunderBolt', avatar: '', isOnline: true, commonSquads: 2, reliabilityScore: 89 },
-    { id: '2', name: 'PhoenixRise', avatar: '', isOnline: false, lastSeen: 'Il y a 3h', commonSquads: 1, reliabilityScore: 91 },
-  ];
+      // Load pending requests
+      const { requests } = await friendshipsAPI.getPendingRequests();
+      const mappedPending: PendingInvite[] = (requests || []).map((r: any) => ({
+        id: r.id,
+        name: r.user?.username || r.user?.display_name || 'Utilisateur',
+        avatar: r.user?.avatar_url || '',
+        mutualFriends: 0,
+        sentAt: formatTimeAgo(r.created_at)
+      }));
+      setPendingInvites(mappedPending);
 
-  const handleAcceptInvite = (inviteId: string) => {
-    showToast('Invitation acceptée', 'success');
+      // Suggestions - empty for now (could use searchUsers later)
+      setSuggestions([]);
+    } catch (error) {
+      console.error('Error loading friends:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRejectInvite = (inviteId: string) => {
-    showToast('Invitation refusée', 'info');
+  const formatTimeAgo = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffMins < 60) return `Il y a ${diffMins}min`;
+    if (diffHours < 24) return `Il y a ${diffHours}h`;
+    return `Il y a ${diffDays}j`;
   };
 
-  const handleSendInvite = (friendId: string) => {
-    showToast('Invitation envoyée', 'success');
+  const handleAcceptInvite = async (inviteId: string) => {
+    try {
+      await friendshipsAPI.acceptRequest(inviteId);
+      showToast('Invitation acceptée', 'success');
+      loadFriendsData(); // Reload data
+    } catch (error) {
+      showToast('Erreur lors de l\'acceptation', 'error');
+    }
+  };
+
+  const handleRejectInvite = async (inviteId: string) => {
+    try {
+      await friendshipsAPI.rejectRequest(inviteId);
+      showToast('Invitation refusée', 'info');
+      loadFriendsData(); // Reload data
+    } catch (error) {
+      showToast('Erreur lors du refus', 'error');
+    }
+  };
+
+  const handleSendInvite = async (friendId: string) => {
+    try {
+      await friendshipsAPI.sendRequest(friendId);
+      showToast('Invitation envoyée', 'success');
+    } catch (error: any) {
+      showToast(error.message || 'Erreur d\'envoi', 'error');
+    }
   };
 
   const tabs: { key: FriendTab; label: string; count: number }[] = [
@@ -96,6 +157,15 @@ export function FriendsScreen({ onNavigate, showToast }: FriendsScreenProps) {
     if (score >= 75) return 'text-[#8b93ff] bg-[rgba(94,109,210,0.1)]';
     return 'text-[#8b8d90] bg-[rgba(139,141,144,0.1)]';
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#08090a] flex items-center justify-center">
+        <div className="w-5 h-5 border-2 border-[#5e6dd2] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pb-24 md:pb-8 bg-[#08090a]">

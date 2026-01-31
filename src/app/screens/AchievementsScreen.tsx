@@ -1,11 +1,13 @@
 /**
  * ACHIEVEMENTS SCREEN - Linear Dark Design System
  * Clean, minimal dark UI with subtle animations
+ * CONNECTED TO SUPABASE API
  */
 
 import { ArrowLeft, Trophy, Lock, Check, Target, Flame, Zap, Award, Star, Crown, Shield, Share2, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { achievementsAPI } from '@/utils/api';
 
 interface AchievementsScreenProps {
   onNavigate: (screen: string) => void;
@@ -73,102 +75,74 @@ const rarityConfig = {
   },
 };
 
+// Icon mapping for achievements
+const iconMap: Record<string, any> = {
+  Trophy, Target, Flame, Zap, Award, Star, Crown, Shield
+};
+
 export function AchievementsScreen({ onNavigate, showToast }: AchievementsScreenProps) {
   const [activeCategory, setActiveCategory] = useState<AchievementCategory>('all');
+  const [loading, setLoading] = useState(true);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
 
-  const achievements: Achievement[] = [
-    {
-      id: '1',
-      name: 'Première Session',
-      description: 'Participe à ta première session',
-      icon: Trophy,
-      rarity: 'common',
-      category: 'sessions',
-      progress: 1,
-      total: 1,
-      unlocked: true,
-      unlockedAt: 'Il y a 2 semaines',
-    },
-    {
-      id: '2',
-      name: 'Fiabilité Parfaite',
-      description: 'Complète 10 sessions sans absence',
-      icon: Crown,
-      rarity: 'legendary',
-      category: 'sessions',
-      progress: 10,
-      total: 10,
-      unlocked: true,
-      unlockedAt: 'Il y a 3 jours',
-    },
-    {
-      id: '3',
-      name: 'Leader de Squad',
-      description: 'Crée ta première squad',
-      icon: Shield,
-      rarity: 'rare',
-      category: 'squads',
-      progress: 1,
-      total: 1,
-      unlocked: true,
-      unlockedAt: 'Il y a 1 semaine',
-    },
-    {
-      id: '4',
-      name: 'Social Butterfly',
-      description: 'Ajoute 5 amis',
-      icon: Star,
-      rarity: 'rare',
-      category: 'social',
-      progress: 3,
-      total: 5,
-      unlocked: false,
-    },
-    {
-      id: '5',
-      name: 'Marathon Gamer',
-      description: 'Participe à 50 sessions',
-      icon: Flame,
-      rarity: 'epic',
-      category: 'sessions',
-      progress: 28,
-      total: 50,
-      unlocked: false,
-    },
-    {
-      id: '6',
-      name: 'Organisateur Pro',
-      description: 'Organise 25 sessions',
-      icon: Target,
-      rarity: 'epic',
-      category: 'sessions',
-      progress: 12,
-      total: 25,
-      unlocked: false,
-    },
-    {
-      id: '7',
-      name: 'Jamais en Retard',
-      description: '20 check-ins à l\'heure',
-      icon: Zap,
-      rarity: 'rare',
-      category: 'social',
-      progress: 15,
-      total: 20,
-      unlocked: false,
-    },
-    {
-      id: '8',
-      name: 'Légende Vivante',
-      description: 'Atteins le niveau 50',
-      icon: Award,
-      rarity: 'legendary',
-      category: 'squads',
-      progress: 38,
-      total: 50,
-      unlocked: false,
-    },
-  ];
+  useEffect(() => {
+    loadAchievements();
+  }, []);
+
+  const loadAchievements = async () => {
+    setLoading(true);
+    try {
+      // Get all achievements
+      const { achievements: allAchievements } = await achievementsAPI.getAll();
+      // Get user progress
+      const { progress: userProgress } = await achievementsAPI.getUserProgress();
+
+      // Map achievements with user progress
+      const mappedAchievements: Achievement[] = (allAchievements || []).map((ach: any) => {
+        const progress = userProgress?.find((p: any) => p.achievement_id === ach.id);
+        return {
+          id: ach.id,
+          name: ach.name,
+          description: ach.description,
+          icon: iconMap[ach.badge_icon] || Trophy,
+          rarity: (ach.tier as AchievementRarity) || 'common',
+          category: (ach.category as AchievementCategory) || 'sessions',
+          progress: progress?.current_progress || 0,
+          total: progress?.total_required || 1,
+          unlocked: progress?.unlocked || false,
+          unlockedAt: progress?.unlocked_at ? formatTimeAgo(progress.unlocked_at) : undefined
+        };
+      });
+
+      setAchievements(mappedAchievements);
+    } catch (error) {
+      console.error('Error loading achievements:', error);
+      // Fallback to empty
+      setAchievements([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatTimeAgo = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays < 1) return "Aujourd'hui";
+    if (diffDays < 7) return `Il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`;
+    if (diffDays < 30) return `Il y a ${Math.floor(diffDays / 7)} semaine${diffDays >= 14 ? 's' : ''}`;
+    return `Il y a ${Math.floor(diffDays / 30)} mois`;
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#08090a] flex items-center justify-center">
+        <div className="w-5 h-5 border-2 border-[#f5a623] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const categories = [
     { key: 'all' as const, label: 'Tous', count: achievements.length },

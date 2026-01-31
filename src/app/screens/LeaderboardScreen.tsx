@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Trophy, Medal, TrendingUp, Star, Crown, Target, Zap, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '@/app/contexts/UserContext';
+import { communityAPI } from '@/utils/community-api';
 
 interface LeaderboardScreenProps {
   onNavigate: (screen: string) => void;
@@ -43,34 +44,36 @@ export function LeaderboardScreen({ onNavigate, showToast, useMockData = false }
   const [period, setPeriod] = useState<Period>('month');
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userRankData, setUserRankData] = useState<{ globalRank: number; totalUsers: number } | null>(null);
 
   useEffect(() => {
     loadLeaderboard();
-  }, [useMockData, activeTab, period]);
+  }, [activeTab, period]);
 
   const loadLeaderboard = async () => {
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const mockLeaderboardData: Player[] = [
-        { rank: 1, userId: 'user-1', name: 'ProGamer42', avatar: '', reliabilityScore: 98, totalSessions: 156, isPremium: true },
-        { rank: 2, userId: 'user-2', name: 'NightOwl', avatar: '', reliabilityScore: 96, totalSessions: 142, isPremium: true },
-        { rank: 3, userId: 'user-3', name: 'TeamPlayer', avatar: '', reliabilityScore: 95, totalSessions: 138, isPremium: false },
-        { rank: 4, userId: 'user-4', name: 'QuickShot', avatar: '', reliabilityScore: 94, totalSessions: 125, isPremium: false },
-        { rank: 5, userId: 'user-5', name: 'StratMaster', avatar: '', reliabilityScore: 92, totalSessions: 118, isPremium: true },
-        { rank: 6, userId: 'user-6', name: 'PhantomX', avatar: '', reliabilityScore: 91, totalSessions: 112, isPremium: false },
-        { rank: 7, userId: 'user-7', name: 'ShadowBlade', avatar: '', reliabilityScore: 90, totalSessions: 105, isPremium: false },
-        { rank: 8, userId: 'user-8', name: 'GameMaster', avatar: '', reliabilityScore: 88, totalSessions: 98, isPremium: false },
-        { rank: 9, userId: 'user-9', name: 'NinjaKiller', avatar: '', reliabilityScore: 86, totalSessions: 92, isPremium: true },
-        { rank: 10, userId: 'user-10', name: 'VictoryLap', avatar: '', reliabilityScore: 85, totalSessions: 87, isPremium: false },
-      ];
-
-      const playersWithCurrentUser = mockLeaderboardData.map((player) => ({
-        ...player,
-        isCurrentUser: player.userId === userProfile?.id,
+      // Use real API
+      const leaderboardData = await communityAPI.getGlobalLeaderboard(50);
+      const mappedPlayers: Player[] = leaderboardData.map((entry: any, index: number) => ({
+        rank: entry.rank || index + 1,
+        userId: entry.user_id,
+        name: entry.username || entry.display_name || 'Joueur',
+        avatar: entry.avatar_url || '',
+        reliabilityScore: entry.reliability_score || 100,
+        totalSessions: entry.sessions_attended || 0,
+        isPremium: false, // Could add premium check
+        isCurrentUser: entry.user_id === userProfile?.id,
       }));
+      setPlayers(mappedPlayers);
 
-      setPlayers(playersWithCurrentUser);
+      // Get user rank
+      try {
+        const rankData = await communityAPI.getUserRank();
+        setUserRankData({ globalRank: rankData.globalRank, totalUsers: rankData.totalUsers });
+      } catch (e) {
+        setUserRankData(null);
+      }
     } catch (error: any) {
       console.error('Error loading leaderboard:', error);
       showToast(error.message || 'Erreur lors du chargement du classement', 'error');
