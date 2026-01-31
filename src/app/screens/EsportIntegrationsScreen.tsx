@@ -119,7 +119,7 @@ export function EsportIntegrationsScreen({ onNavigate, showToast }: EsportIntegr
           <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
             <motion.button
               onClick={() => onNavigate?.('integrations')}
-              className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-all"
+              className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-[#8a8f98] hover:text-white hover:bg-white/[0.06] transition-all"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -129,7 +129,7 @@ export function EsportIntegrationsScreen({ onNavigate, showToast }: EsportIntegr
               <h1 className="text-xl font-semibold text-white tracking-tight">
                 Esport Platforms
               </h1>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-[#8a8f98]">
                 Integrations competitives
               </p>
             </div>
@@ -148,12 +148,12 @@ export function EsportIntegrationsScreen({ onNavigate, showToast }: EsportIntegr
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500 mb-1">
+                <p className="text-sm text-[#8a8f98] mb-1">
                   Plateformes connectees
                 </p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-3xl font-bold text-white">{connectedCount}</span>
-                  <span className="text-lg text-gray-600">/ {platforms.length}</span>
+                  <span className="text-lg text-[#5a5f69]">/ {platforms.length}</span>
                 </div>
               </div>
               <div
@@ -191,7 +191,7 @@ export function EsportIntegrationsScreen({ onNavigate, showToast }: EsportIntegr
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-white mb-1">Fonctionnalite Premium</h3>
-                <p className="text-sm text-gray-400 mb-4 leading-relaxed">
+                <p className="text-sm text-[#8a8f98] mb-4 leading-relaxed">
                   Les integrations esport sont reservees aux abonnes Premium et aux equipes B2B.
                 </p>
                 <motion.button
@@ -211,7 +211,7 @@ export function EsportIntegrationsScreen({ onNavigate, showToast }: EsportIntegr
           <motion.div variants={itemVariants} className="mb-6">
             <div className="flex items-center gap-2 mb-4">
               <Sparkles className="w-4 h-4 text-orange-500" strokeWidth={1.5} />
-              <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider">
+              <h3 className="text-sm font-medium text-[#8a8f98] uppercase tracking-wider">
                 Plateformes disponibles
               </h3>
             </div>
@@ -243,7 +243,7 @@ export function EsportIntegrationsScreen({ onNavigate, showToast }: EsportIntegr
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-500 mb-3">
+                      <p className="text-sm text-[#8a8f98] mb-3">
                         {platform.description}
                       </p>
 
@@ -252,7 +252,7 @@ export function EsportIntegrationsScreen({ onNavigate, showToast }: EsportIntegr
                         {platform.features.map((feature, idx) => (
                           <span
                             key={idx}
-                            className="px-2 py-1 bg-white/5 text-gray-400 text-xs font-medium rounded-md"
+                            className="px-2 py-1 bg-white/[0.05] text-[#8a8f98] text-xs font-medium rounded-md"
                           >
                             {feature}
                           </span>
@@ -265,7 +265,7 @@ export function EsportIntegrationsScreen({ onNavigate, showToast }: EsportIntegr
                           onClick={() => togglePlatform(platform.id)}
                           className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${
                             platform.connected
-                              ? 'bg-white/5 text-gray-400 hover:bg-white/10 border border-white/10'
+                              ? 'bg-white/[0.03] text-[#8a8f98] hover:bg-white/[0.06] border border-white/[0.06]'
                               : 'text-white'
                           }`}
                           style={!platform.connected ? { backgroundColor: platform.color } : {}}
@@ -276,11 +276,11 @@ export function EsportIntegrationsScreen({ onNavigate, showToast }: EsportIntegr
                         </motion.button>
                         <motion.button
                           onClick={() => showToast?.('Ouverture de la documentation...', 'info')}
-                          className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors"
+                          className="p-2.5 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] rounded-lg transition-colors"
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                         >
-                          <ExternalLink className="w-4 h-4 text-gray-500" strokeWidth={1.5} />
+                          <ExternalLink className="w-4 h-4 text-[#8a8f98]" strokeWidth={1.5} />
                         </motion.button>
                       </div>
                     </div>
@@ -304,12 +304,12 @@ export function EsportIntegrationsScreen({ onNavigate, showToast }: EsportIntegr
             <h3 className="text-base font-semibold text-white mb-2">
               Bientot disponible
             </h3>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-[#8a8f98] mb-4">
               Riot Games API, Activision, EA Sports, et plus encore
             </p>
             <motion.button
               onClick={() => showToast?.('Merci de votre interet !', 'success')}
-              className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 rounded-lg text-sm font-medium transition-all"
+              className="px-5 py-2.5 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] text-[#e5e7eb] rounded-lg text-sm font-medium transition-all"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >

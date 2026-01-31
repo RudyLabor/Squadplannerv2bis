@@ -356,13 +356,13 @@ export function DiscordConnectScreen({ onNavigate, showToast }: DiscordConnectSc
                       <Gamepad2 className="w-6 h-6 text-[#5865F2]" />
                     </div>
                     <div>
-                      <p className="font-medium text-white">Squad Planner Bot</p>
-                      <p className="text-xs text-gray-500">Invitez le bot sur votre serveur</p>
+                      <p className="font-medium text-[#f7f8f8]">Squad Planner Bot</p>
+                      <p className="text-xs text-[#5e6063]">Invitez le bot sur votre serveur</p>
                     </div>
                   </div>
                   <motion.button
                     onClick={() => onNavigate('discord-bot')}
-                    className="w-full py-3 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-white font-medium text-sm flex items-center justify-center gap-2 transition-colors"
+                    className="w-full py-3 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-[#f7f8f8] font-medium text-sm flex items-center justify-center gap-2 transition-colors"
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.99 }}
                   >

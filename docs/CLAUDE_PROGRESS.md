@@ -4,11 +4,59 @@
 
 ---
 
+## ⚠️ INSTRUCTIONS OBLIGATOIRES POUR CHAQUE NOUVEL AGENT
+
+> **CRITIQUE**: Chaque nouvel agent DOIT suivre ces instructions AVANT de commencer à travailler.
+
+### 1. Consulter les Skills Claude (OBLIGATOIRE)
+
+Les skills sont des fichiers de compétences spécialisées qui DOIVENT être utilisées selon le contexte. Emplacement: `~/.claude/skills/`
+
+| Skill | Quand l'utiliser |
+|-------|------------------|
+| `react-expert.md` | Composants React, hooks, state management |
+| `typescript-pro.md` | Typage, interfaces, génériques |
+| `test-master.md` | Tests unitaires, E2E, stratégie de test |
+| `playwright-expert.md` | Tests navigateur, automatisation |
+| `postgres-pro.md` | Supabase, RLS, requêtes SQL |
+| `supabase-expert.md` | Auth, real-time, storage |
+| `api-designer.md` | Design API REST, OpenAPI |
+| `code-reviewer.md` | Revue de code, qualité |
+| `security-reviewer.md` | Audit sécurité, vulnérabilités |
+| `devops-engineer.md` | CI/CD, déploiement, Vercel |
+| `debugging-wizard.md` | Debug, résolution de bugs |
+
+**Comment utiliser**: Lire le fichier skill correspondant avant de travailler sur un sujet.
+
+### 2. Consulter le Document de Référence des Fonctionnalités (OBLIGATOIRE)
+
+Le fichier `docs/FONCTIONNALITES_REFERENCE.md` contient la liste COMPLETE de toutes les fonctionnalités de l'application:
+
+- **61 écrans** répartis en 8 sections
+- **Fonctionnalités détaillées** pour chaque écran
+- **5 flux utilisateur complets**
+- **Arborescence des routes**
+
+**IMPORTANT**: Ce document est la SOURCE DE VÉRITÉ pour savoir ce qui doit être testé et implémenté.
+
+### 3. Workflow Obligatoire
+
+```
+1. LIRE ce fichier (CLAUDE_PROGRESS.md)
+2. LIRE les skills pertinentes (~/.claude/skills/)
+3. LIRE docs/FONCTIONNALITES_REFERENCE.md si travail sur fonctionnalités
+4. VÉRIFIER git status
+5. COMMENCER le travail
+```
+
+---
+
 ## TABLE DES MATIÈRES
 
+0. [Instructions Obligatoires](#️-instructions-obligatoires-pour-chaque-nouvel-agent) ⭐ CRITIQUE
 1. [Résumé Exécutif](#résumé-exécutif)
-2. [Vision Produit Complète](#vision-produit-complète) ⭐ NOUVEAU
-3. [Roadmap Fonctionnelle](#roadmap-fonctionnelle---6-phases) ⭐ NOUVEAU
+2. [Vision Produit Complète](#vision-produit-complète)
+3. [Roadmap Fonctionnelle](#roadmap-fonctionnelle---6-phases)
 4. [Context Engineering](#context-engineering)
 5. [Méthode AIDD](#méthode-aidd-plan--code--test--review)
 6. [Boucle de Rétroaction](#boucle-de-rétroaction)
@@ -20,6 +68,7 @@
 12. [Credentials](#credentials)
 13. [Bugs et Issues](#bugs-et-issues)
 14. [Workflow Opérationnel](#workflow-opérationnel)
+15. [Référence Fonctionnalités](#référence-fonctionnalités) ⭐ NOUVEAU
 
 ---
 
@@ -52,14 +101,15 @@ PRODUCTION:  https://squadplanner.fr (domaine principal)
 - ✅ Build réussi (11.46s)
 - ✅ Commit et push vers squadplanner.fr
 
-**Skills Claude créées:**
+**Skills Claude créées (11):**
 | Skill | Description |
 |-------|-------------|
 | react-expert | Composants React, hooks |
 | typescript-pro | TypeScript strict, types |
 | test-master | Tests unitaires, E2E, QA |
 | playwright-expert | Tests browser, Puppeteer |
-| postgres-pro | Supabase, RLS, queries |
+| postgres-pro | PostgreSQL, queries avancées |
+| supabase-expert | Supabase, RLS, auth, real-time |
 | api-designer | REST API, endpoints |
 | code-reviewer | Revue de code, PR |
 | security-reviewer | Sécurité, auth |
@@ -1573,6 +1623,66 @@ onNavigate('squad-detail', { squadId: 'xxx' })  // Avec params
 
 ---
 
-_Dernière mise à jour: 30 Janvier 2026 - 34/67 écrans (51%)_
-_Tous les fichiers commités - Prêt pour le prochain batch d'agents_
-_Document enrichi avec: extraits de code, composants, erreurs à éviter, priorités, routing_
+## RÉFÉRENCE FONCTIONNALITÉS
+
+> **Document créé le 31 Janvier 2026 - Session 6**
+
+### Fichier de Référence Principal
+
+Le fichier `docs/FONCTIONNALITES_REFERENCE.md` contient la spécification COMPLÈTE de l'application extraite du PDF de présentation.
+
+### Contenu du Document
+
+| Section | Écrans | Description |
+|---------|--------|-------------|
+| Authentification | 3 | Splash, Login, Signup |
+| Principale | 10 | Home, Squads, Sessions, Profile... |
+| Notifications | 5 | Liste, Types, Redirections |
+| Social | 8 | Friends, Messages, Recherche |
+| Gamification | 12 | Achievements, Badges, Défis, Stats |
+| B2B / Compétition | 10 | Tournois, Ligues, Organisations |
+| Paramètres | 8 | Settings, Privacy, Intégrations |
+| Analytics | 5 | Dashboard, Export |
+| **TOTAL** | **61** | |
+
+### Fonctionnalités Clés à Tester
+
+#### Authentification & Squads
+- [ ] Inscription & Connexion sécurisée
+- [ ] Création et gestion des Squads
+- [ ] Invitations de membres et rôles
+- [ ] Codes d'invitation uniques
+
+#### Sessions & Chat
+- [ ] Proposition et gestion des sessions
+- [ ] RSVP (Présent, Absent, Incertain)
+- [ ] Sessions récurrentes
+- [ ] Chat en temps réel intégré
+
+#### Notifications & Profil
+- [ ] Notifications en temps réel
+- [ ] Rappels avant sessions
+- [ ] Profil utilisateur détaillé
+- [ ] Statistiques de performance et XP
+
+#### Gamification & Compétition
+- [ ] Système d'XP et niveaux
+- [ ] Achievements et Badges
+- [ ] Challenges (quotidiens/hebdo)
+- [ ] Classements
+
+### Flux Utilisateur à Valider
+
+1. **Inscription → Première Session** (10 étapes)
+2. **Rejoindre une Squad Existante** (10 étapes)
+3. **Organiser un Tournoi** (7 étapes)
+4. **Système d'Amis** (8 étapes)
+5. **Achievements & Gamification** (8 étapes)
+
+> **Voir**: `docs/FONCTIONNALITES_REFERENCE.md` pour les détails complets.
+
+---
+
+_Dernière mise à jour: 31 Janvier 2026 - Session 6_
+_67/67 écrans UI (100%) - Phase: Tests fonctionnels_
+_Document enrichi avec: référence fonctionnalités, instructions skills, workflow obligatoire_

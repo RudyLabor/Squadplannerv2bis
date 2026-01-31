@@ -66,13 +66,13 @@ export function ApiDocsScreen({ onNavigate, showToast }: ApiDocsScreenProps) {
               onClick={() => onNavigate?.('integrations')}
               variant="ghost"
               aria-label="Retour aux intégrations"
-              className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.06] transition-all"
+              className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/[0.06] text-[#8a8f98] hover:text-white hover:bg-white/[0.06] transition-all"
             />
             <div className="flex-1">
               <h1 className="text-xl font-semibold text-white tracking-tight">
                 API Publique
               </h1>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-[#8a8f98]">
                 Documentation développeurs
               </p>
             </div>
@@ -98,7 +98,7 @@ export function ApiDocsScreen({ onNavigate, showToast }: ApiDocsScreenProps) {
             <h2 className="text-2xl font-semibold text-white tracking-tight mb-2">
               Squad Planner API
             </h2>
-            <p className="text-gray-500 text-sm max-w-sm mx-auto leading-relaxed">
+            <p className="text-[#8a8f98] text-sm max-w-sm mx-auto leading-relaxed">
               Intégrez Squad Planner dans vos outils avec notre API RESTful
             </p>
             <div className="flex items-center justify-center gap-4 mt-4">
@@ -107,7 +107,7 @@ export function ApiDocsScreen({ onNavigate, showToast }: ApiDocsScreenProps) {
                 <span className="text-xs font-medium text-emerald-400">v1 Stable</span>
               </span>
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.06]">
-                <span className="text-xs text-gray-400">1000 req/min</span>
+                <span className="text-xs text-[#8a8f98]">1000 req/min</span>
               </span>
             </div>
           </motion.div>
@@ -125,7 +125,7 @@ export function ApiDocsScreen({ onNavigate, showToast }: ApiDocsScreenProps) {
                 <h3 className="text-base font-semibold text-white mb-0.5">
                   Clé API
                 </h3>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-[#8a8f98]">
                   Authentifiez vos requêtes avec votre clé API
                 </p>
               </div>
@@ -134,10 +134,10 @@ export function ApiDocsScreen({ onNavigate, showToast }: ApiDocsScreenProps) {
             {/* Code block */}
             <div className="bg-[#0d0e10] rounded-xl p-4 font-mono text-xs border border-white/[0.04] mb-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-500">Authorization: Bearer</span>
+                <span className="text-[#8a8f98]">Authorization: Bearer</span>
                 <motion.button
                   onClick={() => copyToClipboard('sk_live_abc123...', 'Clé API')}
-                  className="text-gray-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/[0.06]"
+                  className="text-[#8a8f98] hover:text-white transition-colors p-1 rounded-lg hover:bg-white/[0.06]"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                 >
@@ -183,7 +183,7 @@ export function ApiDocsScreen({ onNavigate, showToast }: ApiDocsScreenProps) {
           <motion.div variants={itemVariants} className="mb-6">
             <div className="flex items-center gap-2 mb-4">
               <BookOpen className="w-4 h-4 text-blue-400" strokeWidth={1.5} />
-              <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider">
+              <h3 className="text-sm font-medium text-[#8a8f98] uppercase tracking-wider">
                 Endpoints disponibles
               </h3>
             </div>
@@ -210,7 +210,7 @@ export function ApiDocsScreen({ onNavigate, showToast }: ApiDocsScreenProps) {
                       <code className="text-sm font-mono text-white block truncate">
                         {endpoint.path}
                       </code>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[#8a8f98] mt-1">
                         {endpoint.description}
                       </p>
                       {endpoint.auth && (
@@ -242,7 +242,7 @@ export function ApiDocsScreen({ onNavigate, showToast }: ApiDocsScreenProps) {
                 <h3 className="text-base font-semibold text-white mb-1">
                   Webhooks
                 </h3>
-                <p className="text-sm text-gray-400 mb-4">
+                <p className="text-sm text-[#8a8f98] mb-4">
                   Recevez des notifications en temps réel pour les événements importants
                 </p>
                 <motion.button
@@ -262,20 +262,20 @@ export function ApiDocsScreen({ onNavigate, showToast }: ApiDocsScreenProps) {
             variants={itemVariants}
             className="text-center py-6"
           >
-            <p className="text-sm text-gray-500 mb-3">
+            <p className="text-sm text-[#8a8f98] mb-3">
               Documentation complète
             </p>
             <motion.a
               href="https://docs.squadplanner.app"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-white/[0.06] hover:border-white/[0.1] transition-all"
+              className="inline-flex items-center gap-2 px-5 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm font-medium text-[#e5e7eb] hover:text-white hover:bg-white/[0.06] hover:border-white/[0.1] transition-all"
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
               <BookOpen className="w-4 h-4" strokeWidth={1.5} />
               Voir la documentation
-              <ExternalLink className="w-4 h-4 text-gray-500" strokeWidth={1.5} />
+              <ExternalLink className="w-4 h-4 text-[#8a8f98]" strokeWidth={1.5} />
             </motion.a>
           </motion.div>
 

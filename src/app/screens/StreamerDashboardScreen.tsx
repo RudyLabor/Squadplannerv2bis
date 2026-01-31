@@ -235,25 +235,25 @@ export function StreamerDashboardScreen({ onNavigate, showToast }: StreamerDashb
                   icon={Users}
                   value={stats?.followers.toLocaleString() || '0'}
                   label="Followers"
-                  iconColor={STREAMING_COLOR}
+                  accentColor={STREAMING_COLOR}
                 />
                 <StatCard
                   icon={Eye}
                   value={stats?.avgViewers || 0}
                   label="Viewers moyens"
-                  iconColor="#60a5fa"
+                  accentColor="#60a5fa"
                 />
                 <StatCard
                   icon={Clock}
                   value={stats?.watchTime || '0h'}
                   label="Watch time moyen"
-                  iconColor="#f5a623"
+                  accentColor="#f5a623"
                 />
                 <StatCard
                   icon={TrendingUp}
                   value="+12%"
                   label="Croissance"
-                  iconColor="#4ade80"
+                  accentColor="#4ade80"
                 />
               </motion.div>
 
