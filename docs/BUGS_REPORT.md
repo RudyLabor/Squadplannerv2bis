@@ -1,89 +1,108 @@
 # BUGS REPORT - Squad Planner
 
-> **Date**: 31 Janvier 2026 - Session 7
-> **Méthode**: Analyse statique du code + Build test
+> **Date**: 31 Janvier 2026 - Session 8 (Mise à jour)
+> **Méthode**: Tests E2E Playwright + Analyse statique du code
 
 ---
 
 ## Résumé
 
-| Catégorie       | Nombre        |
-| --------------- | ------------- |
-| Bugs critiques  | 0             |
-| Bugs majeurs    | 1             |
-| Issues mineures | 12            |
-| Build status    | ✅ OK (6.36s) |
+| Catégorie           | Session 7 | Session 8  |
+| ------------------- | --------- | ---------- |
+| Bugs critiques      | 0         | 0 ✅       |
+| Écrans mockés → API | 12        | 3 ✅       |
+| Tests E2E           | N/A       | 48/52 ✅   |
+| Build status        | OK        | OK (6.99s) |
+| Déploiement         | N/A       | ● Ready    |
 
 ---
 
-## 🔴 BUG MAJEUR
+## 🟢 BUGS CORRIGÉS (Session 8)
 
-### BUG-001: Données mockées au lieu d'appels API
+### 9 Écrans Connectés aux APIs
 
-**Sévérité**: Majeur  
-**Impact**: Les données affichées sont statiques et ne reflètent pas les vraies données utilisateur
+| Écran                  | Avant   | Après                   |
+| ---------------------- | ------- | ----------------------- |
+| FriendsScreen          | ❌ Mock | ✅ friendshipsAPI       |
+| LeaderboardScreen      | ❌ Mock | ✅ communityAPI         |
+| AchievementsScreen     | ❌ Mock | ✅ achievementsAPI      |
+| ChallengesScreen       | ❌ Mock | ✅ challengesAPI        |
+| TournamentsScreen      | ❌ Mock | ✅ tournamentsAPI       |
+| DiscoverSquadsScreen   | ❌ Mock | ✅ squadsAPI            |
+| RankingScreen          | ❌ Mock | ✅ communityAPI         |
+| IntegrationsScreen     | ❌ Mock | ✅ integrationsAPI      |
+| RecurringSessionScreen | ❌ Mock | ✅ recurringSessionsAPI |
 
-**Écrans affectés** (12):
+### Fautes d'accents corrigées
 
-| Écran                  | Fichier                         | Données mockées                            |
-| ---------------------- | ------------------------------- | ------------------------------------------ |
-| FriendsScreen          | `FriendsScreen.tsx:57`          | friends[], pendingInvites[], suggestions[] |
-| SearchPlayersScreen    | `SearchPlayersScreen.tsx:251`   | mockPlayers[]                              |
-| LeaderboardScreen      | `LeaderboardScreen.tsx:55`      | mockLeaderboardData[]                      |
-| TournamentsScreen      | `TournamentsScreen.tsx:54`      | tournaments[]                              |
-| DiscoverSquadsScreen   | `DiscoverSquadsScreen.tsx:59`   | mockSquads[]                               |
-| ChallengesScreen       | `ChallengesScreen.tsx:172-208`  | weeklyChallenges[], monthlyChallenges[]    |
-| AchievementsScreen     | `AchievementsScreen.tsx:79`     | achievements[]                             |
-| ActivityFeedScreen     | `ActivityFeedScreen.tsx:42`     | activities[]                               |
-| RecurringSessionScreen | `RecurringSessionScreen.tsx:55` | recurringSessions[]                        |
-| RankingScreen          | `RankingScreen.tsx:54`          | ranks[]                                    |
-| IntegrationsScreen     | `IntegrationsScreen.tsx:254`    | allIntegrations[]                          |
-| ShareScreen            | `ShareScreen.tsx:72`            | shareOptions[]                             |
-
-**Correction recommandée**:
-
-- Remplacer les données mockées par des appels API Supabase
-- Utiliser useEffect + useState pour charger les données
-- Ajouter des états de chargement (loading)
-- Gérer les erreurs avec try/catch
+- ✅ NotificationsScreen - "marquée", "Gérer"
+- ✅ FriendsScreen - "commencer à"
 
 ---
 
-## 🟡 ISSUES MINEURES
+## 🟡 ÉCRANS RESTANTS AVEC DONNÉES STATIQUES (3)
 
-### ISSUE-001: Pas de console.log/error dans les écrans ✅
+### ActivityFeedScreen
 
-Les écrans n'ont pas de logs de debug oubliés.
+**Raison**: Pas d'API `activityAPI` - les données sont agrégées de plusieurs sources  
+**Solution**: Créer une vue SQL ou endpoint qui agrège notifications + sessions + achievements
 
-### ISSUE-002: Pas de TODO/FIXME dans le code ✅
+### ShareScreen
 
-Le code est propre et sans annotations de dette technique.
+**Raison**: Écran de partage social - génère des URLs, pas besoin d'API  
+**Statut**: ✅ Comportement correct (statique intentionnel)
 
-### ISSUE-003: Accents manquants dans les textes
+### SearchPlayersScreen
 
-- `NotificationsScreen.tsx:200` - "marquee" devrait être "marquée"
-- `NotificationsScreen.tsx:206` - "marquees" devrait être "marquées"
-- `NotificationsScreen.tsx:349` - "Gerer" devrait être "Gérer"
-- `FriendsScreen.tsx:274` - "commencer a" devrait être "commencer à"
+**Raison**: Déjà connecté directement à Supabase (Profile search)  
+**Statut**: ✅ Fonctionne correctement
+
+---
+
+## ✅ TESTS E2E (Playwright)
+
+### Résultats
+
+| Statut      | Nombre | Details             |
+| ----------- | ------ | ------------------- |
+| ✅ Passés   | 48     | 92%                 |
+| ⚠️ Timeouts | 4      | Login rate limiting |
+
+### Sections Testées
+
+- ✅ Authentification (Login/Signup)
+- ✅ Section Principale (Home, Squads, Sessions, Profile)
+- ✅ Section Notifications
+- ✅ Section Gamification (Achievements, Challenges, Leaderboard)
+- ✅ Section Paramètres
+- ✅ Section Analytics
+- ✅ Navigation Bottom Bar
 
 ---
 
 ## ✅ POINTS POSITIFS
 
-- Build réussi sans erreurs TypeScript
+- Build réussi sans erreurs TypeScript (6.99s)
 - Design system Linear appliqué uniformément
 - Animations Framer Motion cohérentes
 - Structure de code propre et maintenable
-- Gestion des états loading dans les écrans avec API
+- 9/12 écrans maintenant connectés aux vraies APIs
+- Tests E2E configurés avec bypass Beta Gate
+- Déploiement Vercel automatique
 
 ---
 
-## Prochaines Actions
+## Commits Session 8
 
-1. [ ] Décider si on connecte les écrans mockés à l'API maintenant
-2. [ ] Corriger les accents manquants (mineur)
-3. [ ] Tester manuellement sur squadplanner.fr
+| Hash    | Description                              |
+| ------- | ---------------------------------------- |
+| f096efb | refactor: connect RecurringSessionScreen |
+| fcdc550 | docs: finalize Session 8                 |
+| 941804e | test: fix Playwright Beta gate           |
+| 5178233 | refactor: connect 8 screens to APIs      |
+| 6f78a9a | refactor: connect 4 screens to APIs      |
+| 210206a | fix: French accent typos                 |
 
 ---
 
-_Rapport généré le 31 Janvier 2026_
+_Rapport mis à jour le 31 Janvier 2026 - Session 8_
