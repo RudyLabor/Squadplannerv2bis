@@ -29,6 +29,7 @@ import { SplashScreen } from '@/app/components/SplashScreen';
 import { LanguageSwitcher } from '@/app/components/LanguageSwitcher';
 import { Skeleton } from '@/app/components/ui/skeleton';
 import { PerformanceDebugPanel } from '@/app/components/PerformanceDebugPanel';
+import { BetaProtection } from '@/app/components/BetaProtection';
 
 // Hooks
 import { useCommandPalette } from '@/app/hooks/useCommandPalette';
@@ -475,10 +476,11 @@ function AppContent() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="system">
-        <TranslationProvider>
-          <BrowserRouter>
-            <AuthProvider>
+      <BetaProtection>
+        <ThemeProvider defaultTheme="system">
+          <TranslationProvider>
+            <BrowserRouter>
+              <AuthProvider>
               <UserProvider>
                 <SubscriptionProvider>
                   <ToastProvider>
@@ -497,9 +499,10 @@ export default function App() {
                 </SubscriptionProvider>
               </UserProvider>
             </AuthProvider>
-          </BrowserRouter>
-        </TranslationProvider>
-      </ThemeProvider>
+            </BrowserRouter>
+          </TranslationProvider>
+        </ThemeProvider>
+      </BetaProtection>
     </ErrorBoundary>
   );
 }

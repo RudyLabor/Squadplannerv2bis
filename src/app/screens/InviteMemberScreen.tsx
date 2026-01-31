@@ -1,5 +1,5 @@
 /**
- * InviteMemberScreen - Premium UI
+ * InviteMemberScreen - Linear Dark Design
  * Screen for inviting members to a squad via code, link, or direct search.
  */
 
@@ -19,7 +19,6 @@ import {
   MessageCircle,
   Sparkles,
 } from 'lucide-react';
-import { Button, Input, IconButton } from '@/design-system';
 
 interface InviteMemberScreenProps {
   onNavigate: (screen: string, data?: any) => void;
@@ -31,16 +30,16 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
+    transition: { staggerChildren: 0.06, delayChildren: 0.1 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
+    transition: { type: "spring", stiffness: 400, damping: 28 }
   }
 };
 
@@ -120,59 +119,49 @@ export function InviteMemberScreen({ onNavigate, showToast, data }: InviteMember
   };
 
   return (
-    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-[var(--color-primary-50)] via-purple-50 to-pink-50 relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-[var(--color-primary-400)]/20 to-purple-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 right-0 w-64 h-64 bg-gradient-to-br from-emerald-400/15 to-teal-400/15 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
+    <div className="min-h-screen bg-[#08090a] pb-24 md:pb-8">
+      <div className="max-w-2xl mx-auto px-4 py-6">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           {/* Header */}
-          <motion.div variants={itemVariants} className="flex items-center gap-3 mb-8">
-            <IconButton
-              variant="secondary"
-              size="md"
-              icon={<ArrowLeft className="w-5 h-5" strokeWidth={2} />}
+          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
+            <motion.button
               onClick={() => onNavigate('squad-detail', { squadId })}
-              aria-label="Retour"
-            />
+              className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.06)] transition-all"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <ArrowLeft className="w-5 h-5" strokeWidth={2} />
+            </motion.button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-[var(--color-primary-600)] to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-xl font-semibold text-[#f7f8f8] tracking-tight">
                 Inviter des membres
               </h1>
-              <p className="text-sm text-[var(--fg-secondary)] font-medium">
+              <p className="text-sm text-[#5e6063]">
                 Partage le code ou recherche des joueurs
               </p>
             </div>
-            <motion.div
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--color-primary-500)] to-purple-600 flex items-center justify-center shadow-lg shadow-[var(--color-primary-500)]/30"
-              whileHover={{ scale: 1.05, rotate: 5 }}
-            >
-              <UserPlus className="w-6 h-6 text-white" strokeWidth={2} />
-            </motion.div>
+            <div className="w-11 h-11 rounded-xl bg-[#5e6dd2] flex items-center justify-center">
+              <UserPlus className="w-5 h-5 text-white" strokeWidth={2} />
+            </div>
           </motion.div>
 
           {/* Tabs */}
           <motion.div
             variants={itemVariants}
-            className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl p-1.5 border border-[var(--border-subtle)] shadow-lg mb-6"
+            className="bg-[rgba(255,255,255,0.02)] rounded-xl p-1 border border-[rgba(255,255,255,0.06)] mb-6"
           >
             <div className="flex gap-1">
               <motion.button
                 onClick={() => setActiveTab('link')}
-                className={`flex-1 py-3 px-4 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
+                className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2 ${
                   activeTab === 'link'
-                    ? 'bg-gradient-to-r from-[var(--color-primary-500)] to-purple-500 text-white shadow-lg shadow-[var(--color-primary-500)]/30'
-                    : 'text-[var(--fg-secondary)] hover:text-[var(--fg-primary)]'
+                    ? 'bg-[#5e6dd2] text-white'
+                    : 'text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.04)]'
                 }`}
-                whileHover={{ scale: activeTab === 'link' ? 1 : 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <Link className="w-4 h-4" strokeWidth={2} />
@@ -180,12 +169,11 @@ export function InviteMemberScreen({ onNavigate, showToast, data }: InviteMember
               </motion.button>
               <motion.button
                 onClick={() => setActiveTab('search')}
-                className={`flex-1 py-3 px-4 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
+                className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2 ${
                   activeTab === 'search'
-                    ? 'bg-gradient-to-r from-[var(--color-primary-500)] to-purple-500 text-white shadow-lg shadow-[var(--color-primary-500)]/30'
-                    : 'text-[var(--fg-secondary)] hover:text-[var(--fg-primary)]'
+                    ? 'bg-[#5e6dd2] text-white'
+                    : 'text-[#8b8d90] hover:text-[#f7f8f8] hover:bg-[rgba(255,255,255,0.04)]'
                 }`}
-                whileHover={{ scale: activeTab === 'search' ? 1 : 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <Search className="w-4 h-4" strokeWidth={2} />
@@ -198,53 +186,51 @@ export function InviteMemberScreen({ onNavigate, showToast, data }: InviteMember
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
               className="space-y-4"
             >
               {/* Invite Code Card */}
               <motion.div
                 variants={itemVariants}
-                className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl p-6 border border-[var(--border-subtle)] shadow-lg"
+                className="bg-[rgba(255,255,255,0.02)] rounded-xl p-5 border border-[rgba(255,255,255,0.06)]"
               >
                 <div className="flex items-center gap-3 mb-4">
-                  <motion.div
-                    className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--color-primary-500)] to-purple-600 flex items-center justify-center shadow-lg shadow-[var(--color-primary-500)]/30"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                  >
-                    <QrCode className="w-6 h-6 text-white" strokeWidth={2} />
-                  </motion.div>
+                  <div className="w-10 h-10 rounded-lg bg-[rgba(94,109,210,0.15)] flex items-center justify-center">
+                    <QrCode className="w-5 h-5 text-[#5e6dd2]" strokeWidth={2} />
+                  </div>
                   <div>
-                    <h3 className="font-bold tracking-tight text-[var(--fg-primary)]">Code d'invitation</h3>
-                    <p className="text-xs text-[var(--fg-tertiary)] font-medium">
+                    <h3 className="font-medium text-[#f7f8f8]">Code d'invitation</h3>
+                    <p className="text-xs text-[#5e6063]">
                       Partage ce code avec tes amis
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="flex-1 bg-gradient-to-br from-[var(--color-primary-50)] to-purple-50 rounded-2xl px-6 py-4 text-center border border-[var(--color-primary-200)]">
-                    <code className="text-2xl font-bold font-mono bg-gradient-to-r from-[var(--color-primary-600)] to-purple-600 bg-clip-text text-transparent tracking-[0.3em]">
+                  <div className="flex-1 bg-[rgba(94,109,210,0.1)] rounded-xl px-5 py-4 text-center border border-[rgba(94,109,210,0.2)]">
+                    <code className="text-2xl font-bold font-mono text-[#5e6dd2] tracking-[0.25em]">
                       {inviteCode}
                     </code>
                   </div>
                   <motion.button
                     onClick={handleCopyCode}
-                    className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all shadow-md ${
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
                       codeCopied
-                        ? 'bg-gradient-to-br from-emerald-500 to-teal-500 shadow-emerald-500/30'
-                        : 'bg-white/80 hover:bg-white'
+                        ? 'bg-[rgba(52,199,89,0.15)] border border-[rgba(52,199,89,0.3)]'
+                        : 'bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.06)]'
                     }`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     {codeCopied ? (
-                      <Check className="w-6 h-6 text-white" strokeWidth={2} />
+                      <Check className="w-5 h-5 text-[#34c759]" strokeWidth={2} />
                     ) : (
-                      <Copy className="w-6 h-6 text-gray-600" strokeWidth={2} />
+                      <Copy className="w-5 h-5 text-[#8b8d90]" strokeWidth={2} />
                     )}
                   </motion.button>
                 </div>
 
-                <p className="text-xs text-[var(--fg-tertiary)] text-center font-medium">
+                <p className="text-xs text-[#5e6063] text-center">
                   Les joueurs peuvent entrer ce code dans "Rejoindre une squad"
                 </p>
               </motion.div>
@@ -252,25 +238,22 @@ export function InviteMemberScreen({ onNavigate, showToast, data }: InviteMember
               {/* Invite Link Card */}
               <motion.div
                 variants={itemVariants}
-                className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl p-6 border border-[var(--border-subtle)] shadow-lg"
+                className="bg-[rgba(255,255,255,0.02)] rounded-xl p-5 border border-[rgba(255,255,255,0.06)]"
               >
                 <div className="flex items-center gap-3 mb-4">
-                  <motion.div
-                    className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--color-success-500)] to-teal-500 flex items-center justify-center shadow-lg shadow-[var(--color-success-500)]/30"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                  >
-                    <Link className="w-6 h-6 text-white" strokeWidth={2} />
-                  </motion.div>
+                  <div className="w-10 h-10 rounded-lg bg-[rgba(52,199,89,0.15)] flex items-center justify-center">
+                    <Link className="w-5 h-5 text-[#34c759]" strokeWidth={2} />
+                  </div>
                   <div>
-                    <h3 className="font-bold tracking-tight text-[var(--fg-primary)]">Lien direct</h3>
-                    <p className="text-xs text-[var(--fg-tertiary)] font-medium">
+                    <h3 className="font-medium text-[#f7f8f8]">Lien direct</h3>
+                    <p className="text-xs text-[#5e6063]">
                       Un clic pour rejoindre
                     </p>
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-[var(--bg-subtle)] to-slate-50 rounded-xl px-4 py-3 mb-4 overflow-hidden border border-[var(--border-subtle)]">
-                  <code className="text-sm text-[var(--fg-secondary)] font-mono break-all">
+                <div className="bg-[rgba(255,255,255,0.04)] rounded-lg px-4 py-3 mb-4 border border-[rgba(255,255,255,0.08)]">
+                  <code className="text-sm text-[#8b8d90] font-mono break-all">
                     {inviteLink}
                   </code>
                 </div>
@@ -278,12 +261,12 @@ export function InviteMemberScreen({ onNavigate, showToast, data }: InviteMember
                 <div className="flex gap-3">
                   <motion.button
                     onClick={handleCopyLink}
-                    className={`flex-1 h-12 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all ${
+                    className={`flex-1 h-11 rounded-xl font-medium text-sm flex items-center justify-center gap-2 transition-all ${
                       linkCopied
-                        ? 'bg-gradient-to-r from-[var(--color-success-500)] to-teal-500 text-white shadow-lg shadow-[var(--color-success-500)]/30'
-                        : 'bg-gradient-to-r from-[var(--color-primary-500)] to-purple-500 text-white shadow-lg shadow-[var(--color-primary-500)]/30'
+                        ? 'bg-[#34c759] text-white'
+                        : 'bg-[#5e6dd2] hover:bg-[#6a79db] text-white'
                     }`}
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.98 }}
                   >
                     {linkCopied ? (
@@ -300,11 +283,11 @@ export function InviteMemberScreen({ onNavigate, showToast, data }: InviteMember
                   </motion.button>
                   <motion.button
                     onClick={handleShare}
-                    className="h-12 px-4 rounded-xl bg-[var(--bg-elevated)]/80 border border-[var(--border-subtle)] shadow-md hover:shadow-lg transition-all"
+                    className="h-11 w-11 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.06)] flex items-center justify-center transition-all"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <Share2 className="w-5 h-5 text-[var(--fg-primary)]" strokeWidth={2} />
+                    <Share2 className="w-5 h-5 text-[#8b8d90]" strokeWidth={2} />
                   </motion.button>
                 </div>
               </motion.div>
@@ -312,30 +295,30 @@ export function InviteMemberScreen({ onNavigate, showToast, data }: InviteMember
               {/* Quick Share Options */}
               <motion.div
                 variants={itemVariants}
-                className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl p-6 border border-[var(--border-subtle)] shadow-lg"
+                className="bg-[rgba(255,255,255,0.02)] rounded-xl p-5 border border-[rgba(255,255,255,0.06)]"
               >
                 <div className="flex items-center gap-2 mb-4">
-                  <Sparkles className="w-5 h-5 text-[var(--color-primary-500)]" />
-                  <h3 className="font-bold tracking-tight text-[var(--fg-primary)]">Partage rapide</h3>
+                  <Sparkles className="w-4 h-4 text-[#5e6dd2]" />
+                  <h3 className="font-medium text-[#f7f8f8]">Partage rapide</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <motion.button
                     onClick={handleShareViaDiscord}
-                    className="flex items-center gap-3 p-4 rounded-xl bg-[var(--color-primary-100)] hover:bg-[var(--color-primary-200)] transition-colors"
+                    className="flex items-center gap-3 p-4 rounded-xl bg-[rgba(88,101,242,0.1)] border border-[rgba(88,101,242,0.2)] hover:bg-[rgba(88,101,242,0.15)] transition-all"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <MessageCircle className="w-6 h-6 text-[var(--color-primary-600)]" strokeWidth={2} />
-                    <span className="font-semibold text-[var(--color-primary-700)]">Discord</span>
+                    <MessageCircle className="w-5 h-5 text-[#5865f2]" strokeWidth={2} />
+                    <span className="font-medium text-[#f7f8f8]">Discord</span>
                   </motion.button>
                   <motion.button
                     onClick={handleShare}
-                    className="flex items-center gap-3 p-4 rounded-xl bg-[var(--bg-subtle)] hover:bg-[var(--bg-muted)] transition-colors"
+                    className="flex items-center gap-3 p-4 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.06)] transition-all"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <Share2 className="w-6 h-6 text-[var(--fg-secondary)]" strokeWidth={2} />
-                    <span className="font-semibold text-[var(--fg-primary)]">Autres</span>
+                    <Share2 className="w-5 h-5 text-[#8b8d90]" strokeWidth={2} />
+                    <span className="font-medium text-[#f7f8f8]">Autres</span>
                   </motion.button>
                 </div>
               </motion.div>
@@ -346,42 +329,41 @@ export function InviteMemberScreen({ onNavigate, showToast, data }: InviteMember
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
               className="space-y-4"
             >
               {/* Search Card */}
               <motion.div
                 variants={itemVariants}
-                className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl p-6 border border-[var(--border-subtle)] shadow-lg"
+                className="bg-[rgba(255,255,255,0.02)] rounded-xl p-5 border border-[rgba(255,255,255,0.06)]"
               >
                 <div className="flex items-center gap-3 mb-4">
-                  <motion.div
-                    className="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-500 to-[var(--color-success-500)] flex items-center justify-center shadow-lg shadow-teal-500/30"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                  >
-                    <UserPlus className="w-6 h-6 text-white" strokeWidth={2} />
-                  </motion.div>
+                  <div className="w-10 h-10 rounded-lg bg-[rgba(52,199,89,0.15)] flex items-center justify-center">
+                    <UserPlus className="w-5 h-5 text-[#34c759]" strokeWidth={2} />
+                  </div>
                   <div>
-                    <h3 className="font-bold tracking-tight text-[var(--fg-primary)]">Rechercher un joueur</h3>
-                    <p className="text-xs text-[var(--fg-tertiary)] font-medium">
+                    <h3 className="font-medium text-[#f7f8f8]">Rechercher un joueur</h3>
+                    <p className="text-xs text-[#5e6063]">
                       Trouve et invite directement
                     </p>
                   </div>
                 </div>
 
                 <div className="flex gap-3">
-                  <Input
+                  <input
+                    type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Pseudo ou email..."
-                    className="flex-1 h-12 rounded-xl"
+                    className="flex-1 h-11 px-4 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-[#f7f8f8] placeholder-[#5e6063] text-sm focus:outline-none focus:border-[#5e6dd2] focus:ring-1 focus:ring-[#5e6dd2] transition-all"
                     onKeyDown={(e) => e.key === 'Enter' && handleSearchPlayer()}
                   />
                   <motion.button
                     onClick={handleSearchPlayer}
                     disabled={!searchQuery.trim()}
-                    className="h-12 px-6 rounded-xl bg-gradient-to-r from-[var(--color-primary-500)] to-purple-500 text-white font-semibold shadow-lg shadow-[var(--color-primary-500)]/30 disabled:opacity-40"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    className="h-11 w-11 rounded-xl bg-[#5e6dd2] hover:bg-[#6a79db] text-white flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    whileHover={{ scale: searchQuery.trim() ? 1.05 : 1 }}
+                    whileTap={{ scale: searchQuery.trim() ? 0.95 : 1 }}
                   >
                     <Search className="w-5 h-5" strokeWidth={2} />
                   </motion.button>
@@ -391,14 +373,14 @@ export function InviteMemberScreen({ onNavigate, showToast, data }: InviteMember
               {/* Suggestions */}
               <motion.div
                 variants={itemVariants}
-                className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm rounded-2xl p-6 border border-[var(--border-subtle)] shadow-lg"
+                className="bg-[rgba(255,255,255,0.02)] rounded-xl p-5 border border-[rgba(255,255,255,0.06)]"
               >
-                <h3 className="font-bold tracking-tight text-[var(--fg-primary)] mb-4">Suggestions</h3>
+                <h3 className="font-medium text-[#f7f8f8] mb-4">Suggestions</h3>
                 <div className="text-center py-8">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--bg-subtle)] to-[var(--bg-muted)] mx-auto mb-4 flex items-center justify-center">
-                    <UserPlus className="w-8 h-8 text-[var(--fg-tertiary)]" strokeWidth={1.5} />
+                  <div className="w-14 h-14 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] mx-auto mb-4 flex items-center justify-center">
+                    <UserPlus className="w-7 h-7 text-[#5e6063]" strokeWidth={1.5} />
                   </div>
-                  <p className="text-sm text-[var(--fg-secondary)] font-medium">
+                  <p className="text-sm text-[#8b8d90]">
                     Recherche un joueur par son pseudo pour l'inviter
                   </p>
                 </div>

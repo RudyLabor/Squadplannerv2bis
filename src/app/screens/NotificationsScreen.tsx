@@ -162,7 +162,10 @@ export function NotificationsScreen({ onNavigate, showToast }: NotificationsScre
   }, [userProfile?.id]);
 
   const loadNotifications = async () => {
-    if (!userProfile?.id) return;
+    if (!userProfile?.id) {
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     try {

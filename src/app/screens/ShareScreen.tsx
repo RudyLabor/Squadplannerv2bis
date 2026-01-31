@@ -1,7 +1,6 @@
-import { ArrowLeft, Share2, Check, Twitter, MessageCircle, Copy, Sparkles, ExternalLink, Trophy } from 'lucide-react';
+import { ArrowLeft, Share2, Check, Twitter, MessageCircle, Copy, Sparkles, ExternalLink, Trophy, Link2, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { Card, Button } from '@/design-system';
 
 interface ShareScreenProps {
   onNavigate: (screen: string) => void;
@@ -11,9 +10,9 @@ interface ShareScreenProps {
 interface ShareOption {
   id: string;
   name: string;
+  description: string;
   icon: any;
-  gradient: string;
-  shadow: string;
+  iconBg: string;
   action: () => void;
 }
 
@@ -40,8 +39,8 @@ export function ShareScreen({ onNavigate, showToast }: ShareScreenProps) {
   // Mock data for what's being shared
   const shareContent = {
     type: 'achievement',
-    title: 'Fiabilite Parfaite',
-    description: 'J\'ai debloque le trophee "Fiabilite Parfaite" sur Squad Planner !',
+    title: 'Fiabilité Parfaite',
+    description: 'J\'ai débloqué le trophée "Fiabilité Parfaite" sur Squad Planner !',
     imageUrl: 'https://example.com/achievement.png',
     link: 'https://squadplanner.app/achievement/123',
   };
@@ -49,7 +48,7 @@ export function ShareScreen({ onNavigate, showToast }: ShareScreenProps) {
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareContent.link);
     setCopied(true);
-    showToast('Lien copie !', 'success');
+    showToast('Lien copié !', 'success');
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -66,7 +65,7 @@ export function ShareScreen({ onNavigate, showToast }: ShareScreenProps) {
   };
 
   const handleShareDiscord = () => {
-    showToast('Copie pour Discord !', 'success');
+    showToast('Copié pour Discord !', 'success');
     navigator.clipboard.writeText(`${shareContent.description}\n${shareContent.link}`);
   };
 
@@ -74,44 +73,37 @@ export function ShareScreen({ onNavigate, showToast }: ShareScreenProps) {
     {
       id: 'twitter',
       name: 'Twitter / X',
+      description: 'Partager sur X',
       icon: Twitter,
-      gradient: 'from-sky-400 to-blue-500',
-      shadow: 'shadow-sky-500/30',
+      iconBg: 'bg-[#1DA1F2]',
       action: handleShareTwitter,
     },
     {
       id: 'whatsapp',
       name: 'WhatsApp',
+      description: 'Envoyer à un contact',
       icon: MessageCircle,
-      gradient: 'from-emerald-400 to-green-500',
-      shadow: 'shadow-emerald-500/30',
+      iconBg: 'bg-[#25D366]',
       action: handleShareWhatsApp,
     },
     {
       id: 'discord',
       name: 'Discord',
+      description: 'Copier pour Discord',
       icon: MessageCircle,
-      gradient: 'from-indigo-400 to-violet-500',
-      shadow: 'shadow-indigo-500/30',
+      iconBg: 'bg-[#5865F2]',
       action: handleShareDiscord,
     },
   ];
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15, filter: "blur(5px)" }}
-      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      transition={{ duration: 0.35 }}
-      className="min-h-screen pb-24 pt-safe bg-[var(--bg-base)] relative overflow-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="min-h-screen bg-[#08090a] pb-24 md:pb-8"
     >
-      {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 right-0 w-64 h-64 bg-gradient-to-br from-amber-400/15 to-yellow-400/15 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto px-4 py-6">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -121,174 +113,179 @@ export function ShareScreen({ onNavigate, showToast }: ShareScreenProps) {
           <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
             <motion.button
               onClick={() => onNavigate('achievements')}
-              className="w-12 h-12 rounded-2xl bg-[var(--bg-elevated)] backdrop-blur-sm border border-[var(--border-subtle)] flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+              className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center hover:bg-[rgba(255,255,255,0.05)] transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <ArrowLeft className="w-5 h-5 text-[var(--fg-secondary)]" strokeWidth={2} />
+              <ArrowLeft className="w-5 h-5 text-[#8b8d90]" />
             </motion.button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-xl font-semibold text-[#f7f8f8]">
                 Partager
               </h1>
-              <p className="text-sm text-[var(--fg-secondary)] font-medium mt-0.5">
+              <p className="text-sm text-[#8b8d90]">
                 Montre ton accomplissement
               </p>
             </div>
-            <motion.div
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30"
-              whileHover={{ scale: 1.05, rotate: 5 }}
-            >
-              <Share2 className="w-6 h-6 text-white" strokeWidth={2} />
-            </motion.div>
+            <div className="w-10 h-10 rounded-lg bg-[#5e6dd2] flex items-center justify-center">
+              <Share2 className="w-5 h-5 text-white" />
+            </div>
           </motion.div>
 
           {/* Preview Card */}
           <motion.div
             variants={itemVariants}
-            whileHover={{ scale: 1.02 }}
+            className="mb-6"
           >
-            <Card className="relative overflow-hidden p-6 mb-8 bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 border-0 shadow-xl shadow-orange-500/30">
-              {/* Shine effect - Static for performance */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12" />
-
-              {/* Decorative elements */}
-              <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+            <div className="rounded-xl bg-gradient-to-br from-[#5e6dd2] to-[#8b5cf6] p-5 relative overflow-hidden">
+              {/* Subtle gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
 
               <div className="relative z-10">
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start gap-4 mb-4">
                   <div className="flex-1">
-                    <div className="text-white/80 text-sm font-semibold mb-2 flex items-center gap-2">
-                      <Sparkles className="w-4 h-4" />
-                      Apercu du partage
+                    <div className="flex items-center gap-2 text-white/70 text-xs font-medium mb-2">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      APERÇU DU PARTAGE
                     </div>
-                    <h2 className="text-2xl font-bold tracking-tight text-white mb-2">
+                    <h2 className="text-xl font-semibold text-white mb-1">
                       {shareContent.title}
                     </h2>
-                    <p className="text-white/90 text-sm font-medium">
+                    <p className="text-sm text-white/80">
                       {shareContent.description}
                     </p>
                   </div>
                   <motion.div
-                    className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    className="w-14 h-14 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center"
+                    whileHover={{ scale: 1.05 }}
                   >
-                    <Trophy className="w-8 h-8 text-white" strokeWidth={2} />
+                    <Trophy className="w-7 h-7 text-white" />
                   </motion.div>
                 </div>
 
                 {/* Mock Image Preview */}
-                <div className="bg-white/15 backdrop-blur-sm rounded-xl h-32 flex items-center justify-center border border-white/20">
-                  <div className="text-white/70 text-sm font-medium flex items-center gap-2">
-                    <Trophy className="w-5 h-5" />
-                    Image du trophee
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg h-28 flex items-center justify-center border border-white/10">
+                  <div className="text-white/60 text-sm flex items-center gap-2">
+                    <Trophy className="w-4 h-4" />
+                    Image du trophée
                   </div>
                 </div>
               </div>
-            </Card>
+            </div>
           </motion.div>
 
-          {/* Copy Link */}
-          <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }}>
-            <Card
-              className="p-5 mb-6 cursor-pointer hover:shadow-xl transition-all"
-              interactive
+          {/* Copy Link Section */}
+          <motion.div variants={itemVariants} className="mb-6">
+            <motion.button
               onClick={handleCopyLink}
+              className="w-full rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] p-4 hover:bg-[rgba(255,255,255,0.04)] transition-all group"
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
             >
               <div className="flex items-center gap-4">
-                <motion.div
-                  className={`w-14 h-14 rounded-xl flex items-center justify-center shadow-md ${
-                    copied
-                      ? 'bg-gradient-to-br from-emerald-500 to-teal-500 shadow-emerald-500/30'
-                      : 'bg-gradient-to-br from-indigo-500 to-purple-500 shadow-indigo-500/30'
-                  }`}
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                >
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                  copied
+                    ? 'bg-[#10b981]'
+                    : 'bg-[#5e6dd2]'
+                }`}>
                   {copied ? (
-                    <Check className="w-7 h-7 text-white" strokeWidth={2.5} />
+                    <Check className="w-6 h-6 text-white" />
                   ) : (
-                    <Copy className="w-7 h-7 text-white" strokeWidth={2} />
+                    <Link2 className="w-6 h-6 text-white" />
                   )}
-                </motion.div>
+                </div>
                 <div className="flex-1 text-left">
-                  <div className="text-sm font-bold tracking-tight text-[var(--fg-primary)] mb-1">
-                    {copied ? 'Lien copie !' : 'Copier le lien'}
+                  <div className="text-sm font-medium text-[#f7f8f8] mb-0.5">
+                    {copied ? 'Lien copié !' : 'Copier le lien'}
                   </div>
-                  <div className="text-sm text-[var(--fg-secondary)] font-medium truncate">
+                  <div className="text-xs text-[#5e6063] truncate max-w-[200px] md:max-w-none">
                     {shareContent.link}
                   </div>
                 </div>
-                <ExternalLink className="w-5 h-5 text-[var(--fg-tertiary)]" strokeWidth={2} />
+                <ExternalLink className="w-4 h-4 text-[#5e6063] group-hover:text-[#8b8d90] transition-colors" />
               </div>
-            </Card>
+            </motion.button>
           </motion.div>
 
           {/* Share Options */}
           <motion.div variants={itemVariants} className="mb-6">
-            <h3 className="text-sm font-bold tracking-tight text-[var(--fg-primary)] mb-4">
+            <h3 className="text-xs font-medium text-[#5e6063] uppercase tracking-wider mb-3 px-1">
               Partager sur
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {shareOptions.map((option, index) => {
                 const Icon = option.icon;
                 return (
-                  <motion.div
+                  <motion.button
                     key={option.id}
-                    variants={itemVariants}
-                    custom={index}
-                    whileHover={{ scale: 1.02 }}
+                    onClick={option.action}
+                    className="w-full rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] p-4 hover:bg-[rgba(255,255,255,0.04)] transition-all group"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 + index * 0.05 }}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
                   >
-                    <Card
-                      className="p-4 cursor-pointer hover:shadow-xl transition-all"
-                      interactive
-                      onClick={option.action}
-                    >
-                      <div className="flex items-center gap-4">
-                        <motion.div
-                          className={`w-12 h-12 rounded-xl bg-gradient-to-br ${option.gradient} flex items-center justify-center shadow-md ${option.shadow}`}
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                        >
-                          <Icon className="w-6 h-6 text-white" strokeWidth={2} />
-                        </motion.div>
-                        <div className="flex-1 text-left">
-                          <div className="text-sm font-bold tracking-tight text-[var(--fg-primary)]">
-                            {option.name}
-                          </div>
-                        </div>
-                        <Share2 className="w-5 h-5 text-[var(--fg-tertiary)]" strokeWidth={2} />
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-lg ${option.iconBg} flex items-center justify-center`}>
+                        <Icon className="w-5 h-5 text-white" />
                       </div>
-                    </Card>
-                  </motion.div>
+                      <div className="flex-1 text-left">
+                        <div className="text-sm font-medium text-[#f7f8f8]">
+                          {option.name}
+                        </div>
+                        <div className="text-xs text-[#5e6063]">
+                          {option.description}
+                        </div>
+                      </div>
+                      <Share2 className="w-4 h-4 text-[#5e6063] group-hover:text-[#8b8d90] transition-colors" />
+                    </div>
+                  </motion.button>
                 );
               })}
             </div>
           </motion.div>
 
           {/* Info Banner */}
-          <motion.div
-            variants={itemVariants}
-            whileHover={{ scale: 1.02 }}
-          >
-            <Card className="relative overflow-hidden p-5 bg-gradient-to-br from-indigo-500 to-purple-600 border-0 shadow-xl">
-              {/* Decorative elements */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
-
-              <div className="relative z-10 flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-                  <Share2 className="w-6 h-6 text-white" strokeWidth={2} />
+          <motion.div variants={itemVariants}>
+            <div className="rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[rgba(94,109,210,0.15)] flex items-center justify-center flex-shrink-0">
+                  <Users className="w-5 h-5 text-[#5e6dd2]" />
                 </div>
                 <div className="flex-1">
-                  <div className="text-base font-bold tracking-tight text-white mb-1">
-                    Inspire ta communaute
+                  <div className="text-sm font-medium text-[#f7f8f8] mb-1">
+                    Inspire ta communauté
                   </div>
-                  <div className="text-sm text-white/90 font-medium leading-relaxed">
-                    Partage tes accomplissements pour motiver tes amis et montrer ta progression. Chaque partage renforce la communaute Squad Planner !
+                  <div className="text-xs text-[#8b8d90] leading-relaxed">
+                    Partage tes accomplissements pour motiver tes amis et montrer ta progression. Chaque partage renforce la communauté Squad Planner !
                   </div>
                 </div>
               </div>
-            </Card>
+            </div>
+          </motion.div>
+
+          {/* Stats Summary */}
+          <motion.div
+            variants={itemVariants}
+            className="mt-6 grid grid-cols-3 gap-3"
+          >
+            {[
+              { label: 'Partages', value: '24' },
+              { label: 'Vues', value: '156' },
+              { label: 'Clics', value: '42' },
+            ].map((stat, index) => (
+              <motion.div
+                key={stat.label}
+                className="rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] p-4 text-center"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + index * 0.05 }}
+              >
+                <div className="text-lg font-semibold text-[#f7f8f8]">{stat.value}</div>
+                <div className="text-xs text-[#5e6063]">{stat.label}</div>
+              </motion.div>
+            ))}
           </motion.div>
         </motion.div>
       </div>

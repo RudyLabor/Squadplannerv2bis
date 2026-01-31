@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Heart, Users, TrendingUp, AlertCircle, Clock, Loader2, Sparkles, Activity, Shield } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import { ArrowLeft, Heart, Users, TrendingUp, AlertCircle, Clock, Sparkles, Activity, Shield, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Card, SkeletonPage } from '@/design-system';
 import { SquadCohesion, generateMockCohesionMetrics, generateMockSquadMembers } from '@/app/components/SquadCohesion';
 import { ReliabilityProfile, generateMockReliabilityStats } from '@/app/components/ReliabilityProfile';
 import { calculateSquadCohesion, CohesionResult, MemberStats } from '@/utils/cohesion-calculator';
@@ -17,20 +17,22 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
+    transition: { staggerChildren: 0.06, delayChildren: 0.1 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
+    transition: { type: "spring", stiffness: 400, damping: 28 }
   }
 };
 
-export function SquadHealthScreen({ onNavigate, showToast, squadId }: SquadHealthScreenProps) {
+export function SquadHealthScreen({ onNavigate, showToast, squadId: propSquadId }: SquadHealthScreenProps) {
+  const { squadId: urlSquadId } = useParams<{ squadId: string }>();
+  const squadId = propSquadId || urlSquadId;
   const { squads } = useSquads();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -82,7 +84,7 @@ export function SquadHealthScreen({ onNavigate, showToast, squadId }: SquadHealt
   const handleActionClick = (action: string, data?: any) => {
     switch (action) {
       case 'remove':
-        showToast('Fonctionnalité "Retirer membre" à venir', 'info');
+        showToast('Fonctionnalite "Retirer membre" a venir', 'info');
         break;
       case 'invite':
         onNavigate('join-squad', { squadId: squad.id });
@@ -91,7 +93,7 @@ export function SquadHealthScreen({ onNavigate, showToast, squadId }: SquadHealt
         onNavigate('propose-session');
         break;
       default:
-        showToast('Action détectée', 'info');
+        showToast('Action detectee', 'info');
     }
   };
 
@@ -99,28 +101,28 @@ export function SquadHealthScreen({ onNavigate, showToast, squadId }: SquadHealt
     {
       id: '1',
       date: 'Il y a 2 jours',
-      event: '3 membres ont confirmé leur présence',
+      event: '3 membres ont confirme leur presence',
       type: 'success',
       icon: TrendingUp,
     },
     {
       id: '2',
       date: 'Il y a 5 jours',
-      event: 'HunterAce n\'a pas répondu à 3 sessions',
+      event: 'HunterAce n\'a pas repondu a 3 sessions',
       type: 'warning',
       icon: AlertCircle,
     },
     {
       id: '3',
       date: 'Il y a 1 semaine',
-      event: 'Meilleur taux de présence : 96%',
+      event: 'Meilleur taux de presence : 96%',
       type: 'success',
       icon: TrendingUp,
     },
     {
       id: '4',
       date: 'Il y a 2 semaines',
-      event: 'Session annulée (manque de joueurs)',
+      event: 'Session annulee (manque de joueurs)',
       type: 'error',
       icon: AlertCircle,
     },
@@ -129,8 +131,15 @@ export function SquadHealthScreen({ onNavigate, showToast, squadId }: SquadHealt
   // Afficher un loader pendant le chargement
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[var(--color-primary-50)] via-purple-50 to-pink-50">
-        <SkeletonPage />
+      <div className="min-h-screen bg-[#08090a] flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex flex-col items-center gap-4"
+        >
+          <div className="w-10 h-10 border-2 border-[#5e6dd2] border-t-transparent rounded-full animate-spin" />
+          <p className="text-[#8b8d90] text-sm">Chargement...</p>
+        </motion.div>
       </div>
     );
   }
@@ -141,26 +150,51 @@ export function SquadHealthScreen({ onNavigate, showToast, squadId }: SquadHealt
   const getTypeStyles = (type: string) => {
     switch (type) {
       case 'success':
-        return { bg: 'bg-[var(--color-success-100)]', icon: 'bg-[var(--color-success-500)]', text: 'text-[var(--color-success-700)]' };
+        return {
+          bg: 'bg-[rgba(34,197,94,0.1)]',
+          border: 'border-[rgba(34,197,94,0.2)]',
+          icon: 'text-[#22c55e]',
+          text: 'text-[#22c55e]'
+        };
       case 'warning':
-        return { bg: 'bg-[var(--color-warning-100)]', icon: 'bg-[var(--color-warning-500)]', text: 'text-[var(--color-warning-700)]' };
+        return {
+          bg: 'bg-[rgba(245,158,11,0.1)]',
+          border: 'border-[rgba(245,158,11,0.2)]',
+          icon: 'text-[#f59e0b]',
+          text: 'text-[#f59e0b]'
+        };
       case 'error':
-        return { bg: 'bg-[var(--color-error-100)]', icon: 'bg-[var(--color-error-500)]', text: 'text-[var(--color-error-700)]' };
+        return {
+          bg: 'bg-[rgba(239,68,68,0.1)]',
+          border: 'border-[rgba(239,68,68,0.2)]',
+          icon: 'text-[#ef4444]',
+          text: 'text-[#ef4444]'
+        };
       default:
-        return { bg: 'bg-[var(--bg-subtle)]', icon: 'bg-[var(--fg-secondary)]', text: 'text-[var(--fg-primary)]' };
+        return {
+          bg: 'bg-[rgba(255,255,255,0.02)]',
+          border: 'border-[rgba(255,255,255,0.06)]',
+          icon: 'text-[#8b8d90]',
+          text: 'text-[#f7f8f8]'
+        };
     }
   };
 
-  return (
-    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-[var(--color-primary-50)] via-purple-50 to-pink-50 relative overflow-hidden">
-      {/* Background decorations - Static for performance */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-[var(--color-error-400)]/20 to-pink-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-[var(--color-primary-400)]/20 to-purple-400/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 right-0 w-64 h-64 bg-gradient-to-br from-[var(--color-success-400)]/15 to-teal-400/15 rounded-full blur-3xl" />
-      </div>
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'text-[#22c55e]';
+    if (score >= 60) return 'text-[#f59e0b]';
+    return 'text-[#ef4444]';
+  };
 
-      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
+  const getScoreBg = (score: number) => {
+    if (score >= 80) return 'bg-[rgba(34,197,94,0.15)]';
+    if (score >= 60) return 'bg-[rgba(245,158,11,0.15)]';
+    return 'bg-[rgba(239,68,68,0.15)]';
+  };
+
+  return (
+    <div className="min-h-screen bg-[#08090a] pb-24 md:pb-8">
+      <div className="max-w-2xl mx-auto px-4 py-6">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -170,40 +204,36 @@ export function SquadHealthScreen({ onNavigate, showToast, squadId }: SquadHealt
           <motion.div variants={itemVariants} className="flex items-center gap-3 mb-8">
             <motion.button
               onClick={() => onNavigate('squad-detail')}
-              className="w-12 h-12 rounded-2xl bg-[var(--bg-elevated)]/80 backdrop-blur-sm border border-[var(--border-subtle)]/50 flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+              className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center hover:bg-[rgba(255,255,255,0.05)] transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <ArrowLeft className="w-5 h-5 text-[var(--fg-primary)]" strokeWidth={2} />
+              <ArrowLeft className="w-5 h-5 text-[#f7f8f8]" strokeWidth={1.5} />
             </motion.button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-[var(--color-error-500)] to-pink-500 bg-clip-text text-transparent flex items-center gap-2">
-                <Heart className="w-6 h-6 text-[var(--color-error-500)]" strokeWidth={2} fill="currentColor" />
-                Santé de la Squad
+              <h1 className="text-xl font-semibold text-[#f7f8f8] flex items-center gap-2">
+                <Heart className="w-5 h-5 text-[#ef4444]" strokeWidth={1.5} fill="currentColor" />
+                Sante de la Squad
               </h1>
-              <p className="text-sm text-[var(--fg-secondary)] font-medium">
+              <p className="text-sm text-[#8b8d90]">
                 {squad.name}
               </p>
             </div>
             <motion.div
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--color-error-500)] to-pink-600 flex items-center justify-center shadow-lg shadow-[var(--color-error-500)]/30"
-              whileHover={{ scale: 1.05, rotate: 5 }}
+              className="w-10 h-10 rounded-xl bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.2)] flex items-center justify-center"
+              whileHover={{ scale: 1.05 }}
             >
-              <Activity className="w-6 h-6 text-white" strokeWidth={2} />
+              <Activity className="w-5 h-5 text-[#ef4444]" strokeWidth={1.5} />
             </motion.div>
           </motion.div>
 
           {/* Squad Info Card */}
           <motion.div
             variants={itemVariants}
-            className="bg-gradient-to-br from-[var(--color-primary-500)] to-purple-600 rounded-3xl p-6 mb-6 text-white shadow-xl shadow-[var(--color-primary-500)]/30 relative overflow-hidden"
+            className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-5 mb-6"
           >
-            {/* Decorative elements */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
-
-            <div className="relative z-10 flex items-center gap-4 mb-4">
-              <div className="w-16 h-16 rounded-2xl overflow-hidden ring-2 ring-white/30 shadow-lg">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-14 h-14 rounded-xl overflow-hidden border border-[rgba(255,255,255,0.1)]">
                 <img
                   src={squad.avatar}
                   alt={squad.name}
@@ -211,34 +241,55 @@ export function SquadHealthScreen({ onNavigate, showToast, squadId }: SquadHealt
                 />
               </div>
               <div className="flex-1">
-                <h2 className="text-xl font-bold tracking-tight mb-1">{squad.name}</h2>
-                <div className="flex items-center gap-2 text-sm text-white/90">
-                  <Users className="w-4 h-4" strokeWidth={2} />
+                <h2 className="text-lg font-semibold text-[#f7f8f8] mb-1">{squad.name}</h2>
+                <div className="flex items-center gap-2 text-sm text-[#8b8d90]">
+                  <Users className="w-4 h-4" strokeWidth={1.5} />
                   <span>{members.length} membres</span>
-                  <span>•</span>
+                  <span className="text-[#5e6063]">•</span>
                   <span>{squad.game}</span>
                 </div>
               </div>
+              <div className={`px-3 py-1.5 rounded-lg ${getScoreBg(metrics.score)}`}>
+                <span className={`text-lg font-bold ${getScoreColor(metrics.score)}`}>
+                  {metrics.score}%
+                </span>
+              </div>
             </div>
 
-            <div className="relative z-10 bg-white/20 backdrop-blur-sm rounded-xl p-3">
-              <div className="text-xs text-white/80 mb-1 font-medium">Diagnostic rapide</div>
-              <div className="text-sm font-bold">
+            <div className="bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.04)] rounded-lg p-3">
+              <div className="text-xs text-[#5e6063] mb-1 font-medium uppercase tracking-wider">Diagnostic</div>
+              <div className="text-sm font-medium text-[#f7f8f8]">
                 {metrics.score >= 80
-                  ? 'Votre squad est en excellente santé'
+                  ? 'Votre squad est en excellente sante'
                   : metrics.score >= 60
-                  ? 'Quelques points d\'attention'
+                  ? 'Quelques points d\'attention a surveiller'
                   : 'Action requise pour stabiliser la squad'
                 }
               </div>
             </div>
           </motion.div>
 
+          {/* Quick Stats */}
+          <motion.div variants={itemVariants} className="grid grid-cols-3 gap-3 mb-6">
+            <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4 text-center">
+              <div className="text-2xl font-bold text-[#22c55e] mb-1">{metrics.attendance}%</div>
+              <div className="text-xs text-[#5e6063]">Presence</div>
+            </div>
+            <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4 text-center">
+              <div className="text-2xl font-bold text-[#5e6dd2] mb-1">{metrics.engagement}%</div>
+              <div className="text-xs text-[#5e6063]">Engagement</div>
+            </div>
+            <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4 text-center">
+              <div className="text-2xl font-bold text-[#f59e0b] mb-1">{metrics.consistency}%</div>
+              <div className="text-xs text-[#5e6063]">Regularite</div>
+            </div>
+          </motion.div>
+
           {/* Cohesion Section */}
           <motion.div variants={itemVariants} className="mb-6">
             <div className="flex items-center gap-2 mb-4">
-              <Heart className="w-5 h-5 text-[var(--color-error-500)]" strokeWidth={2} />
-              <h3 className="text-sm font-bold tracking-tight text-[var(--fg-primary)]">
+              <Heart className="w-4 h-4 text-[#ef4444]" strokeWidth={1.5} />
+              <h3 className="text-sm font-medium text-[#f7f8f8]">
                 Cohesion & Dynamique de groupe
               </h3>
             </div>
@@ -254,8 +305,8 @@ export function SquadHealthScreen({ onNavigate, showToast, squadId }: SquadHealt
           {/* Your Reliability */}
           <motion.div variants={itemVariants} className="mb-6">
             <div className="flex items-center gap-2 mb-4">
-              <Shield className="w-5 h-5 text-[var(--color-success-500)]" strokeWidth={2} />
-              <h3 className="text-sm font-bold tracking-tight text-[var(--fg-primary)]">
+              <Shield className="w-4 h-4 text-[#22c55e]" strokeWidth={1.5} />
+              <h3 className="text-sm font-medium text-[#f7f8f8]">
                 Votre contribution
               </h3>
             </div>
@@ -265,13 +316,13 @@ export function SquadHealthScreen({ onNavigate, showToast, squadId }: SquadHealt
           {/* Timeline */}
           <motion.div variants={itemVariants} className="mb-6">
             <div className="flex items-center gap-2 mb-4">
-              <Clock className="w-5 h-5 text-[var(--color-primary-500)]" strokeWidth={2} />
-              <h3 className="text-sm font-bold tracking-tight text-[var(--fg-primary)]">
+              <Clock className="w-4 h-4 text-[#5e6dd2]" strokeWidth={1.5} />
+              <h3 className="text-sm font-medium text-[#f7f8f8]">
                 Historique recent
               </h3>
             </div>
-            <Card variant="elevated" padding="lg" className="bg-[var(--bg-elevated)]/80 backdrop-blur-sm border border-[var(--border-subtle)]/50">
-              <div className="space-y-4">
+            <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4">
+              <div className="space-y-3">
                 {timeline.map((item, index) => {
                   const styles = getTypeStyles(item.type);
                   const Icon = item.icon;
@@ -279,22 +330,22 @@ export function SquadHealthScreen({ onNavigate, showToast, squadId }: SquadHealt
                   return (
                     <motion.div
                       key={item.id}
-                      initial={{ opacity: 0, x: -20 }}
+                      initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
                       className="flex items-start gap-3"
                     >
                       <motion.div
-                        className={`w-10 h-10 rounded-xl ${styles.bg} flex items-center justify-center flex-shrink-0`}
-                        whileHover={{ scale: 1.1 }}
+                        className={`w-9 h-9 rounded-lg ${styles.bg} border ${styles.border} flex items-center justify-center flex-shrink-0`}
+                        whileHover={{ scale: 1.05 }}
                       >
-                        <Icon className={`w-5 h-5 ${styles.text}`} strokeWidth={2} />
+                        <Icon className={`w-4 h-4 ${styles.icon}`} strokeWidth={1.5} />
                       </motion.div>
-                      <div className="flex-1 min-w-0 pt-1">
-                        <div className="text-sm font-semibold text-[var(--fg-primary)] mb-0.5">
+                      <div className="flex-1 min-w-0 pt-0.5">
+                        <div className="text-sm text-[#f7f8f8] mb-0.5">
                           {item.event}
                         </div>
-                        <div className="text-xs text-[var(--fg-secondary)] font-medium">
+                        <div className="text-xs text-[#5e6063]">
                           {item.date}
                         </div>
                       </div>
@@ -302,32 +353,32 @@ export function SquadHealthScreen({ onNavigate, showToast, squadId }: SquadHealt
                   );
                 })}
               </div>
-            </Card>
+            </div>
           </motion.div>
 
           {/* Action CTA */}
           <motion.button
             variants={itemVariants}
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
             onClick={() => onNavigate('intelligence')}
-            className="w-full bg-gradient-to-r from-[var(--color-primary-500)] to-purple-600 rounded-2xl p-5 text-white shadow-xl shadow-[var(--color-primary-500)]/30 hover:shadow-2xl transition-all"
+            className="w-full bg-[#5e6dd2] hover:bg-[#6a79db] rounded-xl p-4 text-white transition-colors"
           >
             <div className="flex items-center justify-between">
-              <div className="flex-1 text-left">
-                <div className="text-base font-bold mb-1">
-                  Voir les recommandations IA
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[rgba(255,255,255,0.15)] flex items-center justify-center">
+                  <Sparkles className="w-5 h-5" strokeWidth={1.5} />
                 </div>
-                <div className="text-sm text-white/90">
-                  Découvrez comment optimiser votre planning
+                <div className="text-left">
+                  <div className="text-sm font-semibold">
+                    Recommandations IA
+                  </div>
+                  <div className="text-xs text-white/70">
+                    Optimisez votre planning
+                  </div>
                 </div>
               </div>
-              <motion.div
-                className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-              >
-                <Sparkles className="w-6 h-6" strokeWidth={2} />
-              </motion.div>
+              <ChevronRight className="w-5 h-5 text-white/60" strokeWidth={1.5} />
             </div>
           </motion.button>
         </motion.div>
@@ -335,4 +386,5 @@ export function SquadHealthScreen({ onNavigate, showToast, squadId }: SquadHealt
     </div>
   );
 }
+
 export default SquadHealthScreen;

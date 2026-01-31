@@ -1,6 +1,7 @@
 /**
  * Premium Success Screen - Post-Checkout Confirmation
  * Shown after successful Stripe payment
+ * Design: Linear Dark Theme
  */
 
 import { useEffect, useState } from "react";
@@ -12,14 +13,13 @@ import {
   Check,
   Sparkles,
   ArrowRight,
-  PartyPopper,
   Zap,
   Brain,
   BarChart3,
   Calendar,
   Users,
+  Loader2,
 } from "lucide-react";
-import { SkeletonPage } from "@/design-system";
 
 interface PremiumSuccessScreenProps {
   onNavigate: (screen: string, data?: any) => void;
@@ -30,16 +30,16 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+    transition: { staggerChildren: 0.08, delayChildren: 0.1 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
+    transition: { type: "spring", stiffness: 400, damping: 28 }
   }
 };
 
@@ -79,22 +79,21 @@ export function PremiumSuccessScreen({ onNavigate, showToast }: PremiumSuccessSc
   }, [sessionId, refreshSubscription, showToast]);
 
   const unlockedFeatures = [
-    { icon: Brain, label: "Suggestions IA", description: "Créneaux optimaux" },
-    { icon: BarChart3, label: "Stats avancées", description: "Analyse détaillée" },
-    { icon: Calendar, label: "Export calendrier", description: "Sync complète" },
-    { icon: Users, label: "Squads illimitées", description: "Sans limite" },
+    { icon: Brain, label: "Suggestions IA", description: "Créneaux optimaux basés sur l'IA" },
+    { icon: BarChart3, label: "Stats avancées", description: "Analyse détaillée de votre squad" },
+    { icon: Calendar, label: "Export calendrier", description: "Sync Google & Apple Calendar" },
+    { icon: Users, label: "Squads illimitées", description: "Créez autant de squads que voulu" },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pb-32 overflow-hidden">
-      {/* Background - Static for performance */}
+    <div className="min-h-screen bg-[#08090a] pb-24 md:pb-8">
+      {/* Subtle gradient overlay */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 -right-20 w-80 h-80 bg-emerald-500/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-40 -left-20 w-60 h-60 bg-amber-500/20 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[#4ade80]/5 rounded-full blur-[120px]" />
       </div>
 
       <motion.div
-        className="relative px-4 py-8"
+        className="relative max-w-lg mx-auto px-4 py-8"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -102,10 +101,18 @@ export function PremiumSuccessScreen({ onNavigate, showToast }: PremiumSuccessSc
         {/* Loading state */}
         {isVerifying && (
           <motion.div
-            className="min-h-[60vh]"
+            className="min-h-[60vh] flex flex-col items-center justify-center"
             variants={itemVariants}
           >
-            <SkeletonPage />
+            <div className="w-16 h-16 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center mb-6">
+              <Loader2 className="w-8 h-8 text-[#5e6dd2] animate-spin" />
+            </div>
+            <h2 className="text-xl font-semibold text-[#f7f8f8] mb-2">
+              Vérification du paiement...
+            </h2>
+            <p className="text-[#8b8d90] text-sm">
+              Cela ne prendra que quelques secondes
+            </p>
           </motion.div>
         )}
 
@@ -115,29 +122,34 @@ export function PremiumSuccessScreen({ onNavigate, showToast }: PremiumSuccessSc
             {/* Success icon */}
             <motion.div
               variants={itemVariants}
-              className="flex justify-center mb-6"
+              className="flex justify-center mb-8"
             >
               <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 200, damping: 10 }}
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
                 className="relative"
               >
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-2xl shadow-emerald-500/30">
-                  <Check className="w-12 h-12 text-white" />
+                <div className="w-20 h-20 rounded-full bg-[#4ade80] flex items-center justify-center shadow-[0_0_60px_rgba(74,222,128,0.3)]">
+                  <Check className="w-10 h-10 text-[#08090a]" strokeWidth={3} />
                 </div>
-                <div className="absolute -top-2 -right-2">
-                  <PartyPopper className="w-8 h-8 text-amber-400" />
-                </div>
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-[#fbbf24] flex items-center justify-center"
+                >
+                  <Sparkles className="w-4 h-4 text-[#08090a]" />
+                </motion.div>
               </motion.div>
             </motion.div>
 
             {/* Success message */}
             <motion.div variants={itemVariants} className="text-center mb-8">
-              <h1 className="text-3xl font-black tracking-tight text-white mb-2">
-                Bienvenue Premium!
+              <h1 className="text-2xl font-semibold text-[#f7f8f8] mb-2">
+                Bienvenue dans Premium!
               </h1>
-              <p className="text-white/60">
+              <p className="text-[#8b8d90]">
                 Votre abonnement est maintenant actif
               </p>
             </motion.div>
@@ -147,37 +159,38 @@ export function PremiumSuccessScreen({ onNavigate, showToast }: PremiumSuccessSc
               variants={itemVariants}
               className="flex justify-center mb-8"
             >
-              <div className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 flex items-center gap-3 shadow-xl shadow-amber-500/30">
-                <Crown className="w-6 h-6 text-white" />
-                <span className="text-lg font-bold text-white">Squad Planner Premium</span>
-                <Sparkles className="w-5 h-5 text-white" />
+              <div className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#fbbf24] to-[#f59e0b] flex items-center gap-2 shadow-[0_0_30px_rgba(251,191,36,0.2)]">
+                <Crown className="w-5 h-5 text-[#08090a]" />
+                <span className="text-sm font-semibold text-[#08090a]">Squad Planner Premium</span>
               </div>
             </motion.div>
 
-            {/* Unlocked features */}
-            <motion.div variants={itemVariants} className="mb-8">
-              <h3 className="text-lg font-bold tracking-tight text-white mb-4 flex items-center gap-2 justify-center">
-                <Zap className="w-5 h-5 text-amber-400" />
+            {/* Unlocked features card */}
+            <motion.div
+              variants={itemVariants}
+              className="mb-8 p-5 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)]"
+            >
+              <h3 className="text-sm font-medium text-[#f7f8f8] mb-4 flex items-center gap-2">
+                <Zap className="w-4 h-4 text-[#fbbf24]" />
                 Fonctionnalités débloquées
               </h3>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-3">
                 {unlockedFeatures.map((feature, index) => (
                   <motion.div
                     key={index}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.5 + index * 0.1 }}
-                    className="p-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4 + index * 0.1 }}
+                    className="flex items-center gap-3 p-3 rounded-lg bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.04)]"
                   >
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
-                        <feature.icon className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-white text-sm">{feature.label}</p>
-                        <p className="text-xs text-white/50">{feature.description}</p>
-                      </div>
+                    <div className="w-10 h-10 rounded-lg bg-[rgba(94,109,210,0.15)] flex items-center justify-center flex-shrink-0">
+                      <feature.icon className="w-5 h-5 text-[#5e6dd2]" />
                     </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-[#f7f8f8]">{feature.label}</p>
+                      <p className="text-xs text-[#5e6063] truncate">{feature.description}</p>
+                    </div>
+                    <Check className="w-4 h-4 text-[#4ade80] flex-shrink-0" />
                   </motion.div>
                 ))}
               </div>
@@ -187,21 +200,21 @@ export function PremiumSuccessScreen({ onNavigate, showToast }: PremiumSuccessSc
             <motion.div variants={itemVariants} className="space-y-3">
               <motion.button
                 onClick={() => onNavigate("home")}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 text-white font-bold flex items-center justify-center gap-2 shadow-lg shadow-amber-500/30"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                className="w-full py-3.5 rounded-lg bg-[#5e6dd2] hover:bg-[#6a79db] text-white text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
               >
                 Commencer à explorer
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-4 h-4" />
               </motion.button>
 
               <motion.button
                 onClick={() => onNavigate("smart-suggestions")}
-                className="w-full py-3 rounded-xl bg-white/10 border border-white/20 text-white font-medium flex items-center justify-center gap-2"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                className="w-full py-3 rounded-lg bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.04)] text-[#f7f8f8] text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
               >
-                <Brain className="w-4 h-4" />
+                <Brain className="w-4 h-4 text-[#5e6dd2]" />
                 Essayer les suggestions IA
               </motion.button>
             </motion.div>
@@ -214,18 +227,18 @@ export function PremiumSuccessScreen({ onNavigate, showToast }: PremiumSuccessSc
             variants={itemVariants}
             className="flex flex-col items-center justify-center min-h-[60vh] text-center"
           >
-            <div className="w-16 h-16 rounded-full bg-amber-500/20 flex items-center justify-center mb-4">
-              <Crown className="w-8 h-8 text-amber-400" />
+            <div className="w-16 h-16 rounded-2xl bg-[rgba(251,191,36,0.1)] flex items-center justify-center mb-6">
+              <Crown className="w-8 h-8 text-[#fbbf24]" />
             </div>
-            <h2 className="text-xl font-bold tracking-tight text-white mb-2">
+            <h2 className="text-xl font-semibold text-[#f7f8f8] mb-2">
               Vérification en cours
             </h2>
-            <p className="text-white/60 mb-6 max-w-xs">
+            <p className="text-[#8b8d90] text-sm mb-6 max-w-xs">
               Votre paiement est en cours de traitement. Cela peut prendre quelques instants.
             </p>
             <motion.button
               onClick={() => onNavigate("premium")}
-              className="px-6 py-3 rounded-xl bg-white/10 border border-white/20 text-white font-medium"
+              className="px-5 py-2.5 rounded-lg bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.04)] text-[#f7f8f8] text-sm font-medium transition-colors"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >

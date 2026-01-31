@@ -1,7 +1,6 @@
-import { ArrowLeft, Trophy, Users, Calendar, CheckCircle, UserPlus, Star, Zap, TrendingUp, Sparkles } from 'lucide-react';
+import { ArrowLeft, Trophy, Users, Calendar, CheckCircle, UserPlus, Star, Zap, TrendingUp, Sparkles, Bell, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-import { Card, Badge } from '@/design-system';
 
 interface ActivityFeedScreenProps {
   onNavigate: (screen: string) => void;
@@ -16,7 +15,8 @@ type Activity = {
   content: string;
   timestamp: string;
   icon: any;
-  gradient: string;
+  iconColor: string;
+  iconBg: string;
 };
 
 const containerVariants = {
@@ -44,19 +44,21 @@ export function ActivityFeedScreen({ onNavigate, showToast }: ActivityFeedScreen
       id: '1',
       type: 'achievement_unlocked',
       user: 'MaxGaming',
-      content: 'a debloque le trophee "Fiabilite Parfaite"',
+      content: 'a débloqué le trophée "Fiabilité Parfaite"',
       timestamp: 'Il y a 5 minutes',
       icon: Trophy,
-      gradient: 'from-[var(--color-warning-500)] to-yellow-500',
+      iconColor: 'text-amber-400',
+      iconBg: 'bg-amber-500/10',
     },
     {
       id: '2',
       type: 'session_created',
       user: 'NightOwl',
-      content: 'a cree une session "Ranked Valorant"',
+      content: 'a créé une session "Ranked Valorant"',
       timestamp: 'Il y a 15 minutes',
       icon: Calendar,
-      gradient: 'from-[var(--color-primary-500)] to-purple-500',
+      iconColor: 'text-[#5e6dd2]',
+      iconBg: 'bg-[#5e6dd2]/10',
     },
     {
       id: '3',
@@ -65,16 +67,18 @@ export function ActivityFeedScreen({ onNavigate, showToast }: ActivityFeedScreen
       content: 'a rejoint la squad "Warriors"',
       timestamp: 'Il y a 1 heure',
       icon: Users,
-      gradient: 'from-purple-500 to-pink-500',
+      iconColor: 'text-purple-400',
+      iconBg: 'bg-purple-500/10',
     },
     {
       id: '4',
       type: 'session_completed',
       user: 'ShadowKing',
-      content: 'a complete la session "LoL Draft"',
+      content: 'a complété la session "LoL Draft"',
       timestamp: 'Il y a 2 heures',
       icon: CheckCircle,
-      gradient: 'from-[var(--color-success-500)] to-teal-500',
+      iconColor: 'text-emerald-400',
+      iconBg: 'bg-emerald-500/10',
     },
     {
       id: '5',
@@ -83,7 +87,8 @@ export function ActivityFeedScreen({ onNavigate, showToast }: ActivityFeedScreen
       content: 'est maintenant niveau 25',
       timestamp: 'Il y a 3 heures',
       icon: TrendingUp,
-      gradient: 'from-orange-500 to-[var(--color-error-500)]',
+      iconColor: 'text-orange-400',
+      iconBg: 'bg-orange-500/10',
     },
     {
       id: '6',
@@ -92,32 +97,35 @@ export function ActivityFeedScreen({ onNavigate, showToast }: ActivityFeedScreen
       content: 'et ThunderBolt sont maintenant amis',
       timestamp: 'Il y a 4 heures',
       icon: UserPlus,
-      gradient: 'from-cyan-500 to-blue-500',
+      iconColor: 'text-cyan-400',
+      iconBg: 'bg-cyan-500/10',
     },
     {
       id: '7',
       type: 'achievement_unlocked',
       user: 'PhoenixRise',
-      content: 'a debloque "Leader de Squad"',
+      content: 'a débloqué "Leader de Squad"',
       timestamp: 'Il y a 5 heures',
       icon: Trophy,
-      gradient: 'from-[var(--color-warning-500)] to-yellow-500',
+      iconColor: 'text-amber-400',
+      iconBg: 'bg-amber-500/10',
     },
     {
       id: '8',
       type: 'session_created',
       user: 'Toi',
-      content: 'as propose une session "CS2 Casual"',
+      content: 'as proposé une session "CS2 Casual"',
       timestamp: 'Il y a 1 jour',
       icon: Calendar,
-      gradient: 'from-[var(--color-primary-500)] to-purple-500',
+      iconColor: 'text-[#5e6dd2]',
+      iconBg: 'bg-[#5e6dd2]/10',
     },
   ];
 
   const filters: { key: ActivityType; label: string; icon: any }[] = [
     { key: 'all', label: 'Tout', icon: Star },
     { key: 'sessions', label: 'Sessions', icon: Calendar },
-    { key: 'achievements', label: 'Trophees', icon: Trophy },
+    { key: 'achievements', label: 'Trophées', icon: Trophy },
     { key: 'social', label: 'Social', icon: Users },
   ];
 
@@ -131,61 +139,74 @@ export function ActivityFeedScreen({ onNavigate, showToast }: ActivityFeedScreen
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15, filter: "blur(5px)" }}
-      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      transition={{ duration: 0.35 }}
-      className="min-h-screen pb-24 pt-safe bg-[var(--bg-base)] relative overflow-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="min-h-screen bg-[#08090a] pb-24 md:pb-8"
     >
-      {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-[var(--color-primary-400)]/20 to-purple-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto px-4 py-6">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           {/* Header */}
-          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
+          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
             <motion.button
               onClick={() => onNavigate('home')}
-              className="w-12 h-12 rounded-2xl bg-[var(--bg-elevated)] backdrop-blur-sm border border-[var(--border-subtle)] flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+              className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center hover:bg-[rgba(255,255,255,0.05)] transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <ArrowLeft className="w-5 h-5 text-[var(--fg-secondary)]" strokeWidth={2} />
+              <ArrowLeft className="w-5 h-5 text-[#8b8d90]" strokeWidth={2} />
             </motion.button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-[var(--color-primary-600)] to-purple-600 bg-clip-text text-transparent">
-                Activite
+              <h1 className="text-2xl font-semibold text-[#f7f8f8] tracking-tight">
+                Activité
               </h1>
-              <p className="text-sm text-[var(--fg-secondary)] font-medium mt-0.5">
-                Ce qui se passe dans ta communaute
+              <p className="text-sm text-[#8b8d90] mt-0.5">
+                Ce qui se passe dans ta communauté
               </p>
             </div>
-            <motion.div
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--color-primary-500)] to-purple-600 flex items-center justify-center shadow-lg"
-              whileHover={{ scale: 1.05, rotate: 5 }}
+            <motion.button
+              className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center hover:bg-[rgba(255,255,255,0.05)] transition-colors relative"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <Zap className="w-6 h-6 text-white" strokeWidth={2} />
-            </motion.div>
+              <Bell className="w-5 h-5 text-[#8b8d90]" strokeWidth={2} />
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#5e6dd2] rounded-full border-2 border-[#08090a]" />
+            </motion.button>
+          </motion.div>
+
+          {/* Stats Cards */}
+          <motion.div variants={itemVariants} className="grid grid-cols-3 gap-3 mb-6">
+            <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4 text-center">
+              <div className="text-2xl font-semibold text-[#f7f8f8]">24</div>
+              <div className="text-xs text-[#5e6063] mt-1">Aujourd'hui</div>
+            </div>
+            <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4 text-center">
+              <div className="text-2xl font-semibold text-[#f7f8f8]">156</div>
+              <div className="text-xs text-[#5e6063] mt-1">Cette semaine</div>
+            </div>
+            <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4 text-center">
+              <div className="text-2xl font-semibold text-[#f7f8f8]">12</div>
+              <div className="text-xs text-[#5e6063] mt-1">Non lues</div>
+            </div>
           </motion.div>
 
           {/* Filters */}
           <motion.div variants={itemVariants} className="flex gap-2 mb-6 overflow-x-auto no-scrollbar pb-2">
             {filters.map((filter) => {
               const Icon = filter.icon;
+              const isActive = activeFilter === filter.key;
               return (
                 <motion.button
                   key={filter.key}
                   onClick={() => setActiveFilter(filter.key)}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap ${
-                    activeFilter === filter.key
-                      ? 'bg-gradient-to-r from-[var(--color-primary-500)] to-purple-500 text-white shadow-lg shadow-[var(--color-primary-500)]/30'
-                      : 'bg-[var(--bg-elevated)] backdrop-blur-sm text-[var(--fg-secondary)] border border-[var(--border-subtle)] hover:border-[var(--color-primary-200)]'
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 whitespace-nowrap ${
+                    isActive
+                      ? 'bg-[#5e6dd2] text-white'
+                      : 'bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] text-[#8b8d90] hover:bg-[rgba(255,255,255,0.05)] hover:text-[#f7f8f8]'
                   }`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -197,6 +218,16 @@ export function ActivityFeedScreen({ onNavigate, showToast }: ActivityFeedScreen
             })}
           </motion.div>
 
+          {/* Section Title */}
+          <motion.div variants={itemVariants} className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-medium text-[#5e6063] uppercase tracking-wider">
+              Fil d'activité
+            </h2>
+            <button className="text-sm text-[#5e6dd2] hover:text-[#6a79db] font-medium transition-colors">
+              Tout marquer comme lu
+            </button>
+          </motion.div>
+
           {/* Activity Feed */}
           <AnimatePresence mode="wait">
             <motion.div
@@ -204,7 +235,7 @@ export function ActivityFeedScreen({ onNavigate, showToast }: ActivityFeedScreen
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="space-y-3"
+              className="space-y-2"
             >
               {filteredActivities.map((activity, index) => {
                 const Icon = activity.icon;
@@ -214,36 +245,32 @@ export function ActivityFeedScreen({ onNavigate, showToast }: ActivityFeedScreen
                     key={activity.id}
                     variants={itemVariants}
                     custom={index}
-                    whileHover={{ scale: 1.02 }}
+                    className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4 hover:bg-[rgba(255,255,255,0.04)] transition-all cursor-pointer group"
+                    whileHover={{ scale: 1.01 }}
                   >
-                    <Card className="p-4 hover:shadow-xl transition-all duration-300" interactive>
-                      <div className="flex items-start gap-4">
-                        {/* Icon */}
-                        <motion.div
-                          className={`w-12 h-12 rounded-xl bg-gradient-to-br ${activity.gradient} flex items-center justify-center flex-shrink-0 shadow-lg`}
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                        >
-                          <Icon className="w-6 h-6 text-white" strokeWidth={2} />
-                        </motion.div>
+                    <div className="flex items-start gap-4">
+                      {/* Icon */}
+                      <div className={`w-10 h-10 rounded-lg ${activity.iconBg} flex items-center justify-center flex-shrink-0`}>
+                        <Icon className={`w-5 h-5 ${activity.iconColor}`} strokeWidth={2} />
+                      </div>
 
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm text-[var(--fg-primary)] mb-1">
-                            <span className="font-bold tracking-tight">{activity.user}</span>
-                            {' '}
-                            <span className="text-[var(--fg-secondary)]">{activity.content}</span>
-                          </div>
-                          <div className="text-sm text-[var(--fg-tertiary)] font-medium">
-                            {activity.timestamp}
-                          </div>
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm text-[#f7f8f8]">
+                          <span className="font-semibold">{activity.user}</span>
+                          {' '}
+                          <span className="text-[#8b8d90]">{activity.content}</span>
                         </div>
-
-                        {/* User Avatar */}
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary-500)] via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-md">
-                          {activity.user[0]}
+                        <div className="text-xs text-[#5e6063] mt-1">
+                          {activity.timestamp}
                         </div>
                       </div>
-                    </Card>
+
+                      {/* User Avatar */}
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#5e6dd2] to-purple-600 flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
+                        {activity.user[0]}
+                      </div>
+                    </div>
                   </motion.div>
                 );
               })}
@@ -254,12 +281,12 @@ export function ActivityFeedScreen({ onNavigate, showToast }: ActivityFeedScreen
           <motion.button
             variants={itemVariants}
             onClick={() => showToast('Chargement...', 'info')}
-            className="w-full mt-6 h-12 rounded-xl bg-[var(--bg-elevated)] backdrop-blur-sm border border-[var(--border-subtle)] text-[var(--fg-secondary)] font-semibold text-sm hover:shadow-lg transition-all flex items-center justify-center gap-2"
+            className="w-full mt-6 h-11 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] text-[#8b8d90] font-medium text-sm hover:bg-[rgba(255,255,255,0.05)] hover:text-[#f7f8f8] transition-all flex items-center justify-center gap-2"
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
           >
             <Sparkles className="w-4 h-4" strokeWidth={2} />
-            Voir plus d'activites
+            Voir plus d'activités
           </motion.button>
 
           {/* Empty State */}
@@ -269,14 +296,14 @@ export function ActivityFeedScreen({ onNavigate, showToast }: ActivityFeedScreen
               animate={{ opacity: 1, y: 0 }}
               className="text-center py-16"
             >
-              <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[var(--color-primary-500)] to-purple-600 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-[var(--color-primary-500)]/30">
-                <Zap className="w-10 h-10 text-white" strokeWidth={1.5} />
+              <div className="w-16 h-16 rounded-2xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center mx-auto mb-4">
+                <MessageCircle className="w-8 h-8 text-[#5e6063]" strokeWidth={1.5} />
               </div>
-              <h3 className="text-xl font-bold tracking-tight text-[var(--fg-primary)] mb-2">
-                Aucune activite recente
+              <h3 className="text-lg font-semibold text-[#f7f8f8] mb-2">
+                Aucune activité récente
               </h3>
-              <p className="text-sm text-[var(--fg-secondary)] max-w-xs mx-auto">
-                L'activite de tes amis apparaitra ici
+              <p className="text-sm text-[#5e6063] max-w-xs mx-auto">
+                L'activité de tes amis apparaîtra ici
               </p>
             </motion.div>
           )}

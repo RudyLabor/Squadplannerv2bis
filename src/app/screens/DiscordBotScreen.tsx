@@ -160,7 +160,6 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
       usage: '/session <jeu> <date> <heure>',
       example: '/session Valorant demain 21h',
       icon: Calendar,
-      gradient: 'from-indigo-500 to-purple-500',
     },
     {
       command: '/rsvp',
@@ -168,7 +167,6 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
       usage: '/rsvp <session_id> <oui|non|peut-être>',
       example: '/rsvp 123 oui',
       icon: Check,
-      gradient: 'from-emerald-500 to-teal-500',
     },
     {
       command: '/retard',
@@ -176,7 +174,6 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
       usage: '/retard <minutes>',
       example: '/retard 15',
       icon: Zap,
-      gradient: 'from-amber-500 to-orange-500',
     },
     {
       command: '/squad',
@@ -184,7 +181,6 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
       usage: '/squad [nom]',
       example: '/squad Fragsters',
       icon: Users,
-      gradient: 'from-purple-500 to-pink-500',
     },
   ];
 
@@ -218,46 +214,40 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
   };
 
   return (
-    <div className="min-h-screen pb-24 pt-safe bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-[#5865F2]/20 to-indigo-400/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10 px-4 py-8 max-w-2xl mx-auto">
+    <div className="min-h-screen pb-24 md:pb-8 pt-safe bg-[#08090a]">
+      <div className="px-4 py-6 max-w-2xl mx-auto">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           {/* Header */}
-          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-6">
+          <motion.div variants={itemVariants} className="flex items-center gap-4 mb-8">
             <motion.button
               onClick={() => onNavigate('integrations')}
-              className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+              className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center hover:bg-[rgba(255,255,255,0.05)] transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
+              <ArrowLeft className="w-5 h-5 text-[#8b8d90]" strokeWidth={2} />
             </motion.button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-[#5865F2] to-indigo-600 bg-clip-text text-transparent">
+              <h1 className="text-xl font-semibold text-[#f7f8f8]">
                 Discord Bot
               </h1>
-              <p className="text-sm text-gray-500 font-medium mt-0.5">
+              <p className="text-sm text-[#5e6063] mt-0.5">
                 Gérez vos sessions depuis Discord
               </p>
             </div>
             <motion.div
-              className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg ${
+              className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                 isConnected
-                  ? 'bg-gradient-to-br from-emerald-500 to-teal-500'
-                  : 'bg-gradient-to-br from-[#5865F2] to-indigo-600'
+                  ? 'bg-emerald-500/20'
+                  : 'bg-[#5865F2]/20'
               }`}
-              whileHover={{ scale: 1.05, rotate: 5 }}
+              whileHover={{ scale: 1.05 }}
             >
-              <Bot className="w-6 h-6 text-white" strokeWidth={2} />
+              <Bot className={`w-5 h-5 ${isConnected ? 'text-emerald-400' : 'text-[#5865F2]'}`} strokeWidth={2} />
             </motion.div>
           </motion.div>
 
@@ -267,17 +257,17 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
               <motion.div
                 key="no-squad"
                 variants={itemVariants}
-                className="bg-amber-50 rounded-2xl p-5 mb-6 border border-amber-200"
+                className="bg-[rgba(255,255,255,0.02)] border border-amber-500/20 rounded-xl p-4 mb-6"
               >
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center flex-shrink-0">
-                    <Zap className="w-6 h-6 text-white" strokeWidth={2} />
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                    <Zap className="w-5 h-5 text-amber-400" strokeWidth={2} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-amber-900 mb-1">
+                    <h3 className="text-sm font-medium text-amber-400 mb-1">
                       Sélectionnez un squad
                     </h3>
-                    <p className="text-xs text-amber-700">
+                    <p className="text-xs text-[#5e6063]">
                       Vous devez sélectionner un squad pour configurer le webhook Discord.
                     </p>
                   </div>
@@ -287,45 +277,38 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
               <motion.div
                 key="connected"
                 variants={itemVariants}
-                className="relative overflow-hidden rounded-2xl mb-6"
+                className="bg-[rgba(255,255,255,0.02)] border border-emerald-500/30 rounded-xl p-5 mb-6"
               >
-                <div className="bg-gradient-to-br from-emerald-500 to-teal-500 p-5">
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12"
-                    animate={{ x: ['-100%', '200%'] }}
-                    transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
-                  />
-                  <div className="relative flex items-center gap-4 mb-4">
-                    <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                      <Webhook className="w-7 h-7 text-white" strokeWidth={2} />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-white mb-1">
-                        Webhook actif
-                      </h3>
-                      <p className="text-sm text-white/80">
-                        Notifications envoyées à Discord
-                      </p>
-                    </div>
-                    <motion.button
-                      onClick={handleDeleteWebhook}
-                      disabled={loading}
-                      className="h-10 px-4 bg-white/20 backdrop-blur-sm hover:bg-white/30 border border-white/30 rounded-xl text-sm font-semibold text-white"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      Supprimer
-                    </motion.button>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                    <Webhook className="w-6 h-6 text-emerald-400" strokeWidth={2} />
                   </div>
-                  <div className="relative">
-                    <span className="text-white/70 text-xs font-medium">Événements actifs:</span>
-                    <div className="flex flex-wrap gap-1.5 mt-2">
-                      {selectedEvents.map((event) => (
-                        <span key={event} className="px-2.5 py-1 bg-white/20 backdrop-blur-sm text-white text-xs font-semibold rounded-full">
-                          {event.replace(/_/g, ' ')}
-                        </span>
-                      ))}
-                    </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-medium text-[#f7f8f8] mb-0.5">
+                      Webhook actif
+                    </h3>
+                    <p className="text-sm text-[#5e6063]">
+                      Notifications envoyées à Discord
+                    </p>
+                  </div>
+                  <motion.button
+                    onClick={handleDeleteWebhook}
+                    disabled={loading}
+                    className="h-9 px-4 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] hover:border-red-500/50 rounded-lg text-sm font-medium text-[#8b8d90] hover:text-red-400 transition-colors"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Supprimer
+                  </motion.button>
+                </div>
+                <div>
+                  <span className="text-[#5e6063] text-xs font-medium">Événements actifs:</span>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {selectedEvents.map((event) => (
+                      <span key={event} className="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium rounded-md">
+                        {event.replace(/_/g, ' ')}
+                      </span>
+                    ))}
                   </div>
                 </div>
               </motion.div>
@@ -333,15 +316,15 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
               <motion.div
                 key="config"
                 variants={itemVariants}
-                className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-white/50 shadow-lg"
+                className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-5 mb-6"
               >
-                <h3 className="text-lg font-bold text-gray-800 mb-5">
+                <h3 className="text-base font-medium text-[#f7f8f8] mb-5">
                   Configuration Webhook Discord
                 </h3>
 
-                <div className="space-y-4 mb-6">
+                <div className="space-y-4 mb-5">
                   <div>
-                    <label className="text-sm text-gray-600 mb-2 block font-semibold">
+                    <label className="text-sm text-[#8b8d90] mb-2 block font-medium">
                       URL du Webhook Discord
                     </label>
                     <input
@@ -349,30 +332,30 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
                       value={webhookUrl}
                       onChange={(e) => setWebhookUrl(e.target.value)}
                       placeholder="https://discord.com/api/webhooks/..."
-                      className="w-full h-12 px-4 rounded-xl bg-gray-50 border border-gray-200 text-sm font-mono text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5865F2]/30 focus:border-[#5865F2] transition-all"
+                      className="w-full h-11 px-4 rounded-lg bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] text-sm font-mono text-[#f7f8f8] placeholder:text-[#5e6063] focus:outline-none focus:border-[#5865F2] transition-colors"
                     />
-                    <p className="text-xs text-gray-400 mt-1.5">
+                    <p className="text-xs text-[#5e6063] mt-1.5">
                       Créez un webhook dans les paramètres de votre serveur Discord
                     </p>
                   </div>
 
                   <div>
-                    <label className="text-sm text-gray-600 mb-2 block font-semibold">
+                    <label className="text-sm text-[#8b8d90] mb-2 block font-medium">
                       Événements à notifier
                     </label>
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       {[
                         { id: 'session_created', label: 'Session créée' },
                         { id: 'session_updated', label: 'Session modifiée' },
                         { id: 'member_joined', label: 'Membre rejoint' },
                         { id: 'rsvp_submitted', label: 'RSVP reçu' },
                       ].map((event) => (
-                        <label key={event.id} className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                        <label key={event.id} className="flex items-center gap-3 cursor-pointer p-2.5 rounded-lg hover:bg-[rgba(255,255,255,0.02)] transition-colors">
                           <motion.div
-                            className={`w-5 h-5 rounded-md border-2 flex items-center justify-center ${
+                            className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
                               selectedEvents.includes(event.id)
                                 ? 'bg-[#5865F2] border-[#5865F2]'
-                                : 'border-gray-300'
+                                : 'border-[rgba(255,255,255,0.15)] bg-transparent'
                             }`}
                             whileTap={{ scale: 0.9 }}
                             onClick={() => toggleEvent(event.id)}
@@ -381,7 +364,7 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
                               <Check className="w-3 h-3 text-white" strokeWidth={3} />
                             )}
                           </motion.div>
-                          <span className="text-sm text-gray-700 font-medium">{event.label}</span>
+                          <span className="text-sm text-[#f7f8f8] font-medium">{event.label}</span>
                         </label>
                       ))}
                     </div>
@@ -392,28 +375,28 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
                   <motion.button
                     onClick={handleSaveWebhook}
                     disabled={loading || !webhookUrl}
-                    className="flex-1 h-12 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-xl font-semibold shadow-lg shadow-[#5865F2]/30 disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="flex-1 h-11 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-lg font-medium disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <Webhook className="w-5 h-5" strokeWidth={2} />
+                    <Webhook className="w-4 h-4" strokeWidth={2} />
                     {loading ? 'Configuration...' : 'Configurer'}
                   </motion.button>
                   <motion.button
                     onClick={handleTestWebhook}
                     disabled={testing || !webhookUrl}
-                    className="h-12 px-6 bg-white border border-gray-200 text-gray-700 rounded-xl font-semibold disabled:opacity-50 flex items-center justify-center gap-2 hover:border-[#5865F2] hover:text-[#5865F2] transition-colors"
+                    className="h-11 px-5 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] text-[#8b8d90] rounded-lg font-medium disabled:opacity-50 flex items-center justify-center gap-2 hover:border-[#5865F2] hover:text-[#5865F2] transition-colors"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <Send className="w-5 h-5" strokeWidth={2} />
+                    <Send className="w-4 h-4" strokeWidth={2} />
                     {testing ? 'Test...' : 'Tester'}
                   </motion.button>
                 </div>
 
-                <div className="mt-4 p-4 bg-indigo-50 rounded-xl border border-indigo-100">
-                  <p className="text-xs text-indigo-700 leading-relaxed">
-                    <span className="font-semibold">Comment créer un webhook ?</span> Allez dans Paramètres du serveur → Intégrations → Webhooks → Nouveau Webhook
+                <div className="mt-4 p-3.5 bg-[#5865F2]/10 border border-[#5865F2]/20 rounded-lg">
+                  <p className="text-xs text-[#8b8d90] leading-relaxed">
+                    <span className="font-medium text-[#5865F2]">Comment créer un webhook ?</span> Allez dans Paramètres du serveur → Intégrations → Webhooks → Nouveau Webhook
                   </p>
                 </div>
               </motion.div>
@@ -422,8 +405,8 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
 
           {/* Slash Commands */}
           <motion.div variants={itemVariants} className="mb-6">
-            <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <Terminal className="w-5 h-5" strokeWidth={2} />
+            <h2 className="text-base font-medium text-[#f7f8f8] mb-4 flex items-center gap-2">
+              <Terminal className="w-5 h-5 text-[#5865F2]" strokeWidth={2} />
               Slash Commands disponibles
             </h2>
 
@@ -433,51 +416,48 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
                   key={cmd.command}
                   variants={itemVariants}
                   custom={index}
-                  className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-white/50 shadow-lg hover:shadow-xl transition-all"
-                  whileHover={{ scale: 1.01, y: -2 }}
+                  className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4 hover:border-[rgba(255,255,255,0.1)] transition-colors"
+                  whileHover={{ scale: 1.01 }}
                 >
-                  <div className="flex items-start gap-4 mb-3">
-                    <motion.div
-                      className={`w-11 h-11 rounded-xl bg-gradient-to-br ${cmd.gradient} flex items-center justify-center flex-shrink-0 shadow-lg`}
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                    >
-                      <cmd.icon className="w-5 h-5 text-white" strokeWidth={2} />
-                    </motion.div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-base font-bold text-gray-800">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-[#5865F2]/20 flex items-center justify-center flex-shrink-0">
+                      <cmd.icon className="w-5 h-5 text-[#5865F2]" strokeWidth={2} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <h3 className="text-sm font-semibold text-[#f7f8f8]">
                           {cmd.command}
                         </h3>
                         <motion.button
                           onClick={() => copyCommand(cmd.command)}
-                          className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all"
+                          className="w-7 h-7 rounded-md bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] flex items-center justify-center hover:border-[rgba(255,255,255,0.1)] transition-colors"
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                         >
                           {copiedCommand === cmd.command ? (
-                            <CheckCircle2 className="w-4 h-4 text-emerald-500" strokeWidth={2} />
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" strokeWidth={2} />
                           ) : (
-                            <Copy className="w-4 h-4 text-gray-400" strokeWidth={2} />
+                            <Copy className="w-3.5 h-3.5 text-[#5e6063]" strokeWidth={2} />
                           )}
                         </motion.button>
                       </div>
-                      <p className="text-sm text-gray-500 mb-3">
+                      <p className="text-sm text-[#8b8d90] mb-3">
                         {cmd.description}
                       </p>
                       <div className="space-y-1.5">
                         <div className="flex items-start gap-2 text-xs">
-                          <span className="text-gray-400 font-semibold min-w-[60px]">
+                          <span className="text-[#5e6063] font-medium min-w-[55px]">
                             Usage:
                           </span>
-                          <code className="font-mono bg-gray-100 px-2 py-0.5 rounded text-gray-600">
+                          <code className="font-mono bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] px-2 py-0.5 rounded text-[#8b8d90]">
                             {cmd.usage}
                           </code>
                         </div>
                         <div className="flex items-start gap-2 text-xs">
-                          <span className="text-gray-400 font-semibold min-w-[60px]">
+                          <span className="text-[#5e6063] font-medium min-w-[55px]">
                             Exemple:
                           </span>
-                          <code className={`font-mono bg-gradient-to-r ${cmd.gradient} bg-clip-text text-transparent px-2 py-0.5 rounded bg-indigo-50 border border-indigo-100`}>
+                          <code className="font-mono bg-[#5865F2]/10 border border-[#5865F2]/20 px-2 py-0.5 rounded text-[#5865F2]">
                             {cmd.example}
                           </code>
                         </div>
@@ -491,7 +471,7 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
 
           {/* Features */}
           <motion.div variants={itemVariants} className="mb-6">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">
+            <h2 className="text-base font-medium text-[#f7f8f8] mb-4">
               Fonctionnalités
             </h2>
 
@@ -506,26 +486,26 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
                   key={feature.label}
                   variants={itemVariants}
                   custom={index}
-                  className={`rounded-2xl p-4 border transition-all ${
+                  className={`rounded-xl p-4 border transition-colors ${
                     feature.enabled
-                      ? 'bg-emerald-50 border-emerald-200'
-                      : 'bg-white/60 border-white/50'
+                      ? 'bg-emerald-500/5 border-emerald-500/20'
+                      : 'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)]'
                   }`}
                   whileHover={{ scale: 1.02 }}
                 >
                   <feature.icon
-                    className={`w-6 h-6 mb-2 ${
-                      feature.enabled ? 'text-emerald-500' : 'text-gray-400'
+                    className={`w-5 h-5 mb-2.5 ${
+                      feature.enabled ? 'text-emerald-400' : 'text-[#5e6063]'
                     }`}
                     strokeWidth={2}
                   />
-                  <div className={`text-sm font-semibold mb-1 ${
-                    feature.enabled ? 'text-gray-800' : 'text-gray-500'
+                  <div className={`text-sm font-medium mb-0.5 ${
+                    feature.enabled ? 'text-[#f7f8f8]' : 'text-[#8b8d90]'
                   }`}>
                     {feature.label}
                   </div>
                   <div className={`text-xs font-medium ${
-                    feature.enabled ? 'text-emerald-600' : 'text-gray-400'
+                    feature.enabled ? 'text-emerald-400' : 'text-[#5e6063]'
                   }`}>
                     {feature.enabled ? 'Actif' : 'Inactif'}
                   </div>
@@ -537,16 +517,16 @@ export function DiscordBotScreen({ onNavigate, showToast }: DiscordBotScreenProp
           {/* Warning */}
           {!isConnected && currentSquad && (
             <motion.div variants={itemVariants}>
-              <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-2xl p-4 border border-amber-200/50">
+              <div className="bg-[rgba(255,255,255,0.02)] border border-amber-500/20 rounded-xl p-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-white" strokeWidth={2} />
+                  <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-amber-400" strokeWidth={2} />
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs font-semibold text-amber-800">
+                    <p className="text-sm font-medium text-amber-400">
                       Bot non connecté
                     </p>
-                    <p className="text-[10px] text-amber-600 mt-0.5">
+                    <p className="text-xs text-[#5e6063] mt-0.5">
                       Connectez pour profiter des slash commands et rappels
                     </p>
                   </div>

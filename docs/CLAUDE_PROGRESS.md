@@ -1035,6 +1035,16 @@ Vercel:      https://squadplanner.vercel.app (backup)
 GitHub:      https://github.com/RudyLabor/Squadplannerv2bis
 ```
 
+### Protection Beta (accès restreint)
+
+```
+Mot de passe: ruudboy92
+```
+
+> Le site est protégé par un mot de passe pendant la phase de développement.
+> Seuls les utilisateurs avec le mot de passe peuvent accéder au site.
+> Pour désactiver la protection, supprimer le composant BetaProtection dans App.tsx.
+
 ---
 
 ## BUGS ET ISSUES

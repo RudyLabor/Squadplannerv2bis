@@ -73,11 +73,11 @@ export function IntelligenceScreen({ onNavigate, showToast }: IntelligenceScreen
       // Utiliser des donnees de demo en cas d'erreur
       setAnalysis({
         patterns: [
-          { id: '1', title: 'Creneau optimal detecte', description: 'Votre squad est plus active le samedi soir entre 20h et 23h', icon: 'Calendar', confidence: 92 },
-          { id: '2', title: 'Regularite en hausse', description: 'La participation a augmente de 15% ce mois-ci', icon: 'TrendingUp', confidence: 87 },
+          { id: '1', type: 'time', title: 'Creneau optimal detecte', description: 'Votre squad est plus active le samedi soir entre 20h et 23h', icon: 'Calendar', confidence: 92 },
+          { id: '2', type: 'attendance', title: 'Regularite en hausse', description: 'La participation a augmente de 15% ce mois-ci', icon: 'TrendingUp', confidence: 87 },
         ],
         recommendations: [
-          { id: '1', title: 'Planifier une session samedi', description: 'C\'est le meilleur moment pour rassembler votre squad', priority: 'high', impact: '+25% de participation', action: 'Planifier maintenant', actionType: 'schedule', data: { day: 'Samedi', time: '20:00' } },
+          { id: '1', type: 'optimal-slot', title: 'Planifier une session samedi', description: 'C\'est le meilleur moment pour rassembler votre squad', priority: 'high', impact: '+25% de participation', action: 'Planifier maintenant', actionType: 'schedule', data: { day: 'Samedi', time: '20:00' } },
         ],
         stats: { avgAttendance: 78, totalSessions: 24, activeMembers: 5, bestDay: 'Samedi', bestTime: '20:00' },
       });
