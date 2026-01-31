@@ -1,8 +1,8 @@
 // @ts-nocheck
-import { ArrowLeft, Repeat, Calendar, Clock, Users, Bell, CheckCircle2, Settings, Trash2, Plus, Zap, Sparkles } from 'lucide-react';
+import { ArrowLeft, Repeat, Calendar, Clock, Users, Bell, CheckCircle2, Settings, Trash2, Plus, Zap, Sparkles, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
-// Button, Card, Badge, IconButton removed - using custom Linear style components
+import { useState, useEffect } from 'react';
+import { recurringSessionsAPI, squadsAPI } from '@/utils/api';
 
 interface RecurringSessionScreenProps {
   onNavigate: (screen: string, data?: any) => void;
@@ -13,10 +13,11 @@ interface RecurringSession {
   id: string;
   title: string;
   squad: string;
+  squad_id: string;
   game: string;
   frequency: 'daily' | 'weekly' | 'biweekly' | 'monthly';
-  dayOfWeek?: number; // 0-6 for weekly
-  dayOfMonth?: number; // 1-31 for monthly
+  dayOfWeek?: number;
+  dayOfMonth?: number;
   time: string;
   duration: string;
   playersNeeded: number;
@@ -50,76 +51,95 @@ const itemVariants = {
 
 export function RecurringSessionScreen({ onNavigate, showToast }: RecurringSessionScreenProps) {
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [recurringSessions, setRecurringSessions] = useState<RecurringSession[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data
-  const recurringSessions: RecurringSession[] = [
-    {
-      id: '1',
-      title: 'Session Valorant Hebdo',
-      squad: 'Les Tryharders',
-      game: 'Valorant',
-      frequency: 'weekly',
-      dayOfWeek: 2, // Mardi
-      time: '21:00',
-      duration: '2h',
-      playersNeeded: 5,
-      autoLock: true,
-      notifyBefore: '24h',
-      isActive: true,
-      nextSession: 'Mardi 27 Jan, 21:00',
-      stats: {
-        totalGenerated: 12,
-        avgAttendance: 94,
-        successRate: 100,
-      },
-    },
-    {
-      id: '2',
-      title: 'Week-end Marathon',
-      squad: 'Les Tryharders',
-      game: 'League of Legends',
-      frequency: 'weekly',
-      dayOfWeek: 6, // Samedi
-      time: '15:00',
-      duration: '4h',
-      playersNeeded: 5,
-      autoLock: false,
-      notifyBefore: '48h',
-      isActive: true,
-      nextSession: 'Samedi 1 Fév, 15:00',
-      stats: {
-        totalGenerated: 8,
-        avgAttendance: 87,
-        successRate: 88,
-      },
-    },
-    {
-      id: '3',
-      title: 'Soirée détente',
-      squad: 'Les Tryharders',
-      game: 'Among Us',
-      frequency: 'biweekly',
-      time: '20:00',
-      duration: '1.5h',
-      playersNeeded: 4,
-      autoLock: false,
-      notifyBefore: '12h',
-      isActive: false,
-      nextSession: 'Vendredi 7 Fév, 20:00',
-      stats: {
-        totalGenerated: 6,
-        avgAttendance: 76,
-        successRate: 67,
-      },
-    },
-  ];
+  useEffect(() => {
+    loadRecurringSessions();
+  }, []);
 
-  const handleToggleActive = (sessionId: string) => {
-    showToast('Statut modifié avec succès', 'success');
+  const loadRecurringSessions = async () => {
+    setLoading(true);
+    try {
+      // First get user's squads to fetch recurring sessions
+      const { squads } = await squadsAPI.getAll();
+      const allSessions: RecurringSession[] = [];
+
+      // Load recurring sessions for each squad
+      for (const squad of squads || []) {
+        try {
+          const { recurringSessions: sessions } = await recurringSessionsAPI.getAll(squad.id);
+          const mappedSessions = (sessions || []).map((s: any) => ({
+            id: s.id,
+            title: s.title || 'Session sans titre',
+            squad: squad.name,
+            squad_id: squad.id,
+            game: squad.game || 'Multi-jeux',
+            frequency: s.frequency || 'weekly',
+            dayOfWeek: s.day_of_week,
+            dayOfMonth: s.day_of_month,
+            time: s.scheduled_time || '20:00',
+            duration: s.duration || '2h',
+            playersNeeded: s.players_needed || 5,
+            autoLock: s.auto_lock || false,
+            notifyBefore: s.notify_before || '24h',
+            isActive: s.is_active !== false,
+            nextSession: formatNextSession(s.day_of_week, s.scheduled_time),
+            stats: {
+              totalGenerated: s.total_generated || 0,
+              avgAttendance: s.avg_attendance || 0,
+              successRate: s.success_rate || 0,
+            },
+          }));
+          allSessions.push(...mappedSessions);
+        } catch (e) {
+          // Squad may not have recurring sessions table
+        }
+      }
+
+      setRecurringSessions(allSessions);
+    } catch (error) {
+      console.error('Error loading recurring sessions:', error);
+      setRecurringSessions([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDelete = (sessionId: string) => {
-    showToast('Session récurrente supprimée', 'info');
+  const formatNextSession = (dayOfWeek?: number, time?: string) => {
+    if (dayOfWeek === undefined) return 'À planifier';
+    const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+    const today = new Date();
+    const todayDay = today.getDay();
+    let daysUntil = dayOfWeek - todayDay;
+    if (daysUntil <= 0) daysUntil += 7;
+    const nextDate = new Date(today);
+    nextDate.setDate(today.getDate() + daysUntil);
+    const formattedDate = nextDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    return `${days[dayOfWeek]} ${formattedDate}, ${time || '20:00'}`;
+  };
+
+  const handleToggleActive = async (sessionId: string) => {
+    const session = recurringSessions.find(s => s.id === sessionId);
+    if (!session) return;
+
+    try {
+      await recurringSessionsAPI.update(sessionId, { is_active: !session.isActive });
+      showToast('Statut modifié avec succès', 'success');
+      loadRecurringSessions();
+    } catch (error) {
+      showToast('Erreur lors de la modification', 'error');
+    }
+  };
+
+  const handleDelete = async (sessionId: string) => {
+    try {
+      await recurringSessionsAPI.update(sessionId, { is_active: false });
+      showToast('Session récurrente désactivée', 'info');
+      loadRecurringSessions();
+    } catch (error) {
+      showToast('Erreur lors de la suppression', 'error');
+    }
   };
 
   const handleEdit = (sessionId: string) => {
@@ -128,6 +148,7 @@ export function RecurringSessionScreen({ onNavigate, showToast }: RecurringSessi
 
   const handleCreate = () => {
     setShowCreateForm(true);
+    showToast('Création à venir', 'info');
   };
 
   const getFrequencyLabel = (frequency: string) => {

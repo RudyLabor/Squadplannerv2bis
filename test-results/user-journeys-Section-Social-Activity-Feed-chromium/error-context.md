@@ -1,0 +1,45 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e4]:
+  - button "Squad Planner" [ref=e6] [cursor=pointer]:
+    - img [ref=e7]
+    - generic [ref=e12]:
+      - generic [ref=e13]: Squad
+      - generic [ref=e14]: Planner
+  - button "🇫🇷 FR" [ref=e17] [cursor=pointer]:
+    - img [ref=e18]
+    - generic [ref=e22]: 🇫🇷
+    - generic [ref=e23]: FR
+  - generic [ref=e28]:
+    - button "Squad Planner Coordination fiable" [ref=e30] [cursor=pointer]:
+      - img [ref=e31]
+      - generic [ref=e36]: Squad Planner
+      - generic [ref=e37]: Coordination fiable
+    - generic [ref=e39]:
+      - heading "Connexion" [level=2] [ref=e40]
+      - generic [ref=e41]:
+        - generic [ref=e42]:
+          - generic [ref=e43]: Email
+          - generic [ref=e44]:
+            - img [ref=e45]
+            - textbox "votre@email.com" [ref=e48]
+        - generic [ref=e49]:
+          - generic [ref=e50]: Mot de passe
+          - generic [ref=e51]:
+            - img [ref=e52]
+            - textbox "••••••••" [ref=e55]
+            - button [ref=e56] [cursor=pointer]:
+              - img [ref=e57]
+        - button "Se connecter" [ref=e60] [cursor=pointer]
+        - button "Mot de passe oublié ?" [ref=e61] [cursor=pointer]
+      - generic [ref=e64]: ou
+      - generic [ref=e66]:
+        - paragraph [ref=e67]: Pas encore de compte ?
+        - button "Créer un compte" [ref=e68] [cursor=pointer]:
+          - text: Créer un compte
+          - img [ref=e69]
+    - paragraph [ref=e72]:
+      - text: En continuant, vous acceptez nos
+      - button "Conditions d'utilisation" [ref=e73] [cursor=pointer]
+```
