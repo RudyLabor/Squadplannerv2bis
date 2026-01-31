@@ -43,16 +43,28 @@ PRODUCTION:  https://squadplanner.fr (domaine principal)
 🔄 Phase:        Audit UI/UX et optimisation desktop
 ```
 
-### Session Actuelle (31 Jan 2026 - Session 5) ⭐ EN COURS
+### Session Actuelle (31 Jan 2026 - Session 5) ✅ TERMINÉE
 
-**En cours:**
-- 🔄 Audit UI/UX complet avec Puppeteer (8 agents parallèles)
-- 🔄 Vérification cohérence design Linear sur toutes les pages
-- 🔄 Optimisation version web (desktop)
+**Accomplissements:**
+- ✅ Commit `abadb65` - fix: Color corrections + error handling
+- ✅ Audit UI/UX complet avec Puppeteer sur squadplanner.fr
+- ✅ 6 pages principales auditées (Login, Home, Squads, Sessions, Profile, Leaderboard)
+- ✅ 3 bugs identifiés sur LeaderboardScreen (#6, #7, #8)
+- ✅ Design Linear dark validé sur pages principales
 
-**Fichiers modifiés (non commités):**
-- `SignupScreen.tsx` - Correction couleurs accent (#5e6ad2 → #5e6dd2)
-- `community-api.ts` - Ajout try/catch + fallback mock data
+**Résultat Audit:**
+- 5/6 pages = Design OK (83%)
+- 1/6 page = Bugs à corriger (LeaderboardScreen)
+
+**Bugs à corriger:**
+- Bug #6: LeaderboardScreen - fond dégradé clair (devrait être #08090a)
+- Bug #7: LeaderboardScreen - sidebar absente
+- Bug #8: LeaderboardScreen - header coupé
+
+**⚠️ IMPORTANT - Tests sur Production:**
+> À partir de maintenant, tous les tests Puppeteer doivent être effectués sur **https://squadplanner.fr** (production) et non sur localhost, pour des tests plus réalistes.
+>
+> Mot de passe beta: `ruudboy92`
 
 ---
 
@@ -819,13 +831,15 @@ Task tool avec:
 
 ### Template de Prompt Agent AMÉLIORÉ ⭐ NOUVEAU
 
+> **⚠️ IMPORTANT:** Tester sur **https://squadplanner.fr** (production) - Mot de passe beta: `ruudboy92`
+
 ```
 Refais `src/app/screens/XXXScreen.tsx` avec le design Linear dark.
 
 IMPORTANT: NE PAS TOUCHER HomeScreen, SquadsScreen, SessionsScreen, ProfileScreen - ce sont les références!
 
 **ÉTAPE 0 - DÉTECTION DE BUGS (CRITIQUE):**
-1. Naviguer vers http://localhost:5179/xxx avec Puppeteer
+1. Naviguer vers https://squadplanner.fr/xxx avec Puppeteer (production, pas localhost!)
 2. Attendre 3 secondes
 3. Exécuter ce script pour détecter les erreurs:
    ```javascript
@@ -999,9 +1013,11 @@ npx playwright test
 
 ### Tests avec Puppeteer
 
+> **⚠️ Tester sur production:** https://squadplanner.fr (mot de passe beta: `ruudboy92`)
+
 ```javascript
-// Navigation
-mcp__puppeteer__puppeteer_navigate({ url: "http://localhost:5173/page" })
+// Navigation (utiliser squadplanner.fr pour tests réalistes)
+mcp__puppeteer__puppeteer_navigate({ url: "https://squadplanner.fr/page" })
 
 // Screenshot
 mcp__puppeteer__puppeteer_screenshot({ name: "page-name" })
@@ -1069,12 +1085,48 @@ Mot de passe: ruudboy92
 | 4 | Page Home timeout après F5 (Web Locks) | Haute | api.ts, supabase.ts | 30/01 |
 | 5 | Bouton Déconnexion ne fonctionne pas | Moyenne | AuthContext.tsx | 30/01 |
 
+### Bugs Identifiés (Audit 31 Jan 2026)
+
+| # | Page | Sévérité | Description | Action |
+|---|------|----------|-------------|--------|
+| 6 | LeaderboardScreen | Moyenne | Fond dégradé clair sur le côté droit au lieu de #08090a uniforme | Corriger le CSS background |
+| 7 | LeaderboardScreen | Moyenne | Sidebar absente (incohérence avec autres pages) | Ajouter DesktopSidebar |
+| 8 | LeaderboardScreen | Basse | Header "Classement" coupé/invisible | Vérifier le layout |
+
 ### Bugs Potentiels à Surveiller
 
 | # | Description | Où regarder |
 |---|-------------|-------------|
 | ? | Loading state IntegrationsScreen | API integrations |
 | ? | Erreurs console sur certaines pages | DevTools |
+
+---
+
+## RAPPORT D'AUDIT UI/UX (31 Jan 2026)
+
+### Pages Auditées sur squadplanner.fr
+
+| Page | Design Linear | Desktop | Bugs |
+|------|---------------|---------|------|
+| /login | ✅ Excellent | ✅ OK | Aucun |
+| /home | ✅ Excellent | ✅ OK | Aucun |
+| /squads | ✅ Excellent | ✅ OK | Aucun |
+| /sessions | ✅ Excellent | ✅ OK | Aucun |
+| /profile | ✅ Excellent | ✅ OK | Aucun |
+| /leaderboard | ⚠️ Problèmes | ❌ Sidebar manquante | Bugs #6, #7, #8 |
+
+### Points Positifs
+- ✅ Design system Linear dark appliqué uniformément sur pages principales
+- ✅ Fond #08090a correct sur Home, Squads, Sessions, Profile
+- ✅ Stat cards avec icônes colorées par catégorie
+- ✅ Empty states bien stylisés avec gradients
+- ✅ Navigation sidebar desktop fonctionnelle
+- ✅ Animations Framer Motion fluides
+- ✅ Hiérarchie typographique correcte
+
+### Points à Améliorer
+- ⚠️ LeaderboardScreen : layout incohérent (pas de sidebar, fond dégradé)
+- ⚠️ Vérifier toutes les pages "Explorer" pour cohérence sidebar
 
 ### Comment Reporter un Bug
 
