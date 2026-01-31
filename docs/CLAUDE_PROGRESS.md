@@ -92,17 +92,18 @@ PRODUCTION:  https://squadplanner.fr (domaine principal)
 🔄 Phase:        Audit UI/UX et optimisation desktop
 ```
 
-### Session 8 (31 Jan 2026) ✅ EN COURS
+### Session 8 (31 Jan 2026) ✅ TERMINÉE
 
-**Objectif:** Connexion des écrans aux APIs Supabase (remplacement des données mockées)
+**Objectif:** Connexion des écrans aux APIs Supabase + Configuration Playwright + Déploiement
 
 **Accomplissements:**
 
 - ✅ 8 écrans connectés aux APIs réelles
-- ✅ Correction des fautes d'accents (NotificationsScreen, FriendsScreen)
-- ✅ Correction des toasts en double
-- ✅ 3 commits poussés sur GitHub main
-- ✅ Build réussi (5.28s)
+- ✅ Playwright configuré avec bypass Beta Gate (`ruudboy92`)
+- ✅ 40/52 tests E2E passés (77%)
+- ✅ Correction des fautes d'accents et toasts en double
+- ✅ 5 commits poussés sur GitHub main
+- ✅ Déploiement Vercel vérifié (build 8.77s, deploy 34s)
 
 **Écrans Refactorés:**
 
@@ -120,14 +121,21 @@ PRODUCTION:  https://squadplanner.fr (domaine principal)
 
 **Commits:**
 
+- `941804e` - test: fix Playwright tests for Beta gate bypass
+- `1de0550` - docs: update CLAUDE_PROGRESS
 - `5178233` - refactor: connect 8 screens to Supabase APIs + fix duplicate toasts
 - `6f78a9a` - refactor: connect 4 screens to Supabase APIs
 - `210206a` - fix: French accent typos + add bugs report
 
-**Tests:**
+**Tests E2E (Playwright):**
 
-- ⚠️ Tests navigateur bloqués (Playwright non disponible)
-- 🌐 Test manuel sur: **squadplanner.fr**
+- ✅ 40 tests passés | ⚠️ 12 timeouts (rate limiting)
+- Sections validées: Auth, Principale, Gamification, Navigation
+
+**Déploiement:**
+
+- ✅ https://squadplanner.fr ● Ready
+- Build: 8.77s | Deploy: 34s
 
 ---
 
