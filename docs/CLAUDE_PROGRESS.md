@@ -94,48 +94,56 @@ PRODUCTION:  https://squadplanner.fr (domaine principal)
 
 ### Session 8 (31 Jan 2026) ✅ TERMINÉE
 
-**Objectif:** Connexion des écrans aux APIs Supabase + Configuration Playwright + Déploiement
+**Objectif:** Connexion des écrans aux APIs Supabase + Configuration Playwright + Tests complets
 
 **Accomplissements:**
 
-- ✅ 8 écrans connectés aux APIs réelles
+- ✅ **9 écrans** connectés aux APIs réelles (sur 12 mockés)
 - ✅ Playwright configuré avec bypass Beta Gate (`ruudboy92`)
-- ✅ 40/52 tests E2E passés (77%)
+- ✅ **48/52 tests E2E passés (92%)**
 - ✅ Correction des fautes d'accents et toasts en double
-- ✅ 5 commits poussés sur GitHub main
-- ✅ Déploiement Vercel vérifié (build 8.77s, deploy 34s)
+- ✅ 8 commits poussés sur GitHub main
+- ✅ 3 déploiements Vercel réussis
 
 **Écrans Refactorés:**
 
-| Écran                | API             | Statut             |
-| -------------------- | --------------- | ------------------ |
-| FriendsScreen        | friendshipsAPI  | ✅                 |
-| LeaderboardScreen    | communityAPI    | ✅                 |
-| AchievementsScreen   | achievementsAPI | ✅                 |
-| ChallengesScreen     | challengesAPI   | ✅                 |
-| TournamentsScreen    | tournamentsAPI  | ✅                 |
-| DiscoverSquadsScreen | squadsAPI       | ✅                 |
-| RankingScreen        | communityAPI    | ✅ (déjà connecté) |
-| IntegrationsScreen   | integrationsAPI | ✅ (déjà connecté) |
-| SearchPlayersScreen  | Supabase direct | ✅ (déjà connecté) |
+| Écran                  | API                  | Statut |
+| ---------------------- | -------------------- | ------ |
+| FriendsScreen          | friendshipsAPI       | ✅     |
+| LeaderboardScreen      | communityAPI         | ✅     |
+| AchievementsScreen     | achievementsAPI      | ✅     |
+| ChallengesScreen       | challengesAPI        | ✅     |
+| TournamentsScreen      | tournamentsAPI       | ✅     |
+| DiscoverSquadsScreen   | squadsAPI            | ✅     |
+| RankingScreen          | communityAPI         | ✅     |
+| IntegrationsScreen     | integrationsAPI      | ✅     |
+| RecurringSessionScreen | recurringSessionsAPI | ✅     |
+
+**Écrans Statiques (Intentionnels):**
+
+- ActivityFeedScreen - Données agrégées (pas d'API unique)
+- ShareScreen - Génération d'URLs sociales
+- SearchPlayersScreen - Déjà connecté à Supabase
 
 **Commits:**
 
+- `6e5f374` - docs: update BUGS_REPORT with Session 8 fixes
+- `f096efb` - refactor: connect RecurringSessionScreen
+- `fcdc550` - docs: finalize Session 8
 - `941804e` - test: fix Playwright tests for Beta gate bypass
-- `1de0550` - docs: update CLAUDE_PROGRESS
-- `5178233` - refactor: connect 8 screens to Supabase APIs + fix duplicate toasts
+- `5178233` - refactor: connect 8 screens to Supabase APIs
 - `6f78a9a` - refactor: connect 4 screens to Supabase APIs
-- `210206a` - fix: French accent typos + add bugs report
+- `210206a` - fix: French accent typos
 
 **Tests E2E (Playwright):**
 
-- ✅ 40 tests passés | ⚠️ 12 timeouts (rate limiting)
-- Sections validées: Auth, Principale, Gamification, Navigation
+- ✅ 48 tests passés | ⚠️ 4 timeouts (rate limiting login)
+- Sections validées: Auth, Principale, Social, Gamification, Paramètres, Analytics, Navigation
 
 **Déploiement:**
 
 - ✅ https://squadplanner.fr ● Ready
-- Build: 8.77s | Deploy: 34s
+- Dernier commit: `6e5f374`
 
 ---
 
